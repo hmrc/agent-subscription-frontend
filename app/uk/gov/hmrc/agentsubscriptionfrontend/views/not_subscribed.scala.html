@@ -2,9 +2,16 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @(registrationName: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = "You can create an Agent Services account", bodyClasses = None) {
-  <h1>You can create an Agent Services account</h1>
-  <p>We've checked <strong class="bold">@registrationName</strong> and it doesn't have an Agent Services account.</p>
+@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = Messages("notSubscribed.title"), bodyClasses = None) {
+    <div class="grid-row">
+        <div class="column-two-thirds">
 
-  <a id="continue" class="button" href="@routes.SubscriptionController.showSubscriptionDetails().url">Create account</a>
+            <h1 class="heading-xlarge">@Messages("notSubscribed.title")</h1>
+
+            <p>@Html(Messages("notSubscribed.p1", registrationName))</p>
+
+            <p><a id="continue" class="button" href="@routes.SubscriptionController.showSubscriptionDetails().url">@Messages("button.createAccount")</a></p>
+
+        </div>
+    </div>
 }
