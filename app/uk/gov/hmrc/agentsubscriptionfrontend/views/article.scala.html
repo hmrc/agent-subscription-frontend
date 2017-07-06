@@ -1,0 +1,8 @@
+
+@(content: Html,
+  includeGridWrapper: Boolean = false,
+  articleClasses: Option[String] = None)(implicit requestHeader: RequestHeader, messages: Messages)
+
+<article class="@if( includeGridWrapper ){ grid-wrapper}@articleClasses.getOrElse("")">
+    @content
+</article>

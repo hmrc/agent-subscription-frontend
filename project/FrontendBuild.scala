@@ -4,9 +4,21 @@ import sbt._
 
 object FrontendBuild extends Build with MicroService {
 
+    import com.typesafe.sbt.web.SbtWeb.autoImport._
+    import sbt.Keys._
+
   val appName = "agent-subscription-frontend"
 
   override lazy val appDependencies: Seq[ModuleID] = compile ++ test() ++ test("it")
+
+  override lazy val playSettings: Seq[Setting[_]] = Seq(
+
+    // Add the views to the dist
+    unmanagedResourceDirectories in Assets += baseDirectory.value / "app" / "assets",
+    // Dont include the source assets in the dist package (public folder)
+    excludeFilter in Assets := "tasks" || "karma.conf.js" || "tests" || "gulpfile.js*" || "js*" || "src*" || "node_modules*" || "sass*" || "typescript*" || "typings*" || ".jshintrc" || "package.json" || "tsconfig.json" || "tsd.json"
+  ) ++ JavaScriptBuild.javaScriptUiSettings
+
 
   val compile = Seq(
     ws,

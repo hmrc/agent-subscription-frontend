@@ -23,3 +23,7 @@ GET    /subscription-failed             uk.gov.hmrc.agentsubscriptionfrontend.co
 
 GET    /signed-out                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.signOut
 GET    /start-survey                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.startSurvey
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET    /assets/*file                                                       @controllers.Assets.at(path="/public", file)
