@@ -1,0 +1,12 @@
+.button-secondary{
+  @include button ($grey-3);
+  @include box-sizing (border-box);
+  padding: em(10) em(15) em(5);
+  vertical-align: top;
+  @include media (mobile) {
+    width: 100%;
+  }
+  &:focus {
+      outline: 3px solid $yellow;
+  }
+}

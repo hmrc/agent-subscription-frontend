@@ -3,17 +3,29 @@
 checkAgency.title=Check for duplicate Agent Services accounts
 >>>>>>> Added govuk assets, gulp, jasmine and custom assets
 
+#Confirm agency
 confirmYourAgency.title=Is this the agent business you''re creating an account for?
+confirmYourAgency.title.caption=Agency details
+confirmYourAgency.table.th.name=Name
+confirmYourAgency.table.th.postcode=Postcode
+confirmYourAgency.table.th.utr=UTR
 
+#Not subscribed
+notSubscribed.title=You can create an Agent Services account
+notSubscribed.p1=We''ve checked <strong class="bold">{0}</strong> and it doesn''t have an Agent Services account.
+
+#Create account - business details
 subscriptionDetails.title=Add your agent business''s details
 subscriptionDetails.businessName.label=Agent business name
 subscriptionDetails.email.label=Business email address
 subscriptionDetails.telephone.label=Business telephone number
 
+#No agency found
 noAgencyFound.title=There is no agent business linked to this account
 
 #Common
 button.startAgain=Try again
+button.createAccount=Create account
 
 #Error messages
 error.postcode.invalid = Please enter a valid postcode

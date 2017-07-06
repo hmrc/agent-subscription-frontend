@@ -21,25 +21,23 @@
             <p>Your business can only have one Agent Services account.</p>
 
             <fieldset>
-                <div class="form-group">
-                    @input(
-                        knownFactsForm("utr"),
-                        '_label -> "Self Assessment UTR or Corporation Tax reference",
-                        '_inputClass -> "form-control",
-                        '_labelClass -> "form-label-bold"
-                    )
-                </div>
 
-                <div class="form-group">
-                    @input(
-                        knownFactsForm("postcode"),
-                        '_label -> "Postcode related to that UTR or reference",
-                        '_inputClass -> "form-control form-control-1-4",
-                        '_labelClass -> "form-label-bold"
-                    )
-                </div>
+                @input(
+                    knownFactsForm("utr"),
+                    '_label -> "Self Assessment UTR or Corporation Tax reference",
+                    '_inputClass -> "form-control",
+                    '_labelClass -> "form-label-bold"
+                )
 
-              <div class="form-field">
+                @input(
+                    knownFactsForm("postcode"),
+                    '_label -> "Postcode related to that UTR or reference",
+                    '_inputClass -> "form-control form-control-1-4",
+                    '_labelClass -> "form-label-bold"
+                )
+
+
+              <div class="form-group">
                 <input class="button" type="submit" id="continue" value="Continue">
               </div>
 
