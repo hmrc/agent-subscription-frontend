@@ -1,34 +1,51 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.play.views.html.helpers.form
-@import uk.gov.hmrc.play.views.html.helpers.input
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.input
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.KnownFacts
 
 @(knownFactsForm : Form[KnownFacts])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = "Check for duplicate Agent Services accounts", bodyClasses = None) {
-  <h1>Check for duplicate Agent Services accounts</h1>
+@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = Messages("checkAgency.title"), bodyClasses = None) {
 
-  @form(
-    action = routes.CheckAgencyController.checkAgencyStatus,
-    'class -> "form js-form") {
+    <div class="grid-row">
+        <div class="column-two-thirds">
 
-    <p>Your business can only have one Agent Services account.</p>
+          <h1 class="heading-xlarge">@Messages("checkAgency.title") </h1>
 
-    <fieldset class="form-group">
-      <div class="form-field">
-          @input(knownFactsForm("utr"), '_label -> "Self Assessment UTR or Corporation Tax reference", '_inputClass -> "input--medium input--cleared")
-      </div>
+          @form(
+            action = routes.CheckAgencyController.checkAgencyStatus,
+            'class -> "form js-form") {
 
-      <div class="form-field">
-          @input(knownFactsForm("postcode"), '_label -> "Postcode related to that UTR or reference", '_inputClass -> "input--small input--cleared")
-      </div>
+            <p>Your business can only have one Agent Services account.</p>
 
-      <div class="form-field">
-        <input class="button" type="submit" id="continue" value="Continue">
-      </div>
+            <fieldset>
+                <div class="form-group">
+                    @input(
+                        knownFactsForm("utr"),
+                        '_label -> "Self Assessment UTR or Corporation Tax reference",
+                        '_inputClass -> "form-control",
+                        '_labelClass -> "form-label-bold"
+                    )
+                </div>
 
-    </fieldset>
-  }
+                <div class="form-group">
+                    @input(
+                        knownFactsForm("postcode"),
+                        '_label -> "Postcode related to that UTR or reference",
+                        '_inputClass -> "form-control form-control-1-4",
+                        '_labelClass -> "form-label-bold"
+                    )
+                </div>
+
+              <div class="form-field">
+                <input class="button" type="submit" id="continue" value="Continue">
+              </div>
+
+            </fieldset>
+          }
+
+    </div>
+  </div>
 }
