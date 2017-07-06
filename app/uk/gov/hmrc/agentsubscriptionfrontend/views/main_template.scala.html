@@ -8,7 +8,18 @@
   userIsLoggedIn: Boolean = true)(mainContent: Html)(implicit request : Request[_], messages: Messages)
 
 @import uk.gov.hmrc.play.views.html.layouts
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.article
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.includes.stylesheets
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.includes.scripts
 
+
+@headScripts ={
+    @stylesheets()
+}
+
+@scriptElem = {
+    @scripts()
+}
 
 @serviceInfoContent = {}
 
@@ -24,9 +35,12 @@
                mainClass = mainClass,
                bodyClasses = bodyClasses,
                sidebar = sidebar,
+               headScripts = headScripts,
                contentHeader = contentHeader,
-               mainContent = layouts.article(mainContent),
+               mainContent = article(
+                   content = mainContent
+               ),
                serviceInfoContent = serviceInfoContent,
-               scriptElem = scriptElem,
+               scriptElem = Some(scriptElem),
                userIsLoggedIn = userIsLoggedIn
 )
