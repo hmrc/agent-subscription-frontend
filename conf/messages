@@ -1,14 +1,5 @@
-<<<<<<< HEAD
-error.postcode.invalid = You have entered an invalid postcode
-error.postcode.blacklisted = You can''t use the postcode you''ve entered
-error.utr.invalid = Please enter a valid UTR
-error.telephone.invalid = Please enter a valid telephone number
-error.no.ampersand = Agency name cannot contain "&"
-error.des.text.invalid = This field is limited to alphanumeric characters (A-Z, a-z, 0-9) and the following characters -,./
-=======
 #Check agency
 checkAgency.title=Check for duplicate Agent Services accounts
->>>>>>> Added govuk assets, gulp, jasmine and custom assets
 
 #Confirm agency
 confirmYourAgency.title=Is this the agent business you''re creating an account for?
@@ -50,11 +41,16 @@ alreadySubscribed.title=Your agency is already subscribed
 #Journey failed
 journeyFailed.title=Create your new account ID and password
 
+#invalid address
+invalidAddress.title=Invalid Address
+invalidAddress.p1=Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:
+
 #Common
 button.startAgain=Try again
 button.createAccount=Create account
 button.gov.uk=Go to Government Gateway
 button.register=Register now
+button.changeAddress=Change Address
 
 #Error messages
 error.postcode.invalid = Please enter a valid postcode
