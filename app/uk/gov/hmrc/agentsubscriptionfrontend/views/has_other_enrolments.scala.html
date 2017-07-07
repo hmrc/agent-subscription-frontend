@@ -2,10 +2,19 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SignedOutController
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = "Create your new Agent Services account", bodyClasses = None) {
-  <h1>Create your agency's new Agent Services account</h1>
-  <p>To do this your agency needs a new Government Gateway ID.</p>
-  <p>
-    <a class="button" href="@SignedOutController.signOut" role="button">Go to Government Gateway</a>
-  </p>
+@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = Messages("hasOtherEnrolments.title"), bodyClasses = None) {
+
+    <div class="grid-row">
+        <div class="column-two-thirds">
+
+            <h1 class="heading-xlarge">@Messages("hasOtherEnrolments.title")</h1>
+
+            <p>@Messages("hasOtherEnrolments.p1")</p>
+
+            <p>
+                <a class="button" href="@SignedOutController.signOut" role="button">@Messages("button.gov.uk")</a>
+            </p>
+
+        </div>
+  </div>
 }
