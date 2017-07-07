@@ -41,11 +41,16 @@ alreadySubscribed.title=Your agency is already subscribed
 #Journey failed
 journeyFailed.title=Create your new account ID and password
 
+#invalid address
+invalidAddress.title=Invalid Address
+invalidAddress.p1=Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:
+
 #Common
 button.startAgain=Try again
 button.createAccount=Create account
 button.gov.uk=Go to Government Gateway
 button.register=Register now
+button.changeAddress=Change Address
 
 #Error messages
 error.postcode.invalid = You have entered an invalid postcode
