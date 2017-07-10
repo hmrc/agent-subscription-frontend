@@ -1,0 +1,8 @@
+[data-toggle-hidden]{
+    display: none;
+}
+.no-js{
+    [data-toggle-hidden] {
+        display: block !important;
+    }
+}

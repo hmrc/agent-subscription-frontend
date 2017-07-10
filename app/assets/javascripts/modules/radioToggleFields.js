@@ -9,8 +9,14 @@
 
     <fieldset>
         <legend>Radio Question</legend>
-        <label for="radio_true"><input id="radio_true" type="radio" name="radio_question" value="true">Yes</label>
-        <label for="radio_false"><input id="radio_false" type="radio" name="radio_question" value="false" data-toggle-id="target">No</label>
+        <div class="multiple-choice">
+            <input id="radio_true" type="radio" name="radio_question" value="true">
+            <label for="radio_true">Yes</label>
+        </div>
+        <div class="multiple-choice">
+            <input id="radio_false" type="radio" name="radio_question" value="false" data-toggle-id="target">
+            <label for="radio_false">No</label>
+        </div>
     </fieldset>
 
     <div id="target" data-toggle-hidden>
@@ -43,6 +49,7 @@
     }
 
     var RadioToggleFields = function (){
+        console.log('here');
 
         var getDataToggleIds = function (scope) {
             var ids = [];
@@ -87,6 +94,8 @@
             var ids = uniqueArray(getDataToggleIds(_this));
 
             //When data-toggle-id checked
+            console.log('change');
+            console.log(ids);
 
             if($(_this).is('[data-toggle-id]:checked')){
 
