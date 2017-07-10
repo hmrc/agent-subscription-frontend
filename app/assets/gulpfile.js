@@ -8,4 +8,4 @@ var gulp = require('gulp'),
 requireDir('./tasks', { recurse: true });
 
 // Execute default task
-gulp.task('default', ['copy', 'build-sass', 'scripts', 'test']);
+gulp.task('default', ['copy', 'build-sass', 'scripts']);
