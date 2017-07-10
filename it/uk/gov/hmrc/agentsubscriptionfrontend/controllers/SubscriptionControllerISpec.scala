@@ -290,10 +290,6 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.submit("addr1")(authenticatedRequest()))
 
         status(result) shouldBe 200
-<<<<<<< HEAD
-=======
-        //checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
->>>>>>> 64e527777d074e549a35d38fc80dd9509fba1e9a
         bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
@@ -310,10 +306,6 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.submit("addr1")(authenticatedRequest()))
 
         status(result) shouldBe 200
-<<<<<<< HEAD
-=======
-        //checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
->>>>>>> 64e527777d074e549a35d38fc80dd9509fba1e9a
         bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
@@ -330,10 +322,6 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.submit("addr1")(authenticatedRequest()))
 
         status(result) shouldBe 200
-<<<<<<< HEAD
-=======
-        //checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
->>>>>>> 64e527777d074e549a35d38fc80dd9509fba1e9a
         bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
@@ -351,10 +339,6 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
 
 
         status(result) shouldBe 200
-<<<<<<< HEAD
-=======
-        //checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
->>>>>>> 64e527777d074e549a35d38fc80dd9509fba1e9a
         bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
@@ -365,7 +349,7 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.getAddressDetails(subscriptionDetailsRequest("knownFactsPostcode", Seq("knownFactsPostcode" -> "1AA AA1"))))
 
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"), "Please enter a valid postcode")
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"), "You have entered an invalid postcode")
       }
 
       "utr is not valid" in {
