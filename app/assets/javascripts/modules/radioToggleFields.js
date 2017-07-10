@@ -49,7 +49,6 @@
     }
 
     var RadioToggleFields = function (){
-        console.log('here');
 
         var getDataToggleIds = function (scope) {
             var ids = [];
@@ -94,8 +93,6 @@
             var ids = uniqueArray(getDataToggleIds(_this));
 
             //When data-toggle-id checked
-            console.log('change');
-            console.log(ids);
 
             if($(_this).is('[data-toggle-id]:checked')){
 
