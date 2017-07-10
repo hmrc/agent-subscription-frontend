@@ -353,7 +353,7 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.getAddressDetails(subscriptionDetailsRequest("knownFactsPostcode", Seq("knownFactsPostcode" -> "1AA AA1"))))
 
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"), "Please enter a valid postcode")
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"), "You have entered an invalid postcode")
       }
 
       "utr is not valid" in {
