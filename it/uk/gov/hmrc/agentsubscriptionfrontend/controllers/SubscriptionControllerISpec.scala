@@ -290,7 +290,6 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.submit("addr1")(authenticatedRequest()))
 
         status(result) shouldBe 200
-        //checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
         bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
@@ -307,7 +306,6 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.submit("addr1")(authenticatedRequest()))
 
         status(result) shouldBe 200
-        //checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
         bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
@@ -324,7 +322,6 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.submit("addr1")(authenticatedRequest()))
 
         status(result) shouldBe 200
-        //checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
         bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
@@ -342,7 +339,6 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
 
 
         status(result) shouldBe 200
-        //checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
         bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
