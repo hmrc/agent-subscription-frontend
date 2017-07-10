@@ -1,0 +1,65 @@
+
+    <style type="text/css">
+
+        [data-toggle-hidden]{
+            display: none;
+        }
+
+        .no-js{
+            [data-toggle-hidden] {
+                display: block !important;
+            }
+        }
+    </style>
+
+    <fieldset>
+        <legend>Radio Question level 1</legend>
+        <div class="multiple-choice">
+            <input id="radio_true" type="radio" name="radio_question" value="true">
+            <label for="radio_true">Yes</label>
+        </div>
+        <div class="multiple-choice">
+            <input id="radio_false" type="radio" name="radio_question" value="false" data-toggle-id="target0">
+            <label for="radio_false">No</label>
+        </div>
+        <div class="multiple-choice">
+            <input id="radio_maybe" type="radio" name="radio_question" value="maybe" data-toggle-id="target1,target2">
+            <label for="radio_maybe">Maybe</label>
+        </div>
+        <div class="multiple-choice">
+            <input id="radio_level2" type="radio" name="radio_question" value="level2" data-toggle-id="target3">
+            <label for="radio_level2">Level 2</label>
+        </div>
+    </fieldset>
+
+    <div id="target0" data-toggle-hidden></div>
+    <div id="target1" data-toggle-hidden></div>
+    <div id="target2" data-toggle-hidden></div>
+
+    <div id="target3" data-toggle-hidden>
+        <fieldset>
+            <legend>Radio Question level 2</legend>
+            <div class="multiple-choice">
+                <input id="level2_radio_true" type="radio" name="level2_radio_question" value="true">
+                <label for="level2_radio_true">Yes</label>
+            </div>
+            <div class="multiple-choice">
+                <label for="level2_radio_false">No</label>
+                <input id="level2_radio_false" type="radio" name="level2_radio_question" value="false" data-toggle-id="target4">
+            </div>
+        </fieldset>
+        <div id="target4" data-toggle-hidden>
+            <fieldset>
+                <legend>Radio Question level 3</legend>
+                <div class="multiple-choice">
+                    <input id="level3_radio_true" type="radio" name="level3_radio_question" value="true">
+                    <label for="level3_radio_true">Yes</label>
+                </div>
+                <div class="multiple-choice">
+                    <input id="level3_radio_false" type="radio" name="level3_radio_question" value="false" data-toggle-id="target5">
+                    <label for="level3_radio_false">No</label>
+                </div>
+            </fieldset>
+            <div id="target5" data-toggle-hidden></div>
+        </div>
+    </div>

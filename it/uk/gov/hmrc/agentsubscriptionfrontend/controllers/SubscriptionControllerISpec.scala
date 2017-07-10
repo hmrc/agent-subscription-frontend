@@ -290,7 +290,7 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.submit("addr1")(authenticatedRequest()))
 
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
+        bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
       "postcode with whitespaces is blacklisted" in {
@@ -306,7 +306,7 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.submit("addr1")(authenticatedRequest()))
 
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
+        bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
       "postcode with lowercase characters is blacklisted" in {
@@ -322,7 +322,7 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.submit("addr1")(authenticatedRequest()))
 
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
+        bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
       "postcode without whitespaces is blacklisted" in {
@@ -339,7 +339,7 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
 
 
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
+        bodyOf(result) should include("Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:")
       }
 
       "known facts postcode is not valid" in {
@@ -349,7 +349,7 @@ class SubscriptionControllerISpec extends BaseControllerISpec with SessionDataMi
         val result = await(controller.getAddressDetails(subscriptionDetailsRequest("knownFactsPostcode", Seq("knownFactsPostcode" -> "1AA AA1"))))
 
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"), "You have entered an invalid postcode")
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"), "Please enter a valid postcode")
       }
 
       "utr is not valid" in {
