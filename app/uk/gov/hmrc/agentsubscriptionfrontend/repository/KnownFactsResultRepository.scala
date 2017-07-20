@@ -17,50 +17,53 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.repository
 
 import java.util.UUID
+import javax.inject.{Inject, Named, Singleton}
 
+import org.joda.time.DateTime
 import play.api.libs.json.Json
-import reactivemongo.api.DB
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
+import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
-import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-trait KnownFactsResultRepository {
-  def findKnownFactsResult(uuid: String)(implicit hc: HeaderCarrier): Future[Option[KnownFactsResult]]
-
-  def create(knownFactsResult: KnownFactsResult)(implicit hc: HeaderCarrier): Future[String]
-}
-
-class KnownFactsResultMongoRepository(mongo: () => DB)
-  extends ReactiveRepository[StashedKnownFactsResult, BSONObjectID]("agent-known-facts-results", mongo, StashedKnownFactsResult.format, ReactiveMongoFormats.objectIdFormats)
-  with KnownFactsResultRepository with Repository[StashedKnownFactsResult, BSONObjectID] {
+@Singleton
+class KnownFactsResultMongoRepository @Inject()(@Named("mongodb.knownfactsresult.ttl") ttl: Int, mongoComponent: ReactiveMongoComponent)
+  extends ReactiveRepository[StashedKnownFactsResult, BSONObjectID]("agent-known-facts-results",
+    mongoComponent.mongoConnector.db,
+    StashedKnownFactsResult.format,
+    ReactiveMongoFormats.objectIdFormats) {
 
   override def indexes: Seq[Index] =
     Seq(Index(
-      key = Seq("uuid" -> IndexType.Ascending),
-      name = Some("uuidUnique"),
-      unique = true,
-      options = BSONDocument("expireAfterSeconds" -> 60))) //FIXME: Retrieve TTL from config
+      key = Seq("id" -> IndexType.Ascending),
+      name = Some("idUnique"),
+      unique = true),
+      Index(
+        key = Seq("createdDate" -> IndexType.Ascending),
+        name = Some("createDate"),
+        unique = false,
+        options = BSONDocument("expireAfterSeconds" -> ttl)
+      ))
 
-  override def findKnownFactsResult(uuid: String)(implicit hc: HeaderCarrier): Future[Option[KnownFactsResult]] = {
-    collection.find(Json.obj("uuid" -> uuid)).one[StashedKnownFactsResult].map {
+  def findKnownFactsResult(id: String)(implicit ec: ExecutionContext): Future[Option[KnownFactsResult]] = {
+    collection.find(Json.obj("id" -> id)).one[StashedKnownFactsResult].map {
       maybeStashedResult => maybeStashedResult.map(_.knownFactsResult)
     }
   }
 
-  override def create(knownFactsResult: KnownFactsResult)(implicit hc: HeaderCarrier): Future[String] = {
-    val uuid: String = UUID.randomUUID().toString
-    super.insert(StashedKnownFactsResult(uuid, knownFactsResult)).map { _ => uuid }
+  def create(knownFactsResult: KnownFactsResult)(implicit ec: ExecutionContext): Future[String] = {
+    val id = UUID.randomUUID().toString.replace("-", "").take(8)
+    insert(StashedKnownFactsResult(id, knownFactsResult)).map(_ => id)
   }
 }
 
-case class StashedKnownFactsResult(uuid: String, knownFactsResult: KnownFactsResult)
+case class StashedKnownFactsResult(id: String, knownFactsResult: KnownFactsResult, createdDate: DateTime = DateTime.now)
 
 object StashedKnownFactsResult {
+  implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
   implicit val format = Json.format[StashedKnownFactsResult]
 }

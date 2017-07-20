@@ -34,7 +34,8 @@ object FrontendBuild extends Build with MicroService {
     "org.jsoup" % "jsoup" % "1.8.1" % scope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
     "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,
-    "org.mockito" % "mockito-core" % "2.7.4" % scope
+    "org.mockito" % "mockito-core" % "2.7.4" % scope,
+    "uk.gov.hmrc" %% "reactivemongo-test" % "2.0.0" % scope
   )
 
 }
