@@ -43,8 +43,9 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
     bind(classOf[SessionStoreService])
     bindBaseUrl("agent-subscription")
     bindBaseUrl("address-lookup-frontend")
-    bindConfigProperty("logoutRedirectUrl")
-    bindConfigProperty("surveyRedirectUrl")
+    bindStringConfigProperty("logoutRedirectUrl")
+    bindStringConfigProperty("surveyRedirectUrl")
+    bindIntConfigProperty("mongodb.knownfactsresult.ttl")
   }
 
   private def bindBaseUrl(serviceName: String) =
@@ -54,14 +55,25 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
     override lazy val get = new URL(baseUrl(serviceName))
   }
 
-  private def bindConfigProperty(propertyName: String) =
-    bind(classOf[String]).annotatedWith(Names.named(s"$propertyName")).toProvider(new ConfigPropertyProvider(propertyName))
+  private def bindStringConfigProperty(propertyName: String) =
+    bind(classOf[String]).annotatedWith(Names.named(s"$propertyName")).toProvider(new StringConfigPropertyProvider(propertyName))
 
-  private class ConfigPropertyProvider(propertyName: String) extends Provider[String] {
+  private class StringConfigPropertyProvider(propertyName: String) extends Provider[String] {
     override lazy val get = getConfString(propertyName, throw new RuntimeException(s"No configuration value found for '$propertyName'"))
 
     def getConfString(confKey: String, defString: => String) = {
       runModeConfiguration.getString(s"$env.$confKey").getOrElse(defString)
+    }
+  }
+
+  private def bindIntConfigProperty(propertyName: String) =
+    bind(classOf[Int]).annotatedWith(Names.named(s"$propertyName")).toProvider(new IntConfigPropertyProvider(propertyName))
+
+  private class IntConfigPropertyProvider(propertyName: String) extends Provider[Int] {
+    override lazy val get = getConfString(propertyName, throw new RuntimeException(s"No configuration value found for '$propertyName'"))
+
+    def getConfString(confKey: String, defInt: => Int) = {
+      runModeConfiguration.getInt(s"$env.$confKey").getOrElse(defInt)
     }
   }
 }
