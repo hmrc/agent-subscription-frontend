@@ -11,7 +11,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SignOutControllerISpec extends BaseControllerISpec {
   private lazy val controller: SignedOutController = app.injector.instanceOf[SignedOutController]
 
-  private lazy val logoutRedirectUrl = "/government-gateway-registration-frontend/choose-your-account"
   private lazy val sosRedirectUrl = "/government-gateway-registration-frontend?accountType=agent"
 
   private lazy val repo = app.injector.instanceOf[KnownFactsResultMongoRepository]
