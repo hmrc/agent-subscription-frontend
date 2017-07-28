@@ -48,32 +48,37 @@ class StartControllerISpec extends BaseControllerISpec {
 
   }
 
-  "showNonAgentNextSteps" should {
-    "display the non-agent next steps page if the current user is logged in" in {
-      implicit val request = authenticatedRequest()
-      val result = await(controller.showNonAgentNextSteps(request))
+  "showNonAgentNextSteps" when {
+    "the current user is logged in" should {
 
-      status(result) shouldBe OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-      bodyOf(result) should include(htmlEscapedMessage("nonAgent.title"))
+      "display the non-agent next steps page"  in {
+        implicit val request = authenticatedRequest()
+        val result = await(controller.showNonAgentNextSteps(request))
+
+        status(result) shouldBe OK
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+        bodyOf(result) should include(htmlEscapedMessage("nonAgent.title"))
+      }
+
+      "include link to create new account" in {
+        val result = await(controller.showNonAgentNextSteps(authenticatedRequest()))
+
+        status(result) shouldBe 200
+        bodyOf(result) should include("/redirect-to-sos")
+      }
     }
 
-    "allow the government gateway URL to be configured" in {
-      val result = await(controller.showNonAgentNextSteps(authenticatedRequest()))
+    "the current user is not logged in" should {
+      "redirect to the company-auth-frontend sign-in page" in {
+        AuthStub.userIsNotAuthenticated()
 
-      status(result) shouldBe 200
-      bodyOf(result) should include("/redirect-to-sos")
-    }
+        val request = FakeRequest()
+        val result = await(controller.showNonAgentNextSteps(request))
 
-    "redirect to the company-auth-frontend sign-in page if the current user is not logged in" in {
-      AuthStub.userIsNotAuthenticated()
-
-      val request = FakeRequest()
-      val result = await(controller.showNonAgentNextSteps(request))
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result).head should include("gg/sign-in")
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result).head should include("gg/sign-in")
+      }
     }
 
     behave like aPageWithFeedbackLinks(request => controller.showNonAgentNextSteps(request), authenticatedRequest())
