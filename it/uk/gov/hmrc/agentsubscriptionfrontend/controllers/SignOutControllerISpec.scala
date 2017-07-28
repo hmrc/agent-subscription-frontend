@@ -28,20 +28,22 @@ class SignOutControllerISpec extends BaseControllerISpec {
 
     "save the KnownFactsResults in the DB" in {
       val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
-      sessionStoreService.knownFactsResult = Some(knownFactsResult)
+      implicit val request = authenticatedRequest()
+      sessionStoreService.currentSession.knownFactsResult = Some(knownFactsResult)
 
       await(repo.find("knownFactsResult.utr" -> "9876543210").map(_.headOption.map(_.knownFactsResult))) shouldBe None
-      await(controller.redirectToSos(authenticatedRequest()))
+      await(controller.redirectToSos(request))
       await(repo.find("knownFactsResult.utr" -> "9876543210").map(_.headOption.map(_.knownFactsResult))) shouldBe Some(knownFactsResult)
     }
 
     "include an ID of the saved KnownFactsResults in the SOS redirect URL" in {
       val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
-      sessionStoreService.knownFactsResult = Some(knownFactsResult)
+      implicit val request = authenticatedRequest()
+      sessionStoreService.currentSession.knownFactsResult = Some(knownFactsResult)
 
-      val request = await(controller.redirectToSos(authenticatedRequest()))
+      val result = await(controller.redirectToSos(request))
       val id = await(repo.find("knownFactsResult.utr" -> "9876543210").map(_.headOption.map(_.id))).get
-      redirectLocation(request).head should include (s"continue=http%3A%2F%2F%2Fagent-subscription%2Freturn-after-gg-creds-created%3Fid%3D$id")
+      redirectLocation(result).head should include (s"continue=http%3A%2F%2F%2Fagent-subscription%2Freturn-after-gg-creds-created%3Fid%3D$id")
     }
 
     "not include an ID in the SOS redirect URL when KnownFactsResults are not yet known" in {

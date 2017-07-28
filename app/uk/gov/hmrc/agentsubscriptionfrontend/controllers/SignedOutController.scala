@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import java.net.URLEncoder
 import javax.inject.{Inject, Named, Singleton}
 
-import play.api.mvc.Action
+import play.api.mvc.{Action, Results}
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -46,11 +46,11 @@ class SignedOutController @Inject()(@Named("surveyRedirectUrl") surveyUrl: Strin
       }
     } yield {
       val continueUrl = returnAfterGGCredsCreatedUrl(id.map(i => s"?id=$i").getOrElse(""))
-      Redirect(s"$sosUrl&continue=$continueUrl", 303).withNewSession
+      Results.SeeOther(s"$sosUrl&continue=$continueUrl").withNewSession
     }
   }
 
   def startSurvey = Action { implicit request =>
-    Redirect(surveyUrl, 303).withNewSession
+    Results.SeeOther(surveyUrl).withNewSession
   }
 }

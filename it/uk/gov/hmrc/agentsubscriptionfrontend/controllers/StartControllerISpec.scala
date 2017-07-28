@@ -117,12 +117,14 @@ class StartControllerISpec extends BaseControllerISpec {
     }
 
     "repopulate the KnownFacts session store with the persisted KnownFactsResult, if given a valid KnownFactsResult ID" in {
+
       val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
       val persistedId = await(repo.create(knownFactsResult))
+      implicit val request = FakeRequest(GET, "?id=" + persistedId)
 
-      await(controller.returnAfterGGCredsCreated(FakeRequest(GET, "?id=" + persistedId)))
+      await(controller.returnAfterGGCredsCreated(request))
 
-      sessionStoreService.knownFactsResult shouldBe Some(knownFactsResult)
+      sessionStoreService.currentSession.knownFactsResult shouldBe Some(knownFactsResult)
     }
   }
 }
