@@ -33,6 +33,7 @@ trait AppConfig {
   val governmentGatewayUrl: String
   val blacklistedPostcodes: Set[String]
   val journeyName: String
+  val redirectUrl: String
 }
 
 trait StrictConfig{
@@ -65,4 +66,5 @@ class FrontendAppConfig extends AppConfig with StrictConfig with ServicesConfig 
   override lazy val blacklistedPostcodes: Set[String] =
     PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
   override lazy val journeyName = getConfString("address-lookup-frontend.journeyName", "")
+  override lazy val redirectUrl = getConfString("agent-services-account-frontend.url", "")
 }

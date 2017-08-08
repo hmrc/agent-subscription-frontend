@@ -46,6 +46,8 @@ class CheckAgencyController @Inject()
 (implicit appConfig: AppConfig)
   extends FrontendController with I18nSupport with AuthActions with SessionDataMissing {
 
+  private val redirectUrl = appConfig.redirectUrl
+
   private val knownFactsForm = Form[KnownFacts](
     mapping(
       "utr" -> FieldMappings.utr,
@@ -64,7 +66,7 @@ class CheckAgencyController @Inject()
     implicit authContext =>
       implicit request =>
         hasMtdEnrolment match {
-          case true => Redirect(routes.CheckAgencyController.showAlreadySubscribed())
+          case true => Redirect(redirectUrl)
           case false => Ok(html.check_agency_status(knownFactsForm))
         }
   }

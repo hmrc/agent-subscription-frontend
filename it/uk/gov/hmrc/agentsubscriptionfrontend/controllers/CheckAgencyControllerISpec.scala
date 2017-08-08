@@ -30,12 +30,11 @@ class CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   private val validPostcode = "AA1 1AA"
   private val invalidPostcode = "not a postcode"
 
-  private val notSubscribed = "notSubscribed"
-  private val alreadySubscribed = "alreadySubscribed"
-
   val utr = Utr("0123456789")
   val postcode = "AA11AA"
   val registrationName = "My Agency"
+
+  private lazy val redirectUrl: String = "https://www.gov.uk/"
 
   private lazy val configuredGovernmentGatewayUrl = "http://configured-government-gateway.gov.uk/"
 
@@ -59,6 +58,15 @@ class CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.showCheckAgencyStatus(authenticatedRequest()))
 
       checkHtmlResultWithBodyText(result, "Check for duplicate Agent Services accounts")
+    }
+
+    "display the AS Account Page if the current user has HMRC-AS-AGENT enrolment" in {
+      AuthStub.isSubscribedToMtd(subscribingAgent)
+
+      val result = await(controller.showCheckAgencyStatus(authenticatedRequest()))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(redirectUrl)
     }
   }
 
@@ -242,7 +250,7 @@ class CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       AuthStub.hasNoEnrolments(subscribingAgent)
       implicit val request = authenticatedRequest()
       sessionStoreService.currentSession.knownFactsResult = Some(
-      KnownFactsResult(utr = Utr("0123456789"), postcode = "AA11AA", taxpayerName = "My Agency", isSubscribedToAgentServices = false))
+        KnownFactsResult(utr = Utr("0123456789"), postcode = "AA11AA", taxpayerName = "My Agency", isSubscribedToAgentServices = false))
 
       val result = await(controller.showConfirmYourAgency(request))
 
@@ -253,7 +261,7 @@ class CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       AuthStub.hasNoEnrolments(subscribingAgent)
       implicit val request = authenticatedRequest()
       sessionStoreService.currentSession.knownFactsResult = Some(
-      KnownFactsResult(utr = Utr("0123456789"), postcode = "AA11AA", taxpayerName = "My Agency", isSubscribedToAgentServices = false))
+        KnownFactsResult(utr = Utr("0123456789"), postcode = "AA11AA", taxpayerName = "My Agency", isSubscribedToAgentServices = false))
 
       val result = await(controller.showConfirmYourAgency(request))
 
