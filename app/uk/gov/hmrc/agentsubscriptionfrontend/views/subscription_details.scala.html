@@ -43,8 +43,20 @@
                     )
                 </div>
 
-                <input type="hidden" name="knownFactsPostcode" id="knownFactsPostcode" value="@detailsForm.data("knownFactsPostcode")" >
-                <input type="hidden" name="utr" id="utr" value="@detailsForm.data("utr")">
+                @input(
+                    detailsForm("knownFactsPostcode"),
+                    '_type -> "hidden",
+                    '_label -> "Postcode",
+                    '_labelClass -> "hidden",
+                    '_labelDataAttributes -> Html("""aria-hidden='true'""")
+                    )
+                @input(
+                    detailsForm("utr"),
+                    '_type -> "hidden",
+                    '_label -> "UTR",
+                    '_labelClass -> "hidden",
+                    '_labelDataAttributes -> Html("""aria-hidden='true'""")
+                )
 
             <div class="form-field">
                 <button class="button" type="submit" id="subscribe">@Messages("button.continue")</button>
