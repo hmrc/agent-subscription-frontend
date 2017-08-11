@@ -146,6 +146,7 @@ class AddressValidatorSpec extends UnitSpec with ResettingMockitoSugar {
       desAddress.addressLine3 shouldBe Some("")
       desAddress.addressLine4 shouldBe Some("")
     }
+
     "pass when there are 5 address line's but log a warning with the utr inside" in {
       when(slf4jLogger.isWarnEnabled).thenReturn(true)
       val addressLookupFrontendAddress = testAddressLookupFrontendAddress(lines = Seq(validLine, validLine, validLine, validLine,validLine))

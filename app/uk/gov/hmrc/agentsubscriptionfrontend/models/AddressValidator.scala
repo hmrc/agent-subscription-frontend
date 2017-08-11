@@ -31,7 +31,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.Postcod
 import scala.util.matching.Regex
 
 @Singleton
-class AddressValidator @Inject()(logger: LoggerLike){
+class AddressValidator @Inject()(logger: LoggerLike) {
 
   type ValidationErrors = NonEmptyList[ValidationError]
 
@@ -39,17 +39,19 @@ class AddressValidator @Inject()(logger: LoggerLike){
   private val desTextRegex: Regex = "^[A-Za-z0-9 \\-,.&'\\/]*$".r
   private val postcodeRegex = "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$".r
 
-  def validateAddress(utr: Utr, addressLookupFrontendAddress: AddressLookupFrontendAddress, blacklistedPostcodes: Set[String]): Validated[ValidationErrors, DesAddress] ={
+  def validateAddress(
+    utr: Utr, addressLookupFrontendAddress: AddressLookupFrontendAddress,
+    blacklistedPostcodes: Set[String]): Validated[ValidationErrors, DesAddress] = {
     if (addressLookupFrontendAddress.lines.length > 4) logger.warn("UTR with more than 4 address lines: " + utr.value)
     (validateLine1(addressLookupFrontendAddress.lines)
-      |@| validateOptionLine(lineIfPresent(addressLookupFrontendAddress.lines, 1))
-      |@| validateOptionLine(lineIfPresent(addressLookupFrontendAddress.lines, 2))
-      |@| validateOptionLine(lineIfPresent(addressLookupFrontendAddress.lines, 3))
-      |@| validatePostcode(addressLookupFrontendAddress.postcode, blacklistedPostcodes)
+     |@| validateOptionLine(lineIfPresent(addressLookupFrontendAddress.lines, 1))
+     |@| validateOptionLine(lineIfPresent(addressLookupFrontendAddress.lines, 2))
+     |@| validateOptionLine(lineIfPresent(addressLookupFrontendAddress.lines, 3))
+     |@| validatePostcode(addressLookupFrontendAddress.postcode, blacklistedPostcodes)
       ).map { (addressLine1, maybeAddressLine2, maybeAddressLine3, maybeAddressLine4, postcode) =>
       DesAddress(addressLine1, maybeAddressLine2, maybeAddressLine3, maybeAddressLine4, postcode, addressLookupFrontendAddress.country.code)
     }
-    }
+  }
 
   private def lineIfPresent(lines: Seq[String], index: Int): Option[String] =
     if (lines.length > index) Some(lines(index))
