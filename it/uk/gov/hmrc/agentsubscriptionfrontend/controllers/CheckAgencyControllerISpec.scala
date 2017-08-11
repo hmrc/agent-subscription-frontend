@@ -34,7 +34,7 @@ class CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   val postcode = "AA11AA"
   val registrationName = "My Agency"
 
-  private lazy val redirectUrl: String = "https://www.gov.uk/"
+  private lazy val redirectUrl: String = "localhost:9401/agent-services-account"
 
   private lazy val configuredGovernmentGatewayUrl = "http://configured-government-gateway.gov.uk/"
 

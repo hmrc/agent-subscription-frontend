@@ -46,8 +46,6 @@ class CheckAgencyController @Inject()
 (implicit appConfig: AppConfig)
   extends FrontendController with I18nSupport with AuthActions with SessionDataMissing {
 
-  private val redirectUrl = appConfig.redirectUrl
-
   private val knownFactsForm = Form[KnownFacts](
     mapping(
       "utr" -> FieldMappings.utr,
@@ -55,20 +53,17 @@ class CheckAgencyController @Inject()
     )(KnownFacts.apply)(KnownFacts.unapply)
   )
 
-  val showHasOtherEnrolments: Action[AnyContent] = AuthorisedWithSubscribingAgent { implicit authContext =>
+  val showHasOtherEnrolments: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit authContext =>
     implicit request =>
-      Ok(html.has_other_enrolments())
+      Future successful Ok(html.has_other_enrolments())
   }
 
   private def hasMtdEnrolment(implicit request: AgentRequest[_]): Boolean = request.enrolments.exists(_.key == "HMRC-AS-AGENT")
 
-  val showCheckAgencyStatus: Action[AnyContent] = AuthorisedWithSubscribingAgent {
+  val showCheckAgencyStatus: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync {
     implicit authContext =>
       implicit request =>
-        hasMtdEnrolment match {
-          case true => Redirect(redirectUrl)
-          case false => Ok(html.check_agency_status(knownFactsForm))
-        }
+        Future successful Ok(html.check_agency_status(knownFactsForm))
   }
 
   private def lookupNextPageUrl(isSubscribedToAgentServices: Boolean): String =
@@ -106,10 +101,10 @@ class CheckAgencyController @Inject()
     }
   }
 
-  val showNoAgencyFound: Action[AnyContent] = AuthorisedWithSubscribingAgent {
+  val showNoAgencyFound: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync {
     implicit authContext =>
       implicit request =>
-        Ok(html.no_agency_found())
+        Future successful Ok(html.no_agency_found())
   }
 
   val showConfirmYourAgency: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync {
@@ -126,9 +121,9 @@ class CheckAgencyController @Inject()
         })
   }
 
-  val showAlreadySubscribed: Action[AnyContent] = AuthorisedWithSubscribingAgent { implicit authContext =>
+  val showAlreadySubscribed: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit authContext =>
     implicit request =>
-      Ok(html.already_subscribed())
+      Future successful Ok(html.already_subscribed())
   }
 
   val showNotSubscribed: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit authContext =>

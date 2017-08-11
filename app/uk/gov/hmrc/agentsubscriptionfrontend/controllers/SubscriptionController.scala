@@ -87,7 +87,9 @@ class SubscriptionController @Inject()
   )
 
   private sealed trait SubscriptionFailed extends Product with Serializable
+
   private final case class SubscriptionReturnedHttpError(httpStatusCode: Int) extends SubscriptionFailed
+
   private final case object MissingSessionData extends SubscriptionFailed
 
   private def hasEnrolments(implicit request: AgentRequest[_]): Boolean = request.enrolments.nonEmpty
@@ -158,7 +160,7 @@ class SubscriptionController @Inject()
         addressLookUpConnector.initJourney(routes.SubscriptionController.submit(), JourneyName).map { x => Redirect(x) }
   }
 
-  val  getAddressDetails: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync {
+  val getAddressDetails: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync {
     implicit authContext =>
       implicit request =>
         subscriptionDetails.bindFromRequest().fold(
@@ -173,30 +175,32 @@ class SubscriptionController @Inject()
         )
   }
 
-  private def redisplaySubscriptionDetails(formWithErrors: Form[InitialDetails])(implicit hc: HeaderCarrier, request: Request[_]) =
+  private def redisplaySubscriptionDetails(formWithErrors: Form[InitialDetails])(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] =
     sessionStoreService.fetchKnownFactsResult.map(_.map { knownFactsResult =>
       Ok(html.subscription_details(knownFactsResult.taxpayerName, formWithErrors))
     }.getOrElse {
       sessionMissingRedirect()
     })
 
-  val showSubscriptionFailed: Action[AnyContent] = AuthorisedWithSubscribingAgent {
+  val showSubscriptionFailed: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync {
     implicit authContext =>
       implicit request =>
-        Ok(html.subscription_failed("Postcodes do not match"))
+        Future successful Ok(html.subscription_failed("Postcodes do not match"))
   }
 
-  val showSubscriptionComplete: Action[AnyContent] = AuthorisedWithSubscribingAgent {
+  val showSubscriptionComplete: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync {
     implicit authContext =>
       implicit request => {
-        val agencyData = for {
-          agencyName <- request.flash.get("agencyName")
-          arn <- request.flash.get("arn")
-        } yield (agencyName, arn)
+        Future successful {
+          val agencyData = for {
+            agencyName <- request.flash.get("agencyName")
+            arn <- request.flash.get("arn")
+          } yield (agencyName, arn)
 
-        agencyData.map(data =>
-          Ok(html.subscription_complete(data._1, data._2))
-        ) getOrElse sessionMissingRedirect()
+          agencyData.map(data =>
+            Ok(html.subscription_complete(data._1, data._2))
+          ) getOrElse sessionMissingRedirect()
+        }
       }
   }
 }
