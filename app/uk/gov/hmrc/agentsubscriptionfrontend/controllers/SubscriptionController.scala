@@ -193,7 +193,7 @@ class SubscriptionController @Inject()
         } yield (agencyName, arn)
 
         agencyData.map(data =>
-          Ok(html.subscription_complete(data._1, data._2))
+          Ok(html.subscription_complete(appConfig.redirectUrl, data._1, data._2))
         ) getOrElse sessionMissingRedirect()
       }
   }
