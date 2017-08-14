@@ -17,8 +17,9 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 
-object TestAppConfig extends AppConfig{
+object TestAppConfig extends AppConfig with ServicesConfig {
 
   override val analyticsToken: String = "N/A"
   override val analyticsHost: String = "auto"

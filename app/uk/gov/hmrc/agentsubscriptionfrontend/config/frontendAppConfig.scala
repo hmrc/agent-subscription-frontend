@@ -36,7 +36,7 @@ trait AppConfig {
   val agentServicesAccountUrl: String
 }
 
-trait StrictConfig{
+trait StrictConfig {
   def loadConfig(key: String): String = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 }
 
