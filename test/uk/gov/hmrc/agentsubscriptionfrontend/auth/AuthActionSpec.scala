@@ -52,8 +52,11 @@ class AuthActionSpec extends UnitSpec with MockitoSugar {
       val failure = Upstream5xxResponse("failure in auth", 500, 500)
       when(authConnector.currentAuthority(any[HeaderCarrier])).thenReturn(Future successful Some(authority))
       when(authConnector.getUserDetails(any[AuthContext])(any[HeaderCarrier], any[HttpReads[HttpResponse]])).thenReturn(Future failed failure)
+      when(authConnector.getEnrolments(any[AuthContext])(any[HeaderCarrier], any[HttpReads[List[Enrolment]]]))
+        .thenReturn(Future successful List.empty[Enrolment])
 
-      val controller = new CheckAgencyController(TestMessagesApi.testMessagesApi, authConnector, passcodeVerificationConfig, passcodeAuthenticationProvider, agentSubscriptionConnector, sessionStoreService)
+      val controller = new CheckAgencyController(TestMessagesApi.testMessagesApi, authConnector,
+        passcodeVerificationConfig, passcodeAuthenticationProvider, agentSubscriptionConnector, sessionStoreService)
 
       intercept[Upstream5xxResponse] {
         val eventualResult: Future[Result] = controller.showCheckAgencyStatus(mockRequestWithMockAuthSession)

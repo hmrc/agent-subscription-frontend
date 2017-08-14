@@ -43,7 +43,7 @@ trait AuthActions extends Actions with PasscodeAuthentication {
                 isAgent <- isAgentAffinityGroup
                 activatedEnrol <- checkActivatedEnrollment(enrolls)
               } yield (isAgent, activatedEnrol)).flatMap{
-                case (true, true) => Future successful Redirect(appConfig.redirectUrl)
+                case (true, true) => Future successful Redirect(appConfig.agentServicesAccountUrl)
                 case (true, false) => body(authContext)(AgentRequest(enrolls, request))
                 case _ => Future successful redirectToNonAgentNextSteps
               }
