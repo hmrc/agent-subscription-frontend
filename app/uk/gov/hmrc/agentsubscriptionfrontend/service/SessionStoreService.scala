@@ -41,9 +41,8 @@ class SessionStoreService @Inject() (sessionCache: SessionCache) {
   def cacheInitialDetails(details: InitialDetails)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     sessionCache.cache("initialDetails", details).map(_ => ())
 
-  def fetchContinueUrl(implicit hc: HeaderCarrier): Future[Option[ContinueUrl]] = {
+  def fetchContinueUrl(implicit hc: HeaderCarrier): Future[Option[ContinueUrl]] =
     sessionCache.fetchAndGetEntry[ContinueUrl]("continueUrl")
-  }
 
   def cacheContinueUrl(url: ContinueUrl)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
     sessionCache.cache("continueUrl", url).map(_ => ())

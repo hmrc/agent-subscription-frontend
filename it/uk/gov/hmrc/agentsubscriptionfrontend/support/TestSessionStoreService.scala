@@ -26,17 +26,17 @@ import scala.concurrent.{ExecutionContext, Future}
 class TestSessionStoreService extends SessionStoreService(null) {
 
   class Session (
-                  var knownFactsResult: Option[KnownFactsResult] = None,
-                  var initialDetails: Option[InitialDetails] = None,
-                  var continueUrl: Option[ContinueUrl] = None
-                )
+    var knownFactsResult: Option[KnownFactsResult] = None,
+    var initialDetails: Option[InitialDetails] = None,
+    var continueUrl: Option[ContinueUrl] = None
+  )
 
   private val sessions = collection.mutable.Map[String,Session]()
 
   private def sessionKey(implicit hc: HeaderCarrier): String = hc.userId match {
-    case None => "default"
-    case Some(userId) => userId.toString
-  }
+      case None => "default"
+      case Some(userId) => userId.toString
+    }
 
   def currentSession(implicit hc: HeaderCarrier): Session = {
     sessions.getOrElseUpdate(sessionKey, new Session())

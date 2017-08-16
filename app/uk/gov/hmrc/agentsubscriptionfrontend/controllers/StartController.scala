@@ -46,7 +46,9 @@ class StartController @Inject()(override val messagesApi: MessagesApi,
     Redirect(routes.StartController.start())
   }
 
-  val start: Action[AnyContent] = PasscodeAuthenticatedAction { implicit request =>
+  def start(continue: Option[ContinueUrl] = None): Action[AnyContent] = PasscodeAuthenticatedAction { implicit request =>
+    continue.foreach(sessionStoreService.cacheContinueUrl)
+
     Ok(html.start())
   }
 
