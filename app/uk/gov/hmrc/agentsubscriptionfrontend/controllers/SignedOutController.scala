@@ -22,6 +22,7 @@ import javax.inject.{Inject, Named, Singleton}
 import play.api.mvc.{Action, Results}
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
+import uk.gov.hmrc.play.binders.ContinueUrl
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
@@ -34,9 +35,18 @@ class SignedOutController @Inject()(@Named("surveyRedirectUrl") surveyUrl: Strin
   extends FrontendController {
 
   def redirectToSos = Action.async { implicit request =>
+    def encodeUtf8(str: String) = URLEncoder.encode(str, "UTF-8")
 
-    def returnAfterGGCredsCreatedUrl(query: String) =
-      URLEncoder.encode(s"/agent-subscription/return-after-gg-creds-created$query", "UTF-8")
+    def sosContinueUrlValue(id: Option[String], ourContinueUrl: Option[ContinueUrl]) = {
+      val queryStr = (id.map(encodeUtf8), ourContinueUrl.map(_.encodedUrl)) match {
+        case (Some(id), Some(url)) => s"?id=$id&continue=$url"
+        case (Some(id), None) => s"?id=$id"
+        case (None, Some(url)) => s"?continue=$url"
+        case (None, None) => ""
+      }
+
+      encodeUtf8(s"/agent-subscription/return-after-gg-creds-created$queryStr")
+    }
 
     for {
       knownFactOpt <- sessionStoreService.fetchKnownFactsResult
@@ -44,9 +54,9 @@ class SignedOutController @Inject()(@Named("surveyRedirectUrl") surveyUrl: Strin
         case Some(x) => knownFactsResultMongoRepository.create(x).map(Option.apply)
         case None => Future.successful(None)
       }
+      agentSubContinueUrl <- sessionStoreService.fetchContinueUrl
     } yield {
-      val continueUrl = returnAfterGGCredsCreatedUrl(id.map(i => s"?id=$i").getOrElse(""))
-      Results.SeeOther(s"$sosUrl&continue=$continueUrl").withNewSession
+      Results.SeeOther(s"$sosUrl&continue=${sosContinueUrlValue(id, agentSubContinueUrl)}").withNewSession
     }
   }
 

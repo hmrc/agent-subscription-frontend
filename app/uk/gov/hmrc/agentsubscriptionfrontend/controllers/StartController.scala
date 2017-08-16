@@ -26,6 +26,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRep
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.passcode.authentication.{PasscodeAuthentication, PasscodeAuthenticationProvider, PasscodeVerificationConfig}
+import uk.gov.hmrc.play.binders.ContinueUrl
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -54,15 +55,20 @@ class StartController @Inject()(override val messagesApi: MessagesApi,
       Ok(html.non_agent_next_steps())
   }
 
-  val returnAfterGGCredsCreated:  Action[AnyContent] = PasscodeAuthenticatedActionAsync { implicit request =>
-    request.getQueryString("id") match {
-      case Some(id) =>
+  def returnAfterGGCredsCreated(id: Option[String] = None,
+                                continue: Option[ContinueUrl] = None): Action[AnyContent] = PasscodeAuthenticatedActionAsync { implicit request =>
+    id match {
+      case Some(knownFactsId) =>
         for {
-          knownFactsResultOpt <- knownFactsResultMongoRepository.findKnownFactsResult(id)
-          _ <- knownFactsResultMongoRepository.delete(id)
+          knownFactsResultOpt <- knownFactsResultMongoRepository.findKnownFactsResult(knownFactsId)
+          _ <- knownFactsResultMongoRepository.delete(knownFactsId)
           _ <- knownFactsResultOpt match {
             case Some(knownFacts) => sessionStoreService.cacheKnownFactsResult(knownFacts)
             case None => Future.successful(())
+          }
+          _ <- (knownFactsResultOpt, continue) match {
+            case (Some(_), Some(continueUrl)) => sessionStoreService.cacheContinueUrl(continueUrl)
+            case _ => Future.successful(())
           }
         } yield {
           knownFactsResultOpt match {

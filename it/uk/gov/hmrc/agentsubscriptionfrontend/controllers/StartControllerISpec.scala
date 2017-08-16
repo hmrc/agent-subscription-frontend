@@ -4,11 +4,12 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
+import uk.gov.hmrc.play.binders.ContinueUrl
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class StartControllerISpec extends BaseISpec {
@@ -89,7 +90,7 @@ class StartControllerISpec extends BaseISpec {
       val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
       val persistedId = await(repo.create(knownFactsResult))
 
-      val result = await(controller.returnAfterGGCredsCreated(FakeRequest(GET, "?id=" + persistedId)))
+      val result = await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest()))
 
       status(result) shouldBe 303
       redirectLocation(result).head should include ("/subscription-details")
@@ -98,15 +99,16 @@ class StartControllerISpec extends BaseISpec {
     "redirect to the check-agency-status page if given an invalid KnownFactsResult ID" in {
       val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
       val persistedId = await(repo.create(knownFactsResult))
+      val invalidId = s"A$persistedId"
 
-      val result = await(controller.returnAfterGGCredsCreated(FakeRequest(GET, s"?id=A$persistedId")))
+      val result = await(controller.returnAfterGGCredsCreated(id = Some(invalidId))(FakeRequest()))
 
       status(result) shouldBe 303
       redirectLocation(result).head should include ("/check-agency-status")
     }
 
     "redirect to check-agency-status page if there is no valid KnownFactsResult ID" in {
-      val result = await(controller.returnAfterGGCredsCreated(FakeRequest()))
+      val result = await(controller.returnAfterGGCredsCreated(id = None)(FakeRequest()))
 
       status(result) shouldBe 303
       redirectLocation(result).head should include ("/check-agency-status")
@@ -116,20 +118,41 @@ class StartControllerISpec extends BaseISpec {
       val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
       val persistedId = await(repo.create(knownFactsResult))
 
-      await(controller.returnAfterGGCredsCreated(FakeRequest(GET, "?id=" + persistedId)))
+      await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest()))
 
       await(repo.findKnownFactsResult(persistedId)) shouldBe None
     }
 
     "repopulate the KnownFacts session store with the persisted KnownFactsResult, if given a valid KnownFactsResult ID" in {
-
       val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
       val persistedId = await(repo.create(knownFactsResult))
-      implicit val request = FakeRequest(GET, "?id=" + persistedId)
+      implicit val request = FakeRequest()
 
-      await(controller.returnAfterGGCredsCreated(request))
+      await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(request))
 
       sessionStoreService.currentSession.knownFactsResult shouldBe Some(knownFactsResult)
+    }
+
+    "place a provided continue URL in session store, if given a valid KnownFactsResult ID" in {
+      val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
+      val persistedId = await(repo.create(knownFactsResult))
+      val continueUrl = ContinueUrl("/test-continue-url")
+      implicit val request = FakeRequest()
+
+      await(controller.returnAfterGGCredsCreated(id = Some(persistedId), continue = Some(continueUrl))(request))
+
+      sessionStoreService.currentSession.continueUrl shouldBe Some(continueUrl)
+    }
+
+    "not place a provided continue URL in session store, if given an invalid KnownFactsResult ID" in {
+      val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
+      val persistedId = await(repo.create(knownFactsResult))
+      val continueUrl = ContinueUrl("/test-continue-url")
+      implicit val request = FakeRequest()
+
+      await(controller.returnAfterGGCredsCreated(id = Some(s"A$persistedId"), continue = Some(continueUrl))(request))
+
+      sessionStoreService.currentSession.continueUrl shouldBe None
     }
   }
 }
