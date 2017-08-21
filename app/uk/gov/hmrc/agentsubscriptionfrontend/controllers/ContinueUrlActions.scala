@@ -16,53 +16,58 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
 import play.api.mvc._
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, HostnameWhiteListService}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{HostnameWhiteListService, SessionStoreService}
 import uk.gov.hmrc.play.binders.ContinueUrl
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, SessionKeys}
 
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
+import scala.util.{Failure, Success, Try}
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 @Singleton
 class ContinueUrlActions @Inject()(whiteListService: HostnameWhiteListService,
                                    sessionStoreService: SessionStoreService) {
-  def withMaybeContinueUrlCachedAsync[A](block: => Future[Result])(implicit request: Request[A]): Future[Result] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    checkContinueUrlAndCache.flatMap(_ => block)
-  }
 
-  def withMaybeContinueUrlCached[A](block: => Result)(implicit request: Request[A]): Future[Result] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    checkContinueUrlAndCache.map(_ => block)
-  }
-
-  private def checkContinueUrlAndCache[A]()(implicit request: Request[A]): Future[Any] = {
-    import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-
-    implicit val hc = HeaderCarrier.fromHeadersAndSession(request.headers, None)
+  private def extractContinueUrl[A](implicit request: Request[A]): Future[Option[ContinueUrl]] = {
+    implicit val hc = HeaderCarrier.fromHeadersAndSession(request.headers, Option(request.session))
 
     request.getQueryString("continue") match {
       case Some(continueUrl) =>
         Try(ContinueUrl(continueUrl)) match {
           case Success(url) =>
             isRelativeOrAbsoluteWhiteListed(url).collect {
-              case true => sessionStoreService.cacheContinueUrl(url)
+              case true => Some(url)
             }.recover {
               case NonFatal(e) =>
                 Logger.warn(s"Check for whitelisted hostname failed", e)
+                None
             }
           case Failure(e) =>
             Logger.warn(s"$continueUrl is not a valid continue URL", e)
-            Future.successful(())
+            Future.successful(None)
         }
       case None =>
-        Future.successful(())
+        Future.successful(None)
     }
+  }
+
+  def withMaybeContinueUrl[A](block: Option[ContinueUrl] => Future[Result])(implicit request: Request[A], hc: HeaderCarrier): Future[Result] = {
+    val continueUrl: Future[Option[ContinueUrl]] = extractContinueUrl
+    continueUrl.flatMap(block(_))
+  }
+
+  def withMaybeContinueUrlCached[A](block: => Future[Result])(implicit hc: HeaderCarrier, request: Request[A]): Future[Result] = {
+      withMaybeContinueUrl {
+        case None => block
+        case Some(url) =>
+          sessionStoreService.cacheContinueUrl(url).flatMap(_ => block)
+      }
   }
 
   private def isRelativeOrAbsoluteWhiteListed(continueUrl: ContinueUrl)(implicit hc: HeaderCarrier): Future[Boolean] = {

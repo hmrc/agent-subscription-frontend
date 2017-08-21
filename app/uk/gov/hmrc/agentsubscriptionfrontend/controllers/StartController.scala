@@ -43,16 +43,17 @@ class StartController @Inject()(override val messagesApi: MessagesApi,
     extends FrontendController with I18nSupport with Actions with PasscodeAuthentication {
 
   import continueUrlActions._
+  import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
 
   val root: Action[AnyContent] = PasscodeAuthenticatedActionAsync { implicit request =>
-    withMaybeContinueUrlCached {
-      Redirect(routes.StartController.start())
+    withMaybeContinueUrl { urlOpt =>
+      Future.successful(Redirect(routes.StartController.start().toURLWithParams("continue" -> urlOpt.map(_.url))))
     }
   }
 
   def start: Action[AnyContent] = PasscodeAuthenticatedActionAsync { implicit request =>
-    withMaybeContinueUrlCached {
-      Ok(html.start())
+    withMaybeContinueUrl { urlOpt =>
+      Future.successful(Ok(html.start(urlOpt)))
     }
   }
 
@@ -62,7 +63,7 @@ class StartController @Inject()(override val messagesApi: MessagesApi,
   }
 
   def returnAfterGGCredsCreated(id: Option[String] = None): Action[AnyContent] = PasscodeAuthenticatedActionAsync { implicit request =>
-    withMaybeContinueUrlCachedAsync {
+    withMaybeContinueUrlCached {
       id match {
         case Some(knownFactsId) =>
           for {
