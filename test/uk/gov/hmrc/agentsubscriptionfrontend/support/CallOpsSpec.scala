@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
+import java.net.URLEncoder
+
 import org.scalatest.{Matchers, WordSpec}
 
 class CallOpsSpec extends WordSpec with Matchers {
@@ -30,6 +32,10 @@ class CallOpsSpec extends WordSpec with Matchers {
       "query exists" in {
         CallOps.addParamsToUrl(s"$url?foo=bar") shouldBe s"$url?foo=bar"
       }
+
+      "there is one parameter but with no value" in {
+        CallOps.addParamsToUrl(url, "foo" -> None) shouldBe url
+      }
     }
 
     "adds params to existing url" when {
@@ -39,6 +45,14 @@ class CallOpsSpec extends WordSpec with Matchers {
 
       "there is an existing query part" in {
         CallOps.addParamsToUrl(s"$url?foo=bar", "baz" -> Some("qwaggly")) shouldBe s"$url?foo=bar&baz=qwaggly"
+      }
+
+      "the url ends with ?" in {
+        CallOps.addParamsToUrl(s"$url?", "foo" -> Some("bar")) shouldBe s"$url?foo=bar"
+      }
+
+      "the url ends with &" in {
+        CallOps.addParamsToUrl(s"$url?foo=bar&", "baz" -> Some("qwaggly")) shouldBe s"$url?foo=bar&baz=qwaggly"
       }
     }
   }
