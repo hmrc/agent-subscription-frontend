@@ -27,7 +27,7 @@ object CallOps {
     }
 
     def addParamsToUrl(url: String, params: (String,Option[String])*): String = {
-      val query = params collect { case (k,v) => v.map(value => s"$k=${URLEncoder.encode(value,"UTF-8")}") } map (_.get) mkString "&"
+      val query = params collect { case (k,v) => v.map(value => s"$k=${URLEncoder.encode(value,"UTF-8")}") } map (_.getOrElse("")) mkString "&"
       if(query.isEmpty) {
         url
       } else {

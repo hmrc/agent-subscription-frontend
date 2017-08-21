@@ -30,20 +30,28 @@ class StartControllerISpec extends BaseISpec {
 
       status(result) shouldBe 303
       redirectLocation(result).head should include("/start")
-
-      sessionStoreService.currentSession.continueUrl shouldBe None
     }
 
-    "store the absolute continue url in the session store" in {
+    "include an absolute continue URL in the redirect" in {
       val url = "http://localhost"
-      implicit val request = FakeRequest(GET, s"?continue=$url")
-
-      val result = await(controller.root(request))
+      val result = await(controller.root(FakeRequest("GET", s"/?continue=${URLEncoder.encode(url, "UTF-8")}")))
 
       status(result) shouldBe 303
-      redirectLocation(result).head should include("/start")
+      redirectLocation(result).head should include(s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")
+    }
 
-      sessionStoreService.currentSession.continueUrl shouldBe Some(ContinueUrl(url))
+    "not include a continue URL if it's invalid" in {
+      val result = await(controller.root(FakeRequest("GET", "/?continue=http://foo@bar:1234")))
+
+      status(result) shouldBe 303
+      redirectLocation(result).head should not include("continue=")
+    }
+
+    "not include a continue URL if it's not provided" in {
+      val result = await(controller.root(FakeRequest("GET", "/")))
+
+      status(result) shouldBe 303
+      redirectLocation(result).head should not include("continue=")
     }
   }
 
@@ -62,91 +70,64 @@ class StartControllerISpec extends BaseISpec {
       bodyOf(result) should include("Create your Agent Services account")
     }
 
-    "store the absolute continue url in the session store" in {
-      val url = "http://localhost"
-      implicit val request = FakeRequest(GET, s"?continue=$url")
-
-      val result = await(controller.start(request))
-
-      status(result) shouldBe 200
-      bodyOf(result) should include("Create your Agent Services account")
-
-      sessionStoreService.currentSession.continueUrl shouldBe Some(ContinueUrl(url))
-    }
-
-    "store the relative continue url in the session store" in {
-      val url = "/foo"
-      implicit val request = FakeRequest(GET, s"?continue=$url")
-
-      val result = await(controller.start(request))
-
-      status(result) shouldBe 200
-      bodyOf(result) should include("Create your Agent Services account")
-
-      sessionStoreService.currentSession.continueUrl shouldBe Some(ContinueUrl(url))
-    }
-
-    "store the absolute www.tax.service.gov.uk continue url in the session store" in {
-      val url = "http://www.tax.service.gov.uk/foo/bar?some=true"
-      implicit val request = FakeRequest(GET, s"?continue=${URLEncoder.encode(url, "UTF-8")}")
-
-      val result = await(controller.start(request))
-
-      status(result) shouldBe 200
-      bodyOf(result) should include("Create your Agent Services account")
-
-      sessionStoreService.currentSession.continueUrl shouldBe Some(ContinueUrl(url))
-    }
-
-    "store the whitelisted absolute external continue url in the session store" in {
-      val url = "http://www.foo.com/bar?some=false"
-      implicit val request = FakeRequest(GET, s"?continue=${URLEncoder.encode(url, "UTF-8")}")
-
-      val result = await(controller.start(request))
-
-      status(result) shouldBe 200
-      bodyOf(result) should include("Create your Agent Services account")
-
-      sessionStoreService.currentSession.continueUrl shouldBe Some(ContinueUrl(url))
-    }
-
-    "not store the non whitelisted absolute external continue url in the session store" in {
-      val url = "http://www.foo.org/bar?some=false"
-      implicit val request = FakeRequest(GET, s"?continue=${URLEncoder.encode(url, "UTF-8")}")
-
-      val result = await(controller.start(request))
-
-      status(result) shouldBe 200
-      bodyOf(result) should include("Create your Agent Services account")
-
-      sessionStoreService.currentSession.continueUrl shouldBe None
-    }
-
-    "not store the absolute external continue url in the session store if the url contains an invalid character" in {
-      val url = "http://www@foo.com"
-      implicit val request = FakeRequest(GET, s"?continue=${URLEncoder.encode(url, "UTF-8")}")
-
-      val result = await(controller.start(request))
-
-      status(result) shouldBe 200
-      bodyOf(result) should include("Create your Agent Services account")
-
-      sessionStoreService.currentSession.continueUrl shouldBe None
-    }
-
-    "not store the continue url in the session store if the continue param is not mentioned in the url" in {
-      implicit val request = FakeRequest()
-
-      val result = await(controller.start(request))
-
-      status(result) shouldBe 200
-      bodyOf(result) should include("Create your Agent Services account")
-
-      sessionStoreService.currentSession.continueUrl shouldBe None
-    }
-
     behave like aPageWithFeedbackLinks(request => controller.start(request))
 
+    "start redirects" should {
+      "include absolute continue URL" in {
+        val url = "http://localhost"
+        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
+
+        status(result) shouldBe 200
+        bodyOf(result) should include(s"continue=${URLEncoder.encode(url, "UTF-8")}")
+      }
+
+      "include relative continue URL" in {
+        val url = "/foo"
+        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
+
+        status(result) shouldBe 200
+        bodyOf(result) should include(s"continue=${URLEncoder.encode(url, "UTF-8")}")
+      }
+
+      "include continue URL if it's the absolute www.tax.service.gov.uk continue url" in {
+        val url = "http://www.tax.service.gov.uk/foo/bar?some=true"
+        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
+
+        status(result) shouldBe 200
+        bodyOf(result) should include(s"continue=${URLEncoder.encode(url, "UTF-8")}")
+      }
+
+      "include continue URL if it's whitelisted" in {
+        val url = "http://www.foo.com/bar?some=false"
+        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
+
+        status(result) shouldBe 200
+        bodyOf(result) should include(s"continue=${URLEncoder.encode(url, "UTF-8")}")
+      }
+
+      "not include a continue URL if it contains an invalid character" in {
+        val url = "http://www@foo.com"
+        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
+
+        status(result) shouldBe 200
+        bodyOf(result) should not include("continue=")
+      }
+
+      "not include a continue URL if it's not whitelisted" in {
+        val url = "http://www.foo.org/bar?some=false"
+        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
+
+        status(result) shouldBe 200
+        bodyOf(result) should not include("continue=")
+      }
+
+      "not include a continue URL if it's not provided" in {
+        val result = await(controller.start()(FakeRequest("GET", "/start")))
+
+        status(result) shouldBe 200
+        bodyOf(result) should not include("continue=")
+      }
+    }
   }
 
   "showNonAgentNextSteps" when {
