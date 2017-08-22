@@ -39,6 +39,7 @@ class ViewsSpec extends MixedPlaySpec {
     override val journeyName: String = "journeyName"
     override val agentServicesAccountUrl: String = "http://localhost:9401/agent-services-account"
     override val domainWhiteList: Set[String] = Set("www.foo.com", "foo.org")
+    override val agentServicesAccountPath: String = "/agent-services-account"
   }
 
   "error_template view" should {
