@@ -201,7 +201,7 @@ class SubscriptionController @Inject()
               sessionStoreService.fetchContinueUrl.
                 recover { case NonFatal(_) => None }.
                 map { continueUrlOpt =>
-                  val continueUrl = CallOps.addParamsToUrl(appConfig.agentServicesAccountUrl, "continue" -> continueUrlOpt.map(_.url))
+                  val continueUrl = CallOps.addParamsToUrl(appConfig.agentServicesAccountPath, "continue" -> continueUrlOpt.map(_.url))
                   Ok(html.subscription_complete(continueUrl, agencyName, arn))
                 }
             case _                       =>
