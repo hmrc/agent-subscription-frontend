@@ -198,13 +198,13 @@ class SubscriptionController @Inject()
 
           agencyData match {
             case Some((agencyName, arn)) =>
-              sessionStoreService.fetchContinueUrl.
-                recover { case NonFatal(ex) => Logger.warn("Session store service failure",ex) }.
-                andThen { case _ => sessionStoreService.remove()}.
-                map { continueUrlOpt =>
-                  val continueUrl = CallOps.addParamsToUrl(appConfig.agentServicesAccountUrl, "continue" -> continueUrlOpt.map(_.url))
-                  Ok(html.subscription_complete(continueUrl, agencyName, arn))
-                }
+              for {
+                urlOpt <- sessionStoreService.fetchContinueUrl
+                _ <- sessionStoreService.remove().recover { case NonFatal(ex) => Logger.warn("Session store service failure", ex)}
+              } yield {
+                val continueUrl = CallOps.addParamsToUrl(appConfig.agentServicesAccountUrl, "continue" -> urlOpt.map(_.url))
+                Ok(html.subscription_complete(continueUrl, agencyName, arn))
+              }
             case _                       =>
               Future.successful(sessionMissingRedirect())
           }
