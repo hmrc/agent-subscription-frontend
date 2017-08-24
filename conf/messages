@@ -15,6 +15,17 @@ error.des.text.invalid = You can only use these characters: A-Z, a-z, 0-9, -,./
 #TODO APB-1112 remove
 error.des.text.invalid.withInput = This field {0} is limited to alphanumeric characters (A-Z, a-z, 0-9) and the following characters -,./
 
+##Modifying address
+address.form.with-errors.error.heading = There was a problem
+address.form.with-errors.error.summary = Please check the following:
+address.form.with-errors.heading = Enter address
+address.form.with-errors.address_line_1 = Address line 1
+address.form.with-errors.address_line_2 = Address line 2
+address.form.with-errors.address_line_3 = Address line 3
+address.form.with-errors.town = Town
+address.form.with-errors.postcode = Postcode
+address.form.with-errors.button.confirm_address= Confirm address
+
 ##Confirm your agency
 confirmYourAgency.title=Is this the business you are setting up an account for?
 confirmYourAgency.caption=Agency details
