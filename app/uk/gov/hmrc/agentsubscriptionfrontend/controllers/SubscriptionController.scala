@@ -69,7 +69,6 @@ class SubscriptionController @Inject()
  override val passcodeAuthenticationProvider: PasscodeAuthenticationProvider,
  subscriptionService: SubscriptionService,
  sessionStoreService: SessionStoreService,
- addressLookUpValidator: AddressValidator,
  addressLookUpConnector: AddressLookupFrontendConnector,
  authenticatorConnector: AuthenticatorConnector
 )
@@ -164,7 +163,7 @@ class SubscriptionController @Inject()
               val addressForm = desAddressForm.bindAddressLookupFrontendAddress(details.utr, address)
               if (addressForm.hasErrors) {
                 Future successful
-                  Ok(html.address_form_with_errors(addressForm, SubscriptionController.renderDesAddressErrors(addressForm.errors)))
+                  Ok(html.address_form_with_errors(addressForm))
               } else {
                 val subscriptResponse = for {
                   res ← subscribe(details, addressForm.get, Some(address))
@@ -181,7 +180,7 @@ class SubscriptionController @Inject()
       implicit request =>
         desAddressForm.form.bindFromRequest().fold(
           formWithErrors => {
-            Future successful Ok(html.address_form_with_errors(formWithErrors, ""))
+            Future successful Ok(html.address_form_with_errors(formWithErrors))
           },
           validDesAddress =>
             sessionStoreService.fetchInitialDetails.flatMap { maybeInitialDetails =>
@@ -229,19 +228,4 @@ class SubscriptionController @Inject()
         }
       }
   }
-}
-
-object SubscriptionController {
-
-  def renderErrors(errors: NonEmptyList[ValidationError])(implicit messages: Messages): String =
-    errors
-      .toList
-      .map(valError => Messages(valError.message, valError.args: _*))
-      .reduce(_ + ", " + _)
-
-  def renderDesAddressErrors(errors: Seq[FormError])(implicit messages: Messages): String =
-    errors
-      .toList
-      .map(valError => Messages(valError.message, valError.args: _*))
-      .reduce(_ + ", " + _)
 }
