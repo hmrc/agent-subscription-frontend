@@ -165,10 +165,7 @@ class SubscriptionController @Inject()
                 Future successful
                   Ok(html.address_form_with_errors(addressForm))
               } else {
-                val subscriptResponse = for {
-                  res ← subscribe(details, addressForm.get, Some(address))
-                } yield res
-                subscriptResponse.map(redirectSubscriptionResponse)
+                subscribe(details, addressForm.get, Some(address)).map(redirectSubscriptionResponse)
               }
             }
           }.getOrElse(Future.successful(sessionMissingRedirect()))
