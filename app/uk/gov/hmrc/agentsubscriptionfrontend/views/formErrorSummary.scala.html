@@ -7,15 +7,12 @@ tabindex="-1">
 <h2 id="error-summary-heading" class="h3-heading">@heading</h2>
 <p>@Messages("address.form.with-errors.error.summary")</p>
 <ul class="js-error-summary-messages">
-    @if(form.hasErrors) {
     @form.errors.map { error =>
     <li role="tooltip" @dataJourney.map(page=> Html(s"""data-journey="${page}:error:${error.key}""""))>
         <a href="#@error.key" id="@{error.key}-error-summary" data-focuses="@error.key">
             @error.messages.map(x => Messages(x))
         </a>
     </li>
-
-    }
     }
 </ul>
 </div>
