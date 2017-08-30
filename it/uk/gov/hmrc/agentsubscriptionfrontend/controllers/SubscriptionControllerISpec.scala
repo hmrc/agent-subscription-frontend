@@ -431,7 +431,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       }
     }
 
-    "redirect to the submit-modified-address page and report related errors" when {
+    "display address_form_with_errors and report related errors" when {
       "postcode is blacklisted" in {
         AuthStub.hasNoEnrolments(subscribingAgent)
         implicit val request = subscriptionDetailsRequest()
@@ -450,8 +450,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("invalidAddress.title"))
       }
 
-      // TODO APB-1112 we probably don't need all these blacklisting variants here, check they are covered in a unit test and remove them from here
-      "postcode with whitespaces is blacklisted" in {
+      "the address is not valid according to DES's rules" in {
         AuthStub.hasNoEnrolments(subscribingAgent)
         implicit val request = subscriptionDetailsRequest()
         sessionStoreService.currentSession.knownFactsResult = Some(myAgencyKnownFactsResult)
@@ -461,53 +460,14 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result0) shouldBe 303
         redirectLocation(result0).head shouldBe "/api/dummy/callback"
 
-        givenAddressLookupReturnsAddress("addr1", postcode = "AB10     1ZT")
+        val tooLongLine = "123456789012345678901234567890123456"
+        givenAddressLookupReturnsAddress("addr1", addressLine1 = tooLongLine)
         val result = await(controller.returnFromAddressLookup("addr1")(authenticatedRequest()))
 
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("invalidAddress.title"))
-
-      }
-
-      "postcode with lowercase characters is blacklisted" in {
-        AuthStub.hasNoEnrolments(subscribingAgent)
-        implicit val request = subscriptionDetailsRequest()
-        sessionStoreService.currentSession.knownFactsResult = Some(myAgencyKnownFactsResult)
-
-        givenAddressLookupInit("agents-subscr", "/api/dummy/callback")
-        val result0 = await(controller.submitInitialDetails(request))
-        status(result0) shouldBe 303
-        redirectLocation(result0).head shouldBe "/api/dummy/callback"
-
-        givenAddressLookupReturnsAddress("addr1", postcode = "Ab10 1zT")
-        val result = await(controller.returnFromAddressLookup("addr1")(authenticatedRequest()))
-
-        status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.maxLength", 35))
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("invalidAddress.title"))
       }
-
-      "postcode without whitespaces is blacklisted" in {
-        AuthStub.hasNoEnrolments(subscribingAgent)
-        implicit val request = subscriptionDetailsRequest()
-        sessionStoreService.currentSession.knownFactsResult = Some(myAgencyKnownFactsResult)
-
-        givenAddressLookupInit("agents-subscr", "/api/dummy/callback")
-        val result0 = await(controller.submitInitialDetails(request))
-        status(result0) shouldBe 303
-        redirectLocation(result0).head shouldBe "/api/dummy/callback"
-
-        givenAddressLookupReturnsAddress("addr1", postcode = "AB101ZT")
-        val result = await(controller.returnFromAddressLookup("addr1")(authenticatedRequest()))
-
-
-        status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("invalidAddress.title"))
-      }
-
-      //TODO APB-1112 add test for non-postcode-blacklisting validation failure because postcode blacklisting will probably be handled differently from other validation failures in future
     }
 
     "redirect to the Check Agency Status page if there is no initial details in session because the user has returned to a bookmark" in {

@@ -142,13 +142,17 @@ class DesAddressValidationSpec extends UnitSpec with ResettingMockitoSugar with 
     }
   }
 
-  "postcode bind" should {
+  "postcodeWithBlacklist bind" should {
     val postcodeMapping = FieldMappings.postcodeWithBlacklist(blacklistedPostcodes).withPrefix("testKey")
 
     def bind(fieldValue: String): Either[Seq[FormError], String] = postcodeMapping.bind(Map("testKey" -> fieldValue))
 
     def shouldRejectFieldValue(fieldValue: String, messageKey: String) = {
       bind(fieldValue) shouldBe Left(List(FormError("testKey", List(messageKey), Seq())))
+    }
+
+    def shouldRejectFieldValueContainingMessage(fieldValue: String, messageKey: String) = {
+      bind(fieldValue).left.get should contain(FormError("testKey", List(messageKey), Seq()))
     }
 
     "return the validated postcode if it is valid" in {
@@ -172,9 +176,20 @@ class DesAddressValidationSpec extends UnitSpec with ResettingMockitoSugar with 
       postcodeMapping.bind(Map.empty) shouldBe Left(List(FormError("testKey", List("error.postcode.empty"), Seq())))
     }
 
-    "return an error if the postcode is blacklisted regardless of spacing" in {
-      shouldRejectFieldValue("BB11BB", "error.postcode.blacklisted")
-      shouldRejectFieldValue(blacklistedPostcode, "error.postcode.blacklisted")
+    "return an error if the postcode is blacklisted" in {
+      shouldRejectFieldValueContainingMessage(blacklistedPostcode, "error.postcode.blacklisted")
+    }
+
+    "return an error if postcode without whitespace is blacklisted" in {
+      shouldRejectFieldValueContainingMessage("BB11BB", "error.postcode.blacklisted")
+    }
+
+    "return an error if postcode with whitespace is blacklisted" in {
+      shouldRejectFieldValueContainingMessage("BB1     1BB", "error.postcode.blacklisted")
+    }
+
+    "return an error if postcode with lowercase characters is blacklisted" in {
+      shouldRejectFieldValueContainingMessage("bb1 1bB", "error.postcode.blacklisted")
     }
   }
 
