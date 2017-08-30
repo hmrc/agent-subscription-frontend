@@ -551,15 +551,20 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       redirectLocation(result).head shouldBe routes.CheckAgencyController.showCheckAgencyStatus().url
     }
 
-    "show resubmit-address-page and show errors" when {
+    "redisplay resubmit-address-page and show errors" when {
       "postcode is invalid" in {
         AuthStub.hasNoEnrolments(subscribingAgent)
 
-        implicit val request = desAddressForm(postcode = "asdfdaf")
+        val invalidPostcode = "asdfdaf"
+        implicit val request = desAddressForm(postcode = invalidPostcode)
         val result = await(controller.submitModifiedAddress()(request))
         status(result) shouldBe 200
 
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.invalid"))
+        checkHtmlResultWithBodyText(
+          result,
+          htmlEscapedMessage("error.postcode.invalid"),
+          invalidPostcode
+        )
       }
 
       "postcode is empty" in {
@@ -574,10 +579,15 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       "characters in a field are more than 35" in {
         AuthStub.hasNoEnrolments(subscribingAgent)
-        implicit val request = desAddressForm(addressLine1 = "12345678901234567890123456789012345678901234567890")
+        val tooLongAddressLine = "12345678901234567890123456789012345678901234567890"
+        implicit val request = desAddressForm(addressLine1 = tooLongAddressLine)
         val result = await(controller.submitModifiedAddress()(request))
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.maxLength"))
+        checkHtmlResultWithBodyText(
+          result,
+          htmlEscapedMessage("error.maxLength"),
+          tooLongAddressLine
+        )
       }
     }
   }
