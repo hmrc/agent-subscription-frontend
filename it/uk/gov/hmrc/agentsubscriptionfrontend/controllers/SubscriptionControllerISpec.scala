@@ -448,9 +448,9 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result) shouldBe 200
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("invalidAddress.title"))
-        //TODO use jsoup to test for action
       }
 
+      // TODO APB-1112 we probably don't need all these blacklisting variants here, check they are covered in a unit test and remove them from here
       "postcode with whitespaces is blacklisted" in {
         AuthStub.hasNoEnrolments(subscribingAgent)
         implicit val request = subscriptionDetailsRequest()
@@ -467,7 +467,6 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result) shouldBe 200
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("invalidAddress.title"))
-        //TODO use jsoup to test for action
 
       }
 
@@ -487,8 +486,6 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result) shouldBe 200
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("invalidAddress.title"))
-        //TODO use jsoup to test for action
-
       }
 
       "postcode without whitespaces is blacklisted" in {
@@ -508,9 +505,9 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result) shouldBe 200
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.blacklisted"))
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("invalidAddress.title"))
-        //TODO use jsoup to test for action
-
       }
+
+      //TODO APB-1112 add test for non-postcode-blacklisting validation failure because postcode blacklisting will probably be handled differently from other validation failures in future
     }
 
     "redirect to the Check Agency Status page if there is no initial details in session because the user has returned to a bookmark" in {
