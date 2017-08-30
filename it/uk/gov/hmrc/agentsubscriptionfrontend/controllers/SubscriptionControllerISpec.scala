@@ -508,44 +508,19 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       redirectLocation(result).head shouldBe routes.CheckAgencyController.showCheckAgencyStatus().url
     }
 
-    "redisplay resubmit-address-page and show errors" when {
-      "postcode is invalid" in {
-        AuthStub.hasNoEnrolments(subscribingAgent)
-
-        val invalidPostcode = "asdfdaf"
-        implicit val request = desAddressForm(postcode = invalidPostcode)
-        val result = await(controller.submitModifiedAddress()(request))
-        status(result) shouldBe 200
-
-        checkHtmlResultWithBodyText(
-          result,
-          htmlEscapedMessage("error.postcode.invalid"),
-          invalidPostcode
-        )
-      }
-
-      "postcode is empty" in {
-        AuthStub.hasNoEnrolments(subscribingAgent)
-
-        implicit val request = desAddressForm(postcode = "")
-        val result = await(controller.submitModifiedAddress()(request))
-        status(result) shouldBe 200
-
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.postcode.empty"))
-      }
-
-      "characters in a field are more than 35" in {
-        AuthStub.hasNoEnrolments(subscribingAgent)
-        val tooLongAddressLine = "12345678901234567890123456789012345678901234567890"
-        implicit val request = desAddressForm(addressLine1 = tooLongAddressLine)
-        val result = await(controller.submitModifiedAddress()(request))
-        status(result) shouldBe 200
-        checkHtmlResultWithBodyText(
-          result,
-          htmlEscapedMessage("error.maxLength", 35),
-          tooLongAddressLine
-        )
-      }
+     "redisplay address_form_with_errors and show errors" when {
+       "the address is not valid according to DES's rules" in {
+         AuthStub.hasNoEnrolments(subscribingAgent)
+         val tooLongAddressLine = "12345678901234567890123456789012345678901234567890"
+         implicit val request = desAddressForm(addressLine1 = tooLongAddressLine)
+         val result = await(controller.submitModifiedAddress()(request))
+         status(result) shouldBe 200
+         checkHtmlResultWithBodyText(
+           result,
+           htmlEscapedMessage("error.maxLength", 35),
+           tooLongAddressLine
+         )
+       }
     }
   }
 

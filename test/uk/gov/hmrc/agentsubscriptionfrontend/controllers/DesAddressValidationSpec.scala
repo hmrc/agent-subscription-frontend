@@ -297,6 +297,14 @@ class DesAddressValidationSpec extends UnitSpec with ResettingMockitoSugar with 
       validatedForm.errors shouldBe errorsForInvalidPostcode
     }
 
+    "validate that postcode is not empty" in {
+      val addressLookupFrontendAddress = testAddressLookupFrontendAddress(postcode = Some(" "))
+
+      val validatedForm = desAddressForm.bindAddressLookupFrontendAddress(utr, addressLookupFrontendAddress)
+
+      validatedForm.errors shouldBe Seq(FormError("postcode", "error.postcode.empty", Seq()))
+    }
+
     "pass on the postcode blacklist so that postcode blacklisting works" in {
       val addressLookupFrontendAddress = testAddressLookupFrontendAddress(postcode = Some(blacklistedPostcode))
 
