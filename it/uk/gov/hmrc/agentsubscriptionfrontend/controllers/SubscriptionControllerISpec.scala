@@ -542,7 +542,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result) shouldBe 200
         checkHtmlResultWithBodyText(
           result,
-          htmlEscapedMessage("error.maxLength"),
+          htmlEscapedMessage("error.maxLength", 35),
           tooLongAddressLine
         )
       }

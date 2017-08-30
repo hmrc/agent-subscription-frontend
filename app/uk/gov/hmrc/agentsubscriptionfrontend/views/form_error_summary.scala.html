@@ -10,7 +10,7 @@ tabindex="-1">
     @form.errors.map { error =>
     <li role="tooltip" @dataJourney.map(page=> Html(s"""data-journey="${page}:error:${error.key}""""))>
         <a href="#@error.key" id="@{error.key}-error-summary" data-focuses="@error.key">
-            @error.messages.map(x => Messages(x))
+            @Messages(error.messages, error.args: _*)
         </a>
     </li>
     }
