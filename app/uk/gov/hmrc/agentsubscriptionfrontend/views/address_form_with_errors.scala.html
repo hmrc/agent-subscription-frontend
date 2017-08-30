@@ -1,7 +1,6 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.play.views.html.helpers.form
 @import uk.gov.hmrc.play.views.html.helpers.input
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.formErrorSummary
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SubscriptionController
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.DesAddress
@@ -16,7 +15,7 @@
 <p>@Messages("invalidAddress.p1")</p>
 
 @form(action = routes.SubscriptionController.submitModifiedAddress(), 'class -> "form js-form") {
-@formErrorSummary(Messages("address.form.with-errors.error.heading"), detailsForm, Seq.empty)
+@form_error_summary(Messages("address.form.with-errors.error.heading"), detailsForm, Seq.empty)
 <h1>@Messages("address.form.with-errors.heading")</h1>
 
 <div class="form-field">
