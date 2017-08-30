@@ -24,6 +24,14 @@ class AuthenticatorConnectorISpec extends UnitSpec with OneAppPerSuite with Wire
       WireMock.verify(1, WireMock.postRequestedFor(urlEqualTo("/government-gateway-authentication/refresh-profile")))
     }
 
+    "return RuntimeException for unexpected response" in {
+      AuthStub.refreshEnrolmentsReturnsUnexpectedStatus
+
+      intercept[RuntimeException] {
+        await(connector.refreshEnrolments)
+      }
+    }
+
     "return false for expired GG token" in {
       AuthStub.refreshEnrolmentsGGTokenHasExpired
 

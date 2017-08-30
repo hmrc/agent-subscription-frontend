@@ -537,8 +537,18 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val result = await(controller.submitModifiedAddress()(request))
 
       status(result) shouldBe 303
-
       redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
+    }
+
+    "redirect to check-agency-status if there is no valid session" in {
+      AuthStub.hasNoEnrolments(subscribingAgent)
+      implicit val request = desAddressForm()
+      sessionStoreService.currentSession.initialDetails = None
+
+      val result = await(controller.submitModifiedAddress()(request))
+
+      status(result) shouldBe 303
+      redirectLocation(result).head shouldBe routes.CheckAgencyController.showCheckAgencyStatus().url
     }
 
     "show resubmit-address-page and show errors" when {
@@ -676,5 +686,4 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       .withRequestBody(containing(subscriptionRequest.agency.address.countryCode))
     )
   }
-
 }

@@ -17,11 +17,10 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import org.scalatest.EitherValues
-import play.api.data.{FormError, Mapping}
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
+import play.api.data.FormError
+import play.api.data.validation.{Invalid, Valid, ValidationError}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.play.test.UnitSpec
-import play.api.data.Forms._
 
 class FieldMappingsSpec extends UnitSpec with EitherValues {
 
@@ -87,6 +86,10 @@ class FieldMappingsSpec extends UnitSpec with EitherValues {
       shouldAcceptFieldValue("AA1M 1AA")
       shouldAcceptFieldValue("A11 1AA")
       shouldAcceptFieldValue("A1A 1AA")
+    }
+
+    "give \"error.postcode.empty\" error when it is set to null" in {
+      bind(null).left.value should contain only FormError("testKey", List("error.postcode.empty"))
     }
 
     "give \"error.postcode.empty\" error when it is not supplied" in {
