@@ -182,11 +182,7 @@ class SubscriptionController @Inject()
           validDesAddress =>
             sessionStoreService.fetchInitialDetails.flatMap { maybeInitialDetails =>
               maybeInitialDetails.map { initialDetails =>
-                val subscriptResponse = for {
-                  res ← subscribe(initialDetails, validDesAddress, None)
-                  _ ← sessionStoreService.remove()
-                } yield res
-                subscriptResponse.map(redirectSubscriptionResponse)
+                subscribe(initialDetails, validDesAddress, None).map(redirectSubscriptionResponse)
               }.getOrElse(Future.successful(sessionMissingRedirect()))
             }
         )
