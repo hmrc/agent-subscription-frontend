@@ -132,8 +132,7 @@ class SubscriptionController @Inject()
   import SubscriptionDetails._
 
   private def subscribe(details: InitialDetails,
-                        address: DesAddress,
-                        addressLookupAddress: Option[AddressLookupFrontendAddress])
+                        address: DesAddress)
                        (implicit hc: HeaderCarrier): Future[Either[SubscriptionReturnedHttpError, (Arn, String)]] = {
     val subscriptionDetails = mapper(details, address)
     subscriptionService.subscribeAgencyToMtd(subscriptionDetails) map {
@@ -160,13 +159,10 @@ class SubscriptionController @Inject()
         sessionStoreService.fetchInitialDetails.flatMap { maybeDetails =>
           maybeDetails.map { details =>
             addressLookUpConnector.getAddressDetails(id).flatMap { address =>
-              val addressForm = desAddressForm.bindAddressLookupFrontendAddress(details.utr, address)
-              if (addressForm.hasErrors) {
-                Future successful
-                  Ok(html.address_form_with_errors(addressForm))
-              } else {
-                subscribe(details, addressForm.get, Some(address)).map(redirectSubscriptionResponse)
-              }
+              desAddressForm.bindAddressLookupFrontendAddress(details.utr, address).fold(
+                formWithErrors => Future successful Ok(html.address_form_with_errors(formWithErrors)),
+                validDesAddress => subscribe(details, validDesAddress).map(redirectSubscriptionResponse)
+              )
             }
           }.getOrElse(Future.successful(sessionMissingRedirect()))
         }
@@ -176,13 +172,11 @@ class SubscriptionController @Inject()
     implicit authContext =>
       implicit request =>
         desAddressForm.form.bindFromRequest().fold(
-          formWithErrors => {
-            Future successful Ok(html.address_form_with_errors(formWithErrors))
-          },
+          formWithErrors => Future successful Ok(html.address_form_with_errors(formWithErrors)),
           validDesAddress =>
             sessionStoreService.fetchInitialDetails.flatMap { maybeInitialDetails =>
               maybeInitialDetails.map { initialDetails =>
-                subscribe(initialDetails, validDesAddress, None).map(redirectSubscriptionResponse)
+                subscribe(initialDetails, validDesAddress).map(redirectSubscriptionResponse)
               }.getOrElse(Future.successful(sessionMissingRedirect()))
             }
         )
