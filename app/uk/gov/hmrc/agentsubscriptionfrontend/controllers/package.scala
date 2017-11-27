@@ -22,6 +22,8 @@ import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Constraints, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings.maxLength
+
 import scala.util.matching.Regex
 
 
@@ -37,10 +39,23 @@ package object controllers {
       if (o == null) Invalid(ValidationError(messageKey)) else if (o.trim.isEmpty) Invalid(ValidationError(messageKey)) else Valid
     }
 
+    // Same as play.api.data.validation.Constraints.maxLength but with a chance to use a custom message instead of error.maxLength
+    private def maxLength(length: Int, messageKey: String = "error.maxLength"): Constraint[String] = Constraint[String]("constraint.maxLength", length) { o =>
+      require(length >= 0, "string maxLength must not be negative")
+      if (o == null) Invalid(ValidationError(messageKey, length)) else if (o.size <= length) Valid else Invalid(ValidationError(messageKey, length))
+    }
+
     // Same as play.api.data.format.Formats.stringFormat but with a custom message instead of error.required
     private def stringFormatWithMessage(messageKey: String): Formatter[String] = new Formatter[String] {
       def bind(key: String, data: Map[String, String]) = data.get(key).toRight(Seq(FormError(key, messageKey, Nil)))
       def unbind(key: String, value: String) = Map(key -> value)
+    }
+
+    private def failFast[T](constraints: Constraint[T]*) = Constraint { fieldValue: T =>
+      constraints.toList.dropWhile(_(fieldValue) == Valid) match {
+        case Nil => Valid
+        case constraint :: _ => constraint(fieldValue)
+      }
     }
 
     private val nonEmptyPostcode: Constraint[String] = Constraint[String] { fieldValue: String =>
@@ -56,7 +71,7 @@ package object controllers {
      }
 
     private val telephoneNumber: Constraint[String] = Constraint[String] { fieldValue: String =>
-      Constraints.nonEmpty(fieldValue) match {
+      nonEmptyWithMessage("error.telephone.empty")(fieldValue) match {
         case i: Invalid => i
         case Valid => fieldValue match {
           case value if !value.matches(telephoneNumberRegex) =>
@@ -66,13 +81,13 @@ package object controllers {
       }
     }
 
-    private val noAmpersand = Constraints.pattern("[^&]*".r, error = "error.no.ampersand")
+    private def noAmpersand(errorMsgKey: String) = Constraints.pattern("[^&]*".r, error = errorMsgKey)
 
-    private[controllers] def desText(messageKey: String = "error.required"): Constraint[String] = Constraint[String] { fieldValue: String =>
-      nonEmptyWithMessage(messageKey)(fieldValue) match {
+    private[controllers] def desText(msgKeyRequired: String, msgKeyInvalid: String): Constraint[String] = Constraint[String] { fieldValue: String =>
+      nonEmptyWithMessage(msgKeyRequired)(fieldValue) match {
         case i: Invalid => i
         case Valid => fieldValue match {
-          case value if !value.matches(desTextRegex) => Invalid(ValidationError("error.des.text.invalid"))
+          case value if !value.matches(desTextRegex) => Invalid(ValidationError(msgKeyInvalid))
           case _ => Valid
         }
       }
@@ -85,13 +100,29 @@ package object controllers {
         true
       }
 
-    def utr: Mapping[Utr] = nonEmptyText.transform[Utr](Utr.apply,_.value).verifying("error.utr.invalid", utr => Utr.isValid(utr.value))
+    def utr: Mapping[Utr] = text
+      .verifying(nonEmptyWithMessage("error.utr.empty"))
+      .transform[Utr](Utr.apply,_.value)
+      .verifying("error.utr.invalid", utr => Utr.isValid(utr.value))
     def postcode: Mapping[String] = of[String](stringFormatWithMessage("error.postcode.empty")) verifying nonEmptyPostcode
     def postcodeWithBlacklist(blacklistedPostcodes: Set[String]): Mapping[String] = postcode
       .verifying("error.postcode.blacklisted", x => validateBlacklist(x, blacklistedPostcodes))
-    def telephone: Mapping[String] = text(maxLength = 24) verifying telephoneNumber
-    def agencyName: Mapping[String] = text(maxLength = 40) verifying noAmpersand verifying desText()
-    def addressLine1: Mapping[String] = text(maxLength = 35) verifying desText("error.address.lines.empty")
-    def addressLine234: Mapping[Option[String]] = optional(text(maxLength = 35) verifying desText())
+    def telephone: Mapping[String] = text
+      .verifying(maxLength(24, "error.telephone.maxLength"))
+      .verifying(telephoneNumber)
+    def emailAddress: Mapping[String] = text
+      .verifying(
+        failFast(
+          nonEmptyWithMessage("error.email.empty"),
+          Constraints.emailAddress))
+    def agencyName: Mapping[String] = text(maxLength = 40)
+      .verifying(noAmpersand("error.agency-name.no.ampersand"))
+      .verifying(desText(msgKeyRequired = "error.agency-name.empty", msgKeyInvalid = "error.agency-name.invalid"))
+    def addressLine1: Mapping[String] = text
+      .verifying(maxLength(35, "error.address.lines.maxLength"))
+      .verifying(desText(msgKeyRequired = "error.address.lines.empty", msgKeyInvalid = "error.address.lines.invalid"))
+    def addressLine234: Mapping[Option[String]] = optional(text
+      .verifying(maxLength(35, "error.address.lines.maxLength"))
+      .verifying(desText(msgKeyRequired = "error.address.lines.empty", msgKeyInvalid = "error.address.lines.invalid")))
   }
 }
