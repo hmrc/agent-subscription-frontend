@@ -214,7 +214,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         val result = await(controller.submitInitialDetails(request))
 
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"), "Enter a valid email address")
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"), "You must enter an email address")
       }
 
       "telephone is invalid with numbers and words" in {
@@ -225,7 +225,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         val result = await(controller.submitInitialDetails(request))
 
         status(result) shouldBe 200
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"), "Please enter a valid telephone number")
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"), "You must enter a valid telephone number, for example 01234567890")
       }
     }
 
