@@ -23,7 +23,6 @@ import play.api.data.validation.{Constraint, Constraints, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 
-
 package object controllers {
 
   object FieldMappings {
@@ -58,16 +57,16 @@ package object controllers {
     }
 
     private val nonEmptyPostcode: Constraint[String] = Constraint[String] { fieldValue: String =>
-       nonEmptyWithMessage("error.postcode.empty")(fieldValue) match {
-         case i: Invalid =>
-           i
-         case Valid =>
-           val error = "error.postcode.invalid"
-           desPostcodeRegex.unapplySeq(fieldValue)
-             .map(_ => Valid)
-             .getOrElse(Invalid(ValidationError(error)))
-       }
-     }
+      nonEmptyWithMessage("error.postcode.empty")(fieldValue) match {
+        case i: Invalid =>
+          i
+        case Valid =>
+          val error = "error.postcode.invalid"
+          desPostcodeRegex.unapplySeq(fieldValue)
+            .map(_ => Valid)
+            .getOrElse(Invalid(ValidationError(error)))
+      }
+    }
 
     private val telephoneNumber: Constraint[String] = Constraint[String] { fieldValue: String =>
       nonEmptyWithMessage("error.telephone.empty")(fieldValue) match {
