@@ -170,7 +170,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result) shouldBe 200
         checkHtmlResultWithBodyText(result,
           htmlEscapedMessage("subscriptionDetails.title"),
-          htmlEscapedMessage("error.des.text.invalid"))
+          htmlEscapedMessage("error.agency-name.invalid"))
       }
 
       "email is omitted" in {

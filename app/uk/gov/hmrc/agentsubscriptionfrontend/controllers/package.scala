@@ -22,9 +22,6 @@ import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Constraints, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings.maxLength
-
-import scala.util.matching.Regex
 
 
 package object controllers {
@@ -51,10 +48,12 @@ package object controllers {
       def unbind(key: String, value: String) = Map(key -> value)
     }
 
-    private def failFast[T](constraints: Constraint[T]*) = Constraint { fieldValue: T =>
-      constraints.toList.dropWhile(_(fieldValue) == Valid) match {
-        case Nil => Valid
-        case constraint :: _ => constraint(fieldValue)
+    private def nonEmptyEmailAddress = Constraint { fieldValue: String =>
+      nonEmptyWithMessage("error.email.empty")(fieldValue) match {
+        case i: Invalid =>
+          i
+        case Valid =>
+          Constraints.emailAddress(fieldValue)
       }
     }
 
@@ -111,10 +110,7 @@ package object controllers {
       .verifying(maxLength(24, "error.telephone.maxLength"))
       .verifying(telephoneNumber)
     def emailAddress: Mapping[String] = text
-      .verifying(
-        failFast(
-          nonEmptyWithMessage("error.email.empty"),
-          Constraints.emailAddress))
+      .verifying(nonEmptyEmailAddress)
     def agencyName: Mapping[String] = text(maxLength = 40)
       .verifying(noAmpersand("error.agency-name.no.ampersand"))
       .verifying(desText(msgKeyRequired = "error.agency-name.empty", msgKeyInvalid = "error.agency-name.invalid"))

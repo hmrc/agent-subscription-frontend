@@ -140,7 +140,8 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
       responseBody should include("Identify your business")
-      responseBody should include("This field is required")
+      responseBody should include("You must include a UTR")
+      responseBody should include("You must include a postcode")
     }
 
     "redirect to no-agency-found page when no matching registration found by agent-subscription" in {
