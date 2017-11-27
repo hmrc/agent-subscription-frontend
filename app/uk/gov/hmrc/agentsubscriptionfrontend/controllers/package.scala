@@ -23,6 +23,7 @@ import play.api.data.validation.{Constraint, Constraints, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 
+
 package object controllers {
 
   object FieldMappings {
