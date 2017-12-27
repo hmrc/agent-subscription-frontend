@@ -17,11 +17,12 @@
 package uk.gov.hmrc.agentsubscriptionfrontend
 
 import play.api.data.Forms._
-import play.api.data.{FormError, Mapping}
+import play.api.data.{Form, FormError, Mapping}
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Constraints, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioWithInput
 
 
 package object controllers {
@@ -98,6 +99,14 @@ package object controllers {
       } else {
         true
       }
+
+    def isValidSaAgentCode(shouldBeSaAgentCode: String) = {
+      val regex = """([A-Z0-9]{2})""".r //changeRegex
+      shouldBeSaAgentCode match {
+        case regex(shouldBeSaAgentCode) => true
+        case _ => false
+      }
+    }
 
     def utr: Mapping[Utr] = text
       .verifying(nonEmptyWithMessage("error.utr.empty"))

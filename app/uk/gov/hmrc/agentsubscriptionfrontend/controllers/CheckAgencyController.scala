@@ -26,14 +26,15 @@ import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{AgentRequest, AuthActions, NoOpRegimeWithContinueUrl}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector, AgentSubscriptionConnector}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AssuranceResults, KnownFactsResult, Registration}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AssuranceResults, KnownFactsResult, RadioWithInput, Registration}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{invasive_check_start, invasive_input_option}
 import uk.gov.hmrc.passcode.authentication.{PasscodeAuthenticationProvider, PasscodeVerificationConfig}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-
+import uk.gov.hmrc.domain.{Nino, SaAgentReference}
 import scala.concurrent.Future
 
 object CheckAgencyController {
@@ -109,14 +110,15 @@ class CheckAgencyController @Inject()
         for {
           hasAcceptableNumberOfPayeClients <- futurePaye
           hasAcceptableNumberOfSAClients <- futureSA
-        } yield Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients))
+        } yield Some(AssuranceResults(false, false)) //Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients))
       }
       else Future.successful(None)
     }
 
     def decideBasedOn: Option[AssuranceResults] => Result = {
-      case Some(AssuranceResults(false,false)) => Redirect(routes.StartController.setupIncomplete())
-      case _  => Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+      //case Some(AssuranceResults(false,false)) => Redirect(routes.StartController.setupIncomplete())
+      case Some(AssuranceResults(false, false)) => Redirect(routes.CheckAgencyController.invasiveCheckStart)
+      case _ => Redirect(routes.CheckAgencyController.showConfirmYourAgency())
     }
 
     agentSubscriptionConnector.getRegistration(knownFacts.utr, knownFacts.postcode) flatMap { maybeRegistration: Option[Registration] =>
@@ -159,5 +161,54 @@ class CheckAgencyController @Inject()
   val showAlreadySubscribed: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() { implicit authContext =>
     implicit request =>
       Future successful Ok(html.already_subscribed())
+  }
+
+  def invasiveCheckStart: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() {
+    implicit authContext =>
+      implicit request =>
+        Future.successful(Ok(invasive_check_start(RadioWithInput.confirmResponseForm)))
+  }
+
+
+  def invasiveSaAgentCodePost: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() {
+    implicit authContext =>
+      implicit request =>
+        RadioWithInput.confirmResponseForm.bindFromRequest().fold(
+          formWithErrors => {
+            Future.successful(Ok(invasive_check_start(formWithErrors)))
+          }, correctForm => {
+            if (correctForm.value.getOrElse(false)) {
+              val ab = SaAgentReference(correctForm.saAgentCode.getOrElse(""))
+              if (SaAgentReference(correctForm.saAgentCode.getOrElse("")).isInstanceOf[SaAgentReference]) {
+                // if (FieldMappings.isValidSaAgentCode(correctForm.saAgentCode.getOrElse(""))) {
+                Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm)).withSession("saAgentReferenceToCheck" -> correctForm.saAgentCode.get))
+              }
+              else {
+                Future.successful(Ok(invasive_check_start(RadioWithInput.confirmResponseForm
+                  .withError("confirmResponse-hidden-input", "updateErrorHere")))) // This should provide a page perhaps, when the code is bad/failing regex
+              }
+            } else
+              Future.successful(Redirect(routes.StartController.setupIncomplete()))
+          })
+  }
+
+  def invasiveTaxPayerOption: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() {
+    implicit authContext =>
+      implicit request =>
+        RadioWithInput.confirmResponseForm.bindFromRequest().fold(
+          formWithErrors => {
+            Future.successful(Ok(invasive_input_option(formWithErrors)))
+          }, correctForm => {
+            val saRef = request.session.get("saAgentReferenceToCheck").map(saRef => saRef)
+            if (correctForm.value.getOrElse(false)) {
+              agentAssuranceConnector.hasActiveCesaRelationship("nino", correctForm.saAgentCode.getOrElse(""), SaAgentReference(saRef.getOrElse("")))
+                .map(result => if (result) Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+                else Redirect(routes.StartController.setupIncomplete()))
+            } else {
+              agentAssuranceConnector.hasActiveCesaRelationship("utr", correctForm.saAgentCode.getOrElse(""), SaAgentReference(saRef.getOrElse("")))
+                .map(result => if (result) Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+                else Redirect(routes.StartController.setupIncomplete()))
+            }
+          })
   }
 }

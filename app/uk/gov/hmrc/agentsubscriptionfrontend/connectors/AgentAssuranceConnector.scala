@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 import java.net.URL
 import javax.inject.{Inject, Named, Singleton}
 
+import uk.gov.hmrc.domain.{Nino, SaAgentReference}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, Upstream4xxResponse}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext.fromLoggingDetails
 
@@ -34,6 +35,21 @@ class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUr
       case e: Upstream4xxResponse => if (e.upstreamResponseCode == 401 || e.upstreamResponseCode == 403) false else throw e
     }
   }
+
+  def getActiveCesaRelationship(url: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    http.GET[HttpResponse](baseUrl + url).map(
+      respone => respone.status == 200)
+      .recover {
+        case e: Upstream4xxResponse => if (e.upstreamResponseCode == 403) false else throw e
+      }
+  }
+
+  private def cesaCheckUrl(ninoOrUtr: String, valueOfNinoOrUtr: String, saAgentReference: SaAgentReference): String = {
+    s"activeCesaRelationship/$ninoOrUtr/$valueOfNinoOrUtr/saAgentReference/${saAgentReference.value}"
+  }
+
+  def hasActiveCesaRelationship(ninoOrUtr: String, valueOfNInoOrUtr: String, saAgentReference: SaAgentReference)
+                               (implicit hc: HeaderCarrier): Future[Boolean] = getActiveCesaRelationship(cesaCheckUrl(ninoOrUtr, valueOfNInoOrUtr, saAgentReference))
 
   def hasAcceptableNumberOfPayeClients(implicit hc: HeaderCarrier): Future[Boolean] = hasAcceptableNumberOfClients("IR-PAYE")
 
