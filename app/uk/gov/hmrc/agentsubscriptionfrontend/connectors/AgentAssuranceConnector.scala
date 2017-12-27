@@ -20,7 +20,7 @@ import java.net.URL
 import javax.inject.{Inject, Named, Singleton}
 
 import uk.gov.hmrc.domain.{Nino, SaAgentReference}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, Upstream4xxResponse}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext.fromLoggingDetails
 
 import scala.concurrent.Future
@@ -44,12 +44,12 @@ class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUr
       }
   }
 
-  private def cesaCheckUrl(ninoOrUtr: String, valueOfNinoOrUtr: String, saAgentReference: SaAgentReference): String = {
-    s"activeCesaRelationship/$ninoOrUtr/$valueOfNinoOrUtr/saAgentReference/${saAgentReference.value}"
+  private def cesaGetUrl(ninoOrUtr: String, valueOfNinoOrUtr: String, saAgentReference: SaAgentReference): String = {
+    s"/agent-assurance/activeCesaRelationship/$ninoOrUtr/$valueOfNinoOrUtr/saAgentReference/${saAgentReference.value}"
   }
 
   def hasActiveCesaRelationship(ninoOrUtr: String, valueOfNInoOrUtr: String, saAgentReference: SaAgentReference)
-                               (implicit hc: HeaderCarrier): Future[Boolean] = getActiveCesaRelationship(cesaCheckUrl(ninoOrUtr, valueOfNInoOrUtr, saAgentReference))
+                               (implicit hc: HeaderCarrier): Future[Boolean] = getActiveCesaRelationship(cesaGetUrl(ninoOrUtr, valueOfNInoOrUtr, saAgentReference))
 
   def hasAcceptableNumberOfPayeClients(implicit hc: HeaderCarrier): Future[Boolean] = hasAcceptableNumberOfClients("IR-PAYE")
 

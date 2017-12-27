@@ -181,7 +181,7 @@ class CheckAgencyController @Inject()
               val ab = SaAgentReference(correctForm.saAgentCode.getOrElse(""))
               if (SaAgentReference(correctForm.saAgentCode.getOrElse("")).isInstanceOf[SaAgentReference]) {
                 // if (FieldMappings.isValidSaAgentCode(correctForm.saAgentCode.getOrElse(""))) {
-                Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm)).withSession("saAgentReferenceToCheck" -> correctForm.saAgentCode.get))
+                Future.successful(Redirect(routes.CheckAgencyController.invasiveTaxPayerOptionGet)) //.withSession("saAgentReferenceToCheck" -> correctForm.saAgentCode.get))
               }
               else {
                 Future.successful(Ok(invasive_check_start(RadioWithInput.confirmResponseForm
@@ -192,6 +192,39 @@ class CheckAgencyController @Inject()
           })
   }
 
+  def invasiveTaxPayerOptionGet: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() {
+    implicit authContext =>
+      implicit request =>
+        Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm)))
+  }
+
+  def invasiveTaxPayerOption1: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() {
+    implicit authContext =>
+      implicit request =>
+        RadioWithInput.confirmResponseForm.bindFromRequest().fold(
+          formWithErrors => {
+            Future.successful(Ok(invasive_input_option(formWithErrors)))
+          }, correctForm => {
+            //            val saRef = request.session.get("saAgentReferenceToCheck").map(saRef => saRef)
+            val saRef = Some("saRef")
+            println("#" + saRef.getOrElse("notFound"))
+            if (correctForm.value.getOrElse(false)) {
+              println("##" + correctForm.saAgentCode.getOrElse("notFound"))
+              agentAssuranceConnector.hasActiveCesaRelationship("nino", correctForm.saAgentCode.getOrElse(""), SaAgentReference(saRef.getOrElse("")))
+                .map(result => if (result) {
+                  Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+                }
+                else Redirect(routes.StartController.setupIncomplete()))
+            } else {
+              agentAssuranceConnector.hasActiveCesaRelationship("utr", correctForm.saAgentCode.getOrElse(""), SaAgentReference(saRef.getOrElse("")))
+                .map(result => if (result) {
+                  Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+                }
+                else Redirect(routes.StartController.setupIncomplete()))
+            }
+          })
+  }
+
   def invasiveTaxPayerOption: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() {
     implicit authContext =>
       implicit request =>
@@ -199,16 +232,26 @@ class CheckAgencyController @Inject()
           formWithErrors => {
             Future.successful(Ok(invasive_input_option(formWithErrors)))
           }, correctForm => {
-            val saRef = request.session.get("saAgentReferenceToCheck").map(saRef => saRef)
             if (correctForm.value.getOrElse(false)) {
-              agentAssuranceConnector.hasActiveCesaRelationship("nino", correctForm.saAgentCode.getOrElse(""), SaAgentReference(saRef.getOrElse("")))
-                .map(result => if (result) Redirect(routes.CheckAgencyController.showConfirmYourAgency())
-                else Redirect(routes.StartController.setupIncomplete()))
+              Nino(correctForm.saAgentCode.getOrElse(""))
+              agentAssuranceConnector.hasActiveCesaRelationship("nino", "SC123456C", SaAgentReference("something"))
+                .map(result => if (result) {
+                  Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+                } else {
+                  Redirect(routes.StartController.setupIncomplete())
+                })
+
             } else {
-              agentAssuranceConnector.hasActiveCesaRelationship("utr", correctForm.saAgentCode.getOrElse(""), SaAgentReference(saRef.getOrElse("")))
-                .map(result => if (result) Redirect(routes.CheckAgencyController.showConfirmYourAgency())
-                else Redirect(routes.StartController.setupIncomplete()))
+              agentAssuranceConnector.hasActiveCesaRelationship("utr", "4000000009", SaAgentReference("something"))
+                .map(result => if (result) {
+                  Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+                } else {
+                  Redirect(routes.StartController.setupIncomplete())
+                })
             }
+
+
+
           })
   }
 }

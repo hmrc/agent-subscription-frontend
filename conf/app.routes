@@ -14,6 +14,7 @@ GET         /has-other-enrolments                 uk.gov.hmrc.agentsubscriptionf
 
 GET         /enter-agent-code                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.invasiveCheckStart
 POST        /enter-agent-code                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.invasiveSaAgentCodePost
+GET         /enter-client-id                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.invasiveTaxPayerOptionGet
 POST        /enter-client-id                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.invasiveTaxPayerOption
 
 GET         /subscription-details                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showInitialDetails
