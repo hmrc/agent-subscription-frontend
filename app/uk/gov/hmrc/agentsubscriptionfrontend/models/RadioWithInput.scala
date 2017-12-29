@@ -35,5 +35,3 @@ object RadioWithInput {
       "confirmResponse-hidden-input" -> optional(text)
       )(RadioWithInput.apply)(RadioWithInput.unapply))
 }
-
-//case class RadioWithInput1(value Option[Boolean],)

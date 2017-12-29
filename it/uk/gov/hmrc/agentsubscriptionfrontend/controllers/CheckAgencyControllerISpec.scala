@@ -279,6 +279,41 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
   }
 
+  "invasive check" should {
+    "start invasiveCheck if selected Yes with SaAgentCode reference inputted" in {
+      hasNoEnrolments(subscribingAgent) // validate what kind of agent
+
+      val result = await(controller.invasiveSaAgentCodePost(authenticatedRequest()
+        .withFormUrlEncodedBody(("confirmResponse", "true"),("confirmResponse-hidden-input","SA6012"))))
+
+      status(result) shouldBe 303
+    }
+    "redirect to setup incomplete if selected No" in {
+      hasNoEnrolments(subscribingAgent)
+
+      val result = await(controller.invasiveSaAgentCodePost(authenticatedRequest()
+        .withFormUrlEncodedBody(("confirmResponse", "false"))))
+
+      status(result) shouldBe 303
+    }
+
+    "Send page back with error when failing the validation of SaAgentCode" in {
+      //TODO
+    }
+
+    "redirect to confirm your agency when successfully submitting nino" in {
+      hasNoEnrolments(subscribingAgent)
+
+      val result = await(controller.invasiveTaxPayerOption(authenticatedRequest()
+        .withFormUrlEncodedBody(("confirmResponse", "true"),("confirmResponse-hidden-input","AA123456A"))))
+
+      status(result) shouldBe 303
+      //redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
+
+    }
+  }
+
+
   def verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck: Boolean, passSaAgentAssuranceCheck: Boolean): Unit = {
     verifyAuditRequestSent(1, AgentSubscriptionFrontendEvent.AgentAssurance,
       detail = Map(
