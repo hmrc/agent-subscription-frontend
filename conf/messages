@@ -109,7 +109,7 @@ invasive.title.option=Add some detail about a taxpayer related to the SA agent c
 invasive.p1=You must choose from these 2 options so we can identify one of your current clients.
 invasive.confirmResponse.true.yes=Yes
 confirmResponse-true.hidden.input.label=Enter your SA agent code
-invasive.confirmResponse.true.no=No
+invasive.confirmResponse.false.no=No
 invasive.confirmResponse.true.nino=Taxpayer''s National Insurance (NI) number
 invasive.confirmResponse.true.utr=Taxpayer''s Self Assessment Unique Taxpayer Reference (UTR)
 

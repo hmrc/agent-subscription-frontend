@@ -179,6 +179,7 @@ class CheckAgencyController @Inject()
       implicit request =>
         RadioWithInput.confirmResponseForm.bindFromRequest().fold(
           formWithErrors => {
+            val a = formWithErrors
             Future.successful(Ok(invasive_check_start(formWithErrors)))
           }, correctForm => {
             if (correctForm.value.getOrElse(false)) {

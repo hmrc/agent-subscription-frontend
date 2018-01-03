@@ -48,4 +48,32 @@
             <button class="button" type="submit" id="continue">@Messages("button.continue")</button>
         </div>
     }
+
+    @form(action = routes.CheckAgencyController.invasiveSaAgentCodePost(),'class -> "form js-form"){
+        <div class="multiple-choice" data-target="saAgentCode">
+            <input id="confirmResponse" type="radio" name="confirmResponse" value="true">
+            <label for="confirmResponse">@Messages("invasive.confirmResponse.true.yes")</label>
+        </div>
+        <div class="panel panel-border-narrow js-hidden" id="saAgentCode">
+            <label class="form-label" for="confirmResponse-true-hidden-input">@Messages("confirmResponse-true.hidden.input.label")</label>
+            <input class="form-control" name="confirmResponse-true-hidden-input" type="text" id="confirmResponse-true-hidden-input">
+        </div>
+
+        <div class="multiple-choice" data-target="confirmResponse">
+            <input id="confirmResponse" type="radio" name="confirmResponse" value="false">
+            <label for="confirmResponse">@Messages("invasive.confirmResponse.false.no")</label>
+        </div>
+        <div class="panel panel-border-narrow js-hidden" id="saAgentCode">
+            <label class="form-label" for="confirmResponse-true-hidden-input">@Messages("confirmResponse-true.hidden.input.label")</label>
+            <input class="form-control" name="confirmResponse-true-hidden-input" type="text" id="confirmResponse-true-hidden-input">
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+
+        <div class="form-group">
+            <button class="button" type="submit" id="continue">@Messages("button.continue")</button>
+        </div>
+    }
 }
