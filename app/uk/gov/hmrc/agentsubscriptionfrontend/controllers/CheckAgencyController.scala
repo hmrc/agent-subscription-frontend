@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{AnyContent, Request, _}
+import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{AgentRequest, AuthActions, NoOpRegimeWithContinueUrl}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -34,7 +35,9 @@ import uk.gov.hmrc.passcode.authentication.{PasscodeAuthenticationProvider, Pass
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.domain.{Nino, SaAgentReference}
+import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
+import uk.gov.hmrc.http.HeaderCarrier
+
 import scala.concurrent.Future
 
 object CheckAgencyController {
@@ -103,16 +106,17 @@ class CheckAgencyController @Inject()
   private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)
                                              (implicit authContext: AuthContext, request: AgentRequest[AnyContent]): Future[Result] = {
     def assureIsAgent(): Future[Option[AssuranceResults]] = {
-      if (agentAssuranceFlag) {
-        val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
-        val futureSA = agentAssuranceConnector.hasAcceptableNumberOfSAClients
-
-        for {
-          hasAcceptableNumberOfPayeClients <- futurePaye
-          hasAcceptableNumberOfSAClients <- futureSA
-        } yield Some(AssuranceResults(false, false)) //Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients))
-      }
-      else Future.successful(None)
+//      if (agentAssuranceFlag) {
+//        val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
+//        val futureSA = agentAssuranceConnector.hasAcceptableNumberOfSAClients
+//
+//        for {
+//          hasAcceptableNumberOfPayeClients <- futurePaye
+//          hasAcceptableNumberOfSAClients <- futureSA
+//        } yield Some(AssuranceResults(false, false)) //Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients))
+//      }
+//      else Future.successful(None)
+      Future.successful(Some(AssuranceResults(false, false)))
     }
 
     def decideBasedOn: Option[AssuranceResults] => Result = {
@@ -178,13 +182,13 @@ class CheckAgencyController @Inject()
             Future.successful(Ok(invasive_check_start(formWithErrors)))
           }, correctForm => {
             if (correctForm.value.getOrElse(false)) {
-              if (SaAgentReference(correctForm.saAgentCode.getOrElse("")).isInstanceOf[SaAgentReference]) {
-                // if (FieldMappings.isValidSaAgentCode(correctForm.saAgentCode.getOrElse(""))) {
-                Future.successful(Redirect(routes.CheckAgencyController.invasiveTaxPayerOptionGet)) //.withSession("saAgentReferenceToCheck" -> correctForm.saAgentCode.get))
-              }
-              else {
-                Future.successful(Ok(invasive_check_start(RadioWithInput.confirmResponseForm
-                  .withError("confirmResponse-hidden-input", "updateErrorHere")))) // This should provide a page perhaps, when the code is bad/failing regex
+              val a = correctForm
+              if(correctForm.messageOfTrueRadioChoice.getOrElse("").length < 7 && correctForm.messageOfTrueRadioChoice.getOrElse("").length > 0) {
+                Future.successful(Redirect(routes.CheckAgencyController.invasiveTaxPayerOptionGet)
+                  .withSession(request.session + ("saAgentReferenceToCheck" -> correctForm.messageOfTrueRadioChoice.getOrElse(""))))
+              }else{
+                Future.successful(Ok(invasive_check_start(RadioWithInput
+                  .confirmResponseForm.withError("confirmResponse-true-hidden-input", "invalidInputErrorUpdateThis"))))
               }
             } else
               Future.successful(Redirect(routes.StartController.setupIncomplete()))
@@ -205,31 +209,34 @@ class CheckAgencyController @Inject()
             Future.successful(Ok(invasive_input_option(formWithErrors)))
           }, correctForm => {
             if (correctForm.value.getOrElse(false)) {
-              if (true) {
-                agentAssuranceConnector.hasActiveCesaRelationship("nino", "AA123456A", SaAgentReference("SA6012"))
-                  .map(result => if (result) {
-                    Redirect(routes.CheckAgencyController.showConfirmYourAgency())
-                  } else {
-                    Redirect(routes.StartController.setupIncomplete())
-                  })
-
-              } else {
-                Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm
-                  .withError("confirmResponse-hidden-input", "invalidInputErrorUpdateThis"))))
+              Nino.isValid(correctForm.messageOfTrueRadioChoice.getOrElse("")) match {
+                case true => checkActiveCesaRelationship(Nino(correctForm.messageOfTrueRadioChoice.getOrElse("")),
+                  SaAgentReference(request.session.get("saAgentReferenceToCheck").getOrElse(""))).map {
+                  case true => Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+                  case false => Redirect(routes.StartController.setupIncomplete())
+                }
+                case false => Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm
+                  .withError("confirmResponse-true-hidden-input", "invalidInputErrorUpdateThis"))))
               }
             } else {
-              if (FieldMappings.utr == correctForm.saAgentCode.getOrElse("")) {
-                agentAssuranceConnector.hasActiveCesaRelationship("utr", "4000000009", SaAgentReference("SA6012"))
-                  .map(result => if (result) {
-                    Redirect(routes.CheckAgencyController.showConfirmYourAgency())
-                  } else {
-                    Redirect(routes.StartController.setupIncomplete())
-                  })
-              } else {
-                Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm
-                  .withError("confirmResponse-hidden-input", "invalidInputErrorUpdateThis"))))
+              Utr.isValid(correctForm.messageOfFalseRadioChoice.getOrElse("")) match {
+                case true => agentAssuranceConnector.hasActiveCesaRelationship(Utr(correctForm.messageOfFalseRadioChoice.getOrElse("")),
+                  SaAgentReference(request.session.get("saAgentReferenceToCheck").getOrElse("")))
+                  .map {
+                    case true =>
+                      Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+                    case false => Redirect(routes.StartController.setupIncomplete())
+                  }
+                case false =>
+                  Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm
+                    .withError("confirmResponse-false-hidden-input", "invalidInputErrorUpdateThis"))))
               }
             }
-          })
+          }
+        )
+  }
+
+  def checkActiveCesaRelationship(ninoOrUtr: TaxIdentifier, inputSaAgentReference: SaAgentReference)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    agentAssuranceConnector.hasActiveCesaRelationship(ninoOrUtr, inputSaAgentReference).map(result => result)
   }
 }

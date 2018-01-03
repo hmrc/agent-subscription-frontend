@@ -1,5 +1,5 @@
 @*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,21 @@
 
 @(confirmResponseForm: Form[RadioWithInput])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = Messages("alreadySubscribed.title"), bodyClasses = None) {
+@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = Messages("invasive.title.option"), bodyClasses = None) {
 
 
     @errorSummary(Messages("error.summary.heading"), confirmResponseForm, Seq.empty, Some("confirmResponseSomethingTrackingGGA"))
 
-    <h1 class="heading-xlarge">@Messages("alreadySubscribed.title")</h1>
+    <h1 class="heading-large">@Messages("invasive.title.option")</h1>
 
+    <p1>@Messages("invasive.p1")</p1>
 
     @form(action = routes.CheckAgencyController.invasiveTaxPayerOption(), 'class -> "form js-form") {
         <div class="form-group">
         @input_radio_group_expand(
             confirmResponseForm("confirmResponse"),
-            Seq(("true", Messages("confirmResponseTrue"), true), ("false", Messages("confirmResponseFalse"), true)),
-            '_legend -> Messages("doYouKnowSALegend"),
+            Seq(("true", Messages("invasive.confirmResponse.true.nino"), true), ("false", Messages("invasive.confirmResponse.true.utr"), true)),
+            '_legend -> Messages(""),
             '_legendClass -> "h2-heading",
             '_groupDivClass -> "form-group soft--ends",
             '_groupClass -> "",
@@ -47,6 +48,4 @@
             <button class="button" type="submit" id="continue">@Messages("button.continue")</button>
         </div>
     }
-
-
 }

@@ -1,5 +1,5 @@
 @*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,23 @@
  *@
 
 @(field: Field, radioOptions: Seq[(String, String, Boolean)], args: (Symbol, Any)*)(implicit messages: Messages)
-
 @import play.api.i18n._
 @import views.html.helper._
-
 @elements = @{new FieldElements(field.id, field, null, args.toMap, messages) }
 @groupDivClass = {@elements.args.get('_groupDivClass)@if(elements.hasErrors){ form-field--error}}
 @fieldsetClass = {@elements.args.get('_groupClass)}
 @labelAfter = @{ elements.args.get('_labelAfter).getOrElse(false).asInstanceOf[Boolean] }
 @dataTarget = {@elements.args.get('_dataTarget)}
-
 <div class="@groupDivClass">
     <fieldset class="@fieldsetClass js-visible js-aria-show js-toggle"
-        @if(elements.args.get('_fieldsetAttributes).isDefined) {@elements.args.get('_fieldsetAttributes)}
-    data-target=@(dataTarget+"-target")
     data-trigger="js-toggle-trigger"
-    data-open=@(dataTarget+"-true")
-    data-close=@(dataTarget+"-false")
-    >
+        @if(elements.args.get('_fieldsetAttributes).isDefined) {@elements.args.get('_fieldsetAttributes)}>
     @if(elements.args.get('_legend).isDefined) {
         <legend @if(elements.args.get('_legendClass).isDefined) {class="@elements.args.get('_legendClass)"}>
         @elements.args.get('_legend)
         </legend>
     }
     @elements.errors.map{error => <span class="error-notification">@Messages(error)</span>}
-
     @radioOptions.map { case (value, label, hiddenInput) =>
         @defining(s"${elements.field.name}-${value.toLowerCase.replace(" ","_")}")  { inputId =>
             <div class="multiple-choice">
@@ -48,10 +40,10 @@
                 id="@inputId"
                 name="@elements.field.name"
                 value="@value"
+                data-target=@(inputId+"-target")
                     @elements.args.get('_inputClass).map{inputClass => class="@inputClass js-toggle-trigger"}
-                    @if(elements.args.contains('_dataAttributes) ){ @elements.args.get('_dataAttributes)}
-                    @field.value.filter( _ == value).map{_ => checked="checked"}/>
-
+                @if(elements.args.contains('_dataAttributes) ){ @elements.args.get('_dataAttributes)}
+                @field.value.filter( _ == value).map{_ => checked="checked"}/>
                 <label for="@inputId"
                     @elements.args.get('_labelClass).map{labelClass => class="@labelClass@field.value.filter( _ == value).map{_ => selected}"}>
                     @if(!labelAfter) {
@@ -64,7 +56,6 @@
                             }
                         } else { @label }
                     }
-
                     @if(labelAfter) {
                         @if(elements.args.get('_stackedLabel)) {
                             @if(label.split(" ").length < 2) {<br>@label
@@ -78,15 +69,14 @@
                 </label>
             </div>
         @if(hiddenInput){
-            <div class="form-group panel panel-border-narrow @if(!elements.errors){hidden}" id="@(dataTarget+"-target")" >
+            <div class="form-group panel panel-border-narrow @if(!elements.errors){hidden}" id="@(inputId+"-target")" >
                 <label for="postcode" class="soft--ends">
-                    <span>@Messages(s"${elements.field.name}.hidden.input.label")</span>
-                    <input type="text" class="form-control input--cleared" name=@(elements.field.name+"-hidden-input") id=@(elements.field.name+"-hidden-input")>
+                    <span>@Messages(s"${inputId}.hidden.input.label")</span>
+                    <input type="text" class="form-control input--cleared" name=@(inputId+"-hidden-input") id=@(inputId+"-hidden-input")>
                 </label>
             </div>
         }
         }
     }
-
     </fieldset>
 </div>

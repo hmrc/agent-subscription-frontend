@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 import java.net.URL
 import javax.inject.{Inject, Named, Singleton}
 
-import uk.gov.hmrc.domain.{Nino, SaAgentReference}
+import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext.fromLoggingDetails
 
@@ -38,7 +39,7 @@ class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUr
 
   def getActiveCesaRelationship(url: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     http.GET[HttpResponse](baseUrl + url).map(
-      respone => respone.status == 200)
+      response => response.status == 200)
       .recover {
         case e: Upstream4xxResponse => if (e.upstreamResponseCode == 403) false else throw e
       }
@@ -48,8 +49,13 @@ class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUr
     s"/agent-assurance/activeCesaRelationship/$ninoOrUtr/$valueOfNinoOrUtr/saAgentReference/${saAgentReference.value}"
   }
 
-  def hasActiveCesaRelationship(ninoOrUtr: String, valueOfNInoOrUtr: String, saAgentReference: SaAgentReference)
-                               (implicit hc: HeaderCarrier): Future[Boolean] = getActiveCesaRelationship(cesaGetUrl(ninoOrUtr, valueOfNInoOrUtr, saAgentReference))
+  def hasActiveCesaRelationship(ninoOrUtr: TaxIdentifier, saAgentReference: SaAgentReference)
+                               (implicit hc: HeaderCarrier): Future[Boolean] = {
+    ninoOrUtr match {
+      case nino @ Nino(_) => getActiveCesaRelationship(cesaGetUrl("nino", nino.value, saAgentReference))
+      case utr @ Utr(_) => getActiveCesaRelationship(cesaGetUrl("utr", utr.value, saAgentReference))
+    }
+  }
 
   def hasAcceptableNumberOfPayeClients(implicit hc: HeaderCarrier): Future[Boolean] = hasAcceptableNumberOfClients("IR-PAYE")
 

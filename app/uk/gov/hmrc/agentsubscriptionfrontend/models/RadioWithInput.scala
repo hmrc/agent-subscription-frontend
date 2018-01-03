@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 
-case class RadioWithInput(value: Option[Boolean], saAgentCode: Option[String])
+case class RadioWithInput(value: Option[Boolean], messageOfTrueRadioChoice: Option[String], messageOfFalseRadioChoice: Option[String])
 
 object RadioWithInput {
   def radioChoice: Constraint[Option[Boolean]] = Constraint[Option[Boolean]] { fieldValue: Option[Boolean] =>
@@ -32,6 +32,7 @@ object RadioWithInput {
 
   val confirmResponseForm: Form[RadioWithInput] = Form[RadioWithInput](
     mapping("confirmResponse" -> optional(boolean).verifying(radioChoice),
-      "confirmResponse-hidden-input" -> optional(text)
+      "confirmResponse-true-hidden-input" -> optional(text),
+      "confirmResponse-false-hidden-input" -> optional(text)
       )(RadioWithInput.apply)(RadioWithInput.unapply))
 }

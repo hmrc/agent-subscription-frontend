@@ -101,3 +101,17 @@ button.signOut=Sign out
 #Setup Incomplete
 setupIncomplete.title=We need some more information
 setupIncomplete.p1=If you think the tax reference and postcode you entered were correct, <a href="{0}" onclick="{1}">let us know.</a>
+
+
+#Invasive check
+invasive.title.saCode=Do you have a Self Assessment (SA) agent code?
+invasive.title.option=Add some detail about a taxpayer related to the SA agent code you entered
+invasive.p1=You must choose from these 2 options so we can identify one of your current clients.
+invasive.confirmResponse.true.yes=Yes
+confirmResponse-true.hidden.input.label=Enter your SA agent code
+invasive.confirmResponse.true.no=No
+invasive.confirmResponse.true.nino=Taxpayer''s National Insurance (NI) number
+invasive.confirmResponse.true.utr=Taxpayer''s Self Assessment Unique Taxpayer Reference (UTR)
+
+invasive.expandable.p1=Where can I find my SA agent code?
+invasive.expandable.p1.open=You got your SA agent code when you registered in writing as an agent for Self Assessment. You used your agent code to set up your online service.
