@@ -109,11 +109,12 @@ class CheckAgencyController @Inject()
       if (agentAssuranceFlag) {
         val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
         val futureSA = agentAssuranceConnector.hasAcceptableNumberOfSAClients
+        val passCesaAgentAssuranceCheck = false
 
         for {
           hasAcceptableNumberOfPayeClients <- futurePaye
           hasAcceptableNumberOfSAClients <- futureSA
-        } yield Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients, false))
+        } yield Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients, passCesaAgentAssuranceCheck))
       }
       else Future.successful(None)
     }
