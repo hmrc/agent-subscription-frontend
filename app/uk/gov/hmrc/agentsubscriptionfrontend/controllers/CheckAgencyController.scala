@@ -118,7 +118,7 @@ class CheckAgencyController @Inject()
     }
 
     def decideBasedOn: Option[AssuranceResults] => Result = {
-      case Some(AssuranceResults(false,false)) => Redirect(routes.StartController.setupIncomplete())
+      case Some(AssuranceResults(false, false)) => Redirect(routes.CheckAgencyController.invasiveCheckStart)
       case _  => Redirect(routes.CheckAgencyController.showConfirmYourAgency())
     }
 

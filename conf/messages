@@ -19,44 +19,6 @@ error.agency-name.no.ampersand = Business name must not include an ampersand
 error.agency-name.invalid = Business name must only include letters a to z, numbers, spaces, hyphens, commas, apostrophes, full stops and forward slashes
 error.summary.heading=There is a problem
 error.prefix=Error:
-  private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)
-                                             (implicit authContext: AuthContext, request: AgentRequest[AnyContent]): Future[Result] = {
-    def assureIsAgent(): Future[Option[AssuranceResults]] = {
-//      if (agentAssuranceFlag) {
-//        val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
-//        val futureSA = agentAssuranceConnector.hasAcceptableNumberOfSAClients
-//
-//        for {
-//          hasAcceptableNumberOfPayeClients <- futurePaye
-//          hasAcceptableNumberOfSAClients <- futureSA
-//        } yield Some(AssuranceResults(false, false)) //Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients))
-//      }
-//      else Future.successful(None)
-      Future.successful(Some(AssuranceResults(false, false)))
-    }
-
-    def decideBasedOn: Option[AssuranceResults] => Result = {
-      //case Some(AssuranceResults(false,false)) => Redirect(routes.StartController.setupIncomplete())
-      case Some(AssuranceResults(false, false)) => Redirect(routes.CheckAgencyController.invasiveCheckStart)
-      case _ => Redirect(routes.CheckAgencyController.showConfirmYourAgency())
-    }
-
-    agentSubscriptionConnector.getRegistration(knownFacts.utr, knownFacts.postcode) flatMap { maybeRegistration: Option[Registration] =>
-      maybeRegistration match {
-        case Some(Registration(Some(taxpayerName), isSubscribedToAgentServices)) =>
-
-          for {
-            assuranceResults <- assureIsAgent()
-            knownFactsResult = KnownFactsResult(knownFacts.utr, knownFacts.postcode, taxpayerName, isSubscribedToAgentServices)
-            _ <- sessionStoreService.cacheKnownFactsResult(knownFactsResult)
-            _ <- assuranceResults.map(auditService.sendAgentAssuranceAuditEvent(knownFactsResult, _)).getOrElse(Future.successful(()))
-          } yield decideBasedOn(assuranceResults)
-
-        case Some(_) => throw new IllegalStateException(s"The agency with UTR ${knownFacts.utr} has no organisation name.")
-        case None => Future successful Redirect(routes.CheckAgencyController.showNoAgencyFound())
-      }
-    }
-  }
 error.email.empty=You must enter an email address
 
 ##Modifying address
