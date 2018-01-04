@@ -19,6 +19,9 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 import java.net.URL
 import javax.inject.{Inject, Named, Singleton}
 
+import com.codahale.metrics.MetricRegistry
+import com.kenshoo.play.metrics.Metrics
+import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http._
@@ -27,22 +30,28 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext.fromLoggingDetai
 import scala.concurrent.Future
 
 @Singleton
-class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUrl: URL, http: HttpGet) {
+class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUrl: URL, http: HttpGet, metrics: Metrics) extends HttpAPIMonitor {
+  override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
+
   def hasAcceptableNumberOfClients(regime: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    http.GET[HttpResponse](
-      new URL(baseUrl, s"/agent-assurance/acceptableNumberOfClients/service/$regime").toString).map { response =>
-      response.status == 204
-    } recover {
-      case e: Upstream4xxResponse => if (e.upstreamResponseCode == 401 || e.upstreamResponseCode == 403) false else throw e
+    monitor(s"ConsumedAPI-AgentAssurance-hasAcceptableNumberOfClients-GET") {
+      http.GET[HttpResponse](
+        new URL(baseUrl, s"/agent-assurance/acceptableNumberOfClients/service/$regime").toString).map { response =>
+        response.status == 204
+      } recover {
+        case e: Upstream4xxResponse => if (e.upstreamResponseCode == 401 || e.upstreamResponseCode == 403) false else throw e
+      }
     }
   }
 
   def getActiveCesaRelationship(url: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    http.GET[HttpResponse](baseUrl + url).map(
-      response => response.status == 200)
-      .recover {
-        case e: Upstream4xxResponse => if (e.upstreamResponseCode == 403) false else throw e
-      }
+    monitor(s"ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
+      http.GET[HttpResponse](baseUrl + url).map(
+        response => response.status == 200)
+        .recover {
+          case e: Upstream4xxResponse => if (e.upstreamResponseCode == 403) false else throw e
+        }
+    }
   }
 
   private def cesaGetUrl(ninoOrUtr: String, valueOfNinoOrUtr: String, saAgentReference: SaAgentReference): String = {
