@@ -185,7 +185,7 @@ class CheckAgencyController @Inject()
                   .withSession(request.session + ("saAgentReferenceToCheck" -> correctForm.messageOfTrueRadioChoice.getOrElse(""))))
               }else{
                 Future.successful(Ok(invasive_check_start(RadioWithInput
-                  .confirmResponseForm.withError("confirmResponse-true-hidden-input", "invalidInputErrorUpdateThis"))))
+                  .confirmResponseForm.withError("confirmResponse-true-hidden-input", Messages("error.saAgentCode.invalid")))))
               }
             } else
               Future.successful(Redirect(routes.StartController.setupIncomplete()))
@@ -213,7 +213,7 @@ class CheckAgencyController @Inject()
                   case false => Redirect(routes.StartController.setupIncomplete())
                 }
                 case false => Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm
-                  .withError("confirmResponse-true-hidden-input", Messages("error.utr.empty")))))
+                  .withError("confirmResponse-true-hidden-input", Messages("error.nino.invalid-format")))))
               }
             } else {
               Utr.isValid(correctForm.messageOfFalseRadioChoice.getOrElse("")) match {
@@ -226,7 +226,7 @@ class CheckAgencyController @Inject()
                   }
                 case false =>
                   Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm
-                    .withError("confirmResponse-false-hidden-input", Messages("enter.nino.invalid-format")))))
+                    .withError("confirmResponse-false-hidden-input", Messages("error.utr.invalid")))))
               }
             }
           }
