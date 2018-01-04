@@ -20,7 +20,7 @@ import javax.inject.{Inject, Named, Singleton}
 
 import play.api.data.Form
 import play.api.data.Forms.mapping
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{AnyContent, Request, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
@@ -212,7 +212,7 @@ class CheckAgencyController @Inject()
                   case false => Redirect(routes.StartController.setupIncomplete())
                 }
                 case false => Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm
-                  .withError("confirmResponse-true-hidden-input", "invalidInputErrorUpdateThis"))))
+                  .withError("confirmResponse-true-hidden-input", Messages("error.utr.empty")))))
               }
             } else {
               Utr.isValid(correctForm.messageOfFalseRadioChoice.getOrElse("")) match {
@@ -225,7 +225,7 @@ class CheckAgencyController @Inject()
                   }
                 case false =>
                   Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm
-                    .withError("confirmResponse-false-hidden-input", "invalidInputErrorUpdateThis"))))
+                    .withError("confirmResponse-false-hidden-input", Messages("enter.nino.invalid-format")))))
               }
             }
           }
