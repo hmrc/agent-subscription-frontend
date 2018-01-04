@@ -19,6 +19,44 @@ error.agency-name.no.ampersand = Business name must not include an ampersand
 error.agency-name.invalid = Business name must only include letters a to z, numbers, spaces, hyphens, commas, apostrophes, full stops and forward slashes
 error.summary.heading=There is a problem
 error.prefix=Error:
+  private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)
+                                             (implicit authContext: AuthContext, request: AgentRequest[AnyContent]): Future[Result] = {
+    def assureIsAgent(): Future[Option[AssuranceResults]] = {
+//      if (agentAssuranceFlag) {
+//        val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
+//        val futureSA = agentAssuranceConnector.hasAcceptableNumberOfSAClients
+//
+//        for {
+//          hasAcceptableNumberOfPayeClients <- futurePaye
+//          hasAcceptableNumberOfSAClients <- futureSA
+//        } yield Some(AssuranceResults(false, false)) //Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients))
+//      }
+//      else Future.successful(None)
+      Future.successful(Some(AssuranceResults(false, false)))
+    }
+
+    def decideBasedOn: Option[AssuranceResults] => Result = {
+      //case Some(AssuranceResults(false,false)) => Redirect(routes.StartController.setupIncomplete())
+      case Some(AssuranceResults(false, false)) => Redirect(routes.CheckAgencyController.invasiveCheckStart)
+      case _ => Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+    }
+
+    agentSubscriptionConnector.getRegistration(knownFacts.utr, knownFacts.postcode) flatMap { maybeRegistration: Option[Registration] =>
+      maybeRegistration match {
+        case Some(Registration(Some(taxpayerName), isSubscribedToAgentServices)) =>
+
+          for {
+            assuranceResults <- assureIsAgent()
+            knownFactsResult = KnownFactsResult(knownFacts.utr, knownFacts.postcode, taxpayerName, isSubscribedToAgentServices)
+            _ <- sessionStoreService.cacheKnownFactsResult(knownFactsResult)
+            _ <- assuranceResults.map(auditService.sendAgentAssuranceAuditEvent(knownFactsResult, _)).getOrElse(Future.successful(()))
+          } yield decideBasedOn(assuranceResults)
+
+        case Some(_) => throw new IllegalStateException(s"The agency with UTR ${knownFacts.utr} has no organisation name.")
+        case None => Future successful Redirect(routes.CheckAgencyController.showNoAgencyFound())
+      }
+    }
+  }
 error.email.empty=You must enter an email address
 
 ##Modifying address
@@ -108,10 +146,11 @@ invasive.title.saCode=Do you have a Self Assessment (SA) agent code?
 invasive.title.option=Add some detail about a taxpayer related to the SA agent code you entered
 invasive.p1=You must choose from these 2 options so we can identify one of your current clients.
 invasive.confirmResponse.true.yes=Yes
-confirmResponse-true.hidden.input.label=Enter your SA agent code
+confirmResponse.true.hidden.input.label.sa=Enter your SA agent code
 invasive.confirmResponse.false.no=No
 invasive.confirmResponse.true.nino=Taxpayer''s National Insurance (NI) number
+confirmResponse.true.hidden.input.label.nino=NI number
 invasive.confirmResponse.true.utr=Taxpayer''s Self Assessment Unique Taxpayer Reference (UTR)
-
+confirmResponse.false.hidden.input.label.utr=Self Assessment UTR
 invasive.expandable.p1=Where can I find my SA agent code?
 invasive.expandable.p1.open=You got your SA agent code when you registered in writing as an agent for Self Assessment. You used your agent code to set up your online service.

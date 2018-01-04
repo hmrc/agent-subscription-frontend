@@ -17,61 +17,47 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioWithInput
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.input_radio_group_expand
 @import uk.gov.hmrc.play.views.html.helpers.{form, errorSummary}
 
 @(confirmResponseForm: Form[RadioWithInput])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = Messages("invasive.title.option"), bodyClasses = None) {
 
-
-    @errorSummary(Messages("error.summary.heading"), confirmResponseForm, Seq.empty, Some("confirmResponseSomethingTrackingGGA"))
-
+    @if(confirmResponseForm.hasErrors) {
+        @errorSummary(Messages("error.summary.heading"), confirmResponseForm, Seq.empty, Some("confirmResponseSomethingTrackingGGA"))
+    }
     <h1 class="heading-large">@Messages("invasive.title.option")</h1>
 
     <p1>@Messages("invasive.p1")</p1>
 
     @form(action = routes.CheckAgencyController.invasiveTaxPayerOption(), 'class -> "form js-form") {
-        <div class="form-group">
-        @input_radio_group_expand(
-            confirmResponseForm("confirmResponse"),
-            Seq(("true", Messages("invasive.confirmResponse.true.nino"), true), ("false", Messages("invasive.confirmResponse.true.utr"), true)),
-            '_legend -> Messages(""),
-            '_legendClass -> "h2-heading",
-            '_groupDivClass -> "form-group soft--ends",
-            '_groupClass -> "",
-            '_fieldsetAttributes -> Html("""id='confirmResponseForm'"""),
-            '_dataTarget -> "confirmResponse"
-        )
-        </div>
-        <div class="form-group">
-            <button class="button" type="submit" id="continue">@Messages("button.continue")</button>
-        </div>
-    }
+        <div class="form-group @if(confirmResponseForm.hasErrors) {form-group-error}">
+            <fieldset>
 
-    @form(action = routes.CheckAgencyController.invasiveSaAgentCodePost(),'class -> "form js-form"){
-        <div class="multiple-choice" data-target="saAgentCode">
-            <input id="confirmResponse" type="radio" name="confirmResponse" value="true">
-            <label for="confirmResponse">@Messages("invasive.confirmResponse.true.yes")</label>
-        </div>
-        <div class="panel panel-border-narrow js-hidden" id="saAgentCode">
-            <label class="form-label" for="confirmResponse-true-hidden-input">@Messages("confirmResponse-true.hidden.input.label")</label>
-            <input class="form-control" name="confirmResponse-true-hidden-input" type="text" id="confirmResponse-true-hidden-input">
-        </div>
+                <legend>
+                    <span class="visually-hidden">@Messages("invasive.title.option")</span>
+                </legend>
 
-        <div class="multiple-choice" data-target="confirmResponse">
-            <input id="confirmResponse" type="radio" name="confirmResponse" value="false">
-            <label for="confirmResponse">@Messages("invasive.confirmResponse.false.no")</label>
-        </div>
-        <div class="panel panel-border-narrow js-hidden" id="saAgentCode">
-            <label class="form-label" for="confirmResponse-true-hidden-input">@Messages("confirmResponse-true.hidden.input.label")</label>
-            <input class="form-control" name="confirmResponse-true-hidden-input" type="text" id="confirmResponse-true-hidden-input">
-        </div>
-        <br>
-        <br>
-        <br>
-        <br>
+                <div class="multiple-choice" data-target="ninoRadioInput">
+                    <input id="confirmResponse" type="radio" name="confirmResponse" value="true">
+                    <label for="confirmResponse">@Messages("invasive.confirmResponse.true.nino")</label>
+                </div>
+                <div class="panel panel-border-narrow js-hidden" id="ninoRadioInput">
+                    <label class="form-label" for="confirmResponse-true-hidden-input">@Messages("confirmResponse.true.hidden.input.label.nino")</label>
+                    <input class="form-control" name="confirmResponse-true-hidden-input" type="text" id="confirmResponse-true-hidden-input">
+                </div>
 
+                <div class="multiple-choice" data-target="utrRadioInput">
+                    <input id="confirmResponse" type="radio" name="confirmResponse" value="false">
+                    <label for="confirmResponse">@Messages("invasive.confirmResponse.true.utr")</label>
+                </div>
+                <div class="panel panel-border-narrow js-hidden" id="utrRadioInput">
+                    <label class="form-label" for="confirmResponse-true-hidden-input">@Messages("confirmResponse.false.hidden.input.label.utr")</label>
+                    <input class="form-control" name="confirmResponse-false-hidden-input" type="text" id="confirmResponse-true-hidden-input">
+                </div>
+            </fieldset>
+
+        </div>
         <div class="form-group">
             <button class="button" type="submit" id="continue">@Messages("button.continue")</button>
         </div>

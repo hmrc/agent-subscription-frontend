@@ -102,27 +102,24 @@ class CheckAgencyController @Inject()
           knownFacts => checkAgencyStatusGivenValidForm(knownFacts)
         )
   }
-
   private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)
                                              (implicit authContext: AuthContext, request: AgentRequest[AnyContent]): Future[Result] = {
     def assureIsAgent(): Future[Option[AssuranceResults]] = {
-//      if (agentAssuranceFlag) {
-//        val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
-//        val futureSA = agentAssuranceConnector.hasAcceptableNumberOfSAClients
-//
-//        for {
-//          hasAcceptableNumberOfPayeClients <- futurePaye
-//          hasAcceptableNumberOfSAClients <- futureSA
-//        } yield Some(AssuranceResults(false, false)) //Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients))
-//      }
-//      else Future.successful(None)
-      Future.successful(Some(AssuranceResults(false, false)))
+      if (agentAssuranceFlag) {
+        val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
+        val futureSA = agentAssuranceConnector.hasAcceptableNumberOfSAClients
+
+        for {
+          hasAcceptableNumberOfPayeClients <- futurePaye
+          hasAcceptableNumberOfSAClients <- futureSA
+        } yield Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients))
+      }
+      else Future.successful(None)
     }
 
     def decideBasedOn: Option[AssuranceResults] => Result = {
-      //case Some(AssuranceResults(false,false)) => Redirect(routes.StartController.setupIncomplete())
-      case Some(AssuranceResults(false, false)) => Redirect(routes.CheckAgencyController.invasiveCheckStart)
-      case _ => Redirect(routes.CheckAgencyController.showConfirmYourAgency())
+      case Some(AssuranceResults(false,false)) => Redirect(routes.StartController.setupIncomplete())
+      case _  => Redirect(routes.CheckAgencyController.showConfirmYourAgency())
     }
 
     agentSubscriptionConnector.getRegistration(knownFacts.utr, knownFacts.postcode) flatMap { maybeRegistration: Option[Registration] =>
@@ -179,11 +176,9 @@ class CheckAgencyController @Inject()
       implicit request =>
         RadioWithInput.confirmResponseForm.bindFromRequest().fold(
           formWithErrors => {
-            val a = formWithErrors
             Future.successful(Ok(invasive_check_start(formWithErrors)))
           }, correctForm => {
             if (correctForm.value.getOrElse(false)) {
-              val a = correctForm
               if(correctForm.messageOfTrueRadioChoice.getOrElse("").length < 7 && correctForm.messageOfTrueRadioChoice.getOrElse("").length > 0) {
                 Future.successful(Redirect(routes.CheckAgencyController.invasiveTaxPayerOptionGet)
                   .withSession(request.session + ("saAgentReferenceToCheck" -> correctForm.messageOfTrueRadioChoice.getOrElse(""))))
