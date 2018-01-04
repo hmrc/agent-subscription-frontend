@@ -90,8 +90,6 @@ class AuditService @Inject()(val auditConnector: AuditConnector, authConnector: 
       .set("postcode", knownFactsResult.postcode)
       .set("passSaAgentAssuranceCheck", assuranceResults.hasAcceptableNumberOfSAClients)
       .set("passPayeAgentAssuranceCheck", assuranceResults.hasAcceptableNumberOfPayeClients)
-      .set("clientUtr", clientUtr)
-      .set("clientNino", clientNino)
       .set("passCESAAgentAssuranceCheck", assuranceResults.passCesaAgentAssuranceCheck)
 
     //TODO auditData.set("refuseToDealWith", ?)
@@ -111,6 +109,14 @@ class AuditService @Inject()(val auditConnector: AuditConnector, authConnector: 
       e <- saEnrolmentOpt
       saAgentRef <- e.identifiers.find(_.key == "IRAgentReference")
     } auditData.set("saAgentRef", saAgentRef.value)
+
+    clientNino.foreach { nino =>
+      auditData.set("clientNino", nino)
+    }
+
+    clientUtr.foreach { utr =>
+      auditData.set("clientUtr", utr)
+    }
 
     for {
       _ <- authConnector.getUserDetails(authContext).map { response =>
