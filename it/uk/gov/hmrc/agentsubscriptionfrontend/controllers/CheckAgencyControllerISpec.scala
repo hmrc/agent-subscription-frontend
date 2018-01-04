@@ -312,13 +312,21 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     "redirect to confirm your agency when successfully submitting nino" in {
       givenNinoAGoodCombinationAndUserHasRelationshipInCesa("nino", "AA123456A", "SA6012")
       hasNoEnrolments(subscribingAgent)
+      withMatchingUtrAndPostcode(validUtr, validPostcode, false)
 
-      val result = await(controller.invasiveTaxPayerOption(authenticatedRequest()
+      implicit val request = authenticatedRequest()
+
+      val result = await(controller.invasiveTaxPayerOption(request
         .withFormUrlEncodedBody(("confirmResponse", "true"), ("confirmResponse-true-hidden-input", "AA123456A"))
         .withSession(("saAgentReferenceToCheck" -> "SA6012"))))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
+
+      sessionStoreService.currentSession.knownFactsResult shouldBe
+        Some(KnownFactsResult(validUtr, validPostcode, "My Agency", isSubscribedToAgentServices = false))
+
+      verifyAgentAssuranceAuditRequestSent(false, false)
     }
 
     "nino invalid send back 200 with error page" in {
@@ -376,6 +384,8 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
         "isEnrolledPAYEAgent" -> "true",
         "payeAgentRef" -> "HZ1234",
         "passPayeAgentAssuranceCheck" -> passPayeAgentAssuranceCheck.toString,
+        "clientNino" -> "AA123456A",
+        "passCESAAgentAssuranceCheck" -> "true",
         "authProviderId" -> "12345-credId",
         "authProviderType" -> "GovernmentGateway"
       ),
