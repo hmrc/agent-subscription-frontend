@@ -34,7 +34,7 @@ class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUr
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
   def hasAcceptableNumberOfClients(regime: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    monitor(s"ConsumedAPI-AgentAssurance-hasAcceptableNumberOfClients-GET") {
+    monitor(s"ConsumedAPI-Agent-Assurance-hasAcceptableNumberOfClients-GET") {
       http.GET[HttpResponse](
         new URL(baseUrl, s"/agent-assurance/acceptableNumberOfClients/service/$regime").toString).map { response =>
         response.status == 204
@@ -45,7 +45,7 @@ class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUr
   }
 
   def getActiveCesaRelationship(url: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    monitor(s"ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
+    monitor(s"ConsumedAPI-Agent-Assurance-getActiveCesaRelationship-GET") {
       http.GET[HttpResponse](baseUrl + url).map(
         _ => true)
         .recover {
