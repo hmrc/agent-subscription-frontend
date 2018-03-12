@@ -35,7 +35,8 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
-      givenUtrIsNotForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
@@ -54,7 +55,8 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
-      givenUtrIsNotForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
@@ -71,7 +73,8 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
-      givenUtrIsNotForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
@@ -86,7 +89,8 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
-      givenUtrIsNotForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
@@ -101,7 +105,8 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
-      givenUtrIsNotForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
 
       implicit val request = authenticatedRequest().withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
@@ -117,7 +122,8 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
-      givenUtrIsNotForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
@@ -132,7 +138,8 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
-      givenUtrIsNotForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
@@ -147,7 +154,8 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
-      givenUtrIsNotForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
@@ -159,7 +167,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
     "redirect to setup incomplete when agent's utr is in the R2DW list" in {
       isEnrolledForNonMtdServices(subscribingAgent)
-      givenUtrIsForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsForbidden(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
@@ -167,26 +175,80 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.StartController.setupIncomplete().url)
       verify(0, getRequestedFor(urlPathEqualTo(s"/agent-subscription/registration/${encodePathSegment(validUtr.value)}/postcode/${encodePathSegment(validPostcode)}")))
+      verifyCheckRefusalToDealWith(1, validUtr.value)
+      verifyCheckAgentIsManuallyAssured(0, validUtr.value)
+      verifyCheckForAcceptableNumberOfPAYEClientsUrl(0)
+      verifyCheckForAcceptableNumberOfSAClients(0)
     }
 
     "continue checks when UTR is not found the R2DW list" in {
+      withMatchingUtrAndPostcode(validUtr, validPostcode)
       isEnrolledForNonMtdServices(subscribingAgent)
-      givenUtrIsNotForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
+      givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
+      givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
       verify(1, getRequestedFor(urlPathEqualTo(s"/agent-subscription/registration/${encodePathSegment(validUtr.value)}/postcode/${encodePathSegment(validPostcode)}")))
+      verifyCheckRefusalToDealWith(1, validUtr.value)
+      verifyCheckAgentIsManuallyAssured(1, validUtr.value)
+      verifyCheckForAcceptableNumberOfPAYEClientsUrl(1)
+      verifyCheckForAcceptableNumberOfSAClients(1)
     }
 
     "exception received due to missing config in R2DW" in {
       isEnrolledForNonMtdServices(subscribingAgent)
-      given404ReturnedForR2dw(validUtr.value)
+      givenRefusalToDealWithReturns404(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       an[IllegalStateException] shouldBe thrownBy(await(controller.checkAgencyStatus(request)))
 
       verify(0, getRequestedFor(urlPathEqualTo(s"/agent-subscription/registration/${encodePathSegment(validUtr.value)}/postcode/${encodePathSegment(validPostcode)}")))
+    }
+
+    "proceed direct to showConfirmYourAgency and skip assurance checks " +
+    "when agent's UTR is not in the Refusal to Deal With list but is in the Manually Assured Agents list" in {
+      withMatchingUtrAndPostcode(validUtr, validPostcode)
+      isEnrolledForNonMtdServices(subscribingAgent)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsManuallyAssured(validUtr.value)
+
+      implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      val result = await(controller.checkAgencyStatus(request))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
+
+      verifyCheckRefusalToDealWith(1, validUtr.value)
+      verifyCheckAgentIsManuallyAssured(1, validUtr.value)
+      verify(1, getRequestedFor(urlPathEqualTo(s"/agent-subscription/registration/${encodePathSegment(validUtr.value)}/postcode/${encodePathSegment(validPostcode)}")))
+      verifyCheckForAcceptableNumberOfPAYEClientsUrl(0)
+      verifyCheckForAcceptableNumberOfSAClients(0)
+      verifyAuditRequestNotSent(AgentSubscriptionFrontendEvent.AgentAssurance)
+    }
+
+    "perform all usual assurance checks when agent's UTR is not in the Manually Assured Agents list" in {
+      withMatchingUtrAndPostcode(validUtr, validPostcode)
+      isEnrolledForNonMtdServices(subscribingAgent)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
+      givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
+      givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
+
+      implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      val result = await(controller.checkAgencyStatus(request))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
+
+      verifyCheckRefusalToDealWith(1, validUtr.value)
+      verifyCheckAgentIsManuallyAssured(1, validUtr.value)
+      verify(1, getRequestedFor(urlPathEqualTo(s"/agent-subscription/registration/${encodePathSegment(validUtr.value)}/postcode/${encodePathSegment(validPostcode)}")))
+      verifyCheckForAcceptableNumberOfPAYEClientsUrl(1)
+      verifyCheckForAcceptableNumberOfSAClients(1)
     }
   }
 }

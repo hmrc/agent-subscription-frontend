@@ -109,13 +109,19 @@ class CheckAgencyController @Inject()
                                              (implicit authContext: AuthContext, request: AgentRequest[AnyContent]): Future[Result] = {
     def assureIsAgent(): Future[Option[AssuranceResults]] = {
       if (agentAssuranceFlag) {
-        val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
-        val futureSA = agentAssuranceConnector.hasAcceptableNumberOfSAClients
+        agentAssuranceConnector.isManuallyAssuredAgent(knownFacts.utr).flatMap { isManuallyAssured =>
+          if(isManuallyAssured)
+            Future.successful(None)
+          else {
+            val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
+            val futureSA = agentAssuranceConnector.hasAcceptableNumberOfSAClients
 
-        for {
-          hasAcceptableNumberOfPayeClients <- futurePaye
-          hasAcceptableNumberOfSAClients <- futureSA
-        } yield Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients))
+            for {
+              hasAcceptableNumberOfPayeClients <- futurePaye
+              hasAcceptableNumberOfSAClients <- futureSA
+            } yield Some(AssuranceResults(hasAcceptableNumberOfPayeClients, hasAcceptableNumberOfSAClients))
+          }
+        }
       }
       else Future.successful(None)
     }
@@ -137,6 +143,7 @@ class CheckAgencyController @Inject()
       agentSubscriptionConnector.getRegistration(knownFacts.utr, knownFacts.postcode) flatMap { maybeRegistration: Option[Registration] =>
         maybeRegistration match {
           case Some(Registration(Some(taxpayerName), isSubscribedToAgentServices)) if !isSubscribedToAgentServices =>
+
             for {
               assuranceResults <- assureIsAgent()
               knownFactsResult = KnownFactsResult(knownFacts.utr, knownFacts.postcode, taxpayerName, isSubscribedToAgentServices)
