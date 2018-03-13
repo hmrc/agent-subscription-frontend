@@ -46,7 +46,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       sessionStoreService.currentSession.knownFactsResult shouldBe Some(
         KnownFactsResult(validUtr, validPostcode, "My Agency", isSubscribedToAgentServices = false)
       )
-      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = true, passSaAgentAssuranceCheck = true)
+      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = Some(true), passSaAgentAssuranceCheck = Some(true))
       metricShouldExistsAndBeenUpdated("Count-Subscription-CheckAgency-Success")
     }
 
@@ -64,7 +64,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
       sessionStoreService.currentSession.knownFactsResult.get.isSubscribedToAgentServices shouldBe false
-      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = true, passSaAgentAssuranceCheck = true)
+      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = Some(true), passSaAgentAssuranceCheck = Some(true))
       metricShouldExistsAndBeenUpdated("Count-Subscription-CheckAgency-Success")
     }
 
@@ -97,7 +97,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.invasiveCheckStart().url)
-      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = false, passSaAgentAssuranceCheck = false)
+      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = Some(false), passSaAgentAssuranceCheck = Some(false))
     }
 
     "fail when the business registration found by agent-subscription is not already subscribed for an agent without an acceptable number of PAYE clients" in {
@@ -113,7 +113,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.invasiveCheckStart().url)
-      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = false, passSaAgentAssuranceCheck = false)
+      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = Some(false), passSaAgentAssuranceCheck = Some(false))
     }
 
     "redirect to already subscribed page when the business registration found by agent-subscription is already subscribed " +
@@ -133,7 +133,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       verifyAuditRequestNotSent(AgentSubscriptionFrontendEvent.AgentAssurance)
     }
 
-    "proceed to showConfirmYourAgency when there in not an acceptable number of PAYE client, but there is enough SA Clients" in {
+    "proceed to showConfirmYourAgency when there is not an acceptable number of PAYE client, but there is enough SA Clients" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
@@ -146,7 +146,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
-      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = false, passSaAgentAssuranceCheck = true)
+      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = Some(false), passSaAgentAssuranceCheck = Some(true))
     }
 
     "proceed to showConfirmYourAgency when there in not an acceptable number of SA client, but there is enough PAYE Clients" in {
@@ -162,21 +162,23 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
-      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = true, passSaAgentAssuranceCheck = false)
+      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = Some(true), passSaAgentAssuranceCheck = Some(false))
     }
 
     "redirect to setup incomplete when agent's utr is in the R2DW list" in {
+      withMatchingUtrAndPostcode(validUtr, validPostcode)
       isEnrolledForNonMtdServices(subscribingAgent)
       givenRefusalToDealWithUtrIsForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.StartController.setupIncomplete().url)
-      verify(0, getRequestedFor(urlPathEqualTo(s"/agent-subscription/registration/${encodePathSegment(validUtr.value)}/postcode/${encodePathSegment(validPostcode)}")))
+      verify(1, getRequestedFor(urlPathEqualTo(s"/agent-subscription/registration/${encodePathSegment(validUtr.value)}/postcode/${encodePathSegment(validPostcode)}")))
       verifyCheckRefusalToDealWith(1, validUtr.value)
-      verifyCheckAgentIsManuallyAssured(0, validUtr.value)
+      verifyCheckAgentIsManuallyAssured(1, validUtr.value)
       verifyCheckForAcceptableNumberOfPAYEClientsUrl(0)
       verifyCheckForAcceptableNumberOfSAClients(0)
     }
@@ -200,13 +202,16 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
     }
 
     "exception received due to missing config in R2DW" in {
+      withMatchingUtrAndPostcode(validUtr, validPostcode)
       isEnrolledForNonMtdServices(subscribingAgent)
       givenRefusalToDealWithReturns404(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
 
       implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       an[IllegalStateException] shouldBe thrownBy(await(controller.checkAgencyStatus(request)))
 
-      verify(0, getRequestedFor(urlPathEqualTo(s"/agent-subscription/registration/${encodePathSegment(validUtr.value)}/postcode/${encodePathSegment(validPostcode)}")))
+      verify(1, getRequestedFor(urlPathEqualTo(s"/agent-subscription/registration/${encodePathSegment(validUtr.value)}/postcode/${encodePathSegment(validPostcode)}")))
+      verifyCheckRefusalToDealWith(1, validUtr.value)
     }
 
     "proceed direct to showConfirmYourAgency and skip assurance checks " +
@@ -227,7 +232,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       verify(1, getRequestedFor(urlPathEqualTo(s"/agent-subscription/registration/${encodePathSegment(validUtr.value)}/postcode/${encodePathSegment(validPostcode)}")))
       verifyCheckForAcceptableNumberOfPAYEClientsUrl(0)
       verifyCheckForAcceptableNumberOfSAClients(0)
-      verifyAuditRequestNotSent(AgentSubscriptionFrontendEvent.AgentAssurance)
+      verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = None, passSaAgentAssuranceCheck = None)
     }
 
     "perform all usual assurance checks when agent's UTR is not in the Manually Assured Agents list" in {

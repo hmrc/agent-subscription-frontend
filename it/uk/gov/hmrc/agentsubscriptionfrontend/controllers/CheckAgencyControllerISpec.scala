@@ -436,7 +436,12 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   }
 
 
-  def verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck: Boolean, passSaAgentAssuranceCheck: Boolean): Unit = {
+  def verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck: Option[Boolean], passSaAgentAssuranceCheck: Option[Boolean]): Unit = {
+    val optional = Seq(
+      passPayeAgentAssuranceCheck.map("passPayeAgentAssuranceCheck" -> _.toString),
+      passSaAgentAssuranceCheck.map("passSaAgentAssuranceCheck" -> _.toString)
+    ).flatten
+
     verifyAuditRequestSent(1, AgentSubscriptionFrontendEvent.AgentAssurance,
       detail = Map(
         "utr" -> validUtr.value,
@@ -444,13 +449,11 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
         "isEnrolledSAAgent" -> "true",
         "saAgentRef" -> "FOO1234",
         //TODO "refuseToDealWith" -> ?,
-        "passSaAgentAssuranceCheck" -> passSaAgentAssuranceCheck.toString,
         "isEnrolledPAYEAgent" -> "true",
         "payeAgentRef" -> "HZ1234",
-        "passPayeAgentAssuranceCheck" -> passPayeAgentAssuranceCheck.toString,
         "authProviderId" -> "12345-credId",
         "authProviderType" -> "GovernmentGateway"
-      ),
+      ) ++ optional,
       tags = Map(
         "transactionName" -> "agent-assurance",
         "path" -> "/"
