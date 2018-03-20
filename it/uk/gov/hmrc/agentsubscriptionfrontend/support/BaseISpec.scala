@@ -82,9 +82,9 @@ abstract class BaseISpec extends UnitSpec with OneAppPerSuite with MongoApp with
 
   protected implicit val materializer = app.materializer
 
-  protected def authenticatedRequest(user: SampleUser = subscribingAgent): FakeRequest[AnyContentAsEmpty.type] = {
+  protected def authenticatedRequest(user: SampleUser = subscribingAgent, method: String = "GET", path: String = "/"): FakeRequest[AnyContentAsEmpty.type] = {
     val sessionKeys = userIsAuthenticated(user)
-    FakeRequest().withSession(sessionKeys: _*)
+    FakeRequest(method, path).withSession(sessionKeys: _*)
   }
 
 
