@@ -111,6 +111,7 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
     bindBaseUrl("auth")
     bindConfigProperty[String]("surveyRedirectUrl")
     bindConfigProperty[String]("sosRedirectUrl")
+    bindConfigProperty[String]("guidanceRedirectUrl")
     bindConfigProperty[Int]("mongodb.knownfactsresult.ttl")
     bindConfigProperty[Boolean]("agentAssuranceFlag")
     bindServiceProperty("cachable.session-cache.domain")
