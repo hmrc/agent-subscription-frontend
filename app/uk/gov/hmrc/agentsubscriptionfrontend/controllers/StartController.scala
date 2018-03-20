@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
@@ -38,23 +38,20 @@ class StartController @Inject()(override val messagesApi: MessagesApi,
                                 override val passcodeAuthenticationProvider: PasscodeAuthenticationProvider,
                                 knownFactsResultMongoRepository: KnownFactsResultMongoRepository,
                                 continueUrlActions: ContinueUrlActions,
-                                sessionStoreService: SessionStoreService)
+                                sessionStoreService: SessionStoreService,
+                                @Named("guidanceRedirectUrl") guidanceRedirectUrl: String)
                                (implicit appConfig: AppConfig)
     extends FrontendController with I18nSupport with Actions with PasscodeAuthentication {
 
   import continueUrlActions._
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
 
-  val root: Action[AnyContent] = PasscodeAuthenticatedActionAsync { implicit request =>
-    withMaybeContinueUrl { urlOpt =>
-      Future.successful(Redirect(routes.StartController.start().toURLWithParams("continue" -> urlOpt.map(_.url))))
-    }
+  val root: Action[AnyContent] = PasscodeAuthenticatedAction { implicit request =>
+    Redirect(guidanceRedirectUrl)
   }
 
-  def start: Action[AnyContent] = PasscodeAuthenticatedActionAsync { implicit request =>
-    withMaybeContinueUrl { urlOpt =>
-      Future.successful(Ok(html.start(urlOpt)))
-    }
+  def start: Action[AnyContent] = PasscodeAuthenticatedAction { implicit request =>
+    Redirect(guidanceRedirectUrl)
   }
 
   val showNonAgentNextSteps: Action[AnyContent] = AuthorisedFor(NoOpRegime, GGConfidence) { implicit authContext =>

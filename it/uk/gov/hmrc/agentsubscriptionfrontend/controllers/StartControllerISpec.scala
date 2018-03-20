@@ -18,115 +18,30 @@ class StartControllerISpec extends BaseISpec {
 
   private lazy val controller: StartController = app.injector.instanceOf[StartController]
   private lazy val configuredGovernmentGatewayUrl = "http://configured-government-gateway.gov.uk/"
+  private lazy val configuredGuidanceRedirectUrl = "https://configured.guidanceRedirectUrl.com"
   private lazy val repo = app.injector.instanceOf[KnownFactsResultMongoRepository]
 
   override protected def appBuilder: GuiceApplicationBuilder = super.appBuilder
-    .configure("government-gateway.url" -> configuredGovernmentGatewayUrl)
+    .configure(
+      "government-gateway.url" -> configuredGovernmentGatewayUrl,
+      "Test.guidanceRedirectUrl" -> configuredGuidanceRedirectUrl
+    )
 
   "context root" should {
-    "redirect to start page" in {
-      implicit val request = FakeRequest()
-      val result = await(controller.root(request))
+    "redirect to guidance page on gov.uk" in {
+      val result = await(controller.root(FakeRequest()))
 
       status(result) shouldBe 303
-      redirectLocation(result).head should include("/start")
-    }
-
-    "include an absolute continue URL in the redirect" in {
-      val url = "http://localhost"
-      val result = await(controller.root(FakeRequest("GET", s"/?continue=${URLEncoder.encode(url, "UTF-8")}")))
-
-      status(result) shouldBe 303
-      redirectLocation(result).head should include(s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")
-    }
-
-    "not include a continue URL if it's invalid" in {
-      val result = await(controller.root(FakeRequest("GET", "/?continue=http://foo@bar:1234")))
-
-      status(result) shouldBe 303
-      redirectLocation(result).head should not include("continue=")
-    }
-
-    "not include a continue URL if it's not provided" in {
-      val result = await(controller.root(FakeRequest("GET", "/")))
-
-      status(result) shouldBe 303
-      redirectLocation(result).head should not include("continue=")
+      redirectLocation(result).get should include(configuredGuidanceRedirectUrl)
     }
   }
 
   "start" should {
-    "not require authentication" in {
-      AuthStub.userIsNotAuthenticated()
-
+    "redirect to guidance page on gov.uk" in {
       val result = await(controller.start(FakeRequest()))
 
-      status(result) shouldBe 200
-    }
-
-    "be available" in {
-      val result = await(controller.start()(FakeRequest()))
-
-      bodyOf(result) should include("Agent Services account: sign in or set up")
-    }
-
-    behave like aPageWithFeedbackLinks(request => controller.start(request))
-
-    "start redirects" should {
-      "include absolute continue URL" in {
-        val url = "http://localhost"
-        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
-
-        status(result) shouldBe 200
-        bodyOf(result) should include(s"continue=${URLEncoder.encode(url, "UTF-8")}")
-      }
-
-      "include relative continue URL" in {
-        val url = "/foo"
-        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
-
-        status(result) shouldBe 200
-        bodyOf(result) should include(s"continue=${URLEncoder.encode(url, "UTF-8")}")
-      }
-
-      "include continue URL if it's the absolute www.tax.service.gov.uk continue url" in {
-        val url = "http://www.tax.service.gov.uk/foo/bar?some=true"
-        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
-
-        status(result) shouldBe 200
-        bodyOf(result) should include(s"continue=${URLEncoder.encode(url, "UTF-8")}")
-      }
-
-      "include continue URL if it's whitelisted" in {
-        val url = "http://www.foo.com/bar?some=false"
-        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
-
-        status(result) shouldBe 200
-        bodyOf(result) should include(s"continue=${URLEncoder.encode(url, "UTF-8")}")
-      }
-
-      "not include a continue URL if it contains an invalid character" in {
-        val url = "http://www@foo.com"
-        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
-
-        status(result) shouldBe 200
-        bodyOf(result) should not include("continue=")
-      }
-
-      "not include a continue URL if it's not whitelisted" in {
-        val url = "http://www.foo.org/bar?some=false"
-        val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
-
-        status(result) shouldBe 200
-        bodyOf(result) should not include("continue=")
-      }
-
-      "not include a continue URL if it's not provided" in {
-        val result = await(controller.start()(FakeRequest("GET", "/start")))
-
-        status(result) shouldBe 200
-        bodyOf(result) should not include("continue=")
-      }
+      status(result) shouldBe 303
+      redirectLocation(result).get should include(configuredGuidanceRedirectUrl)
     }
   }
 

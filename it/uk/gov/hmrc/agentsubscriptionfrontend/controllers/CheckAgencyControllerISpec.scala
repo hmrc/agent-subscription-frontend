@@ -58,6 +58,11 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       controller.showCheckAgencyStatus(request)
     }, authenticatedRequest())
 
+    behave like anEndpointCachingAContinueUrl(request => {
+      hasNoEnrolments(subscribingAgent)
+        controller.showCheckAgencyStatus(request)
+    }, sessionStoreService)
+
     "display the check agency status page if the current user is logged in and has affinity group = Agent" in {
       hasNoEnrolments(subscribingAgent)
 
