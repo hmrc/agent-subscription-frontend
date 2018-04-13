@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import javax.inject.{Inject, Named, Singleton}
+import javax.inject.{ Inject, Named, Singleton }
 
 import play.api.mvc.Action
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -28,10 +28,11 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import scala.concurrent.Future
 
 @Singleton
-class SignedOutController @Inject()(@Named("surveyRedirectUrl") surveyUrl: String,
-                                    @Named("sosRedirectUrl") sosUrl: String,
-                                    knownFactsResultMongoRepository: KnownFactsResultMongoRepository,
-                                    sessionStoreService: SessionStoreService)(implicit appConfig: AppConfig)
+class SignedOutController @Inject() (
+  @Named("surveyRedirectUrl") surveyUrl: String,
+  @Named("sosRedirectUrl") sosUrl: String,
+  knownFactsResultMongoRepository: KnownFactsResultMongoRepository,
+  sessionStoreService: SessionStoreService)(implicit appConfig: AppConfig)
   extends FrontendController {
 
   def redirectToSos = Action.async { implicit request =>
@@ -46,9 +47,9 @@ class SignedOutController @Inject()(@Named("surveyRedirectUrl") surveyUrl: Strin
     } yield {
       val continueUrl =
         addParamsToUrl(
-          "/agent-subscription/return-after-gg-creds-created","id" -> id.map(_.toString),
+          "/agent-subscription/return-after-gg-creds-created", "id" -> id.map(_.toString),
           "continue" -> agentSubContinueUrl.map(_.url))
-      SeeOther(addParamsToUrl(sosUrl,  "continue" -> Some(continueUrl))).withNewSession
+      SeeOther(addParamsToUrl(sosUrl, "continue" -> Some(continueUrl))).withNewSession
     }
   }
 

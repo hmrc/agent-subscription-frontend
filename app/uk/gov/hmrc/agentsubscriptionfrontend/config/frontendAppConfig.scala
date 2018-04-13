@@ -17,14 +17,13 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.config
 
 import java.util.Collections.emptyList
-import javax.inject.Singleton
 
-import play.api.Play.{configuration, current}
+import javax.inject.Inject
+import play.api.{ Configuration, Environment }
+import play.api.Play.{ configuration, current }
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.play.config.ServicesConfig
-
-import scala.collection.JavaConversions._
 
 trait AppConfig {
   val analyticsToken: String
@@ -56,8 +55,9 @@ object GGConfig extends StrictConfig {
     routes.CheckAgencyController.showCheckAgencyStatus().url
 }
 
-@Singleton
-class FrontendAppConfig extends AppConfig with StrictConfig with ServicesConfig {
+class FrontendAppConfig @Inject() (environment: Environment, configuration: Configuration) extends AppConfig with StrictConfig with ServicesConfig {
+  override val runModeConfiguration: Configuration = configuration
+  override protected def mode = environment.mode
   private lazy val contactHost = runModeConfiguration.getString(s"contact-frontend.host").getOrElse("")
   private lazy val servicesAccountUrl = getConfString("agent-services-account-frontend.external-url", "")
   private lazy val servicesAccountPath = getConfString("agent-services-account-frontend.start.path", "")
@@ -74,7 +74,5 @@ class FrontendAppConfig extends AppConfig with StrictConfig with ServicesConfig 
     PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
   override lazy val journeyName: String = getConfString("address-lookup-frontend.journeyName", "")
   override lazy val agentServicesAccountUrl: String = s"$servicesAccountUrl$servicesAccountPath"
-  override lazy val domainWhiteList =
-    runModeConfiguration.getStringList("continueUrl.domainWhiteList").getOrElse(emptyList()).toSet
   override lazy val agentAssuranceFlag: Boolean = runModeConfiguration.getBoolean("agentAssuranceFlag").getOrElse(false)
 }

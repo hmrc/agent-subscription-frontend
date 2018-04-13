@@ -18,29 +18,29 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import javax.inject.Inject
 
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.i18n.{ I18nSupport, MessagesApi }
+import play.api.mvc.{ Action, AnyContent, Result }
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.NoOpRegime
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-import uk.gov.hmrc.passcode.authentication.{PasscodeAuthentication, PasscodeAuthenticationProvider, PasscodeVerificationConfig}
+import uk.gov.hmrc.passcode.authentication.{ PasscodeAuthentication, PasscodeAuthenticationProvider, PasscodeVerificationConfig }
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-class StartController @Inject()(override val messagesApi: MessagesApi,
-                                override val authConnector: AuthConnector,
-                                override val config: PasscodeVerificationConfig,
-                                override val passcodeAuthenticationProvider: PasscodeAuthenticationProvider,
-                                knownFactsResultMongoRepository: KnownFactsResultMongoRepository,
-                                continueUrlActions: ContinueUrlActions,
-                                sessionStoreService: SessionStoreService)
-                               (implicit appConfig: AppConfig)
-    extends FrontendController with I18nSupport with Actions with PasscodeAuthentication {
+class StartController @Inject() (
+  override val messagesApi: MessagesApi,
+  override val authConnector: AuthConnector,
+  override val config: PasscodeVerificationConfig,
+  override val passcodeAuthenticationProvider: PasscodeAuthenticationProvider,
+  knownFactsResultMongoRepository: KnownFactsResultMongoRepository,
+  continueUrlActions: ContinueUrlActions,
+  sessionStoreService: SessionStoreService)(implicit appConfig: AppConfig)
+  extends FrontendController with I18nSupport with Actions with PasscodeAuthentication {
 
   import continueUrlActions._
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
@@ -57,9 +57,8 @@ class StartController @Inject()(override val messagesApi: MessagesApi,
     }
   }
 
-  val showNonAgentNextSteps: Action[AnyContent] = AuthorisedFor(NoOpRegime, GGConfidence) { implicit authContext =>
-    implicit request =>
-      Ok(html.non_agent_next_steps())
+  val showNonAgentNextSteps: Action[AnyContent] = AuthorisedFor(NoOpRegime, GGConfidence) { implicit authContext => implicit request =>
+    Ok(html.non_agent_next_steps())
   }
 
   def returnAfterGGCredsCreated(id: Option[String] = None): Action[AnyContent] = PasscodeAuthenticatedActionAsync { implicit request =>

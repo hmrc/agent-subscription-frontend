@@ -21,7 +21,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AddressLookupFrontendAddress, DesAddress}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{ AddressLookupFrontendAddress, DesAddress }
 
 class DesAddressForm(logger: LoggerLike, blacklistedPostcodes: Set[String]) {
   val form = Form[DesAddress](
@@ -31,9 +31,7 @@ class DesAddressForm(logger: LoggerLike, blacklistedPostcodes: Set[String]) {
       "addressLine3" -> FieldMappings.addressLine234,
       "addressLine4" -> FieldMappings.addressLine234,
       "postcode" -> FieldMappings.postcodeWithBlacklist(blacklistedPostcodes),
-      "countryCode" -> text
-    )(DesAddress.apply)(DesAddress.unapply)
-  )
+      "countryCode" -> text)(DesAddress.apply)(DesAddress.unapply))
 
   def bindAddressLookupFrontendAddress(utr: Utr, addressLookupFrontendAddress: AddressLookupFrontendAddress): Form[DesAddress] = {
     if (addressLookupFrontendAddress.lines.length > 4) {
@@ -46,9 +44,7 @@ class DesAddressForm(logger: LoggerLike, blacklistedPostcodes: Set[String]) {
         "addressLine3" -> lineIfPresent(addressLookupFrontendAddress.lines, 2).getOrElse(""),
         "addressLine4" -> lineIfPresent(addressLookupFrontendAddress.lines, 3).getOrElse(""),
         "postcode" -> addressLookupFrontendAddress.postcode.getOrElse(""),
-        "countryCode" -> addressLookupFrontendAddress.country.code
-      )
-    )
+        "countryCode" -> addressLookupFrontendAddress.country.code))
   }
 
   private def lineIfPresent(lines: Seq[String], index: Int): Option[String] =

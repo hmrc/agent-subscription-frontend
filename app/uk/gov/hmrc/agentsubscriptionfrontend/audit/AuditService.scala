@@ -17,14 +17,13 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.audit
 
 import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
 
+import javax.inject.Inject
 import com.google.inject.Singleton
-import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import play.api.mvc.{ AnyContent, Request }
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AgentRequest
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AssuranceCheckInput, AssuranceResults, KnownFactsResult}
-import uk.gov.hmrc.domain.{Nino, TaxIdentifier}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{ AssuranceCheckInput, AssuranceResults, KnownFactsResult }
+import uk.gov.hmrc.domain.TaxIdentifier
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -58,7 +57,7 @@ class AuditData {
 }
 
 @Singleton
-class AuditService @Inject()(val auditConnector: AuditConnector, authConnector: AuthConnector) {
+class AuditService @Inject() (val auditConnector: AuditConnector, authConnector: AuthConnector) {
 
   import AgentSubscriptionFrontendEvent._
 
@@ -77,14 +76,13 @@ class AuditService @Inject()(val auditConnector: AuditConnector, authConnector: 
     ("userEnteredNino", None),
     ("passCESAAgentAssuranceCheck", None),
     ("authProviderId", None),
-    ("authProviderType", None)
-  )
+    ("authProviderType", None))
 
-  def sendAgentAssuranceAuditEvent(knownFactsResult: KnownFactsResult,
-                                   assuranceResults: AssuranceResults,
-                                   assuranceCheckInput: Option[AssuranceCheckInput] = None)
-                                  (implicit hc: HeaderCarrier, request: AgentRequest[AnyContent],
-                                   authContext: AuthContext): Future[Unit] = {
+  def sendAgentAssuranceAuditEvent(
+    knownFactsResult: KnownFactsResult,
+    assuranceResults: AssuranceResults,
+    assuranceCheckInput: Option[AssuranceCheckInput] = None)(implicit hc: HeaderCarrier, request: AgentRequest[AnyContent],
+    authContext: AuthContext): Future[Unit] = {
     implicit val auditData: AuditData = new AuditData
 
     auditData.set("utr", knownFactsResult.utr)
@@ -124,7 +122,6 @@ class AuditService @Inject()(val auditConnector: AuditConnector, authConnector: 
         auditData.set("userEnteredSaAgentRef", saAgentRef)
       }
     }
-
     for {
       _ <- authConnector.getUserDetails(authContext).map { response =>
         val json = response.json
@@ -146,13 +143,11 @@ class AuditService @Inject()(val auditConnector: AuditConnector, authConnector: 
       case (f, Some(d)) => (f, d)
     }
 
-  private[audit] def auditEvent(event: AgentSubscriptionFrontendEvent, transactionName: String, details: Seq[(String, Any)] = Seq.empty)
-                               (implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] = {
+  private[audit] def auditEvent(event: AgentSubscriptionFrontendEvent, transactionName: String, details: Seq[(String, Any)] = Seq.empty)(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] = {
     send(createEvent(event, transactionName, details: _*))
   }
 
-  private[audit] def createEvent(event: AgentSubscriptionFrontendEvent, transactionName: String, details: (String, Any)*)
-                                (implicit hc: HeaderCarrier, request: Request[Any]): DataEvent = {
+  private[audit] def createEvent(event: AgentSubscriptionFrontendEvent, transactionName: String, details: (String, Any)*)(implicit hc: HeaderCarrier, request: Request[Any]): DataEvent = {
 
     def toString(x: Any): String = x match {
       case t: TaxIdentifier => t.value
@@ -161,11 +156,11 @@ class AuditService @Inject()(val auditConnector: AuditConnector, authConnector: 
 
     val detail = hc.toAuditDetails(details.map(pair => pair._1 -> toString(pair._2)): _*)
     val tags = hc.toAuditTags(transactionName, request.path)
-    DataEvent(auditSource = "agent-subscription-frontend",
+    DataEvent(
+      auditSource = "agent-subscription-frontend",
       auditType = event.toString,
       tags = tags,
-      detail = detail
-    )
+      detail = detail)
   }
 
   private[audit] def send(events: DataEvent*)(implicit hc: HeaderCarrier): Future[Unit] = {

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 object PostcodesLoader {
   private val postcodeWithoutSpacesRegex = "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$".r
@@ -43,6 +43,5 @@ object PostcodesLoader {
 
   def formatPostcode(p: String) = Option(p).map(_.replace(" ", "").toUpperCase).orNull
 
-  final class PostcodeLoaderException(message: String) extends
-    Exception(s"Unknown error code from agent-subscription while loading postcodes: $message")
+  final class PostcodeLoaderException(message: String) extends Exception(s"Unknown error code from agent-subscription while loading postcodes: $message")
 }

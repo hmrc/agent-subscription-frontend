@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 
 import play.api.Logger
 import play.api.mvc._
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{HostnameWhiteListService, SessionStoreService}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{ HostnameWhiteListService, SessionStoreService }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.binders.ContinueUrl
@@ -28,11 +28,12 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 @Singleton
-class ContinueUrlActions @Inject()(whiteListService: HostnameWhiteListService,
-                                   sessionStoreService: SessionStoreService) {
+class ContinueUrlActions @Inject() (
+  whiteListService: HostnameWhiteListService,
+  sessionStoreService: SessionStoreService) {
 
   def extractContinueUrl[A](implicit request: Request[A]): Future[Option[ContinueUrl]] = {
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Option(request.session))

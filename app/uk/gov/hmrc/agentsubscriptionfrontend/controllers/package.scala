@@ -17,13 +17,12 @@
 package uk.gov.hmrc.agentsubscriptionfrontend
 
 import play.api.data.Forms._
-import play.api.data.{Form, FormError, Mapping}
+import play.api.data.{ Form, FormError, Mapping }
 import play.api.data.format.Formatter
-import play.api.data.validation.{Constraint, Constraints, _}
+import play.api.data.validation.{ Constraint, Constraints, _ }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioWithInput
-
 
 package object controllers {
 
@@ -105,7 +104,7 @@ package object controllers {
 
     def utr: Mapping[Utr] = text
       .verifying(nonEmptyWithMessage("error.utr.empty"))
-      .transform[Utr](Utr.apply,_.value)
+      .transform[Utr](Utr.apply, _.value)
       .verifying("error.utr.invalid", utr => Utr.isValid(utr.value))
     def postcode: Mapping[String] = of[String](stringFormatWithMessage("error.postcode.empty")) verifying nonEmptyPostcode
     def postcodeWithBlacklist(blacklistedPostcodes: Set[String]): Mapping[String] = postcode

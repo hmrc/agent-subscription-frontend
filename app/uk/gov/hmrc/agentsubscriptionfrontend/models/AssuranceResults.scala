@@ -17,5 +17,5 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
 case class AssuranceResults(
-                             hasAcceptableNumberOfPayeClients: Boolean,
-                             hasAcceptableNumberOfSAClients: Boolean)
+  hasAcceptableNumberOfPayeClients: Boolean,
+  hasAcceptableNumberOfSAClients: Boolean)

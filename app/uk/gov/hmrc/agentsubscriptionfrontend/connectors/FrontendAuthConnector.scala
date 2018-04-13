@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentsubscriptionfrontend.controllers
+package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
-import play.api.Logger
-import play.api.mvc.{ Result, Results }
+import java.net.URL
+import javax.inject.{ Inject, Named, Singleton }
 
-trait SessionDataMissing {
-  this: Results =>
+import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.http.HttpPost
+import uk.gov.hmrc.play.http.ws.WSPost
 
-  def sessionMissingRedirect(): Result = {
-    Logger.warn("No KnownFactsResult and/or InitialDetails in session store, redirecting back to check-agency-status")
-    Redirect(routes.CheckAgencyController.showCheckAgencyStatus())
+@Singleton
+class FrontendAuthConnector @Inject() (@Named("auth-baseUrl") baseUrl: URL)
+  extends PlayAuthConnector {
+
+  override val serviceUrl = baseUrl.toString
+
+  override def http = new HttpPost with WSPost {
+    override val hooks = NoneRequired
   }
 }

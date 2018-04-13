@@ -23,7 +23,7 @@ import play.api.mvc.Results._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.GGConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
-import uk.gov.hmrc.play.frontend.auth.{GovernmentGateway, TaxRegime}
+import uk.gov.hmrc.play.frontend.auth.{ GovernmentGateway, TaxRegime }
 
 import scala.concurrent.Future
 
@@ -46,7 +46,7 @@ object NoOpRegimeWithContinueUrl extends TaxRegime {
     override lazy val continueURL = GGConfig.checkAgencyStatusCallbackUrl
 
     override def redirectToLogin(implicit request: Request[_]) = {
-      val url = CallOps.addParamsToUrl(continueURL,"continue" -> request.getQueryString("continue"))
+      val url = CallOps.addParamsToUrl(continueURL, "continue" -> request.getQueryString("continue"))
 
       Future.successful(Redirect(loginURL, Map("continue" -> Seq(url), "origin" -> Seq(origin))))
     }

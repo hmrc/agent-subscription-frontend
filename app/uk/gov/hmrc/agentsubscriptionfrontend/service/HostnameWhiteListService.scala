@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import java.net.URL
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.SsoConnector
@@ -28,7 +28,7 @@ import scala.concurrent.Future
 import scala.util.Try
 
 @Singleton
-class HostnameWhiteListService @Inject()(appConfig: AppConfig, ssoConnector: SsoConnector) {
+class HostnameWhiteListService @Inject() (appConfig: AppConfig, ssoConnector: SsoConnector) {
 
   val domainWhiteList: Set[String] = appConfig.domainWhiteList
 

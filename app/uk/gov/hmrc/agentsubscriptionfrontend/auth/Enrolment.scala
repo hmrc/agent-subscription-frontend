@@ -22,11 +22,12 @@ import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel
 
 case class EnrolmentIdentifier(key: String, value: String)
 
-case class Enrolment(key: String,
-                     identifiers: Seq[EnrolmentIdentifier],
-                     state: String,
-                     confidenceLevel: ConfidenceLevel,
-                     delegatedAuthRule: Option[String] = None) {
+case class Enrolment(
+  key: String,
+  identifiers: Seq[EnrolmentIdentifier],
+  state: String,
+  confidenceLevel: ConfidenceLevel,
+  delegatedAuthRule: Option[String] = None) {
 
   def isActivated: Boolean = state.toLowerCase == "activated"
 }
@@ -38,13 +39,12 @@ object Enrolment {
     (__ \ "state").readNullable[String] and
     (__ \ "confidenceLevel").readNullable[ConfidenceLevel] and
     (__ \ "delegatedAuthRule").readNullable[String]) {
-    (key, optIds, optState, optCL, optDelegateRule) =>
-      Enrolment(
-        key,
-        optIds.getOrElse(Seq()),
-        optState.getOrElse("Activated"),
-        optCL.getOrElse(ConfidenceLevel.L0),
-        optDelegateRule
-      )
-  }
+      (key, optIds, optState, optCL, optDelegateRule) =>
+        Enrolment(
+          key,
+          optIds.getOrElse(Seq()),
+          optState.getOrElse("Activated"),
+          optCL.getOrElse(ConfidenceLevel.L0),
+          optDelegateRule)
+    }
 }

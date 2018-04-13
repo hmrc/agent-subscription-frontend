@@ -18,12 +18,12 @@ package uk.gov.hmrc.agentsubscriptionfrontend.auth
 
 import play.api.mvc._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ContinueUrlActions, routes}
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ ContinueUrlActions, routes }
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.passcode.authentication.PasscodeAuthentication
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext, TaxRegime}
+import uk.gov.hmrc.play.frontend.auth.{ Actions, AuthContext, TaxRegime }
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -38,32 +38,30 @@ trait AuthActions extends Actions with PasscodeAuthentication with Monitoring {
   private implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
   def AuthorisedWithSubscribingAgentAsync(regime: TaxRegime = NoOpRegime)(body: AsyncPlayUserRequest)(implicit appConfig: AppConfig): Action[AnyContent] =
-    AuthorisedFor(regime, pageVisibility = GGConfidence).async {
-      implicit authContext =>
-        implicit request =>
-          withVerifiedPasscode {
-            enrolments.flatMap { enrolls =>
-              (for {
-                isAgent <- isAgentAffinityGroup
-                activatedEnrol <- checkActivatedEnrollment(enrolls)
-              } yield (isAgent, activatedEnrol)).flatMap {
-                case (true, true) => {
-                  continueUrlActions.extractContinueUrl.map {
-                    case Some(continueUrl) =>
-                      mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
-                      Redirect(continueUrl.url)
-                    case None =>
-                      mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
-                      Redirect(appConfig.agentServicesAccountUrl)
-                  }
-                }
-                case (true, false) => body(authContext)(AgentRequest(enrolls, request))
-                case _ =>
-                  mark("Count-Subscription-NonAgent")
-                  Future successful redirectToNonAgentNextSteps
+    AuthorisedFor(regime, pageVisibility = GGConfidence).async { implicit authContext => implicit request =>
+      withVerifiedPasscode {
+        enrolments.flatMap { enrolls =>
+          (for {
+            isAgent <- isAgentAffinityGroup
+            activatedEnrol <- checkActivatedEnrollment(enrolls)
+          } yield (isAgent, activatedEnrol)).flatMap {
+            case (true, true) => {
+              continueUrlActions.extractContinueUrl.map {
+                case Some(continueUrl) =>
+                  mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
+                  Redirect(continueUrl.url)
+                case None =>
+                  mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
+                  Redirect(appConfig.agentServicesAccountUrl)
               }
             }
+            case (true, false) => body(authContext)(AgentRequest(enrolls, request))
+            case _ =>
+              mark("Count-Subscription-NonAgent")
+              Future successful redirectToNonAgentNextSteps
           }
+        }
+      }
     }
 
   protected def enrolments(implicit authContext: AuthContext, hc: HeaderCarrier): Future[List[Enrolment]] =

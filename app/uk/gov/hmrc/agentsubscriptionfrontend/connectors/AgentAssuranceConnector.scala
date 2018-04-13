@@ -17,30 +17,30 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import java.net.URL
-import javax.inject.{Inject, Named, Singleton}
+import javax.inject.{ Inject, Named, Singleton }
 
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
+import uk.gov.hmrc.domain.{ Nino, SaAgentReference, TaxIdentifier }
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext.fromLoggingDetails
 
 import scala.concurrent.Future
 
 @Singleton
-class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUrl: URL, http: HttpGet, metrics: Metrics) extends HttpAPIMonitor {
+class AgentAssuranceConnector @Inject() (@Named("agent-assurance-baseUrl") baseUrl: URL, http: HttpGet, metrics: Metrics) extends HttpAPIMonitor {
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
   def hasAcceptableNumberOfClients(regime: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     monitor(s"ConsumedAPI-AgentAssurance-hasAcceptableNumberOfClients-GET") {
       http.GET[HttpResponse](
         new URL(baseUrl, s"/agent-assurance/acceptableNumberOfClients/service/$regime").toString).map { response =>
-        response.status == 204
-      } recover {
-        case e: Upstream4xxResponse => if (e.upstreamResponseCode == 401 || e.upstreamResponseCode == 403) false else throw e
-      }
+          response.status == 204
+        } recover {
+          case e: Upstream4xxResponse => if (e.upstreamResponseCode == 401 || e.upstreamResponseCode == 403) false else throw e
+        }
     }
   }
 
@@ -59,8 +59,7 @@ class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUr
     s"/agent-assurance/activeCesaRelationship/$ninoOrUtr/$valueOfNinoOrUtr/saAgentReference/${saAgentReference.value}"
   }
 
-  def hasActiveCesaRelationship(ninoOrUtr: TaxIdentifier, taxIdName: String, saAgentReference: SaAgentReference)
-                               (implicit hc: HeaderCarrier): Future[Boolean] = {
+  def hasActiveCesaRelationship(ninoOrUtr: TaxIdentifier, taxIdName: String, saAgentReference: SaAgentReference)(implicit hc: HeaderCarrier): Future[Boolean] = {
     getActiveCesaRelationship(cesaGetUrl(taxIdName, ninoOrUtr.value, saAgentReference))
   }
 
