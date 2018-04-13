@@ -36,7 +36,6 @@ trait AppConfig {
   val blacklistedPostcodes: Set[String]
   val journeyName: String
   val agentServicesAccountUrl: String
-  val domainWhiteList: Set[String]
   val agentAssuranceFlag: Boolean
 }
 

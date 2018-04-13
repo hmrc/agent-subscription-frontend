@@ -20,7 +20,7 @@ import javax.inject.{ Inject, Singleton }
 
 import play.api.Logger
 import play.api.mvc._
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{ HostnameWhiteListService, SessionStoreService }
+import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.binders.ContinueUrl
@@ -32,7 +32,6 @@ import scala.util.{ Failure, Success, Try }
 
 @Singleton
 class ContinueUrlActions @Inject() (
-  whiteListService: HostnameWhiteListService,
   sessionStoreService: SessionStoreService) {
 
   def extractContinueUrl[A](implicit request: Request[A]): Future[Option[ContinueUrl]] = {
@@ -41,14 +40,7 @@ class ContinueUrlActions @Inject() (
     request.getQueryString("continue") match {
       case Some(continueUrl) =>
         Try(ContinueUrl(continueUrl)) match {
-          case Success(url) =>
-            isRelativeOrAbsoluteWhiteListed(url).collect {
-              case true => Some(url)
-            }.recover {
-              case NonFatal(e) =>
-                Logger.warn(s"Check for whitelisted hostname failed", e)
-                None
-            }
+          case Success(url) => Future successful Some(url)
           case Failure(e) =>
             Logger.warn(s"$continueUrl is not a valid continue URL", e)
             Future.successful(None)
@@ -69,10 +61,5 @@ class ContinueUrlActions @Inject() (
       case Some(url) =>
         sessionStoreService.cacheContinueUrl(url).flatMap(_ => block)
     }
-  }
-
-  private def isRelativeOrAbsoluteWhiteListed(continueUrl: ContinueUrl)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    if (!continueUrl.isRelativeUrl) whiteListService.isAbsoluteUrlWhiteListed(continueUrl)
-    else Future.successful(true)
   }
 }
