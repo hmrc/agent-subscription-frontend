@@ -272,7 +272,6 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result2) shouldBe 303
         redirectLocation(result2).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
         sessionStoreService.allSessionsRemoved shouldBe false
-        flash(result2).get("agencyName") shouldBe Some("My Agency")
         flash(result2).get("arn") shouldBe Some("ARN00001")
 
         verifySubscriptionRequestSent(subscriptionRequest())
@@ -300,7 +299,6 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result2) shouldBe 303
         redirectLocation(result2).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
         sessionStoreService.allSessionsRemoved shouldBe false
-        flash(result2).get("agencyName") shouldBe Some("My Agency")
         flash(result2).get("arn") shouldBe Some("ARN00001")
 
         verifySubscriptionRequestSent(subscriptionRequest())
@@ -375,7 +373,6 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       verifySubscriptionRequestSent(request)
 
       sessionStoreService.allSessionsRemoved shouldBe false
-      flash(user1Result2).get("agencyName") shouldBe Some("My Agency")
       flash(user1Result2).get("arn") shouldBe Some("ARN00001")
 
       stubAddressLookupReturnedAddress("addr2", request2)
@@ -386,7 +383,6 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       redirectLocation(user2Result2).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
 
       sessionStoreService.allSessionsRemoved shouldBe false
-      flash(user2Result2).get("agencyName") shouldBe Some("My Agency 2")
       flash(user2Result2).get("arn") shouldBe Some("ARN00002")
     }
 

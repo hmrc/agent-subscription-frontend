@@ -16,12 +16,12 @@
 
 @import play.api.Configuration
 
-@(continueUrl: String, agencyName: String, arn: String)(implicit request: Request[_], configuration: Configuration, messages: Messages)
+@(continueUrl: String, arn: String)(implicit request: Request[_], configuration: Configuration, messages: Messages)
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(title = Messages("subscriptionComplete.title"), bodyClasses = None) {
 
     <div class="transaction-banner--complete">
-        <h1 class="transaction-banner__heading">@Messages("subscriptionComplete.h1", agencyName)</h1>
+        <h1 class="transaction-banner__heading">@Messages("subscriptionComplete.h1")</h1>
         <p>
             <span class="display-block">@Messages("subscriptionComplete.accountName")</span>
             <strong class="heading-medium">@arn</strong>

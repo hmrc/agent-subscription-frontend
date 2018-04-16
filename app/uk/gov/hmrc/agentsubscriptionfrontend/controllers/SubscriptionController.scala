@@ -142,7 +142,7 @@ class SubscriptionController @Inject() (
       case Right((arn, agencyName)) =>
         mark("Count-Subscription-Complete")
         Redirect(routes.SubscriptionController.showSubscriptionComplete())
-          .flashing("arn" -> arn.arn, "agencyName" -> agencyName)
+          .flashing("arn" -> arn.arn)
 
       case Left(SubscriptionReturnedHttpError(CONFLICT)) =>
         mark("Count-Subscription-AlreadySubscribed-APIResponse")
@@ -192,28 +192,21 @@ class SubscriptionController @Inject() (
 
   val showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      {
-        val agencyData = for {
-          agencyName <- request.flash.get("agencyName")
-          arn <- request.flash.get("arn")
-        } yield (agencyName, arn)
-
-        agencyData match {
-          case Some((agencyName, arn)) =>
-            sessionStoreService.fetchContinueUrl.
-              recover {
-                case NonFatal(ex) =>
-                  Logger.warn("Session store service failure", ex)
-                  None
-              }.
-              andThen { case _ => sessionStoreService.remove() }.
-              map { continueUrlOpt =>
-                val continueUrl = CallOps.addParamsToUrl(appConfig.agentServicesAccountUrl, "continue" -> continueUrlOpt.map(_.url))
-                Ok(html.subscription_complete(continueUrl, agencyName, arn))
-              }
-          case _ =>
-            Future.successful(sessionMissingRedirect())
-        }
+      request.flash.get("arn") match {
+        case Some(arn) =>
+          sessionStoreService.fetchContinueUrl.
+            recover {
+              case NonFatal(ex) =>
+                Logger.warn("Session store service failure", ex)
+                None
+            }.
+            andThen { case _ => sessionStoreService.remove() }.
+            map { continueUrlOpt =>
+              val continueUrl = CallOps.addParamsToUrl(appConfig.agentServicesAccountUrl, "continue" -> continueUrlOpt.map(_.url))
+              Ok(html.subscription_complete(continueUrl, arn))
+            }
+        case _ =>
+          Future.successful(sessionMissingRedirect())
       }
     }
   }
