@@ -18,12 +18,12 @@ import java.net.URL
 
 import javax.inject.{ Inject, Named, Provider, Singleton }
 import com.google.inject.AbstractModule
+import com.google.inject.binder.ScopedBindingBuilder
 import com.google.inject.name.Names.named
 import com.google.inject.name.Names
 import org.slf4j.MDC
 import play.api.{ Configuration, Environment, Logger, LoggerLike }
-import uk.gov.hmrc.agentsubscriptionfrontend.config._
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.{ PostcodesLoader, PostcodesProvider }
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.FrontendAuthConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -35,10 +35,64 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
 
+import scala.reflect.ClassTag
+
 class FrontendModule(val environment: Environment, val configuration: Configuration) extends AbstractModule with ServicesConfig {
 
   override val runModeConfiguration: Configuration = configuration
   override protected def mode = environment.mode
+
+  trait ConfigPropertyType[A] {
+    def bindConfigProperty(clazz: Class[A])(propertyName: String): ScopedBindingBuilder
+  }
+
+  object ConfigProperty {
+
+    implicit val stringConfigProperty = new ConfigPropertyType[String] {
+      def bindConfigProperty(clazz: Class[String])(propertyName: String): ScopedBindingBuilder =
+        bind(clazz).annotatedWith(named(s"$propertyName")).toProvider(new StringConfigPropertyProvider(propertyName))
+
+      private class StringConfigPropertyProvider(propertyName: String) extends Provider[String] {
+        override lazy val get = getConfString(propertyName, throw new RuntimeException(s"No configuration value found for '$propertyName'"))
+
+        def getConfString(confKey: String, defString: => String) = {
+          configuration.getString(s"$env.$confKey").getOrElse(configuration.getString(confKey).getOrElse(defString))
+        }
+      }
+
+    }
+
+    implicit val intConfigProperty = new ConfigPropertyType[Int] {
+      def bindConfigProperty(clazz: Class[Int])(propertyName: String): ScopedBindingBuilder =
+        bind(clazz).annotatedWith(named(s"$propertyName")).toProvider(new IntConfigPropertyProvider(propertyName))
+
+      private class IntConfigPropertyProvider(propertyName: String) extends Provider[Int] {
+        override lazy val get = getConfInt(propertyName, throw new RuntimeException(s"No configuration value found for '$propertyName'"))
+
+        def getConfInt(confKey: String, defInt: => Int) = {
+          configuration.getInt(s"$env.$confKey").getOrElse(configuration.getInt(confKey).getOrElse(defInt))
+        }
+      }
+
+    }
+
+    implicit val booleanConfigProperty = new ConfigPropertyType[Boolean] {
+      def bindConfigProperty(clazz: Class[Boolean])(propertyName: String): ScopedBindingBuilder =
+        bind(clazz).annotatedWith(named(s"$propertyName")).toProvider(new BooleanConfigPropertyProvider(propertyName))
+
+      private class BooleanConfigPropertyProvider(propertyName: String) extends Provider[Boolean] {
+        override lazy val get = getConfBool(propertyName)
+
+        def getConfBool(confKey: String) = {
+          configuration.getBoolean(s"$env.$confKey").getOrElse(configuration.getBoolean(confKey).getOrElse(false))
+        }
+      }
+
+    }
+
+    def bindConfigProperty[A](propertyName: String)(implicit classTag: ClassTag[A], ct: ConfigPropertyType[A]): ScopedBindingBuilder =
+      ct.bindConfigProperty(classTag.runtimeClass.asInstanceOf[Class[A]])(propertyName)
+  }
 
   def configure(): Unit = {
 
@@ -53,16 +107,17 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
 
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
-
     bind(classOf[AuthConnector]).to(classOf[FrontendAuthConnector])
-    //bind(classOf[AuditConnector]).to(classOf[FrontendAuditConnector])
+    bind(classOf[uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector]).to(classOf[LegacyFrontendAuthConnector])
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[SessionStoreService])
     bind(classOf[LoggerLike]).toInstance(Logger)
     bind(classOf[SessionCache]).to(classOf[AgentSubscriptionSessionCache])
 
-    val postcodes = PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
-    bind(classOf[Set[String]]).annotatedWith(Names.named("blacklistedPostCodes")).toInstance(postcodes)
+    bind(classOf[PostcodesProvider]).annotatedWith(Names.named("blacklistedPostCodes")).toInstance(new PostcodesProvider {
+      lazy val postcodes = PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
+      override def apply(): Set[String] = postcodes
+    })
 
     bindBaseUrl("agent-assurance")
     bindBaseUrl("agent-subscription")
@@ -73,21 +128,27 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
     bindBaseUrl("authentication.government-gateway.sign-in")
     bindBaseUrl("agent-services-account-frontend")
 
-    bindServiceConfigProperty[String]("surveyRedirectUrl")
-    bindServiceConfigProperty[String]("sosRedirectUrl")
-    bindServiceConfigProperty[String]("authentication.login-callback.url")
-    bindServiceConfigProperty[String]("contact-frontend.host")
-    bindServiceConfigProperty[String]("google-analytics.token")
-    bindServiceConfigProperty[String]("google-analytics.host")
-    bindServiceConfigProperty[String]("government-gateway.url")
-    bindServiceConfigProperty[String]("address-lookup-frontend.journeyName")
-    bindServiceConfigProperty[String]("reportAProblemPartialUrl")
-    bindServiceConfigProperty[String]("reportAProblemNonJSUrl")
-    bindServiceConfigProperty[String]("betaFeedbackUrl")
-    bindServiceConfigProperty[String]("betaFeedbackUnauthenticatedUrl")
-    bindServiceConfigProperty[Int]("mongodb.knownfactsresult.ttl")
-    bindServiceConfigProperty[Boolean]("agentAssuranceFlag")
+    import ConfigProperty._
+
+    bindConfigProperty[String]("surveyRedirectUrl")
+    bindConfigProperty[String]("sosRedirectUrl")
+    bindConfigProperty[Int]("mongodb.knownfactsresult.ttl")
+    bindConfigProperty[Boolean]("agentAssuranceFlag")
+    bindConfigProperty[String]("authentication.login-callback.url")
+    bindConfigProperty[String]("contact-frontend.host")
+    bindConfigProperty[String]("google-analytics.token")
+    bindConfigProperty[String]("google-analytics.host")
+    bindConfigProperty[String]("government-gateway.url")
+    bindConfigProperty[String]("reportAProblemPartialUrl")
+    bindConfigProperty[String]("reportAProblemNonJSUrl")
+    bindConfigProperty[String]("betaFeedbackUrl")
+    bindConfigProperty[String]("betaFeedbackUnauthenticatedUrl")
+
+    bindServiceProperty("address-lookup-frontend.journeyName")
+    bindServiceProperty("address-lookup-frontend.new-address-callback.url")
     bindServiceProperty("cachable.session-cache.domain")
+    bindServiceProperty("agent-services-account-frontend.external-url")
+    bindServiceProperty("agent-services-account-frontend.start.path")
 
   }
 
@@ -114,47 +175,12 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
       throw new Exception(s"Config property for service not found $propertyName")
     })
   }
+}
 
-  import scala.reflect.ClassTag
-  import com.google.inject.binder.ScopedBindingBuilder
-  import com.google.inject.name.Names.named
-
-  private def bindServiceConfigProperty[A](propertyName: String)(implicit classTag: ClassTag[A], ct: ServiceConfigPropertyType[A]): ScopedBindingBuilder =
-    ct.bindServiceConfigProperty(classTag.runtimeClass.asInstanceOf[Class[A]])(propertyName)
-
-  sealed trait ServiceConfigPropertyType[A] {
-    def bindServiceConfigProperty(clazz: Class[A])(propertyName: String): ScopedBindingBuilder
-  }
-
-  object ServiceConfigPropertyType {
-
-    implicit val stringServiceConfigProperty: ServiceConfigPropertyType[String] = new ServiceConfigPropertyType[String] {
-      def bindServiceConfigProperty(clazz: Class[String])(propertyName: String): ScopedBindingBuilder =
-        bind(clazz).annotatedWith(named(s"$propertyName")).toProvider(new StringServiceConfigPropertyProvider(propertyName))
-
-      private class StringServiceConfigPropertyProvider(propertyName: String) extends Provider[String] {
-        override lazy val get = getConfString(propertyName, throw new RuntimeException(s"No service configuration value found for '$propertyName'"))
-      }
-    }
-
-    implicit val intServiceConfigProperty: ServiceConfigPropertyType[Int] = new ServiceConfigPropertyType[Int] {
-      def bindServiceConfigProperty(clazz: Class[Int])(propertyName: String): ScopedBindingBuilder =
-        bind(clazz).annotatedWith(named(s"$propertyName")).toProvider(new IntServiceConfigPropertyProvider(propertyName))
-
-      private class IntServiceConfigPropertyProvider(propertyName: String) extends Provider[Int] {
-        override lazy val get = getConfInt(propertyName, throw new RuntimeException(s"No service configuration value found for '$propertyName'"))
-      }
-    }
-
-    implicit val booleanServiceConfigProperty: ServiceConfigPropertyType[Boolean] = new ServiceConfigPropertyType[Boolean] {
-      def bindServiceConfigProperty(clazz: Class[Boolean])(propertyName: String): ScopedBindingBuilder =
-        bind(clazz).annotatedWith(named(s"$propertyName")).toProvider(new BooleanServiceConfigPropertyProvider(propertyName))
-
-      private class BooleanServiceConfigPropertyProvider(propertyName: String) extends Provider[Boolean] {
-        override lazy val get = getConfBool(propertyName, false)
-      }
-    }
-  }
+@Singleton
+class LegacyFrontendAuthConnector @Inject() (val http: HttpGet, @Named("auth-baseUrl") val baseUrl: URL)
+  extends uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector {
+  lazy val serviceUrl = baseUrl.toExternalForm
 }
 
 @Singleton

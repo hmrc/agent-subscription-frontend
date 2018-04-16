@@ -38,15 +38,12 @@ class AddressLookupFrontendConnector @Inject() (
   @Named("address-lookup-frontend-baseUrl") baseUrl: URL,
   http: HttpGet with HttpPost,
   metrics: Metrics,
-  environment: Environment,
-  configuration: Configuration) extends ServicesConfig with HttpAPIMonitor {
-  private val addressLookupContinueUrl = getConfString("address-lookup-frontend.new-address-callback.url", "")
+  @Named("address-lookup-frontend.new-address-callback.url") addressLookupContinueUrl: String) extends HttpAPIMonitor {
+
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
-  override val runModeConfiguration: Configuration = configuration
-  override protected def mode = environment.mode
 
   def initJourney(call: Call, journeyName: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[String] = {
-    monitor(s"ConsumedAPI-Address-Lookup-Frontend-initJourney-POST-${journeyName}") {
+    monitor(s"ConsumedAPI-Address-Lookup-Frontend-initJourney-POST-$journeyName") {
       val continueJson = Json.obj("continueUrl" -> s"$addressLookupContinueUrl${call.url}")
 
       http.POST[JsObject, HttpResponse](initJourneyUrl(journeyName), continueJson) map { resp =>

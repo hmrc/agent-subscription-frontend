@@ -26,6 +26,7 @@ import play.api.libs.json._
 import play.api.mvc.{ AnyContent, _ }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{ AgentRequest, AuthActions }
+import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesProvider
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AddressLookupFrontendConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings._
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
@@ -70,12 +71,11 @@ class SubscriptionController @Inject() (
   addressLookUpConnector: AddressLookupFrontendConnector,
   val continueUrlActions: ContinueUrlActions,
   val metrics: Metrics,
-  @Named("blacklistedPostCodes") blacklistedPostCodes: Set[String])(implicit configuration: Configuration)
+  @Named("blacklistedPostCodes") blacklistedPostCodes: PostcodesProvider,
+  @Named("address-lookup-frontend.journeyName") addressLookupFrontendJourneyName: String)(implicit configuration: Configuration)
   extends FrontendController with I18nSupport with AuthActions with SessionDataMissing with Monitoring {
 
-  private val JourneyName: String = configuration.getString("address-lookup-frontend.journeyName").get
-
-  val desAddressForm = new DesAddressForm(Logger, blacklistedPostCodes)
+  val desAddressForm = new DesAddressForm(Logger, blacklistedPostCodes())
 
   private val initialDetailsForm = Form[InitialDetails](
     mapping(
@@ -109,7 +109,7 @@ class SubscriptionController @Inject() (
         redisplayInitialDetails(formWithErrors),
       form => {
         mark("Count-Subscription-AddressLookup-Start")
-        addressLookUpConnector.initJourney(routes.SubscriptionController.returnFromAddressLookup(), JourneyName).map { x =>
+        addressLookUpConnector.initJourney(routes.SubscriptionController.returnFromAddressLookup(), addressLookupFrontendJourneyName).map { x =>
           sessionStoreService.cacheInitialDetails(InitialDetails(form.utr, form.knownFactsPostcode, form.name,
             form.email, form.telephone))
           Redirect(x)

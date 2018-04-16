@@ -15,19 +15,17 @@
  */
 
 import javax.inject.{ Inject, Named, Singleton }
-import play.api.http.HeaderNames.CACHE_CONTROL
-import play.api.http.HttpErrorHandler
 import play.api.i18n.{ Messages, MessagesApi }
 import play.api.mvc.Results._
 import play.api.mvc.{ Request, RequestHeader, Result }
 import play.api.{ Configuration, Environment, Mode }
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.error_template
 import uk.gov.hmrc.auth.core.{ InsufficientEnrolments, NoActiveSession }
 import uk.gov.hmrc.http.{ JsValidationException, NotFoundException }
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.error_template
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 import uk.gov.hmrc.play.bootstrap.config.{ AuthRedirects, HttpAuditEvent }
+import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 
 import scala.concurrent.{ ExecutionContext, Future }
 

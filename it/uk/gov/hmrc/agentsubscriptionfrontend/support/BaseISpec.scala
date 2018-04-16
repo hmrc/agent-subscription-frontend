@@ -2,6 +2,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import com.codahale.metrics.MetricRegistry
 import com.google.inject.AbstractModule
+import com.google.inject.name.Names
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, Messages, MessagesApi}
@@ -19,6 +20,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.test.UnitSpec
 import com.kenshoo.play.metrics.Metrics
+import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 
 import scala.concurrent.Future
 

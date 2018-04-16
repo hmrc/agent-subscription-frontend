@@ -2,15 +2,20 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import java.net.URLEncoder
 
+import com.google.inject.AbstractModule
+import com.google.inject.name.Names
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{ contentType, _ }
+import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
+import uk.gov.hmrc.http.{CoreGet, HttpGet}
 import uk.gov.hmrc.play.binders.ContinueUrl
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -22,6 +27,7 @@ class StartControllerISpec extends BaseISpec {
 
   override protected def appBuilder: GuiceApplicationBuilder = super.appBuilder
     .configure("government-gateway.url" -> configuredGovernmentGatewayUrl)
+
 
   "context root" should {
     "redirect to start page" in {
