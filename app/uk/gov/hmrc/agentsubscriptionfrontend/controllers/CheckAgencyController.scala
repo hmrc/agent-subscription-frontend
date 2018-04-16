@@ -17,9 +17,8 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import javax.inject.{ Inject, Named, Singleton }
-
 import com.kenshoo.play.metrics.Metrics
-import play.api.Logger
+import play.api.{ Configuration, Logger }
 import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.i18n.{ I18nSupport, Messages, MessagesApi }
@@ -27,8 +26,7 @@ import play.api.mvc.{ AnyContent, Request, _ }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{ AgentRequest, AuthActions, NoOpRegimeWithContinueUrl }
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{ AgentAssuranceConnector, AgentSubscriptionConnector }
+import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{ AgentAssuranceConnector, AgentSubscriptionConnector, FrontendAuthConnector }
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
@@ -62,7 +60,7 @@ class CheckAgencyController @Inject() (
   val sessionStoreService: SessionStoreService,
   val continueUrlActions: ContinueUrlActions,
   auditService: AuditService,
-  val metrics: Metrics)(implicit appConfig: AppConfig)
+  val metrics: Metrics)(implicit configuration: Configuration)
   extends FrontendController with I18nSupport with AuthActions with SessionDataMissing with Monitoring {
 
   import continueUrlActions._

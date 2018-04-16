@@ -439,8 +439,7 @@ class FieldMappingsSpec extends UnitSpec with EitherValues {
       val tooLongAndNonMatchingLine = "123456789012345678901234567890123456<"
       bind(tooLongAndNonMatchingLine) shouldBe Left(List(
         FormError("testKey", "error.address.lines.maxLength", Seq(35)),
-        FormError("testKey", "error.address.lines.invalid", Seq())
-      ))
+        FormError("testKey", "error.address.lines.invalid", Seq())))
     }
   }
 

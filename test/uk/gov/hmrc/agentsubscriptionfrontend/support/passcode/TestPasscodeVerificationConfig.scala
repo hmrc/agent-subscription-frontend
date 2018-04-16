@@ -22,4 +22,9 @@ class TestPasscodeVerificationConfig(override val enabled: Boolean) extends Pass
   override def regime: String = "agent-subscription"
 
   override def getVerificationURL(): String = "/"
+
+  override def mode: play.api.Mode.Mode = ???
+
+  override def runModeConfiguration: play.api.Configuration = ???
+
 }

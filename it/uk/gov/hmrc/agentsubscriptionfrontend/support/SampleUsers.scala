@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{ JsValue, Json }
 
 case class SampleUser(authJson: String, userDetailsJson: String) {
   private val json: JsValue = Json.parse(authJson)
@@ -31,7 +31,7 @@ object SampleUsers {
   private val subscribingAgentOid = "1234567890"
   private val subscribingAgentUserDetailsLink: String = s"/user-details/id/$subscribingAgentOid"
   def subscribingAgent(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
-      s"""
+    s"""
        |{
        |  "uri": "/auth/oid/$subscribingAgentOid",
        |  "userDetailsLink": "$subscribingAgentUserDetailsLink",
@@ -56,8 +56,7 @@ object SampleUsers {
        |  "authProviderId" : "12345-credId",
        |  "authProviderType" : "GovernmentGateway"
        |}
-    """.stripMargin
-  )
+    """.stripMargin)
 
   private val subscribingAgentOid2 = "1234567899"
   private val subscribingAgentUserDetailsLink2: String = s"/user-details/id/$subscribingAgentOid2"
@@ -87,8 +86,7 @@ object SampleUsers {
                          |  "authProviderId" : "12345-credId",
                          |  "authProviderType" : "GovernmentGateway"
                          |}
-    """.stripMargin
-  )
+    """.stripMargin)
 
   private val individualOid = "234567891"
   private val individualUserDetailsLink: String = s"/user-details/id/$individualOid"
@@ -118,8 +116,6 @@ object SampleUsers {
        |  "authProviderId" : "12345-credId",
        |  "authProviderType" : "GovernmentGateway"
        |}
-    """.stripMargin
-
-  )
+    """.stripMargin)
 }
 

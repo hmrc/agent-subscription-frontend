@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import javax.inject.{ Inject, Singleton }
-
+import javax.inject.{ Inject, Named, Singleton }
 import com.kenshoo.play.metrics.Metrics
-import play.api.Logger
+import play.api.{ Configuration, Logger }
 import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.i18n.{ I18nSupport, MessagesApi }
@@ -27,7 +26,6 @@ import play.api.libs.json._
 import play.api.mvc.{ AnyContent, _ }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{ AgentRequest, AuthActions }
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AddressLookupFrontendConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings._
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
@@ -35,9 +33,9 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{ SessionStoreService, SubscriptionService }
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{ CallOps, Monitoring }
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.passcode.authentication.{ PasscodeAuthenticationProvider, PasscodeVerificationConfig }
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
@@ -71,11 +69,11 @@ class SubscriptionController @Inject() (
   sessionStoreService: SessionStoreService,
   addressLookUpConnector: AddressLookupFrontendConnector,
   val continueUrlActions: ContinueUrlActions,
-  val metrics: Metrics)(implicit appConfig: AppConfig)
+  val metrics: Metrics,
+  @Named("blacklistedPostCodes") blacklistedPostCodes: Set[String])(implicit configuration: Configuration)
   extends FrontendController with I18nSupport with AuthActions with SessionDataMissing with Monitoring {
 
-  private val JourneyName: String = appConfig.journeyName
-  private val blacklistedPostCodes: Set[String] = appConfig.blacklistedPostcodes
+  private val JourneyName: String = configuration.getString("address-lookup-frontend.journeyName").get
 
   val desAddressForm = new DesAddressForm(Logger, blacklistedPostCodes)
 
@@ -204,7 +202,7 @@ class SubscriptionController @Inject() (
           }.
           andThen { case _ => sessionStoreService.remove() }.
           map { continueUrlOpt =>
-            val continueUrl = CallOps.addParamsToUrl(appConfig.agentServicesAccountUrl, "continue" -> continueUrlOpt.map(_.url))
+            val continueUrl = CallOps.addParamsToUrl(configuration.getString("agent-services-account-frontend").get, "continue" -> continueUrlOpt.map(_.url))
             Ok(html.subscription_complete(continueUrl, agencyName, arn))
           }
       case _ =>

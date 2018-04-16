@@ -16,39 +16,27 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.views
 
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.MixedPlaySpec
+import play.api.Configuration
 import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.twirl.api.Html
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.error_template_Scope0.error_template
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template_Scope0.main_template
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.error_template_Scope0.error_template_Scope1.error_template
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template_Scope0.main_template_Scope1.main_template
 
-class ViewsSpec extends MixedPlaySpec {
+class ViewsSpec extends MixedPlaySpec with MockitoSugar {
 
-  implicit val appConfig = new AppConfig() {
-    override val analyticsToken: String = "analyticsToken"
-    override val analyticsHost: String = "analyticsHost"
-    override val reportAProblemPartialUrl: String = "reportAProblemPartialUrl"
-    override val reportAProblemNonJSUrl: String = "reportAProblemNonJSUrl"
-    override val betaFeedbackUrl: String = "betaFeedbackUrl"
-    override val betaFeedbackUnauthenticatedUrl: String = "betaFeedbackUnauthenticatedUrl"
-    override val governmentGatewayUrl: String = "governmentGatewayUrl"
-    override val blacklistedPostcodes: Set[String] = Set("blacklistedPostcodes")
-    override val journeyName: String = "journeyName"
-    override val agentServicesAccountUrl: String = "http://localhost:9401/agent-services-account"
-    override val domainWhiteList: Set[String] = Set("www.foo.com", "foo.org")
-    override val agentAssuranceFlag: Boolean = false
-  }
+  val configuration = mock[Configuration]
 
   "error_template view" should {
 
     "render title, heading and message" in new App {
       val view = new error_template()
       val html = view.render(
-        "My custom page title", "My custom heading", "My custom message", FakeRequest(), applicationMessages, appConfig)
+        "My custom page title", "My custom heading", "My custom message", FakeRequest(), configuration, applicationMessages)
 
       contentAsString(html) must {
         include("My custom page title") and
@@ -57,8 +45,7 @@ class ViewsSpec extends MixedPlaySpec {
       }
 
       val hmtl2 = view.f("My custom page title", "My custom heading", "My custom message")(
-        FakeRequest(), applicationMessages, appConfig
-      )
+        FakeRequest(), configuration, applicationMessages)
       hmtl2 must be(html)
     }
   }
@@ -68,7 +55,6 @@ class ViewsSpec extends MixedPlaySpec {
     "render title, header, sidebar and main content" in new App {
       val view = new main_template()
       val html = view.render(
-        appConfig = appConfig,
         title = "My custom page title",
         sidebarLinks = Some(Html("sidebarLinks")),
         contentHeader = Some(Html("contentHeader")),
@@ -78,8 +64,8 @@ class ViewsSpec extends MixedPlaySpec {
         userIsLoggedIn = true,
         mainContent = Html("mainContent"),
         request = FakeRequest(),
-        messages = applicationMessages
-      )
+        messages = applicationMessages,
+        configuration = configuration)
 
       contentAsString(html) must {
         include("My custom page title") and
@@ -92,15 +78,13 @@ class ViewsSpec extends MixedPlaySpec {
       }
 
       val hmtl2 = view.f(
-        appConfig,
         "My custom page title",
         Some(Html("sidebarLinks")),
         Some(Html("contentHeader")),
         Some("bodyClasses"),
         Some("mainClass"),
         Some(Html("scriptElem")),
-        true
-      )(Html("mainContent"))(FakeRequest(), applicationMessages)
+        true)(Html("mainContent"))(FakeRequest(), configuration, applicationMessages)
       hmtl2 must be(html)
     }
 

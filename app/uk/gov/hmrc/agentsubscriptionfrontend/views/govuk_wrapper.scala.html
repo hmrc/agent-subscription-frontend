@@ -14,8 +14,9 @@
  * limitations under the License.
  *@
 
-@(appConfig: uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig,
-  title: String,
+@import play.api.Configuration
+
+@(title: String,
   mainClass: Option[String] = None,
   mainDataAttributes: Option[Html] = None,
   bodyClasses: Option[String] = None,
@@ -24,7 +25,8 @@
   mainContent: Html = HtmlFormat.empty,
   serviceInfoContent: Html = HtmlFormat.empty,
   scriptElem: Option[Html] = None,
-  userIsLoggedIn: Boolean)(implicit request: Request[_], messages: Messages)
+  userIsLoggedIn: Boolean)(implicit request : Request[_], configuration: Configuration, messages: Messages)
+
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
@@ -34,8 +36,8 @@
 
 @betaBanner = {
 @uiLayouts.betaBanner(userIsLoggedIn,
-    appConfig.betaFeedbackUrl,
-    appConfig.betaFeedbackUnauthenticatedUrl,
+    configuration.getString("betaFeedbackUrl").get,
+    configuration.getString("betaFeedbackUnauthenticatedUrl").get,
     showFeedbackLinkInBetaBanner = true)
 }
 
@@ -68,8 +70,8 @@
 
 @bodyEnd = {
     @uiLayouts.footer(
-      analyticsToken = Some(appConfig.analyticsToken),
-      analyticsHost = appConfig.analyticsHost,
+      analyticsToken = configuration.getString("google-analytics.token"),
+      analyticsHost = configuration.getString("google-analytics.host").get,
       ssoUrl = None,
       scriptElem = Some(scriptElement),
       gaCalls = None)
@@ -91,7 +93,7 @@
     }
 }
 
-@getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
+@getHelpForm = @{uiHelpers.reportAProblemLink(configuration.getString("reportAProblemPartialUrl").get, configuration.getString("reportAProblemNonJSUrl").get)}
 
 @content = {
     @uiLayouts.main_content(

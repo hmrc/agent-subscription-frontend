@@ -17,11 +17,10 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import javax.inject.Inject
-
+import play.api.Configuration
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc.{ Action, AnyContent, Result }
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.NoOpRegime
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
@@ -39,7 +38,7 @@ class StartController @Inject() (
   override val passcodeAuthenticationProvider: PasscodeAuthenticationProvider,
   knownFactsResultMongoRepository: KnownFactsResultMongoRepository,
   continueUrlActions: ContinueUrlActions,
-  sessionStoreService: SessionStoreService)(implicit appConfig: AppConfig)
+  sessionStoreService: SessionStoreService)(implicit configuration: Configuration)
   extends FrontendController with I18nSupport with Actions with PasscodeAuthentication {
 
   import continueUrlActions._

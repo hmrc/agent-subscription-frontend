@@ -21,17 +21,16 @@ import com.kenshoo.play.metrics.Metrics
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
+import play.api.Configuration
 import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector, AgentSubscriptionConnector}
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{CheckAgencyController, ContinueUrlActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestAppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestMessagesApi.testMessagesApi
 import uk.gov.hmrc.agentsubscriptionfrontend.support.passcode.TestPasscodeVerificationConfig
-import uk.gov.hmrc.http.{Request => _, _}
+import uk.gov.hmrc.http.{ Request => _, _ }
 import uk.gov.hmrc.passcode.authentication.{PasscodeAuthenticationProvider, PasscodeVerificationConfig, TestPasscodeAuthenticationProvider}
 import uk.gov.hmrc.play.frontend.auth._
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
@@ -42,7 +41,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionSpec extends UnitSpec with MockitoSugar {
 
-  implicit val appConfig: AppConfig = TestAppConfig
+  implicit val configuration = mock[Configuration]
 
   "AuthorisedWithSubscribingAgent" should {
     "propagate errors that occur when checking affinity group (APB-493-3)" in {
@@ -156,7 +155,7 @@ class TestAuthActions(override val config: PasscodeVerificationConfig, override 
   extends AuthActions with MockitoSugar {
 
   override protected def authConnector: AuthConnector = ???
-  override val continueUrlActions: ContinueUrlActions = new ContinueUrlActions(null, null)
+  override val continueUrlActions: ContinueUrlActions = new ContinueUrlActions(null)
   override val metrics: Metrics = new Metrics {
     override def toJson: String = ""
     override def defaultRegistry: MetricRegistry = new MetricRegistry

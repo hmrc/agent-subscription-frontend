@@ -16,25 +16,21 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend
 
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AddressLookupFrontendAddress, Country}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{ AddressLookupFrontendAddress, Country }
 
 package object support {
 
   def testCountry(
     code: String = "GB",
-    name: Option[String] = None
-  ) = Country(
+    name: Option[String] = None) = Country(
     code = code,
-    name = name
-  )
+    name = name)
 
   def testAddressLookupFrontendAddress(
     lines: Seq[String] = Seq("1 Test Street"),
     postcode: Option[String] = Some("AA1 1AA"),
-    country: Country = testCountry()
-  ) = AddressLookupFrontendAddress(
+    country: Country = testCountry()) = AddressLookupFrontendAddress(
     lines = lines,
     postcode = postcode,
-    country = country
-  )
+    country = country)
 }

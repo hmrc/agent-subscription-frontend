@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+@import play.api.Configuration
 
-@(continueUrl: String, agencyName: String, arn: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(continueUrl: String, agencyName: String, arn: String)(implicit request: Request[_], configuration: Configuration, messages: Messages)
 
-@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = Messages("subscriptionComplete.title"), bodyClasses = None) {
+@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(title = Messages("subscriptionComplete.title"), bodyClasses = None) {
 
     <div class="transaction-banner--complete">
         <h1 class="transaction-banner__heading">@Messages("subscriptionComplete.h1", agencyName)</h1>

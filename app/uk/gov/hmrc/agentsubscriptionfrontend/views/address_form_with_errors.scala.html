@@ -14,14 +14,15 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.play.views.html.helpers.{form, input, errorSummary}
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SubscriptionController
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.DesAddress
-@(detailsForm: Form[DesAddress])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@import play.api.Configuration
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
+@(detailsForm: Form[DesAddress])(implicit request: Request[_], configuration: Configuration, messages: Messages)
 
-@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(detailsForm) + Messages("subscriptionDetails.title"), bodyClasses = None) {
+@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(title =  error_prefix(detailsForm) + Messages("subscriptionDetails.title"), bodyClasses = None) {
 @if(detailsForm.hasErrors) {
     @errorSummary(Messages("error.summary.heading"), detailsForm, Seq.empty, Some("return-from-address-lookup"))
 }

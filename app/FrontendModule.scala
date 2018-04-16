@@ -16,17 +16,19 @@
 
 import java.net.URL
 
-import javax.inject.{ Inject, Provider, Singleton }
+import javax.inject.{ Inject, Named, Provider, Singleton }
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names.named
-import com.google.inject.name.{ Named, Names }
+import com.google.inject.name.Names
 import org.slf4j.MDC
 import play.api.{ Configuration, Environment, Logger, LoggerLike }
 import uk.gov.hmrc.agentsubscriptionfrontend.config._
+import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.FrontendAuthConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -52,27 +54,41 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
 
-    //example of service property bindings
-    bindServiceConfigProperty[String]("appName")
     bind(classOf[AuthConnector]).to(classOf[FrontendAuthConnector])
-    bind(classOf[AuditConnector]).to(classOf[FrontendAuditConnector])
+    //bind(classOf[AuditConnector]).to(classOf[FrontendAuditConnector])
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[SessionStoreService])
     bind(classOf[LoggerLike]).toInstance(Logger)
+    bind(classOf[SessionCache]).to(classOf[AgentSubscriptionSessionCache])
+
+    val postcodes = PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
+    bind(classOf[Set[String]]).annotatedWith(Names.named("blacklistedPostCodes")).toInstance(postcodes)
+
     bindBaseUrl("agent-assurance")
     bindBaseUrl("agent-subscription")
     bindBaseUrl("address-lookup-frontend")
     bindBaseUrl("sso")
     bindBaseUrl("cachable.session-cache")
     bindBaseUrl("auth")
+    bindBaseUrl("authentication.government-gateway.sign-in")
+    bindBaseUrl("agent-services-account-frontend")
+
     bindServiceConfigProperty[String]("surveyRedirectUrl")
     bindServiceConfigProperty[String]("sosRedirectUrl")
+    bindServiceConfigProperty[String]("authentication.login-callback.url")
+    bindServiceConfigProperty[String]("contact-frontend.host")
+    bindServiceConfigProperty[String]("google-analytics.token")
+    bindServiceConfigProperty[String]("google-analytics.host")
+    bindServiceConfigProperty[String]("government-gateway.url")
+    bindServiceConfigProperty[String]("address-lookup-frontend.journeyName")
+    bindServiceConfigProperty[String]("reportAProblemPartialUrl")
+    bindServiceConfigProperty[String]("reportAProblemNonJSUrl")
+    bindServiceConfigProperty[String]("betaFeedbackUrl")
+    bindServiceConfigProperty[String]("betaFeedbackUnauthenticatedUrl")
     bindServiceConfigProperty[Int]("mongodb.knownfactsresult.ttl")
     bindServiceConfigProperty[Boolean]("agentAssuranceFlag")
     bindServiceProperty("cachable.session-cache.domain")
 
-    bindBaseUrl("auth")
-    bindBaseUrl("agent-subscription")
   }
 
   private def bindBaseUrl(serviceName: String) =
@@ -144,6 +160,16 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
 @Singleton
 class FrontendAuditConnector @Inject() (@Named("appName") val appName: String) extends AuditConnector {
   override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
+}
+
+@Singleton
+class AgentSubscriptionSessionCache @Inject() (
+  val http: HttpGet with HttpPut with HttpDelete,
+  @Named("appName") val appName: String,
+  @Named("cachable.session-cache-baseUrl") val baseUrl: URL,
+  @Named("cachable.session-cache.domain") val domain: String) extends SessionCache {
+  override lazy val defaultSource = appName
+  override lazy val baseUri = baseUrl.toExternalForm
 }
 
 @Singleton

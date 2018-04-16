@@ -18,9 +18,11 @@ package uk.gov.hmrc.agentsubscriptionfrontend.auth
 
 import java.net.URLEncoder
 
+import javax.inject.Inject
+import play.api.{ Configuration, Environment }
 import play.api.mvc.Request
 import play.api.mvc.Results._
-import uk.gov.hmrc.agentsubscriptionfrontend.config.GGConfig
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 import uk.gov.hmrc.play.frontend.auth.{ GovernmentGateway, TaxRegime }
@@ -34,16 +36,18 @@ object NoOpRegime extends TaxRegime {
 }
 
 object CheckAgencyStatusGovernmentGateway extends GovernmentGateway {
-  override lazy val loginURL = GGConfig.ggSignInUrl
-  override lazy val continueURL = GGConfig.checkAgencyStatusCallbackUrl
+  val configuration = Configuration.apply()
+  override lazy val loginURL = s"${configuration.getString("authentication.government-gateway.sign-in.base-url")}${configuration.getString("authentication.government-gateway.sign-in.path")}"
+  override lazy val continueURL = configuration.getString("authentication.login-callback.url") + routes.CheckAgencyController.showCheckAgencyStatus().url
 }
 
 object NoOpRegimeWithContinueUrl extends TaxRegime {
   override def isAuthorised(accounts: Accounts) = true
 
   override val authenticationType = new GovernmentGateway {
-    override lazy val loginURL = GGConfig.ggSignInUrl
-    override lazy val continueURL = GGConfig.checkAgencyStatusCallbackUrl
+    val configuration = Configuration.apply()
+    override lazy val loginURL = s"${configuration.getString("authentication.government-gateway.sign-in.base-url")}${configuration.getString("authentication.government-gateway.sign-in.path")}"
+    override lazy val continueURL = configuration.getString("authentication.login-callback.url") + routes.CheckAgencyController.showCheckAgencyStatus().url
 
     override def redirectToLogin(implicit request: Request[_]) = {
       val url = CallOps.addParamsToUrl(continueURL, "continue" -> request.getQueryString("continue"))

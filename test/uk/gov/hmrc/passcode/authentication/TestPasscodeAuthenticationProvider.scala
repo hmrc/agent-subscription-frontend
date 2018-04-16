@@ -18,7 +18,6 @@ package uk.gov.hmrc.passcode.authentication
 
 import play.api.mvc.Request
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

@@ -31,8 +31,7 @@ import scala.util.control.NonFatal
 import scala.util.{ Failure, Success, Try }
 
 @Singleton
-class ContinueUrlActions @Inject() (
-  sessionStoreService: SessionStoreService) {
+class ContinueUrlActions @Inject() (sessionStoreService: SessionStoreService) {
 
   def extractContinueUrl[A](implicit request: Request[A]): Future[Option[ContinueUrl]] = {
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Option(request.session))

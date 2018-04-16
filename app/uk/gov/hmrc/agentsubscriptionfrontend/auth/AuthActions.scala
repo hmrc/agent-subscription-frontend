@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.auth
 
+import play.api.Configuration
 import play.api.mvc._
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ ContinueUrlActions, routes }
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,7 +37,7 @@ trait AuthActions extends Actions with PasscodeAuthentication with Monitoring {
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-  def AuthorisedWithSubscribingAgentAsync(regime: TaxRegime = NoOpRegime)(body: AsyncPlayUserRequest)(implicit appConfig: AppConfig): Action[AnyContent] =
+  def AuthorisedWithSubscribingAgentAsync(regime: TaxRegime = NoOpRegime)(body: AsyncPlayUserRequest)(implicit configuration: Configuration): Action[AnyContent] =
     AuthorisedFor(regime, pageVisibility = GGConfidence).async { implicit authContext => implicit request =>
       withVerifiedPasscode {
         enrolments.flatMap { enrolls =>
@@ -52,7 +52,7 @@ trait AuthActions extends Actions with PasscodeAuthentication with Monitoring {
                   Redirect(continueUrl.url)
                 case None =>
                   mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
-                  Redirect(appConfig.agentServicesAccountUrl)
+                  Redirect(configuration.getString("agent-services-account-frontend").get)
               }
             }
             case (true, false) => body(authContext)(AgentRequest(enrolls, request))

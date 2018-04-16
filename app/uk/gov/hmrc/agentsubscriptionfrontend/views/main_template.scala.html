@@ -14,14 +14,15 @@
  * limitations under the License.
  *@
 
-@(appConfig: uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig,
-  title: String,
+@import play.api.Configuration
+
+@(title: String,
   sidebarLinks: Option[Html] = None,
   contentHeader: Option[Html] = None,
   bodyClasses: Option[String] = None,
   mainClass: Option[String] = None,
   scriptElem: Option[Html] = None,
-  userIsLoggedIn: Boolean = true)(mainContent: Html)(implicit request : Request[_], messages: Messages)
+  userIsLoggedIn: Boolean = true)(mainContent: Html)(implicit request : Request[_], configuration: Configuration, messages: Messages)
 
 @import uk.gov.hmrc.play.views.html.layouts
 
@@ -35,8 +36,7 @@
 }
 
 
-@govuk_wrapper(appConfig = appConfig,
-               title = title,
+@govuk_wrapper(title = title,
                mainClass = mainClass,
                bodyClasses = bodyClasses,
                sidebar = sidebar,
@@ -44,5 +44,4 @@
                mainContent = layouts.article(mainContent),
                serviceInfoContent = serviceInfoContent,
                scriptElem = scriptElem,
-               userIsLoggedIn = userIsLoggedIn
-)
+               userIsLoggedIn = userIsLoggedIn)

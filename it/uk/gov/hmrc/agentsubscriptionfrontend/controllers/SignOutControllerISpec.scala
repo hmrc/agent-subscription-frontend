@@ -3,14 +3,13 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import java.net.URLEncoder
 import play.api.test.FakeRequest
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
-import play.api.test.Helpers.{redirectLocation, _}
+import play.api.test.Helpers.{ redirectLocation, _ }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
-
 
 class SignOutControllerISpec extends BaseISpec {
   private lazy val controller: SignedOutController = app.injector.instanceOf[SignedOutController]
@@ -46,14 +45,14 @@ class SignOutControllerISpec extends BaseISpec {
 
       val result = await(controller.redirectToSos(request))
       val id = await(repo.find("knownFactsResult.utr" -> "9876543210").map(_.headOption.map(_.id))).get
-      redirectLocation(result).head should include (s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created%3Fid%3D$id")
+      redirectLocation(result).head should include(s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created%3Fid%3D$id")
     }
 
     "not include an ID in the SOS redirect URL when KnownFactsResults are not yet known" in {
       implicit val request = authenticatedRequest()
 
       val result = await(controller.redirectToSos(request))
-      redirectLocation(result).head should include (s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created")
+      redirectLocation(result).head should include(s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created")
     }
 
     "include a continue URL in the SOS redirect URL if a continue URL exists in the session store" in {
@@ -66,7 +65,7 @@ class SignOutControllerISpec extends BaseISpec {
       val sosContinueValueUnencoded = s"/agent-subscription/return-after-gg-creds-created?continue=${ourContinueUrl.encodedUrl}"
       val sosContinueValueEncoded = URLEncoder.encode(sosContinueValueUnencoded, "UTF-8")
       val expectedSosContinueParam = s"continue=${sosContinueValueEncoded}"
-      redirectLocation(result).head should include (expectedSosContinueParam)
+      redirectLocation(result).head should include(expectedSosContinueParam)
     }
 
     "include both an ID and a continue URL in the SOS redirect URL if both a continue URL and KnownFacts exist in the session store" in {
@@ -82,7 +81,7 @@ class SignOutControllerISpec extends BaseISpec {
       val sosContinueValueUnencoded = s"/agent-subscription/return-after-gg-creds-created?id=$id&continue=${ourContinueUrl.encodedUrl}"
       val sosContinueValueEncoded = URLEncoder.encode(sosContinueValueUnencoded, "UTF-8")
       val expectedSosContinueParam = s"continue=${sosContinueValueEncoded}"
-      redirectLocation(result).head should include (expectedSosContinueParam)
+      redirectLocation(result).head should include(expectedSosContinueParam)
     }
   }
 
