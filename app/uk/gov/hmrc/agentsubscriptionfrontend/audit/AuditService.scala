@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import com.google.inject.Singleton
 import play.api.mvc.{ AnyContent, Request }
-import uk.gov.hmrc.agentsubscriptionfrontend.auth.AgentRequest
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{ AssuranceCheckInput, AssuranceResults, KnownFactsResult }
 import uk.gov.hmrc.domain.TaxIdentifier
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,7 +30,7 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.collection.JavaConversions
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
 object AgentSubscriptionFrontendEvent extends Enumeration {
@@ -80,7 +79,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector) {
   def sendAgentAssuranceAuditEvent(
     knownFactsResult: KnownFactsResult,
     assuranceResults: AssuranceResults,
-    assuranceCheckInput: Option[AssuranceCheckInput] = None)(implicit hc: HeaderCarrier, request: AgentRequest[AnyContent]): Future[Unit] = {
+    assuranceCheckInput: Option[AssuranceCheckInput] = None)(implicit request: Request[AnyContent], hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
     implicit val auditData: AuditData = new AuditData
 
     auditData.set("utr", knownFactsResult.utr)

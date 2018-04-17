@@ -25,7 +25,7 @@ import play.api.libs.json._
 import play.api.mvc.{ AnyContent, _ }
 import play.api.{ Configuration, Logger }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.auth.{ AgentRequest, AuthActions }
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesProvider
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AddressLookupFrontendConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings._
@@ -40,6 +40,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent._
 
 case class SubscriptionDetails(
   utr: Utr,
@@ -84,12 +85,10 @@ class SubscriptionController @Inject() (
 
   private case class SubscriptionReturnedHttpError(httpStatusCode: Int) extends Product with Serializable
 
-  private def hasEnrolments(implicit request: AgentRequest[_]): Boolean = true //FIXME
-
-  val showInitialDetails: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
-    hasEnrolments match {
-      case true => Future(Redirect(routes.CheckAgencyController.showHasOtherEnrolments()))
-      case false =>
+  val showInitialDetails: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent {
+      case hasNonEmptyEnrolments(_) => Future(Redirect(routes.CheckAgencyController.showHasOtherEnrolments()))
+      case _ =>
         mark("Count-Subscription-CleanCreds-Success")
         sessionStoreService.fetchKnownFactsResult.map(_.map { knownFactsResult =>
           Ok(html.subscription_details(knownFactsResult.taxpayerName, initialDetailsForm.fill(
@@ -100,18 +99,20 @@ class SubscriptionController @Inject() (
     }
   }
 
-  val submitInitialDetails: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
-    initialDetailsForm.bindFromRequest().fold(
-      formWithErrors =>
-        redisplayInitialDetails(formWithErrors),
-      form => {
-        mark("Count-Subscription-AddressLookup-Start")
-        addressLookUpConnector.initJourney(routes.SubscriptionController.returnFromAddressLookup(), addressLookupFrontendJourneyName).map { x =>
-          sessionStoreService.cacheInitialDetails(InitialDetails(form.utr, form.knownFactsPostcode, form.name,
-            form.email, form.telephone))
-          Redirect(x)
-        }
-      })
+  val submitInitialDetails: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      initialDetailsForm.bindFromRequest().fold(
+        formWithErrors =>
+          redisplayInitialDetails(formWithErrors),
+        form => {
+          mark("Count-Subscription-AddressLookup-Start")
+          addressLookUpConnector.initJourney(routes.SubscriptionController.returnFromAddressLookup(), addressLookupFrontendJourneyName).map { x =>
+            sessionStoreService.cacheInitialDetails(InitialDetails(form.utr, form.knownFactsPostcode, form.name,
+              form.email, form.telephone))
+            Redirect(x)
+          }
+        })
+    }
   }
 
   private def redisplayInitialDetails(formWithErrors: Form[InitialDetails])(implicit hc: HeaderCarrier, request: Request[_]) =
@@ -152,59 +153,66 @@ class SubscriptionController @Inject() (
     }
   }
 
-  def returnFromAddressLookup(id: String): Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
-
-    sessionStoreService.fetchInitialDetails.flatMap { maybeDetails =>
-      maybeDetails.map { details =>
-        addressLookUpConnector.getAddressDetails(id).flatMap { address =>
-          desAddressForm.bindAddressLookupFrontendAddress(details.utr, address).fold(
-            formWithErrors => Future successful Ok(html.address_form_with_errors(formWithErrors)),
-            validDesAddress => {
-              mark("Count-Subscription-AddressLookup-Success")
-              subscribe(details, validDesAddress).map(redirectSubscriptionResponse)
-            })
-        }
-      }.getOrElse(Future.successful(sessionMissingRedirect()))
+  def returnFromAddressLookup(id: String): Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      sessionStoreService.fetchInitialDetails.flatMap { maybeDetails =>
+        maybeDetails.map { details =>
+          addressLookUpConnector.getAddressDetails(id).flatMap { address =>
+            desAddressForm.bindAddressLookupFrontendAddress(details.utr, address).fold(
+              formWithErrors => Future successful Ok(html.address_form_with_errors(formWithErrors)),
+              validDesAddress => {
+                mark("Count-Subscription-AddressLookup-Success")
+                subscribe(details, validDesAddress).map(redirectSubscriptionResponse)
+              })
+          }
+        }.getOrElse(Future.successful(sessionMissingRedirect()))
+      }
     }
   }
 
-  def submitModifiedAddress: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
-    desAddressForm.form.bindFromRequest().fold(
-      formWithErrors => Future successful Ok(html.address_form_with_errors(formWithErrors)),
-      validDesAddress =>
-        sessionStoreService.fetchInitialDetails.flatMap { maybeInitialDetails =>
-          maybeInitialDetails.map { initialDetails =>
-            subscribe(initialDetails, validDesAddress).map(redirectSubscriptionResponse)
-          }.getOrElse(Future.successful(sessionMissingRedirect()))
-        })
+  def submitModifiedAddress: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      desAddressForm.form.bindFromRequest().fold(
+        formWithErrors => Future successful Ok(html.address_form_with_errors(formWithErrors)),
+        validDesAddress =>
+          sessionStoreService.fetchInitialDetails.flatMap { maybeInitialDetails =>
+            maybeInitialDetails.map { initialDetails =>
+              subscribe(initialDetails, validDesAddress).map(redirectSubscriptionResponse)
+            }.getOrElse(Future.successful(sessionMissingRedirect()))
+          })
+    }
   }
 
-  val showSubscriptionFailed: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
-    Future successful Ok(html.subscription_failed("Postcodes do not match"))
+  val showSubscriptionFailed: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Future successful Ok(html.subscription_failed("Postcodes do not match"))
+    }
   }
 
-  val showSubscriptionComplete: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
-    {
-      val agencyData = for {
-        agencyName <- request.flash.get("agencyName")
-        arn <- request.flash.get("arn")
-      } yield (agencyName, arn)
+  val showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      {
+        val agencyData = for {
+          agencyName <- request.flash.get("agencyName")
+          arn <- request.flash.get("arn")
+        } yield (agencyName, arn)
 
-      agencyData match {
-        case Some((agencyName, arn)) =>
-          sessionStoreService.fetchContinueUrl.
-            recover {
-              case NonFatal(ex) =>
-                Logger.warn("Session store service failure", ex)
-                None
-            }.
-            andThen { case _ => sessionStoreService.remove() }.
-            map { continueUrlOpt =>
-              val continueUrl = CallOps.addParamsToUrl(configuration.getString("agent-services-account-frontend").get, "continue" -> continueUrlOpt.map(_.url))
-              Ok(html.subscription_complete(continueUrl, agencyName, arn))
-            }
-        case _ =>
-          Future.successful(sessionMissingRedirect())
+        agencyData match {
+          case Some((agencyName, arn)) =>
+            sessionStoreService.fetchContinueUrl.
+              recover {
+                case NonFatal(ex) =>
+                  Logger.warn("Session store service failure", ex)
+                  None
+              }.
+              andThen { case _ => sessionStoreService.remove() }.
+              map { continueUrlOpt =>
+                val continueUrl = CallOps.addParamsToUrl(configuration.getString("agent-services-account-frontend").get, "continue" -> continueUrlOpt.map(_.url))
+                Ok(html.subscription_complete(continueUrl, agencyName, arn))
+              }
+          case _ =>
+            Future.successful(sessionMissingRedirect())
+        }
       }
     }
   }
