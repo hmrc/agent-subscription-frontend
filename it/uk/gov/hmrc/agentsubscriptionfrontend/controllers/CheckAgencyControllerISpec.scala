@@ -26,7 +26,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers._
-import uk.gov.hmrc.domain.{Nino, TaxIdentifier}
+import uk.gov.hmrc.domain.{ Nino, TaxIdentifier }
 
 trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   val validUtr = Utr("2000000000")
@@ -44,7 +44,8 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   private lazy val configuredGovernmentGatewayUrl = "http://configured-government-gateway.gov.uk/"
 
   override protected def appBuilder: GuiceApplicationBuilder = super.appBuilder
-    .configure("agentAssuranceFlag" -> agentAssuranceFlag,
+    .configure(
+      "agentAssuranceFlag" -> agentAssuranceFlag,
       "government-gateway.url" -> configuredGovernmentGatewayUrl)
 
   lazy val controller: CheckAgencyController = app.injector.instanceOf[CheckAgencyController]
@@ -228,7 +229,8 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       val result = await(controller.showConfirmYourAgency(request))
 
-      checkHtmlResultWithBodyText(result,
+      checkHtmlResultWithBodyText(
+        result,
         htmlEscapedMessage("confirmYourAgency.title"),
         s"$postcode", s"${utr.value}", s"$registrationName")
       metricShouldExistsAndBeenUpdated("Count-Subscription-CleanCreds-Start")
@@ -433,7 +435,6 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
   }
 
-
   def verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck: Boolean, passSaAgentAssuranceCheck: Boolean): Unit = {
     verifyAuditRequestSent(1, AgentSubscriptionFrontendEvent.AgentAssurance,
       detail = Map(
@@ -447,13 +448,10 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
         "payeAgentRef" -> "HZ1234",
         "passPayeAgentAssuranceCheck" -> passPayeAgentAssuranceCheck.toString,
         "authProviderId" -> "12345-credId",
-        "authProviderType" -> "GovernmentGateway"
-      ),
+        "authProviderType" -> "GovernmentGateway"),
       tags = Map(
         "transactionName" -> "agent-assurance",
-        "path" -> "/"
-      )
-    )
+        "path" -> "/"))
   }
 
   def verifyAgentAssuranceAuditRequestSentWithClientIdentifier(identifier: TaxIdentifier, passCESAAgentAssuranceCheck: Boolean, saAgentRef: String): Unit = {
@@ -472,14 +470,10 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
         "passCESAAgentAssuranceCheck" -> passCESAAgentAssuranceCheck.toString,
         "authProviderId" -> "12345-credId",
         "authProviderType" -> "GovernmentGateway",
-        "userEnteredSaAgentRef" -> saAgentRef
-      ) + clientIdentifier,
+        "userEnteredSaAgentRef" -> saAgentRef) + clientIdentifier,
       tags = Map(
         "transactionName" -> "agent-assurance",
-        "path" -> "/"
-      )
-    )
+        "path" -> "/"))
   }
-
 
 }

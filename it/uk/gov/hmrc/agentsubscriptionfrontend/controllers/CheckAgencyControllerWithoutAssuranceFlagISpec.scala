@@ -10,13 +10,12 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers.subscribingAgen
 
 class CheckAgencyControllerWithoutAssuranceFlagISpec extends CheckAgencyControllerISpec {
 
-  override val agentAssuranceFlag: Boolean =  false
+  override val agentAssuranceFlag: Boolean = false
 
   "checkAgencyStatus with the agentAssuranceFlag set to false" should {
     "redirect to confirm agency page and store known facts result in the session store when a matching registration is found for the UTR and postcode" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       isEnrolledForNonMtdServices(subscribingAgent)
-
 
       implicit val request = authenticatedRequest()
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
@@ -34,7 +33,6 @@ class CheckAgencyControllerWithoutAssuranceFlagISpec extends CheckAgencyControll
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       isEnrolledForNonMtdServices(subscribingAgent)
 
-
       implicit val request = authenticatedRequest()
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
@@ -48,7 +46,6 @@ class CheckAgencyControllerWithoutAssuranceFlagISpec extends CheckAgencyControll
     "redirect to already subscribed page when the business registration found by agent-subscription is already subscribed" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = true)
       isEnrolledForNonMtdServices(subscribingAgent)
-
 
       implicit val request = authenticatedRequest()
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)

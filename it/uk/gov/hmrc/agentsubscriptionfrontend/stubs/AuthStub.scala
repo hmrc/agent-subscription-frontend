@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{SampleUser, SessionKeysForTesting}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{ SampleUser, SessionKeysForTesting }
 import uk.gov.hmrc.http.SessionKeys
 
 object AuthStub {
@@ -25,9 +25,7 @@ object AuthStub {
     stubFor(post(urlEqualTo("/auth/authorise"))
       .willReturn(
         aResponse()
-          .withStatus(500)
-      )
-    )
+          .withStatus(500)))
   }
 
   def userIsNotAuthenticated(): Unit = {
@@ -35,21 +33,17 @@ object AuthStub {
       .willReturn(
         aResponse()
           .withStatus(401)
-          .withHeader("WWW-Authenticate", "MDTP detail=\"InsufficientEnrolments\"")
-      )
-    )
+          .withHeader("WWW-Authenticate", "MDTP detail=\"InsufficientEnrolments\"")))
   }
 
-  def userIsAuthenticated(user: SampleUser): Seq[(String,String)] = {
+  def userIsAuthenticated(user: SampleUser): Seq[(String, String)] = {
     //FIXME
     stubFor(post(urlEqualTo("/auth/authorise"))
       .willReturn(
         aResponse()
           .withStatus(200)
           .withHeader("Content-Type", "application/json")
-          .withBody("""{}""")
-      )
-    )
+          .withBody("""{}""")))
     sessionKeysForMockAuth(user)
   }
 

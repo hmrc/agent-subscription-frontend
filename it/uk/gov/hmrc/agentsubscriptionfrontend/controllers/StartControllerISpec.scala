@@ -4,7 +4,7 @@ import java.net.URLEncoder
 
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentType, _}
+import play.api.test.Helpers.{ contentType, _ }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
@@ -22,7 +22,6 @@ class StartControllerISpec extends BaseISpec {
 
   override protected def appBuilder: GuiceApplicationBuilder = super.appBuilder
     .configure("government-gateway.url" -> configuredGovernmentGatewayUrl)
-
 
   "context root" should {
     "redirect to start page" in {

@@ -5,11 +5,11 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
-import play.api.i18n.{Lang, Messages, MessagesApi}
+import play.api.i18n.{ Lang, Messages, MessagesApi }
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.mvc.{ AnyContentAsEmpty, Result }
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentType, _}
+import play.api.test.Helpers.{ contentType, _ }
 import play.twirl.api.HtmlFormat.escape
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.SsoConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
@@ -25,7 +25,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.Postcod
 import scala.concurrent.Future
 
 abstract class BaseISpec extends UnitSpec with OneAppPerSuite with MongoApp with WireMockSupport
-  with EndpointBehaviours with DataStreamStubs  with MetricTestSupport {
+  with EndpointBehaviours with DataStreamStubs with MetricTestSupport {
 
   override implicit lazy val app: Application = appBuilder.build()
 
@@ -39,8 +39,7 @@ abstract class BaseISpec extends UnitSpec with OneAppPerSuite with MongoApp with
         "microservice.services.agent-assurance.port" -> wireMockPort,
         "auditing.enabled" -> true,
         "auditing.consumer.baseUri.host" -> wireMockHost,
-        "auditing.consumer.baseUri.port" -> wireMockPort
-      )
+        "auditing.consumer.baseUri.port" -> wireMockPort)
       .configure(mongoConfiguration)
       .overrides(new TestGuiceModule)
   }
@@ -85,7 +84,6 @@ abstract class BaseISpec extends UnitSpec with OneAppPerSuite with MongoApp with
     FakeRequest().withSession(sessionKeys: _*)
   }
 
-
   protected def checkHtmlResultWithBodyText(result: Result, expectedSubstrings: String*): Unit = {
     status(result) shouldBe OK
     contentType(result) shouldBe Some("text/html")
@@ -101,5 +99,4 @@ abstract class BaseISpec extends UnitSpec with OneAppPerSuite with MongoApp with
   implicit def hc(implicit request: FakeRequest[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
 }
-
 

@@ -40,8 +40,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
       sessionStoreService.currentSession.knownFactsResult shouldBe Some(
-        KnownFactsResult(validUtr, validPostcode, "My Agency", isSubscribedToAgentServices = false)
-      )
+        KnownFactsResult(validUtr, validPostcode, "My Agency", isSubscribedToAgentServices = false))
       verifyAgentAssuranceAuditRequestSent(passPayeAgentAssuranceCheck = true, passSaAgentAssuranceCheck = true)
       metricShouldExistsAndBeenUpdated("Count-Subscription-CheckAgency-Success")
     }
@@ -106,18 +105,18 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
     "redirect to already subscribed page when the business registration found by agent-subscription is already subscribed " +
       "for an agent without an acceptable number of PAYE clients" in {
-      withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = true)
-      isEnrolledForNonMtdServices(subscribingAgent)
-      givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
-      givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
+        withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = true)
+        isEnrolledForNonMtdServices(subscribingAgent)
+        givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
+        givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
 
-      implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
-      val result = await(controller.checkAgencyStatus(request))
+        implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+        val result = await(controller.checkAgencyStatus(request))
 
-      status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showAlreadySubscribed().url)
-      verifyAuditRequestNotSent(AgentSubscriptionFrontendEvent.AgentAssurance)
-    }
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showAlreadySubscribed().url)
+        verifyAuditRequestNotSent(AgentSubscriptionFrontendEvent.AgentAssurance)
+      }
 
     "proceed to showConfirmYourAgency when there in not an acceptable number of PAYE client, but there is enough SA Clients" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
