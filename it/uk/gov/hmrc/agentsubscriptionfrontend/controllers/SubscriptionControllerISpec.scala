@@ -117,7 +117,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       implicit val request = authenticatedRequest(subscribingAgentWithoutEnrolments)
 
       val continueUrl = ContinueUrl("/test-continue-url")
-      val expectedContinueParam = configuration.getString("agentServicesAccountFrontend") + "?continue=" + continueUrl.encodedUrl
+      val expectedContinueParam = "?continue=" + continueUrl.encodedUrl
 
       sessionStoreService.currentSession(hc(request)).continueUrl = Some(continueUrl)
       val result = await(controller.showSubscriptionComplete(request.withFlash("arn" -> "ARN0001", "agencyName" -> "My Agency")))
