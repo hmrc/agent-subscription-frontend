@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import javax.inject.Inject
+import javax.inject.{ Inject, Named, Singleton }
 import play.api.Configuration
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc.{ Action, AnyContent }
@@ -25,10 +25,11 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.{ AuthConnector, AuthProviders, AuthorisedFunctions }
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
 
+@Singleton
 class StartController @Inject() (
   override val messagesApi: MessagesApi,
   override val authConnector: AuthConnector,

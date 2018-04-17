@@ -16,28 +16,26 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import javax.inject.{ Inject, Named, Singleton }
 import com.kenshoo.play.metrics.Metrics
-import play.api.{ Configuration, Logger }
+import javax.inject.{ Inject, Named, Singleton }
 import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.i18n.{ I18nSupport, Messages, MessagesApi }
-import play.api.mvc.{ AnyContent, Request, _ }
+import play.api.mvc.{ AnyContent, _ }
+import play.api.{ Configuration, Logger }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
-import uk.gov.hmrc.agentsubscriptionfrontend.auth.{ AgentRequest, AuthActions, NoOpRegimeWithContinueUrl }
-import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{ AgentAssuranceConnector, AgentSubscriptionConnector, FrontendAuthConnector }
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.{ AgentRequest, AuthActions }
+import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{ AgentAssuranceConnector, AgentSubscriptionConnector }
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{ invasive_check_start, invasive_input_option }
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.{ Nino, SaAgentReference, TaxIdentifier }
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.passcode.authentication.{ PasscodeAuthenticationProvider, PasscodeVerificationConfig }
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
 
@@ -54,8 +52,6 @@ class CheckAgencyController @Inject() (
   val agentAssuranceConnector: AgentAssuranceConnector,
   override val messagesApi: MessagesApi,
   override val authConnector: AuthConnector,
-  override val config: PasscodeVerificationConfig,
-  override val passcodeAuthenticationProvider: PasscodeAuthenticationProvider,
   val agentSubscriptionConnector: AgentSubscriptionConnector,
   val sessionStoreService: SessionStoreService,
   val continueUrlActions: ContinueUrlActions,
@@ -65,14 +61,14 @@ class CheckAgencyController @Inject() (
 
   import continueUrlActions._
 
-  val showHasOtherEnrolments: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() { implicit authContext => implicit request =>
+  val showHasOtherEnrolments: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
     Future successful Ok(html.has_other_enrolments())
   }
 
-  private def hasMtdEnrolment(implicit request: AgentRequest[_]): Boolean = request.enrolments.exists(_.key == "HMRC-AS-AGENT")
+  private def hasMtdEnrolment(implicit request: AgentRequest[_]): Boolean = true //FIXME
 
   def showCheckAgencyStatus: Action[AnyContent] = {
-    AuthorisedWithSubscribingAgentAsync(NoOpRegimeWithContinueUrl) { implicit authContext => implicit request =>
+    AuthorisedWithSubscribingAgentAsync { implicit request =>
       withMaybeContinueUrlCached {
         hasMtdEnrolment match {
           case true =>
@@ -86,14 +82,14 @@ class CheckAgencyController @Inject() (
     }
   }
 
-  val checkAgencyStatus: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() { implicit authContext: AuthContext => implicit request =>
+  val checkAgencyStatus: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
     CheckAgencyController.knownFactsForm.bindFromRequest().fold(
       formWithErrors => {
         Future successful Ok(html.check_agency_status(formWithErrors))
       },
       knownFacts => checkAgencyStatusGivenValidForm(knownFacts))
   }
-  private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)(implicit authContext: AuthContext, request: AgentRequest[AnyContent]): Future[Result] = {
+  private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)(implicit request: AgentRequest[AnyContent]): Future[Result] = {
     def assureIsAgent(): Future[Option[AssuranceResults]] = {
       if (agentAssuranceFlag) {
         val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
@@ -137,11 +133,11 @@ class CheckAgencyController @Inject() (
     }
   }
 
-  val showNoAgencyFound: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() { implicit authContext => implicit request =>
+  val showNoAgencyFound: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
     Future successful Ok(html.no_agency_found())
   }
 
-  val showConfirmYourAgency: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() { implicit authContext => implicit request =>
+  val showConfirmYourAgency: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
     sessionStoreService.fetchKnownFactsResult.map(_.map { knownFactsResult =>
       Ok(html.confirm_your_agency(
         registrationName = knownFactsResult.taxpayerName,
@@ -162,15 +158,15 @@ class CheckAgencyController @Inject() (
       routes.SubscriptionController.showInitialDetails().url
     }
 
-  val showAlreadySubscribed: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() { implicit authContext => implicit request =>
+  val showAlreadySubscribed: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
     Future successful Ok(html.already_subscribed())
   }
 
-  def invasiveCheckStart: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() { implicit authContext => implicit request =>
+  def invasiveCheckStart: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
     Future.successful(Ok(invasive_check_start(RadioWithInput.confirmResponseForm)))
   }
 
-  def invasiveSaAgentCodePost: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() { implicit authContext => implicit request =>
+  def invasiveSaAgentCodePost: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
     RadioWithInput.confirmResponseForm.bindFromRequest().fold(
       formWithErrors => {
         Future.successful(Ok(invasive_check_start(formWithErrors)))
@@ -191,11 +187,11 @@ class CheckAgencyController @Inject() (
       })
   }
 
-  def invasiveTaxPayerOptionGet: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() { implicit authContext => implicit request =>
+  def invasiveTaxPayerOptionGet: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
     Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm)))
   }
 
-  def invasiveTaxPayerOption: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync() { implicit authContext => implicit request =>
+  def invasiveTaxPayerOption: Action[AnyContent] = AuthorisedWithSubscribingAgentAsync { implicit request =>
     RadioWithInput.confirmResponseForm.bindFromRequest().fold(
       formWithErrors => {
         Future.successful(Ok(invasive_input_option(formWithErrors)))
@@ -228,7 +224,7 @@ class CheckAgencyController @Inject() (
     def isValid = validateId(id)
   }
 
-  def checkAndRedirect(value: TaxIdFormValue)(implicit hc: HeaderCarrier, request: AgentRequest[AnyContent], authContext: AuthContext) = {
+  def checkAndRedirect(value: TaxIdFormValue)(implicit hc: HeaderCarrier, request: AgentRequest[AnyContent]) = {
 
     if (value.isValid) {
       val saAgentReference = request.session.get("saAgentReferenceToCheck").getOrElse("")
@@ -250,7 +246,7 @@ class CheckAgencyController @Inject() (
     taxIdFormValue: TaxIdFormValue,
     inputSaAgentReference: SaAgentReference)(
     implicit
-    hc: HeaderCarrier, request: AgentRequest[AnyContent], authContext: AuthContext): Future[Boolean] = {
+    hc: HeaderCarrier, request: AgentRequest[AnyContent]): Future[Boolean] = {
     agentAssuranceConnector.hasActiveCesaRelationship(taxIdFormValue.taxId, taxIdFormValue.name, inputSaAgentReference).map { relationshipExists =>
       val (userEnteredNino, userEnteredUtr) = taxIdFormValue.taxId match {
         case nino @ Nino(_) => (Some(nino), None)

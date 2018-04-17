@@ -61,32 +61,4 @@ trait EndpointBehaviours {
       bodyOf(result) should include("/contact/beta-feedback")
     }
   }
-
-  protected def aWhitelistedEndpoint(doRequest: PlayRequest): Unit = {
-    "prevent access if passcode authorisation fails" in {
-      AuthStub.hasNoEnrolments(subscribingAgent)
-
-      AuthStub.passcodeAuthorisationFails()
-
-      implicit val request = authenticatedRequest()
-      val result = await(doRequest(request))
-
-      status(result) shouldBe 303
-      result.header.headers("Location") should include("verification/otac")
-    }
-
-    "allow access if passcode authorisation succeeds" in {
-      AuthStub.hasNoEnrolments(subscribingAgent)
-
-      val sessionKeys = AuthStub.passcodeAuthorisationSucceeds()
-
-      implicit val request = authenticatedRequest().withSession(sessionKeys: _*)
-      val result = await(doRequest(request))
-
-      redirectLocation(result) match {
-        case Some(location) => location should not include "verification/otac"
-        case None =>
-      }
-    }
-  }
 }

@@ -18,67 +18,24 @@ package uk.gov.hmrc.agentsubscriptionfrontend.auth
 
 import play.api.Configuration
 import play.api.mvc._
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ ContinueUrlActions, routes }
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContinueUrlActions
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.passcode.authentication.PasscodeAuthentication
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.play.frontend.auth.{ Actions, AuthContext, TaxRegime }
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-case class AgentRequest[A](enrolments: List[Enrolment], request: Request[A]) extends WrappedRequest[A](request)
+case class AgentRequest[A](request: Request[A]) extends WrappedRequest[A](request)
 
-trait AuthActions extends Actions with PasscodeAuthentication with Monitoring {
-  protected type AsyncPlayUserRequest = AuthContext => AgentRequest[AnyContent] => Future[Result]
+trait AuthActions extends Monitoring {
+  protected type AsyncPlayUserRequest = AgentRequest[AnyContent] => Future[Result]
 
+  val authConnector: AuthConnector
   val continueUrlActions: ContinueUrlActions
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-  def AuthorisedWithSubscribingAgentAsync(regime: TaxRegime = NoOpRegime)(body: AsyncPlayUserRequest)(implicit configuration: Configuration): Action[AnyContent] =
-    AuthorisedFor(regime, pageVisibility = GGConfidence).async { implicit authContext => implicit request =>
-      withVerifiedPasscode {
-        enrolments.flatMap { enrolls =>
-          (for {
-            isAgent <- isAgentAffinityGroup
-            activatedEnrol <- checkActivatedEnrollment(enrolls)
-          } yield (isAgent, activatedEnrol)).flatMap {
-            case (true, true) => {
-              continueUrlActions.extractContinueUrl.map {
-                case Some(continueUrl) =>
-                  mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
-                  Redirect(continueUrl.url)
-                case None =>
-                  mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
-                  Redirect(configuration.getString("agent-services-account-frontend").get)
-              }
-            }
-            case (true, false) => body(authContext)(AgentRequest(enrolls, request))
-            case _ =>
-              mark("Count-Subscription-NonAgent")
-              Future successful redirectToNonAgentNextSteps
-          }
-        }
-      }
-    }
-
-  protected def enrolments(implicit authContext: AuthContext, hc: HeaderCarrier): Future[List[Enrolment]] =
-    authConnector.getEnrolments[List[Enrolment]](authContext)
-
-  private def checkActivatedEnrollment(enrolls: List[Enrolment]): Future[Boolean] =
-    enrolls.find(_.key equals "HMRC-AS-AGENT") match {
-      case Some(enroll) if enroll.isActivated => Future successful true
-      case _ => Future successful false
-    }
-
-  protected def isAgentAffinityGroup()(implicit authContext: AuthContext, hc: HeaderCarrier): Future[Boolean] =
-    authConnector.getUserDetails(authContext).map { userDetailsResponse =>
-      val affinityGroup = (userDetailsResponse.json \ "affinityGroup").as[String]
-      affinityGroup == "Agent"
-    }
-
-  private def redirectToNonAgentNextSteps: Result =
-    Redirect(routes.StartController.showNonAgentNextSteps())
+  def AuthorisedWithSubscribingAgentAsync(body: AsyncPlayUserRequest)(implicit configuration: Configuration): Action[AnyContent] =
+    Action.async { implicit request => body(AgentRequest(request)) }
 }

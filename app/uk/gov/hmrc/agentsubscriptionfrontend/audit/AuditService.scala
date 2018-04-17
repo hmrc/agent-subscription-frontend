@@ -28,8 +28,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.collection.JavaConversions
@@ -57,7 +55,7 @@ class AuditData {
 }
 
 @Singleton
-class AuditService @Inject() (val auditConnector: AuditConnector, authConnector: AuthConnector) {
+class AuditService @Inject() (val auditConnector: AuditConnector) {
 
   import AgentSubscriptionFrontendEvent._
 
@@ -78,11 +76,11 @@ class AuditService @Inject() (val auditConnector: AuditConnector, authConnector:
     ("authProviderId", None),
     ("authProviderType", None))
 
+  //noinspection ScalaStyle
   def sendAgentAssuranceAuditEvent(
     knownFactsResult: KnownFactsResult,
     assuranceResults: AssuranceResults,
-    assuranceCheckInput: Option[AssuranceCheckInput] = None)(implicit hc: HeaderCarrier, request: AgentRequest[AnyContent],
-    authContext: AuthContext): Future[Unit] = {
+    assuranceCheckInput: Option[AssuranceCheckInput] = None)(implicit hc: HeaderCarrier, request: AgentRequest[AnyContent]): Future[Unit] = {
     implicit val auditData: AuditData = new AuditData
 
     auditData.set("utr", knownFactsResult.utr)
@@ -92,7 +90,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector, authConnector:
 
     //TODO auditData.set("refuseToDealWith", ?)
 
-    val payeEnrolmentOpt = request.enrolments.find(e => e.key == "IR-PAYE-AGENT" && e.isActivated)
+    /*val payeEnrolmentOpt = request.enrolments.find(e => e.key == "IR-PAYE-AGENT" && e.isActivated)
     auditData.set("isEnrolledPAYEAgent", payeEnrolmentOpt.isDefined)
 
     val saEnrolmentOpt = request.enrolments.find(e => e.key == "IR-SA-AGENT" && e.isActivated)
@@ -106,7 +104,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector, authConnector:
     for {
       e <- saEnrolmentOpt
       saAgentRef <- e.identifiers.find(_.key == "IRAgentReference")
-    } auditData.set("saAgentRef", saAgentRef.value)
+    } auditData.set("saAgentRef", saAgentRef.value)*/
 
     assuranceCheckInput.foreach { userInput =>
       userInput.passCesaAgentAssuranceCheck.foreach { assuranceCheck =>
@@ -122,14 +120,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector, authConnector:
         auditData.set("userEnteredSaAgentRef", saAgentRef)
       }
     }
-    for {
-      _ <- authConnector.getUserDetails(authContext).map { response =>
-        val json = response.json
-        (json \ "authProviderId").asOpt[String].foreach(auditData.set("authProviderId", _))
-        (json \ "authProviderType").asOpt[String].foreach(auditData.set("authProviderType", _))
-      }
-      _ <- sendAgentAssuranceAuditEvent(auditData)
-    } yield ()
+    sendAgentAssuranceAuditEvent(auditData)
   }
 
   def sendAgentAssuranceAuditEvent(auditData: AuditData)(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] = {

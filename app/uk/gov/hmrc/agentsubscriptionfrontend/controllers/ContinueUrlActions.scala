@@ -17,7 +17,6 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import javax.inject.{ Inject, Singleton }
-
 import play.api.Logger
 import play.api.mvc._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
@@ -27,7 +26,6 @@ import uk.gov.hmrc.play.binders.ContinueUrl
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
-import scala.util.control.NonFatal
 import scala.util.{ Failure, Success, Try }
 
 @Singleton

@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.SessionKeys
 
 object AuthStub {
   def authIsDown(): Unit = {
-    stubFor(get(urlEqualTo("/auth/authority"))
+    stubFor(post(urlEqualTo("/auth/authorise"))
       .willReturn(
         aResponse()
           .withStatus(500)
@@ -31,110 +31,42 @@ object AuthStub {
   }
 
   def userIsNotAuthenticated(): Unit = {
-    stubFor(get(urlEqualTo("/auth/authority"))
+    stubFor(post(urlEqualTo("/auth/authorise"))
       .willReturn(
         aResponse()
           .withStatus(401)
+          .withHeader("WWW-Authenticate", "MDTP detail=\"InsufficientEnrolments\"")
       )
     )
   }
 
-  /**
-    * @return session keys required for the play-authorised-frontend library to
-    *         recognise that the user is logged in
-    */
-  def userIsAuthenticated(user: SampleUser): Seq[(String, String)] = {
-    stubFor(get(urlEqualTo("/auth/authority"))
+  def userIsAuthenticated(user: SampleUser): Seq[(String,String)] = {
+    //FIXME
+    stubFor(post(urlEqualTo("/auth/authorise"))
       .willReturn(
         aResponse()
           .withStatus(200)
-          .withBody(user.authJson)
+          .withHeader("Content-Type", "application/json")
+          .withBody("""{}""")
       )
     )
-
-    stubFor(get(urlMatching("/auth/oid/[^/]+$"))
-      .willReturn(
-        aResponse()
-          .withStatus(200)
-          .withBody(user.authJson)
-      )
-    )
-
-    stubFor(get(urlEqualTo(user.userDetailsLink))
-      .willReturn(
-        aResponse()
-          .withStatus(200)
-          .withBody(user.userDetailsJson)
-      )
-    )
-
     sessionKeysForMockAuth(user)
   }
 
-  def passcodeAuthorisationSucceeds(regime: String = "agent-subscription", otacToken: String = "dummy-otac-token"): Seq[(String, String)] = {
-    stubPasscodeAuthorisation(regime, 200)
-
-    Seq(SessionKeys.otacToken -> otacToken)
-  }
-
-  def passcodeAuthorisationFails(regime: String = "agent-subscription"): Unit = {
-    stubPasscodeAuthorisation(regime, 404)
-  }
-
-  private def stubPasscodeAuthorisation(regime: String, status: Int) = {
-    stubFor(get(urlEqualTo(s"/authorise/read/$regime"))
-      .willReturn(
-        aResponse()
-          .withStatus(status)))
-  }
-
   def isSubscribedToMtd(user: SampleUser): Unit = {
-    stubFor(get(urlEqualTo(user.enrolmentsLink))
-        .willReturn(
-          aResponse()
-              .withStatus(200)
-              .withBody(
-                s"""
-                   |[{"key":"HMRC-AS-AGENT","identifiers":[{"key":"AgentReferenceNumber","value":"JARN1234567"}],"state":"Activated"}]
-                 """.stripMargin
-              )
-        ))
+    //FIXME
   }
 
   def isSubscribedToMtdNotActivated(user: SampleUser): Unit = {
-    stubFor(get(urlEqualTo(user.enrolmentsLink))
-      .willReturn(
-        aResponse()
-          .withStatus(200)
-          .withBody(
-            s"""
-               |[{"key":"HMRC-AS-AGENT","identifiers":[{"key":"AgentReferenceNumber","value":"JARN1234567"}],"state":"Not-Activated"}]
-                 """.stripMargin
-          )
-      ))
+    //FIXME
   }
 
   def hasNoEnrolments(user: SampleUser): Unit = {
-    stubFor(get(urlEqualTo(user.enrolmentsLink))
-      .willReturn(
-        aResponse()
-          .withStatus(200)
-          .withBody("[]")
-      ))
+    //FIXME
   }
 
   def isEnrolledForNonMtdServices(user: SampleUser): Unit = {
-    stubFor(get(urlEqualTo(user.enrolmentsLink))
-      .willReturn(
-        aResponse()
-          .withStatus(200)
-          .withBody(
-            s"""
-               |[{"key":"IR-PAYE-AGENT","identifiers":[{"key":"IRAgentReference","value":"HZ1234"}],"state":"Activated"},
-               | {"key":"IR-SA-AGENT","identifiers":[{"key":"IRAgentReference","value":"FOO1234"}],"state":"Activated"}]
-         """.stripMargin
-          )
-      ))
+    //FIXME
   }
 
   private def sessionKeysForMockAuth(user: SampleUser): Seq[(String, String)] = Seq(

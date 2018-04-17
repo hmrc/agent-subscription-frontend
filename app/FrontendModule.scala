@@ -23,6 +23,7 @@ import com.google.inject.name.Names.named
 import com.google.inject.name.Names
 import org.slf4j.MDC
 import play.api.{ Configuration, Environment, Logger, LoggerLike }
+import play.modules.reactivemongo.{ ReactiveMongoComponent, ReactiveMongoComponentImpl }
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.{ PostcodesLoader, PostcodesProvider }
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.FrontendAuthConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
@@ -94,6 +95,7 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
       ct.bindConfigProperty(classTag.runtimeClass.asInstanceOf[Class[A]])(propertyName)
   }
 
+  //noinspection ScalaStyle
   def configure(): Unit = {
 
     val appName = "agent-subscription-frontend"
@@ -108,7 +110,6 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
     bind(classOf[AuthConnector]).to(classOf[FrontendAuthConnector])
-    bind(classOf[uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector]).to(classOf[LegacyFrontendAuthConnector])
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[SessionStoreService])
     bind(classOf[LoggerLike]).toInstance(Logger)
@@ -149,7 +150,6 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
     bindServiceProperty("cachable.session-cache.domain")
     bindServiceProperty("agent-services-account-frontend.external-url")
     bindServiceProperty("agent-services-account-frontend.start.path")
-
   }
 
   private def bindBaseUrl(serviceName: String) =
@@ -175,12 +175,6 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
       throw new Exception(s"Config property for service not found $propertyName")
     })
   }
-}
-
-@Singleton
-class LegacyFrontendAuthConnector @Inject() (val http: HttpGet, @Named("auth-baseUrl") val baseUrl: URL)
-  extends uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector {
-  lazy val serviceUrl = baseUrl.toExternalForm
 }
 
 @Singleton

@@ -36,7 +36,6 @@ abstract class BaseISpec extends UnitSpec with OneAppPerSuite with MongoApp with
         "microservice.services.agent-subscription.port" -> wireMockPort,
         "microservice.services.address-lookup-frontend.port" -> wireMockPort,
         "microservice.services.sso.port" -> wireMockPort,
-        "passcodeAuthentication.enabled" -> passcodeAuthenticationEnabled,
         "microservice.services.agent-assurance.port" -> wireMockPort,
         "auditing.enabled" -> true,
         "auditing.consumer.baseUri.host" -> wireMockHost,
@@ -50,8 +49,6 @@ abstract class BaseISpec extends UnitSpec with OneAppPerSuite with MongoApp with
     givenAuditConnector()
     givenCleanMetricRegistry()
   }
-
-  protected def passcodeAuthenticationEnabled: Boolean = false
 
   protected lazy val sessionStoreService = new TestSessionStoreService
 

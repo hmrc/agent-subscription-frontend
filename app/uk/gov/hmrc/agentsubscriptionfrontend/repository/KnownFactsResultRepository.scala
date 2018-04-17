@@ -17,8 +17,8 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.repository
 
 import java.util.UUID
-import javax.inject.{ Inject, Named, Singleton }
 
+import javax.inject.{ Inject, Named, Singleton }
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoComponent
@@ -32,12 +32,15 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class KnownFactsResultMongoRepository @Inject() (@Named("mongodb.knownfactsresult.ttl") ttl: Int, mongoComponent: ReactiveMongoComponent)
+class KnownFactsResultMongoRepository @Inject() (mongoComponent: ReactiveMongoComponent)
   extends ReactiveRepository[StashedKnownFactsResult, BSONObjectID](
     "agent-known-facts-results",
     mongoComponent.mongoConnector.db,
     StashedKnownFactsResult.format,
-    ReactiveMongoFormats.objectIdFormats) {
+    ReactiveMongoFormats.objectIdFormats)
+  with StrictlyEnsureIndexes[StashedKnownFactsResult, BSONObjectID] {
+
+  val ttl = 900
 
   override def indexes: Seq[Index] = Seq(
     Index(
