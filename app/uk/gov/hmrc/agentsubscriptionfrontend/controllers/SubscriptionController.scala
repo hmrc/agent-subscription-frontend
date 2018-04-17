@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.{ Inject, Named, Singleton }
+import javax.inject.{ Inject, Singleton }
 import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.i18n.{ I18nSupport, MessagesApi }
@@ -25,8 +25,9 @@ import play.api.libs.json._
 import play.api.mvc.{ AnyContent, _ }
 import play.api.{ Configuration, Logger }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent._
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesProvider
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AddressLookupFrontendConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings._
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
@@ -40,7 +41,6 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
-import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent._
 
 case class SubscriptionDetails(
   utr: Utr,
@@ -69,11 +69,12 @@ class SubscriptionController @Inject() (
   addressLookUpConnector: AddressLookupFrontendConnector,
   val continueUrlActions: ContinueUrlActions,
   val metrics: Metrics,
-  @Named("blacklistedPostCodes") blacklistedPostCodes: PostcodesProvider,
-  @Named("address-lookup-frontend.journeyName") addressLookupFrontendJourneyName: String)(implicit configuration: Configuration)
+  override val appConfig: AppConfig)
   extends FrontendController with I18nSupport with AuthActions with SessionDataMissing with Monitoring {
 
-  val desAddressForm = new DesAddressForm(Logger, blacklistedPostCodes())
+  implicit val configuration: Configuration = appConfig.configuration
+
+  val desAddressForm = new DesAddressForm(Logger, appConfig.blacklistedPostcodes)
 
   private val initialDetailsForm = Form[InitialDetails](
     mapping(
@@ -106,7 +107,7 @@ class SubscriptionController @Inject() (
           redisplayInitialDetails(formWithErrors),
         form => {
           mark("Count-Subscription-AddressLookup-Start")
-          addressLookUpConnector.initJourney(routes.SubscriptionController.returnFromAddressLookup(), addressLookupFrontendJourneyName).map { x =>
+          addressLookUpConnector.initJourney(routes.SubscriptionController.returnFromAddressLookup(), appConfig.journeyName).map { x =>
             sessionStoreService.cacheInitialDetails(InitialDetails(form.utr, form.knownFactsPostcode, form.name,
               form.email, form.telephone))
             Redirect(x)

@@ -24,6 +24,7 @@ import com.google.inject.name.Names
 import org.slf4j.MDC
 import play.api.{ Configuration, Environment, Logger, LoggerLike }
 import play.modules.reactivemongo.{ ReactiveMongoComponent, ReactiveMongoComponentImpl }
+import uk.gov.hmrc.agentsubscriptionfrontend.config.{ AppConfig, FrontendAppConfig }
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.{ PostcodesLoader, PostcodesProvider }
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.FrontendAuthConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
@@ -114,6 +115,7 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
     bind(classOf[SessionStoreService])
     bind(classOf[LoggerLike]).toInstance(Logger)
     bind(classOf[SessionCache]).to(classOf[AgentSubscriptionSessionCache])
+    bind(classOf[AppConfig]).to(classOf[FrontendAppConfig])
 
     bind(classOf[PostcodesProvider]).annotatedWith(Names.named("blacklistedPostCodes")).toInstance(new PostcodesProvider {
       lazy val postcodes = PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
@@ -135,21 +137,7 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
     bindConfigProperty[String]("sosRedirectUrl")
     bindConfigProperty[Int]("mongodb.knownfactsresult.ttl")
     bindConfigProperty[Boolean]("agentAssuranceFlag")
-    bindConfigProperty[String]("authentication.login-callback.url")
-    bindConfigProperty[String]("contact-frontend.host")
-    bindConfigProperty[String]("google-analytics.token")
-    bindConfigProperty[String]("google-analytics.host")
-    bindConfigProperty[String]("government-gateway.url")
-    bindConfigProperty[String]("reportAProblemPartialUrl")
-    bindConfigProperty[String]("reportAProblemNonJSUrl")
-    bindConfigProperty[String]("betaFeedbackUrl")
-    bindConfigProperty[String]("betaFeedbackUnauthenticatedUrl")
-
-    bindServiceProperty("address-lookup-frontend.journeyName")
-    bindServiceProperty("address-lookup-frontend.new-address-callback.url")
     bindServiceProperty("cachable.session-cache.domain")
-    bindServiceProperty("agent-services-account-frontend.external-url")
-    bindServiceProperty("agent-services-account-frontend.start.path")
   }
 
   private def bindBaseUrl(serviceName: String) =

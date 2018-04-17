@@ -21,8 +21,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.audit.AgentSubscriptionFrontendEven
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.withMatchingUtrAndPostcode
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.isEnrolledForNonMtdServices
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers.subscribingAgent
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers.subscribingAgentEnrolledForNonMTD
 
 class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerISpec {
   override def agentAssuranceFlag = true
@@ -30,11 +29,11 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
   "checkAgencyStatus with the agentAssuranceFlag set to true" should {
     "redirect to confirm agency page and store known facts result in the session store when a matching registration is found for the UTR and postcode" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
-      isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
 
-      implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
       status(result) shouldBe 303
@@ -47,11 +46,11 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
     "store isSubscribedToAgentServices = false in session when the business registration found by agent-subscription is not already subscribed" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
-      isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
 
-      implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
       status(result) shouldBe 303
@@ -63,11 +62,11 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
     "redirect to already subscribed page when the business registration found by agent-subscription is already subscribed" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = true)
-      isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
 
-      implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
       status(result) shouldBe 303
@@ -77,11 +76,11 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
     "fail when a matching registration is found for the UTR and postcode for an agent without an acceptable number of PAYE clients" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
-      isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
 
-      implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
       status(result) shouldBe 303
@@ -91,11 +90,11 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
     "fail when the business registration found by agent-subscription is not already subscribed for an agent without an acceptable number of PAYE clients" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
-      isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
 
-      implicit val request = authenticatedRequest().withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
       status(result) shouldBe 303
@@ -106,11 +105,11 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
     "redirect to already subscribed page when the business registration found by agent-subscription is already subscribed " +
       "for an agent without an acceptable number of PAYE clients" in {
         withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = true)
-        isEnrolledForNonMtdServices(subscribingAgent)
         givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
         givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
 
-        implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+        implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+          .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
         val result = await(controller.checkAgencyStatus(request))
 
         status(result) shouldBe 303
@@ -120,11 +119,11 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
     "proceed to showConfirmYourAgency when there in not an acceptable number of PAYE client, but there is enough SA Clients" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
-      isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
 
-      implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
       status(result) shouldBe 303
@@ -134,11 +133,11 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
 
     "proceed to showConfirmYourAgency when there in not an acceptable number of SA client, but there is enough PAYE Clients" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
-      isEnrolledForNonMtdServices(subscribingAgent)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
 
-      implicit val request = authenticatedRequest(subscribingAgent).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
       status(result) shouldBe 303

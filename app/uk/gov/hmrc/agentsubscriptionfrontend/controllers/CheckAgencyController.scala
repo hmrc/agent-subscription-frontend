@@ -26,7 +26,8 @@ import play.api.{ Configuration, Logger }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent._
-import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.{ Agent, AuthActions }
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{ AgentAssuranceConnector, AgentSubscriptionConnector }
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
@@ -57,10 +58,13 @@ class CheckAgencyController @Inject() (
   val sessionStoreService: SessionStoreService,
   val continueUrlActions: ContinueUrlActions,
   auditService: AuditService,
-  val metrics: Metrics)(implicit configuration: Configuration)
+  override val appConfig: AppConfig,
+  val metrics: Metrics)
   extends FrontendController with I18nSupport with AuthActions with SessionDataMissing with Monitoring {
 
   import continueUrlActions._
+
+  implicit val configuration: Configuration = appConfig.configuration
 
   val showHasOtherEnrolments: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
@@ -84,7 +88,7 @@ class CheckAgencyController @Inject() (
   }
 
   val checkAgencyStatus: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
+    withSubscribingAgent { implicit agent =>
       CheckAgencyController.knownFactsForm.bindFromRequest().fold(
         formWithErrors => {
           Future successful Ok(html.check_agency_status(formWithErrors))
@@ -93,7 +97,7 @@ class CheckAgencyController @Inject() (
     }
   }
 
-  private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+  private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)(implicit hc: HeaderCarrier, request: Request[AnyContent], agent: Agent): Future[Result] = {
     def assureIsAgent(): Future[Option[AssuranceResults]] = {
       if (agentAssuranceFlag) {
         val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
@@ -208,7 +212,7 @@ class CheckAgencyController @Inject() (
   }
 
   def invasiveTaxPayerOption: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
+    withSubscribingAgent { implicit agent =>
       RadioWithInput.confirmResponseForm.bindFromRequest().fold(
         formWithErrors => {
           Future.successful(Ok(invasive_input_option(formWithErrors)))
@@ -242,7 +246,7 @@ class CheckAgencyController @Inject() (
     def isValid = validateId(id)
   }
 
-  def checkAndRedirect(value: TaxIdFormValue)(implicit hc: HeaderCarrier, request: Request[AnyContent]) = {
+  def checkAndRedirect(value: TaxIdFormValue)(implicit hc: HeaderCarrier, request: Request[AnyContent], agent: Agent) = {
 
     if (value.isValid) {
       val saAgentReference = request.session.get("saAgentReferenceToCheck").getOrElse("")
@@ -264,7 +268,7 @@ class CheckAgencyController @Inject() (
     taxIdFormValue: TaxIdFormValue,
     inputSaAgentReference: SaAgentReference)(
     implicit
-    hc: HeaderCarrier, request: Request[AnyContent]): Future[Boolean] = {
+    hc: HeaderCarrier, request: Request[AnyContent], agent: Agent): Future[Boolean] = {
     agentAssuranceConnector.hasActiveCesaRelationship(taxIdFormValue.taxId, taxIdFormValue.name, inputSaAgentReference).map { relationshipExists =>
       val (userEnteredNino, userEnteredUtr) = taxIdFormValue.taxId match {
         case nino @ Nino(_) => (Some(nino), None)
@@ -277,7 +281,7 @@ class CheckAgencyController @Inject() (
           case Some(knownFactsResult) =>
             auditService.sendAgentAssuranceAuditEvent(
               knownFactsResult,
-              AssuranceResults(false, false),
+              AssuranceResults(hasAcceptableNumberOfPayeClients = false, hasAcceptableNumberOfSAClients = false),
               Some(AssuranceCheckInput(Some(relationshipExists), Some(inputSaAgentReference.value), userEnteredUtr, userEnteredNino)))
           case None =>
             Future.successful(Logger.warn("Could not send audit events due to empty knownfacts results"))

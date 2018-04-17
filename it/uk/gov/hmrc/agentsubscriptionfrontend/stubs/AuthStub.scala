@@ -33,38 +33,21 @@ object AuthStub {
       .willReturn(
         aResponse()
           .withStatus(401)
-          .withHeader("WWW-Authenticate", "MDTP detail=\"InsufficientEnrolments\"")))
+          .withHeader("WWW-Authenticate", "MDTP detail=\"SessionRecordNotFound\"")))
   }
 
   def userIsAuthenticated(user: SampleUser): Seq[(String, String)] = {
-    //FIXME
+    val response = s"""{${user.allEnrolments},${user.affinityGroup},"credentials": {"providerId": "12345-credId", "providerType": "GovernmentGateway"}}"""
     stubFor(post(urlEqualTo("/auth/authorise"))
       .willReturn(
         aResponse()
           .withStatus(200)
           .withHeader("Content-Type", "application/json")
-          .withBody("""{}""")))
+          .withBody(response)))
     sessionKeysForMockAuth(user)
   }
 
-  def isSubscribedToMtd(user: SampleUser): Unit = {
-    //FIXME
-  }
-
-  def isSubscribedToMtdNotActivated(user: SampleUser): Unit = {
-    //FIXME
-  }
-
-  def hasNoEnrolments(user: SampleUser): Unit = {
-    //FIXME
-  }
-
-  def isEnrolledForNonMtdServices(user: SampleUser): Unit = {
-    //FIXME
-  }
-
   private def sessionKeysForMockAuth(user: SampleUser): Seq[(String, String)] = Seq(
-    SessionKeys.userId -> user.authorityUri,
     SessionKeysForTesting.token -> "fakeToken")
 
 }

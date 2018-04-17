@@ -6,7 +6,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers.{ individual, subscribingAgent }
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers.{ individual, subscribingAgentEnrolledAsHMRCASAGENT }
 import uk.gov.hmrc.play.test.UnitSpec
 
 trait EndpointBehaviours {
@@ -14,7 +14,7 @@ trait EndpointBehaviours {
   type PlayRequest = Request[AnyContent] => Result
   private implicit val materializer = app.materializer
 
-  protected def authenticatedRequest(user: SampleUser = subscribingAgent): FakeRequest[AnyContentAsEmpty.type]
+  protected def authenticatedRequest(user: SampleUser = subscribingAgentEnrolledAsHMRCASAGENT): FakeRequest[AnyContentAsEmpty.type]
 
   protected def anAgentAffinityGroupOnlyEndpoint(doRequest: PlayRequest): Unit = {
     "redirect to the company-auth-frontend sign-in page if the current user is not logged in" in {
@@ -30,7 +30,6 @@ trait EndpointBehaviours {
 
     "redirect to the non-Agent next steps page if the current user is logged in and does not have affinity group = Agent" in {
       val sessionKeys = AuthStub.userIsAuthenticated(individual)
-      AuthStub.isEnrolledForNonMtdServices(individual)
 
       val request = FakeRequest().withSession(sessionKeys: _*)
       val result = await(doRequest(request))

@@ -16,10 +16,13 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
+import com.kenshoo.play.metrics.Metrics
 import javax.inject.{ Inject, Named, Singleton }
 import play.api.Configuration
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc.{ Action, AnyContent }
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
@@ -35,11 +38,15 @@ class StartController @Inject() (
   override val authConnector: AuthConnector,
   knownFactsResultMongoRepository: KnownFactsResultMongoRepository,
   val continueUrlActions: ContinueUrlActions,
-  sessionStoreService: SessionStoreService)(implicit configuration: Configuration)
-  extends FrontendController with I18nSupport with AuthorisedFunctions {
+  sessionStoreService: SessionStoreService,
+  override val appConfig: AppConfig,
+  val metrics: Metrics)
+  extends FrontendController with I18nSupport with AuthActions {
 
   import continueUrlActions._
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
+
+  implicit val configuration: Configuration = appConfig.configuration
 
   val root: Action[AnyContent] = Action.async { implicit request =>
     withMaybeContinueUrl { urlOpt =>
@@ -54,7 +61,7 @@ class StartController @Inject() (
   }
 
   val showNonAgentNextSteps: Action[AnyContent] = Action.async { implicit request =>
-    authorised(AuthProviders(GovernmentGateway)) {
+    withAuthenticatedUser {
       Future.successful(Ok(html.non_agent_next_steps()))
     }
   }

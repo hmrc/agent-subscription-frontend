@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import com.google.inject.Singleton
 import play.api.mvc.{ AnyContent, Request }
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{ AssuranceCheckInput, AssuranceResults, KnownFactsResult }
 import uk.gov.hmrc.domain.TaxIdentifier
 import uk.gov.hmrc.http.HeaderCarrier
@@ -79,7 +80,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector) {
   def sendAgentAssuranceAuditEvent(
     knownFactsResult: KnownFactsResult,
     assuranceResults: AssuranceResults,
-    assuranceCheckInput: Option[AssuranceCheckInput] = None)(implicit request: Request[AnyContent], hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
+    assuranceCheckInput: Option[AssuranceCheckInput] = None)(implicit request: Request[AnyContent], agent: Agent, hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
     implicit val auditData: AuditData = new AuditData
 
     auditData.set("utr", knownFactsResult.utr)
@@ -89,10 +90,10 @@ class AuditService @Inject() (val auditConnector: AuditConnector) {
 
     //TODO auditData.set("refuseToDealWith", ?)
 
-    /*val payeEnrolmentOpt = request.enrolments.find(e => e.key == "IR-PAYE-AGENT" && e.isActivated)
+    val payeEnrolmentOpt = agent.hasIRPAYEAGENT
     auditData.set("isEnrolledPAYEAgent", payeEnrolmentOpt.isDefined)
 
-    val saEnrolmentOpt = request.enrolments.find(e => e.key == "IR-SA-AGENT" && e.isActivated)
+    val saEnrolmentOpt = agent.hasIRSAAGENT
     auditData.set("isEnrolledSAAgent", saEnrolmentOpt.isDefined)
 
     for {
@@ -103,7 +104,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector) {
     for {
       e <- saEnrolmentOpt
       saAgentRef <- e.identifiers.find(_.key == "IRAgentReference")
-    } auditData.set("saAgentRef", saAgentRef.value)*/
+    } auditData.set("saAgentRef", saAgentRef.value)
 
     assuranceCheckInput.foreach { userInput =>
       userInput.passCesaAgentAssuranceCheck.foreach { assuranceCheck =>
@@ -119,6 +120,10 @@ class AuditService @Inject() (val auditConnector: AuditConnector) {
         auditData.set("userEnteredSaAgentRef", saAgentRef)
       }
     }
+
+    auditData.set("authProviderId", agent.authProviderId)
+    auditData.set("authProviderType", agent.authProviderType)
+
     sendAgentAssuranceAuditEvent(auditData)
   }
 

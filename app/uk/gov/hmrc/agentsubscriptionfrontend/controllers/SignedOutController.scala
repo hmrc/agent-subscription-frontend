@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import javax.inject.{ Inject, Named, Singleton }
 import play.api.Configuration
 import play.api.mvc.Action
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps.addParamsToUrl
@@ -31,8 +32,11 @@ class SignedOutController @Inject() (
   @Named("surveyRedirectUrl") surveyUrl: String,
   @Named("sosRedirectUrl") sosUrl: String,
   knownFactsResultMongoRepository: KnownFactsResultMongoRepository,
-  sessionStoreService: SessionStoreService)(implicit configuration: Configuration)
+  sessionStoreService: SessionStoreService,
+  appConfig: AppConfig)
   extends FrontendController {
+
+  implicit val configuration: Configuration = appConfig.configuration
 
   def redirectToSos = Action.async { implicit request =>
 
@@ -57,6 +61,6 @@ class SignedOutController @Inject() (
   }
 
   def redirectToASAccountPage = Action { implicit request =>
-    SeeOther(configuration.getString("agent-services-account-frontend").get).withNewSession
+    SeeOther(appConfig.agentServicesAccountUrl).withNewSession
   }
 }
