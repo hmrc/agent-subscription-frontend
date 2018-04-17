@@ -24,7 +24,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers._
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.domain.{ Nino, TaxIdentifier }
 
 trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {

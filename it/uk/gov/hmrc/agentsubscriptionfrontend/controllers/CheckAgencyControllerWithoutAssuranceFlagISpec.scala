@@ -4,7 +4,7 @@ import play.api.test.Helpers.{ redirectLocation, _ }
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AgentSubscriptionFrontendEvent
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.withMatchingUtrAndPostcode
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers.subscribingAgentEnrolledForNonMTD
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
 
 class CheckAgencyControllerWithoutAssuranceFlagISpec extends CheckAgencyControllerISpec {
 

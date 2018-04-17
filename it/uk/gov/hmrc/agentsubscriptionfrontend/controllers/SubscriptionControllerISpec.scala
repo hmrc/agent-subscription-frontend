@@ -24,7 +24,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{ AgentSubscriptionStub, AuthStub }
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers._
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.play.binders.ContinueUrl
 
 class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec {
@@ -269,7 +269,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
         val addressId = "addr1"
         stubAddressLookupReturnedAddress(addressId, subscriptionRequest())
-        val result2 = await(controller.returnFromAddressLookup(addressId)(authenticatedRequest()))
+        val result2 = await(controller.returnFromAddressLookup(addressId)(authenticatedRequest(subscribingAgentEnrolledAsHMRCASAGENT)))
 
         status(result2) shouldBe 303
         redirectLocation(result2).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url

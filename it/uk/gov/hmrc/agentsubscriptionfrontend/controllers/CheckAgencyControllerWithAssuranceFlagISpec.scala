@@ -21,7 +21,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.audit.AgentSubscriptionFrontendEven
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.withMatchingUtrAndPostcode
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers.subscribingAgentEnrolledForNonMTD
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
 
 class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerISpec {
   override def agentAssuranceFlag = true

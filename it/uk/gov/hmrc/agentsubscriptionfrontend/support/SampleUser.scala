@@ -30,7 +30,7 @@ case class SampleUser(enrolments: Seq[Enrolment], affinity: AffinityGroup) {
   val affinityGroup = s""" "affinityGroup": "$affinity" """
 }
 
-object SampleUsers {
+object SampleUser {
 
   def subscribingAgentEnrolledAsHMRCASAGENT(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
     Seq(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "TARN0000001")), "Activated")),

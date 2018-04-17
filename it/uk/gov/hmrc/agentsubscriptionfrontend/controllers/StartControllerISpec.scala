@@ -4,12 +4,12 @@ import java.net.URLEncoder
 
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{ contentType, _ }
+import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
-import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, SampleUser}
 import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -126,7 +126,7 @@ class StartControllerISpec extends BaseISpec {
     "the current user is logged in" should {
 
       "display the non-agent next steps page" in {
-        implicit val request = authenticatedRequest()
+        implicit val request = authenticatedRequest(SampleUser.individual)
         val result = await(controller.showNonAgentNextSteps(request))
 
         status(result) shouldBe OK
@@ -136,7 +136,7 @@ class StartControllerISpec extends BaseISpec {
       }
 
       "include link to create new account" in {
-        val result = await(controller.showNonAgentNextSteps(authenticatedRequest()))
+        val result = await(controller.showNonAgentNextSteps(authenticatedRequest(SampleUser.individual)))
 
         status(result) shouldBe 200
         bodyOf(result) should include("/redirect-to-sos")
@@ -155,7 +155,7 @@ class StartControllerISpec extends BaseISpec {
       }
     }
 
-    behave like aPageWithFeedbackLinks(request => controller.showNonAgentNextSteps(request), authenticatedRequest())
+    behave like aPageWithFeedbackLinks(request => controller.showNonAgentNextSteps(request), authenticatedRequest(SampleUser.individual))
   }
 
   "returnAfterGGCredsCreated" should {

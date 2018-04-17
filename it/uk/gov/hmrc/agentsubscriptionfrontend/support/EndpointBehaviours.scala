@@ -6,7 +6,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers.{ individual, subscribingAgentEnrolledAsHMRCASAGENT }
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{ individual, subscribingAgentEnrolledAsHMRCASAGENT }
 import uk.gov.hmrc.play.test.UnitSpec
 
 trait EndpointBehaviours {

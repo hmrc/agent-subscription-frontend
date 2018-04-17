@@ -15,7 +15,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.connectors.SsoConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.DataStreamStubs
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUsers._
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.test.UnitSpec
