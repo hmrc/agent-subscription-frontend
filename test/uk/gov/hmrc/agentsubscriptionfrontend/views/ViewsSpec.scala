@@ -29,14 +29,12 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template_Scope0.mai
 
 class ViewsSpec extends MixedPlaySpec with MockitoSugar {
 
-  val configuration = mock[Configuration]
-
   "error_template view" should {
 
     "render title, heading and message" in new App {
       val view = new error_template()
       val html = view.render(
-        "My custom page title", "My custom heading", "My custom message", FakeRequest(), configuration, applicationMessages)
+        "My custom page title", "My custom heading", "My custom message", FakeRequest(), app.configuration, applicationMessages)
 
       contentAsString(html) must {
         include("My custom page title") and
@@ -45,7 +43,7 @@ class ViewsSpec extends MixedPlaySpec with MockitoSugar {
       }
 
       val hmtl2 = view.f("My custom page title", "My custom heading", "My custom message")(
-        FakeRequest(), configuration, applicationMessages)
+        FakeRequest(), app.configuration, applicationMessages)
       hmtl2 must be(html)
     }
   }
@@ -65,7 +63,7 @@ class ViewsSpec extends MixedPlaySpec with MockitoSugar {
         mainContent = Html("mainContent"),
         request = FakeRequest(),
         messages = applicationMessages,
-        configuration = configuration)
+        configuration = app.configuration)
 
       contentAsString(html) must {
         include("My custom page title") and
@@ -84,7 +82,7 @@ class ViewsSpec extends MixedPlaySpec with MockitoSugar {
         Some("bodyClasses"),
         Some("mainClass"),
         Some(Html("scriptElem")),
-        true)(Html("mainContent"))(FakeRequest(), configuration, applicationMessages)
+        true)(Html("mainContent"))(FakeRequest(), app.configuration, applicationMessages)
       hmtl2 must be(html)
     }
 
