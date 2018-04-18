@@ -4,12 +4,12 @@ import java.net.URLEncoder
 
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentType, _}
+import play.api.test.Helpers.{ contentType, _ }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, SampleUser}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{ BaseISpec, SampleUser }
 import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import uk.gov.hmrc.auth.core.{ AffinityGroup, Enrolment, EnrolmentIdentifier }
 
-case class SampleUser(enrolments: Seq[Enrolment], affinity: AffinityGroup) {
+case class SampleUser(userId: String, enrolments: Seq[Enrolment], affinity: AffinityGroup) {
   val allEnrolments = s""" "allEnrolments": [${
     enrolments.map(e =>
       s"""{
@@ -33,28 +33,34 @@ case class SampleUser(enrolments: Seq[Enrolment], affinity: AffinityGroup) {
 object SampleUser {
 
   def subscribingAgentEnrolledAsHMRCASAGENT(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
+    "12345-credId",
     Seq(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "TARN0000001")), "Activated")),
     AffinityGroup.Agent)
 
   def subscribingAgentEnrolledAsHMRCASAGENTNotActivated(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
+    "12345-credId",
     Seq(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "TARN0000001")), "NotActivated")),
     AffinityGroup.Agent)
 
   def subscribingAgentEnrolledForNonMTD(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
+    "12345-credId",
     Seq(
       Enrolment("IR-PAYE-AGENT", Seq(EnrolmentIdentifier("IRAgentReference", "HZ1234")), "Activated"),
       Enrolment("IR-SA-AGENT", Seq(EnrolmentIdentifier("IRAgentReference", "FOO1234")), "Activated")),
     AffinityGroup.Agent)
 
-  def subscribingAgentWithoutEnrolments(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
+  def subscribingCleanAgentWithoutEnrolments(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
+    "12345-credId",
     Seq(),
     AffinityGroup.Agent)
 
-  def subscribingAgent2(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
-    Seq(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "TARN0000001")), "Activated")),
+  def subscribing2ndAgentWithoutEnrolments(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
+    "54321-credId",
+    Seq(),
     AffinityGroup.Agent)
 
   def individual(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
+    "individual",
     Seq(Enrolment("FOO", Seq(EnrolmentIdentifier("foo", "AAAAA")), "Activated")),
     AffinityGroup.Individual)
 }

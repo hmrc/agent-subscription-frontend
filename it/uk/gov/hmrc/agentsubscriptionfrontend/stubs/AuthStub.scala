@@ -37,7 +37,7 @@ object AuthStub {
   }
 
   def userIsAuthenticated(user: SampleUser): Seq[(String, String)] = {
-    val response = s"""{${user.allEnrolments},${user.affinityGroup},"credentials": {"providerId": "12345-credId", "providerType": "GovernmentGateway"}}"""
+    val response = s"""{${user.allEnrolments},${user.affinityGroup},"credentials": {"providerId": "${user.userId}", "providerType": "GovernmentGateway"}}"""
     stubFor(post(urlEqualTo("/auth/authorise"))
       .willReturn(
         aResponse()
@@ -48,6 +48,7 @@ object AuthStub {
   }
 
   private def sessionKeysForMockAuth(user: SampleUser): Seq[(String, String)] = Seq(
+    SessionKeys.userId -> user.userId,
     SessionKeysForTesting.token -> "fakeToken")
 
 }
