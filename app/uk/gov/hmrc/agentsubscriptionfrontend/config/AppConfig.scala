@@ -42,6 +42,10 @@ trait AppConfig {
   val domainWhiteList: Set[String]
   val agentAssuranceFlag: Boolean
   val addressLookupContinueUrl: String
+  val surveyRedirectUrl: String
+  val sosRedirectUrl: String
+  val mongoDbKnownFactsResult: Int
+  val cacheableSessionDomain: String
 }
 
 @Singleton
@@ -70,7 +74,11 @@ class FrontendAppConfig @Inject() (val environment: Environment, val configurati
   override val agentServicesAccountUrl: String = s"$servicesAccountUrl$servicesAccountPath"
   override val domainWhiteList: Set[String] =
     runModeConfiguration.getStringList("continueUrl.domainWhiteList").getOrElse(emptyList()).toSet
-  override val agentAssuranceFlag: Boolean = runModeConfiguration.getBoolean("agentAssuranceFlag").getOrElse(false)
+  override val agentAssuranceFlag: Boolean = configuration.getBoolean("agentAssuranceFlag").getOrElse(false)
   override val addressLookupContinueUrl = getConfString("address-lookup-frontend.new-address-callback.url", "")
+  override val surveyRedirectUrl: String = getConfString("surveyRedirectUrl", "")
+  override val sosRedirectUrl: String = configuration.getString("sosRedirectUrl").getOrElse("")
+  override val mongoDbKnownFactsResult: Int = configuration.getInt("mongodb.knownfactsresult.ttl").getOrElse(0)
+  override val cacheableSessionDomain: String = getConfString("cachable.session-cache.domain", "")
 
 }

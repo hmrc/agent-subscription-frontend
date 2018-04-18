@@ -44,59 +44,6 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
   override val runModeConfiguration: Configuration = configuration
   override protected def mode = environment.mode
 
-  trait ConfigPropertyType[A] {
-    def bindConfigProperty(clazz: Class[A])(propertyName: String): ScopedBindingBuilder
-  }
-
-  object ConfigProperty {
-
-    implicit val stringConfigProperty = new ConfigPropertyType[String] {
-      def bindConfigProperty(clazz: Class[String])(propertyName: String): ScopedBindingBuilder =
-        bind(clazz).annotatedWith(named(s"$propertyName")).toProvider(new StringConfigPropertyProvider(propertyName))
-
-      private class StringConfigPropertyProvider(propertyName: String) extends Provider[String] {
-        override lazy val get = getConfString(propertyName, throw new RuntimeException(s"No configuration value found for '$propertyName'"))
-
-        def getConfString(confKey: String, defString: => String) = {
-          configuration.getString(s"$env.$confKey").getOrElse(configuration.getString(confKey).getOrElse(defString))
-        }
-      }
-
-    }
-
-    implicit val intConfigProperty = new ConfigPropertyType[Int] {
-      def bindConfigProperty(clazz: Class[Int])(propertyName: String): ScopedBindingBuilder =
-        bind(clazz).annotatedWith(named(s"$propertyName")).toProvider(new IntConfigPropertyProvider(propertyName))
-
-      private class IntConfigPropertyProvider(propertyName: String) extends Provider[Int] {
-        override lazy val get = getConfInt(propertyName, throw new RuntimeException(s"No configuration value found for '$propertyName'"))
-
-        def getConfInt(confKey: String, defInt: => Int) = {
-          configuration.getInt(s"$env.$confKey").getOrElse(configuration.getInt(confKey).getOrElse(defInt))
-        }
-      }
-
-    }
-
-    implicit val booleanConfigProperty = new ConfigPropertyType[Boolean] {
-      def bindConfigProperty(clazz: Class[Boolean])(propertyName: String): ScopedBindingBuilder =
-        bind(clazz).annotatedWith(named(s"$propertyName")).toProvider(new BooleanConfigPropertyProvider(propertyName))
-
-      private class BooleanConfigPropertyProvider(propertyName: String) extends Provider[Boolean] {
-        override lazy val get = getConfBool(propertyName)
-
-        def getConfBool(confKey: String) = {
-          configuration.getBoolean(s"$env.$confKey").getOrElse(configuration.getBoolean(confKey).getOrElse(false))
-        }
-      }
-
-    }
-
-    def bindConfigProperty[A](propertyName: String)(implicit classTag: ClassTag[A], ct: ConfigPropertyType[A]): ScopedBindingBuilder =
-      ct.bindConfigProperty(classTag.runtimeClass.asInstanceOf[Class[A]])(propertyName)
-  }
-
-  //noinspection ScalaStyle
   def configure(): Unit = {
 
     val appName = "agent-subscription-frontend"
@@ -117,11 +64,6 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
     bind(classOf[SessionCache]).to(classOf[AgentSubscriptionSessionCache])
     bind(classOf[AppConfig]).to(classOf[FrontendAppConfig])
 
-    bind(classOf[PostcodesProvider]).annotatedWith(Names.named("blacklistedPostCodes")).toInstance(new PostcodesProvider {
-      lazy val postcodes = PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
-      override def apply(): Set[String] = postcodes
-    })
-
     bindBaseUrl("agent-assurance")
     bindBaseUrl("agent-subscription")
     bindBaseUrl("address-lookup-frontend")
@@ -130,14 +72,6 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
     bindBaseUrl("auth")
     bindBaseUrl("authentication.government-gateway.sign-in")
     bindBaseUrl("agent-services-account-frontend")
-
-    import ConfigProperty._
-
-    bindConfigProperty[String]("surveyRedirectUrl")
-    bindConfigProperty[String]("sosRedirectUrl")
-    bindConfigProperty[Int]("mongodb.knownfactsresult.ttl")
-    bindConfigProperty[Boolean]("agentAssuranceFlag")
-    bindServiceProperty("cachable.session-cache.domain")
   }
 
   private def bindBaseUrl(serviceName: String) =

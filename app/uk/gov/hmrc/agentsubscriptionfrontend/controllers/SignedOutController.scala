@@ -29,8 +29,6 @@ import scala.concurrent.Future
 
 @Singleton
 class SignedOutController @Inject() (
-  @Named("surveyRedirectUrl") surveyUrl: String,
-  @Named("sosRedirectUrl") sosUrl: String,
   knownFactsResultMongoRepository: KnownFactsResultMongoRepository,
   sessionStoreService: SessionStoreService,
   appConfig: AppConfig)
@@ -52,12 +50,12 @@ class SignedOutController @Inject() (
         addParamsToUrl(
           "/agent-subscription/return-after-gg-creds-created", "id" -> id.map(_.toString),
           "continue" -> agentSubContinueUrl.map(_.url))
-      SeeOther(addParamsToUrl(sosUrl, "continue" -> Some(continueUrl))).withNewSession
+      SeeOther(addParamsToUrl(appConfig.sosRedirectUrl, "continue" -> Some(continueUrl))).withNewSession
     }
   }
 
   def startSurvey = Action { implicit request =>
-    SeeOther(surveyUrl).withNewSession
+    SeeOther(appConfig.surveyRedirectUrl).withNewSession
   }
 
   def redirectToASAccountPage = Action { implicit request =>

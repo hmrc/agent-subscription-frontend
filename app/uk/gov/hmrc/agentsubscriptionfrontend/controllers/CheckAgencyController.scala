@@ -50,7 +50,6 @@ object CheckAgencyController {
 
 @Singleton
 class CheckAgencyController @Inject() (
-  @Named("agentAssuranceFlag") agentAssuranceFlag: Boolean,
   val agentAssuranceConnector: AgentAssuranceConnector,
   override val messagesApi: MessagesApi,
   override val authConnector: AuthConnector,
@@ -99,7 +98,7 @@ class CheckAgencyController @Inject() (
 
   private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)(implicit hc: HeaderCarrier, request: Request[AnyContent], agent: Agent): Future[Result] = {
     def assureIsAgent(): Future[Option[AssuranceResults]] = {
-      if (agentAssuranceFlag) {
+      if (appConfig.agentAssuranceFlag) {
         val futurePaye = agentAssuranceConnector.hasAcceptableNumberOfPayeClients
         val futureSA = agentAssuranceConnector.hasAcceptableNumberOfSAClients
 
