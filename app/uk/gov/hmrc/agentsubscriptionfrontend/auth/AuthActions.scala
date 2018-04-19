@@ -16,83 +16,90 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.auth
 
-import play.api.mvc._
+import play.api.Mode
+import play.api.mvc.{ Request, Result }
+import play.api.mvc.Results._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ContinueUrlActions, routes}
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ ContinueUrlActions, routes }
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core.retrieve.Retrievals.{ affinityGroup, allEnrolments, credentials }
+import uk.gov.hmrc.auth.core.retrieve.{ Credentials, ~ }
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.passcode.authentication.PasscodeAuthentication
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext, TaxRegime}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
-case class AgentRequest[A](enrolments: List[Enrolment], request: Request[A]) extends WrappedRequest[A](request)
+class Agent(private val enrolments: Set[Enrolment], private val creds: Credentials) {
 
-trait AuthActions extends Actions with PasscodeAuthentication with Monitoring {
-  protected type AsyncPlayUserRequest = AuthContext => AgentRequest[AnyContent] => Future[Result]
+  def hasIRPAYEAGENT: Option[Enrolment] = enrolments.find(e => e.key == "IR-PAYE-AGENT" && e.isActivated)
+  def hasIRSAAGENT: Option[Enrolment] = enrolments.find(e => e.key == "IR-SA-AGENT" && e.isActivated)
 
-  val continueUrlActions: ContinueUrlActions
+  def authProviderId = creds.providerId
+  def authProviderType = creds.providerType
+}
+
+object Agent {
+
+  object hasHmrcAsAgentEnrolment {
+    def unapply(agent: Agent): Option[Unit] =
+      if (agent.enrolments.exists(_.key == "HMRC-AS-AGENT")) Some(()) else None
+  }
+
+  object hasNonEmptyEnrolments {
+    def unapply(agent: Agent): Option[Unit] =
+      if (agent.enrolments.nonEmpty) Some(()) else None
+  }
+}
+
+trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring {
+
+  def continueUrlActions: ContinueUrlActions
+  def appConfig: AppConfig
+
+  def env = appConfig.environment
+  def config = appConfig.configuration
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-  def AuthorisedWithSubscribingAgentAsync(regime: TaxRegime = NoOpRegime)(body: AsyncPlayUserRequest)(implicit appConfig: AppConfig): Action[AnyContent] =
-    AuthorisedFor(regime, pageVisibility = GGConfidence).async {
-      implicit authContext =>
-        implicit request =>
-          withVerifiedPasscode {
-            enrolments.flatMap { enrolls =>
-              (for {
-                isAgent <- isAgentAffinityGroup
-                activatedEnrol <- checkActivatedEnrollment(enrolls)
-              } yield (isAgent, activatedEnrol)).flatMap {
-                case (true, true) => {
-                  continueUrlActions.extractContinueUrl.map {
-                    case Some(continueUrl) =>
-                      mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
-                      Redirect(continueUrl.url)
-                    case None =>
-                      mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
-                      Redirect(appConfig.agentServicesAccountUrl)
-                  }
-                }
-                case (true, false) => body(authContext)(AgentRequest(enrolls, request))
-                case _ =>
-                  Future successful redirectToNonAgentNextSteps
+  def withSubscribingAgent[A](body: Agent => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+    authorised(AuthProviders(GovernmentGateway))
+      .retrieve(allEnrolments and affinityGroup and credentials) {
+        case enrolments ~ affinity ~ creds =>
+          (isAnAgent(affinity), isEnrolledForHmrcAsAgent(enrolments)) match {
+            case (true, true) =>
+              continueUrlActions.extractContinueUrl.map {
+                case Some(continueUrl) =>
+                  mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
+                  Redirect(continueUrl.url)
+                case None =>
+                  mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
+                  Redirect(appConfig.agentServicesAccountUrl)
               }
-            }
+            case (true, false) => body(new Agent(enrolments.enrolments, creds))
+            case _ =>
+              Future successful {
+                mark("Count-Subscription-NonAgent")
+                Redirect(routes.StartController.showNonAgentNextSteps())
+              }
           }
-    }
+      }.recover {
+        case _: NoActiveSession =>
+          toGGLogin(if (appConfig.environment.mode.equals(Mode.Dev)) s"http://${request.host}${request.uri}" else s"${request.uri}")
+      }
 
-  def AuthorisedWithAgentAffinityAsync(body: AuthContext => Request[AnyContent] => Future[Result])
-                                         (implicit appConfig: AppConfig): Action[AnyContent] =
-    AuthorisedFor(NoOpRegime, pageVisibility = GGConfidence).async {
-      implicit authContext =>
-        implicit request =>
-          isAgentAffinityGroup.flatMap {
-            case true => body(authContext)(request)
-            case false => Future successful redirectToNonAgentNextSteps
-          }
-    }
+  def withAuthenticatedUser[A](body: => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+    authorised(AuthProviders(GovernmentGateway))(body)
+      .recover {
+        case _: NoActiveSession =>
+          toGGLogin(if (appConfig.environment.mode.equals(Mode.Dev)) s"http://${request.host}${request.uri}" else s"${request.uri}")
+      }
 
-  protected def enrolments(implicit authContext: AuthContext, hc: HeaderCarrier): Future[List[Enrolment]] =
-    authConnector.getEnrolments[List[Enrolment]](authContext)
+  private def isAnAgent(affinity: Option[AffinityGroup]): Boolean =
+    affinity.contains(AffinityGroup.Agent)
 
-  private def checkActivatedEnrollment(enrolls: List[Enrolment]): Future[Boolean] =
-    enrolls.find(_.key equals "HMRC-AS-AGENT") match {
-      case Some(enroll) if enroll.isActivated => Future successful true
-      case _ => Future successful false
-    }
-
-  protected def isAgentAffinityGroup()(implicit authContext: AuthContext, hc: HeaderCarrier): Future[Boolean] =
-    authConnector.getUserDetails(authContext).map { userDetailsResponse =>
-      val affinityGroup = (userDetailsResponse.json \ "affinityGroup").as[String]
-      affinityGroup == "Agent"
-    }
-
-  private def redirectToNonAgentNextSteps: Result = {
-    mark("Count-Subscription-NonAgent")
-    Redirect(routes.StartController.showNonAgentNextSteps())
-  }
+  private def isEnrolledForHmrcAsAgent(enrolments: Enrolments): Boolean =
+    enrolments.enrolments.find(_.key equals "HMRC-AS-AGENT").exists(_.isActivated)
 }

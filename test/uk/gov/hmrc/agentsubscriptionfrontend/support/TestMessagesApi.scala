@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import play.api.i18n._
-import play.api.{Configuration, Environment}
+import play.api.{ Configuration, Environment }
 
 object TestMessagesApi {
 
@@ -27,6 +27,5 @@ object TestMessagesApi {
   val testMessagesApi: MessagesApi = new DefaultMessagesApi(
     environment,
     configuration,
-    new DefaultLangs(configuration)
-  )
+    new DefaultLangs(configuration))
 }

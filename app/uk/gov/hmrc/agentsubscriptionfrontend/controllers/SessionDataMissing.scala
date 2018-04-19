@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import play.api.Logger
-import play.api.mvc.{Result, Results}
+import play.api.mvc.{ Result, Results }
 
 trait SessionDataMissing {
   this: Results =>

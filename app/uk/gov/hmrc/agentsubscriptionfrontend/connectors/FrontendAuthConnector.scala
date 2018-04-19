@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentsubscriptionfrontend.support.passcode
+package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
-import uk.gov.hmrc.passcode.authentication.PasscodeVerificationConfig
+import java.net.URL
+import javax.inject.{ Inject, Named, Singleton }
 
-class TestPasscodeVerificationConfig(override val enabled: Boolean) extends PasscodeVerificationConfig(null) {
-  override def regime: String = "agent-subscription"
+import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.http.HttpPost
+import uk.gov.hmrc.play.http.ws.WSPost
 
-  override def getVerificationURL(): String = "/"
+@Singleton
+class FrontendAuthConnector @Inject() (@Named("auth-baseUrl") baseUrl: URL)
+  extends PlayAuthConnector {
+
+  override val serviceUrl = baseUrl.toString
+
+  override def http = new HttpPost with WSPost {
+    override val hooks = NoneRequired
+  }
 }

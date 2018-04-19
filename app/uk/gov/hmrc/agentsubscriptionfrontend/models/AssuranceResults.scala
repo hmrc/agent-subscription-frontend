@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-case class AssuranceResults(isOnRefusalToDealWithList: Boolean,
-                            isManuallyAssured: Boolean,
-                            hasAcceptableNumberOfPayeClients: Option[Boolean],
-                            hasAcceptableNumberOfSAClients: Option[Boolean])
+case class AssuranceResults(
+  isOnRefusalToDealWithList: Boolean,
+  isManuallyAssured: Boolean,
+  hasAcceptableNumberOfPayeClients: Option[Boolean],
+  hasAcceptableNumberOfSAClients: Option[Boolean])
 
 object AssuranceResults {
   object RefuseToDealWith {
     def unapply(maybeAssuranceResults: Some[AssuranceResults]): Option[AssuranceResults] =
-      maybeAssuranceResults.filter(_.isOnRefusalToDealWithList )
+      maybeAssuranceResults.filter(_.isOnRefusalToDealWithList)
   }
 
   object ManuallyAssured {
@@ -35,7 +36,7 @@ object AssuranceResults {
   object CheckedInvisibleAssuranceAndPassed {
     def unapply(maybeAssuranceResults: Some[AssuranceResults]): Option[AssuranceResults] = maybeAssuranceResults match {
       case Some(AssuranceResults(false, false, Some(true), _)) => maybeAssuranceResults
-      case Some(AssuranceResults(false, false, _ ,Some(true))) => maybeAssuranceResults
+      case Some(AssuranceResults(false, false, _, Some(true))) => maybeAssuranceResults
       case _ => None
     }
   }

@@ -17,8 +17,8 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import org.scalatest.EitherValues
-import play.api.data.validation.{Invalid, Valid, ValidationError}
-import play.api.data.{FormError, Mapping}
+import play.api.data.validation.{ Invalid, Valid, ValidationError }
+import play.api.data.{ FormError, Mapping }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.play.test.UnitSpec
@@ -439,8 +439,7 @@ class FieldMappingsSpec extends UnitSpec with EitherValues {
       val tooLongAndNonMatchingLine = "123456789012345678901234567890123456<"
       bind(tooLongAndNonMatchingLine) shouldBe Left(List(
         FormError("testKey", "error.address.lines.maxLength", Seq(35)),
-        FormError("testKey", "error.address.lines.invalid", Seq())
-      ))
+        FormError("testKey", "error.address.lines.invalid", Seq())))
     }
   }
 

@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import java.net.URLEncoder
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{ Matchers, WordSpec }
 
 class CallOpsSpec extends WordSpec with Matchers {
   "addParamsToUrl" should {

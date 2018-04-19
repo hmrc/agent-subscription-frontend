@@ -16,31 +16,29 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
-import javax.inject.{Inject, Named, Singleton}
-
+import javax.inject.{ Inject, Singleton }
 import play.api.Logger
-import play.api.mvc.AnyContent
+import play.api.mvc.{ AnyContent, Request }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
-import uk.gov.hmrc.agentsubscriptionfrontend.auth.AgentRequest
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
+import uk.gov.hmrc.domain.{ Nino, SaAgentReference, TaxIdentifier }
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.AuthContext
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class AssuranceService @Inject()(@Named("agentAssuranceFlag") agentAssuranceFlag: Boolean,
-                                 assuranceConnector: AgentAssuranceConnector,
-                                 auditService: AuditService,
-                                 sessionStoreService: SessionStoreService) {
+class AssuranceService @Inject() (
+  appConfig: AppConfig,
+  assuranceConnector: AgentAssuranceConnector,
+  auditService: AuditService,
+  sessionStoreService: SessionStoreService) {
 
   def assureIsAgent(utr: Utr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[AssuranceResults]] = {
-    if (!agentAssuranceFlag) {
-      Future.successful(None)
-    } else {
+    if (appConfig.agentAssuranceFlag) {
       val futureManuallyAssured = assuranceConnector.isManuallyAssuredAgent(utr)
       val futureR2dw = assuranceConnector.isR2DWAgent(utr)
 
@@ -59,14 +57,17 @@ class AssuranceService @Inject()(@Named("agentAssuranceFlag") agentAssuranceFlag
           } yield Some(AssuranceResults(isOnRefusalToDealWithList, isManuallyAssured, Some(hasAcceptableNumberOfPayeClients), Some(hasAcceptableNumberOfSAClients)))
         }
       } yield assuranceResults
+    } else {
+      Future.successful(None)
     }
   }
 
   def checkActiveCesaRelationship(userEnteredNinoOrUtr: TaxIdentifier, name: String,
-                                  saAgentReference: SaAgentReference)
-                                 (implicit hc: HeaderCarrier,
-                                  ec: ExecutionContext,
-                                  request: AgentRequest[AnyContent], authContext: AuthContext): Future[Boolean] = {
+    saAgentReference: SaAgentReference)(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext,
+    request: Request[AnyContent],
+    agent: Agent): Future[Boolean] = {
     assuranceConnector.hasActiveCesaRelationship(userEnteredNinoOrUtr, name, saAgentReference).map { relationshipExists =>
       val (userEnteredNino, userEnteredUtr) = userEnteredNinoOrUtr match {
         case nino @ Nino(_) => (Some(nino), None)
@@ -77,7 +78,8 @@ class AssuranceService @Inject()(@Named("agentAssuranceFlag") agentAssuranceFlag
         knownFactResultOpt <- sessionStoreService.fetchKnownFactsResult
         _ <- knownFactResultOpt match {
           case Some(knownFactsResult) =>
-            auditService.sendAgentAssuranceAuditEvent(knownFactsResult,
+            auditService.sendAgentAssuranceAuditEvent(
+              knownFactsResult,
               AssuranceResults(false, false, Some(false), Some(false)),
               Some(AssuranceCheckInput(Some(relationshipExists), Some(saAgentReference.value), userEnteredUtr, userEnteredNino)))
           case None =>
