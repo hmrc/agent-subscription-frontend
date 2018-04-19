@@ -16,33 +16,32 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{InitialDetails, KnownFactsResult}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{ InitialDetails, KnownFactsResult }
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.play.binders.ContinueUrl
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 class TestSessionStoreService extends SessionStoreService(null) {
 
-  class Session (
+  class Session(
     var knownFactsResult: Option[KnownFactsResult] = None,
     var initialDetails: Option[InitialDetails] = None,
-    var continueUrl: Option[ContinueUrl] = None
-  )
+    var continueUrl: Option[ContinueUrl] = None)
 
-  private val sessions = collection.mutable.Map[String,Session]()
+  private val sessions = collection.mutable.Map[String, Session]()
 
   private def sessionKey(implicit hc: HeaderCarrier): String = hc.userId match {
-      case None => "default"
-      case Some(userId) => userId.toString
-    }
+    case None => "default"
+    case Some(userId) => userId.toString
+  }
 
   def currentSession(implicit hc: HeaderCarrier): Session = {
     sessions.getOrElseUpdate(sessionKey, new Session())
   }
 
-  def clear():Unit = {
+  def clear(): Unit = {
     sessions.clear()
   }
 
@@ -56,8 +55,7 @@ class TestSessionStoreService extends SessionStoreService(null) {
 
   override def cacheKnownFactsResult(knownFactsResult: KnownFactsResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     Future.successful(
-      currentSession.knownFactsResult = Some(knownFactsResult)
-    )
+      currentSession.knownFactsResult= Some(knownFactsResult))
 
   override def fetchInitialDetails(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[InitialDetails]] = {
     Future successful currentSession.initialDetails
@@ -65,8 +63,7 @@ class TestSessionStoreService extends SessionStoreService(null) {
 
   override def cacheInitialDetails(details: InitialDetails)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     Future.successful(
-      currentSession.initialDetails = Some(details)
-    )
+      currentSession.initialDetails= Some(details))
 
   override def fetchContinueUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[ContinueUrl]] = {
     Future successful currentSession.continueUrl
@@ -74,8 +71,7 @@ class TestSessionStoreService extends SessionStoreService(null) {
 
   override def cacheContinueUrl(url: ContinueUrl)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     Future.successful(
-      currentSession.continueUrl = Some(url)
-    )
+      currentSession.continueUrl= Some(url))
 
   override def remove()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     Future {

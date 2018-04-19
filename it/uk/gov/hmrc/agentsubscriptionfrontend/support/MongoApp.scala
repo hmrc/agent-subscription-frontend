@@ -1,8 +1,8 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
-import org.scalatest.{BeforeAndAfterEach, Suite}
+import org.scalatest.{ BeforeAndAfterEach, Suite }
 import org.scalatestplus.play.OneServerPerSuite
-import uk.gov.hmrc.mongo.{MongoSpecSupport, Awaiting => MongoAwaiting}
+import uk.gov.hmrc.mongo.{ MongoSpecSupport, Awaiting => MongoAwaiting }
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.global

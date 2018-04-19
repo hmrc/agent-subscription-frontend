@@ -1,8 +1,8 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AddressLookupFrontendAddress, Country}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{ AddressLookupFrontendAddress, Country }
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs.givenAddressLookupReturnsAddress
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, MetricTestSupport}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{ BaseISpec, MetricTestSupport }
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,8 +31,7 @@ class AddressLookupFrontendConnectorSpec extends BaseISpec with MetricTestSuppor
           addressLine3,
           town),
         postcode = Some(postcode),
-        country = Country("GB",Some("United Kingdom"))
-      )
+        country = Country("GB", Some("United Kingdom")))
 
       timerShouldExistsAndBeenUpdated("ConsumedAPI-Address-Lookup-Frontend-getAddressDetails-GET")
     }

@@ -66,25 +66,25 @@ object AgentSubscriptionStub {
           .withStatus(Status.INTERNAL_SERVER_ERROR)))
   }
 
-  def subscriptionWillSucceed(utr: Utr, request: SubscriptionRequest, arn: String = "ARN00001" ): Unit = {
+  def subscriptionWillSucceed(utr: Utr, request: SubscriptionRequest, arn: String = "ARN00001"): Unit = {
     stubFor(subscriptionRequestFor(utr, request)
-              .willReturn(aResponse()
-                .withStatus(201)
-                  .withBody(
-                    s"""
+      .willReturn(aResponse()
+        .withStatus(201)
+        .withBody(
+          s"""
                        |{
                        |  "arn": "$arn"
                        |}
                      """.stripMargin)))
   }
 
-  def subscriptionWillConflict(utr: Utr, request: SubscriptionRequest ): Unit = {
+  def subscriptionWillConflict(utr: Utr, request: SubscriptionRequest): Unit = {
     stubFor(subscriptionRequestFor(utr, request)
       .willReturn(aResponse()
         .withStatus(409)))
   }
 
-  def subscriptionWillBeForbidden(utr: Utr, request: SubscriptionRequest ): Unit = {
+  def subscriptionWillBeForbidden(utr: Utr, request: SubscriptionRequest): Unit = {
     stubFor(subscriptionRequestFor(utr, request)
       .willReturn(aResponse()
         .withStatus(403)))
@@ -96,7 +96,7 @@ object AgentSubscriptionStub {
         .withStatus(code)))
   }
 
-  def subscriptionAttemptWillFail(utr: Utr, request: SubscriptionRequest ): Unit = {
+  def subscriptionAttemptWillFail(utr: Utr, request: SubscriptionRequest): Unit = {
     stubFor(subscriptionRequestFor(utr, request)
       .willReturn(aResponse()
         .withStatus(500)))

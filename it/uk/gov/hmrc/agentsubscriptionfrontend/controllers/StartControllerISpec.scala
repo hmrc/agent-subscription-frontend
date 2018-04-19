@@ -4,12 +4,13 @@ import java.net.URLEncoder
 
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentType, _}
+import play.api.test.Helpers.{ contentType, _ }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledAsHMRCASAGENT
 import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,14 +45,14 @@ class StartControllerISpec extends BaseISpec {
       val result = await(controller.root(FakeRequest("GET", "/?continue=http://foo@bar:1234")))
 
       status(result) shouldBe 303
-      redirectLocation(result).head should not include("continue=")
+      redirectLocation(result).head should not include ("continue=")
     }
 
     "not include a continue URL if it's not provided" in {
       val result = await(controller.root(FakeRequest("GET", "/")))
 
       status(result) shouldBe 303
-      redirectLocation(result).head should not include("continue=")
+      redirectLocation(result).head should not include ("continue=")
     }
   }
 
@@ -110,7 +111,7 @@ class StartControllerISpec extends BaseISpec {
         val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
 
         status(result) shouldBe 200
-        bodyOf(result) should not include("continue=")
+        bodyOf(result) should not include ("continue=")
       }
 
       "not include a continue URL if it's not whitelisted" in {
@@ -118,14 +119,14 @@ class StartControllerISpec extends BaseISpec {
         val result = await(controller.start()(FakeRequest("GET", s"/start?continue=${URLEncoder.encode(url, "UTF-8")}")))
 
         status(result) shouldBe 200
-        bodyOf(result) should not include("continue=")
+        bodyOf(result) should not include ("continue=")
       }
 
       "not include a continue URL if it's not provided" in {
         val result = await(controller.start()(FakeRequest("GET", "/start")))
 
         status(result) shouldBe 200
-        bodyOf(result) should not include("continue=")
+        bodyOf(result) should not include ("continue=")
       }
     }
   }
@@ -133,8 +134,8 @@ class StartControllerISpec extends BaseISpec {
   "showNonAgentNextSteps" when {
     "the current user is logged in" should {
 
-      "display the non-agent next steps page"  in {
-        implicit val request = authenticatedRequest()
+      "display the non-agent next steps page" in {
+        implicit val request = authenticatedRequest(subscribingAgentEnrolledAsHMRCASAGENT)
         val result = await(controller.showNonAgentNextSteps(request))
 
         status(result) shouldBe OK
@@ -144,7 +145,7 @@ class StartControllerISpec extends BaseISpec {
       }
 
       "include link to create new account" in {
-        val result = await(controller.showNonAgentNextSteps(authenticatedRequest()))
+        val result = await(controller.showNonAgentNextSteps(authenticatedRequest(subscribingAgentEnrolledAsHMRCASAGENT)))
 
         status(result) shouldBe 200
         bodyOf(result) should include("/redirect-to-sos")
@@ -163,7 +164,7 @@ class StartControllerISpec extends BaseISpec {
       }
     }
 
-    behave like aPageWithFeedbackLinks(request => controller.showNonAgentNextSteps(request), authenticatedRequest())
+    behave like aPageWithFeedbackLinks(request => controller.showNonAgentNextSteps(request), authenticatedRequest(subscribingAgentEnrolledAsHMRCASAGENT))
   }
 
   "returnAfterGGCredsCreated" should {
@@ -174,7 +175,7 @@ class StartControllerISpec extends BaseISpec {
       val result = await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest()))
 
       status(result) shouldBe 303
-      redirectLocation(result).head should include ("/subscription-details")
+      redirectLocation(result).head should include("/subscription-details")
     }
 
     "redirect to the check-agency-status page if given an invalid KnownFactsResult ID" in {
@@ -185,14 +186,14 @@ class StartControllerISpec extends BaseISpec {
       val result = await(controller.returnAfterGGCredsCreated(id = Some(invalidId))(FakeRequest()))
 
       status(result) shouldBe 303
-      redirectLocation(result).head should include ("/check-agency-status")
+      redirectLocation(result).head should include("/check-agency-status")
     }
 
     "redirect to check-agency-status page if there is no valid KnownFactsResult ID" in {
       val result = await(controller.returnAfterGGCredsCreated(id = None)(FakeRequest()))
 
       status(result) shouldBe 303
-      redirectLocation(result).head should include ("/check-agency-status")
+      redirectLocation(result).head should include("/check-agency-status")
     }
 
     "delete the persisted KnownFactsResult if given a valid KnownFactsResult ID" in {

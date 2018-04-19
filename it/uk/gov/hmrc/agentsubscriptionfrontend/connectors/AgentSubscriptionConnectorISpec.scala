@@ -117,9 +117,11 @@ class AgentSubscriptionConnectorISpec extends UnitSpec with OneAppPerSuite with 
   }
 
   private val subscriptionRequest =
-    SubscriptionRequest(utr = utr,
+    SubscriptionRequest(
+      utr = utr,
       knownFacts = SubscriptionRequestKnownFacts("AA1 2AA"),
-      agency = Agency(name = "My Agency",
+      agency = Agency(
+        name = "My Agency",
         address = DesAddress(
           addressLine1 = "1 Some Street",
           addressLine2 = Some("Anytown"),
