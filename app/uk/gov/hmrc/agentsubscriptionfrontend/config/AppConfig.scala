@@ -44,7 +44,7 @@ trait AppConfig {
   val addressLookupContinueUrl: String
   val surveyRedirectUrl: String
   val sosRedirectUrl: String
-  val mongoDbKnownFactsResult: Int
+  val mongoDbKnownFactsResultTtl: Int
   val cacheableSessionDomain: String
 }
 
@@ -54,31 +54,33 @@ class FrontendAppConfig @Inject() (val environment: Environment, val configurati
   override val runModeConfiguration: Configuration = configuration
   override protected def mode = environment.mode
 
-  private val contactHost = runModeConfiguration.getString(s"contact-frontend.host").getOrElse("")
-  private val servicesAccountUrl = getConfString("agent-services-account-frontend.external-url", "")
-  private val servicesAccountPath = getConfString("agent-services-account-frontend.start.path", "")
+  private val contactHost = getConfStringOrFail(s"contact-frontend.host")
+  private val servicesAccountUrl = getServicesConfStringOrFail("agent-services-account-frontend.external-url")
+  private val servicesAccountPath = getServicesConfStringOrFail("agent-services-account-frontend.start.path")
   private val contactFormServiceIdentifier = "AOSS"
 
-  def loadConfig(key: String): String = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
-
-  override val analyticsToken: String = loadConfig(s"google-analytics.token")
-  override val analyticsHost: String = loadConfig(s"google-analytics.host")
+  override val analyticsToken: String = getConfStringOrFail(s"google-analytics.token")
+  override val analyticsHost: String = getConfStringOrFail(s"google-analytics.host")
   override val betaFeedbackUrl = s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier"
   override val betaFeedbackUnauthenticatedUrl = s"$contactHost/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
   override val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   override val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  override val governmentGatewayUrl: String = loadConfig("government-gateway.url")
+  override val governmentGatewayUrl: String = getConfStringOrFail("government-gateway.url")
   override val blacklistedPostcodes: Set[String] =
     PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
-  override val journeyName: String = getConfString("address-lookup-frontend.journeyName", "")
+  override val journeyName: String = getServicesConfStringOrFail("address-lookup-frontend.journeyName")
   override val agentServicesAccountUrl: String = s"$servicesAccountUrl$servicesAccountPath"
   override val domainWhiteList: Set[String] =
     runModeConfiguration.getStringList("continueUrl.domainWhiteList").getOrElse(emptyList()).toSet
-  override val agentAssuranceFlag: Boolean = configuration.getBoolean("agentAssuranceFlag").getOrElse(false)
-  override val addressLookupContinueUrl = getConfString("address-lookup-frontend.new-address-callback.url", "")
-  override val surveyRedirectUrl: String = getConfString("surveyRedirectUrl", "")
-  override val sosRedirectUrl: String = configuration.getString("sosRedirectUrl").getOrElse("")
-  override val mongoDbKnownFactsResult: Int = configuration.getInt("mongodb.knownfactsresult.ttl").getOrElse(0)
-  override val cacheableSessionDomain: String = getConfString("cachable.session-cache.domain", "")
+  override val agentAssuranceFlag: Boolean = getConfBooleanOrFail("agentAssuranceFlag")
+  override val addressLookupContinueUrl = getServicesConfStringOrFail("address-lookup-frontend.new-address-callback.url")
+  override val surveyRedirectUrl: String = getConfStringOrFail(s"$env.surveyRedirectUrl")
+  override val sosRedirectUrl: String = getConfStringOrFail(s"$env.sosRedirectUrl")
+  override val mongoDbKnownFactsResultTtl: Int = getConfIntOrFail(s"$env.mongodb.knownfactsresult.ttl")
+  override val cacheableSessionDomain: String = getServicesConfStringOrFail("cachable.session-cache.domain")
 
+  def getServicesConfStringOrFail(key: String): String = getConfString(key, throw new Exception(s"Property not found $key"))
+  def getConfStringOrFail(key: String): String = configuration.getString(key).getOrElse(throw new Exception(s"Property not found $key"))
+  def getConfBooleanOrFail(key: String): Boolean = configuration.getBoolean(key).getOrElse(throw new Exception(s"Property not found $key"))
+  def getConfIntOrFail(key: String): Int = configuration.getInt(key).getOrElse(throw new Exception(s"Property not found $key"))
 }

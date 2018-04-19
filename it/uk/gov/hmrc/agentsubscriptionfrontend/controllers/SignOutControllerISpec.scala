@@ -1,8 +1,9 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import java.net.URLEncoder
+
 import play.api.test.FakeRequest
-import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{ BaseISpec, SampleUser }
 import play.api.test.Helpers.{ redirectLocation, _ }
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
@@ -22,7 +23,7 @@ class SignOutControllerISpec extends BaseISpec {
 
   "redirect to SOS" should {
     "redirect to SOS page" in {
-      val result = await(controller.redirectToSos(authenticatedRequest()))
+      val result = await(controller.redirectToSos(authenticatedRequest(SampleUser.subscribingAgentEnrolledForNonMTD)))
 
       status(result) shouldBe 303
       redirectLocation(result).head should include(sosRedirectUrl)

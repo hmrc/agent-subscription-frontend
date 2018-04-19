@@ -24,6 +24,7 @@ import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{ Index, IndexType }
 import reactivemongo.bson.{ BSONDocument, BSONObjectID }
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.StashedKnownFactsResult.StashedKnownFactsResultId
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -32,7 +33,7 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class KnownFactsResultMongoRepository @Inject() (mongoComponent: ReactiveMongoComponent)
+class KnownFactsResultMongoRepository @Inject() (mongoComponent: ReactiveMongoComponent, appConfig: AppConfig)
   extends ReactiveRepository[StashedKnownFactsResult, BSONObjectID](
     "agent-known-facts-results",
     mongoComponent.mongoConnector.db,
@@ -40,7 +41,7 @@ class KnownFactsResultMongoRepository @Inject() (mongoComponent: ReactiveMongoCo
     ReactiveMongoFormats.objectIdFormats)
   with StrictlyEnsureIndexes[StashedKnownFactsResult, BSONObjectID] {
 
-  val ttl = 900
+  val ttl = appConfig.mongoDbKnownFactsResultTtl
 
   override def indexes: Seq[Index] = Seq(
     Index(

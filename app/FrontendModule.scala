@@ -109,8 +109,9 @@ class AgentSubscriptionSessionCache @Inject() (
   val http: HttpGet with HttpPut with HttpDelete,
   @Named("appName") val appName: String,
   @Named("cachable.session-cache-baseUrl") val baseUrl: URL,
-  @Named("cachable.session-cache.domain") val domain: String) extends SessionCache {
+  appConfig: AppConfig) extends SessionCache {
   override lazy val defaultSource = appName
+  lazy val domain: String = appConfig.cacheableSessionDomain
   override lazy val baseUri = baseUrl.toExternalForm
 }
 
