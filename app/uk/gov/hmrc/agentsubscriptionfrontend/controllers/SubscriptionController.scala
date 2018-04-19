@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import javax.inject.{ Inject, Singleton }
 import com.kenshoo.play.metrics.Metrics
+import javax.inject.{ Inject, Singleton }
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms.mapping
@@ -33,7 +33,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings._
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{ SessionStoreService, SubscriptionService }
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{ CallOps, Monitoring }
+import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpException }
