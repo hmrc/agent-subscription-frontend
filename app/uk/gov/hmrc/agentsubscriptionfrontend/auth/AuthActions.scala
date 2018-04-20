@@ -62,8 +62,6 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
   def env = appConfig.environment
   def config = appConfig.configuration
 
-  private implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
-
   def withSubscribingAgent[A](body: Agent => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     authorised(AuthProviders(GovernmentGateway))
       .retrieve(allEnrolments and affinityGroup and credentials) {
