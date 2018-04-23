@@ -56,10 +56,7 @@ class ErrorHandler @Inject() (
   }
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]) = {
-    error_template(
-      Messages("global.error.500.title"),
-      Messages("global.error.500.heading"),
-      Messages("global.error.500.message"))
+    internalServerErrorTemplate
   }
 }
 
