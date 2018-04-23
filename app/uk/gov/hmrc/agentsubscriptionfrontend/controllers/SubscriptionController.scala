@@ -186,7 +186,7 @@ class SubscriptionController @Inject() (
   }
 
   val showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
+    withAuthenticatedAgent {
       request.flash.get("arn") match {
         case Some(arn) =>
           sessionStoreService.fetchContinueUrl.

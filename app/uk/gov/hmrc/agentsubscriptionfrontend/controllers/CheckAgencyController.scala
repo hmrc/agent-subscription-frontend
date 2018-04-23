@@ -95,8 +95,7 @@ class CheckAgencyController @Inject() (
     }
   }
 
-  private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)
-                                             (implicit hc: HeaderCarrier, request: Request[AnyContent], agent: Agent): Future[Result] = {
+  private def checkAgencyStatusGivenValidForm(knownFacts: KnownFacts)(implicit hc: HeaderCarrier, request: Request[AnyContent], agent: Agent): Future[Result] = {
 
     def cacheKnownFactsAndAudit(maybeAssuranceResults: Option[AssuranceResults], taxpayerName: String, isSubscribedToAgentServices: Boolean) = {
       val knownFactsResult = KnownFactsResult(knownFacts.utr, knownFacts.postcode, taxpayerName, isSubscribedToAgentServices)

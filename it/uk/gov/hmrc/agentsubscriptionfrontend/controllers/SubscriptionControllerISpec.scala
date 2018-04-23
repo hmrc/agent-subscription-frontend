@@ -120,7 +120,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionComplete.title"))
       }
       "there was no delay and the new enrolment is visible in auth" in {
-        implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedRequest(subscribingAgentEnrolledAsHMRCASAGENT)
 
         val result = await(controller.showSubscriptionComplete(request.withFlash("arn" -> "ARN0001", "agencyName" -> "My Agency")))
 

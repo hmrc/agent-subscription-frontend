@@ -36,6 +36,15 @@ object AuthStub {
           .withHeader("WWW-Authenticate", "MDTP detail=\"SessionRecordNotFound\"")))
   }
 
+  def userIsNotAnAgent(user: SampleUser): Seq[(String, String)] = {
+    stubFor(post(urlEqualTo("/auth/authorise"))
+      .willReturn(
+        aResponse()
+          .withStatus(401)
+          .withHeader("WWW-Authenticate", "MDTP detail=\"UnsupportedAffinityGroup\"")))
+    sessionKeysForMockAuth(user)
+  }
+
   def userIsAuthenticated(user: SampleUser): Seq[(String, String)] = {
     val response = s"""{${user.allEnrolments},${user.affinityGroup},"credentials": {"providerId": "${user.userId}", "providerType": "GovernmentGateway"}}"""
     stubFor(post(urlEqualTo("/auth/authorise"))

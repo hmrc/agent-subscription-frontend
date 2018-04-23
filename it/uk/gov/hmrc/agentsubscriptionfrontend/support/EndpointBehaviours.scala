@@ -31,7 +31,7 @@ trait EndpointBehaviours {
     }
 
     "redirect to the non-Agent next steps page if the current user is logged in and does not have affinity group = Agent" in {
-      val sessionKeys = AuthStub.userIsAuthenticated(individual)
+      val sessionKeys = AuthStub.userIsNotAnAgent(individual)
 
       val request = FakeRequest().withSession(sessionKeys: _*)
       val result = await(doRequest(request))
