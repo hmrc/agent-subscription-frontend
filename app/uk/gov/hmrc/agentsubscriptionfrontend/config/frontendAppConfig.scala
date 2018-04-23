@@ -52,17 +52,17 @@ class FrontendAppConfig @Inject() (val environment: Environment, val configurati
   override val runModeConfiguration: Configuration = configuration
   override protected def mode = environment.mode
 
-  private val contactHost = getConfStringOrFail(s"contact-frontend.host")
   private val servicesAccountUrl = getServicesConfStringOrFail("agent-services-account-frontend.external-url")
   private val servicesAccountPath = getServicesConfStringOrFail("agent-services-account-frontend.start.path")
-  private val contactFormServiceIdentifier = "AOSS"
 
   override val analyticsToken: String = getConfStringOrFail(s"google-analytics.token")
   override val analyticsHost: String = getConfStringOrFail(s"google-analytics.host")
-  override val betaFeedbackUrl = s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier"
-  override val betaFeedbackUnauthenticatedUrl = s"$contactHost/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
-  override val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  override val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+
+  override val betaFeedbackUrl: String = getConfStringOrFail("betaFeedbackUrl")
+  override val betaFeedbackUnauthenticatedUrl: String = getConfStringOrFail("betaFeedbackUnauthenticatedUrl")
+  override val reportAProblemPartialUrl: String = getConfStringOrFail("reportAProblemPartialUrl")
+  override val reportAProblemNonJSUrl: String = getConfStringOrFail("reportAProblemNonJSUrl")
+
   override val governmentGatewayUrl: String = getConfStringOrFail("government-gateway.url")
   override val blacklistedPostcodes: Set[String] =
     PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
@@ -71,7 +71,7 @@ class FrontendAppConfig @Inject() (val environment: Environment, val configurati
   override val domainWhiteList: Set[String] =
     runModeConfiguration.getStringList("continueUrl.domainWhiteList").getOrElse(emptyList()).toSet
   override val agentAssuranceFlag: Boolean = getConfBooleanOrFail("agentAssuranceFlag")
-  override val addressLookupContinueUrl = getServicesConfStringOrFail("address-lookup-frontend.new-address-callback.url")
+  override val addressLookupContinueUrl: String = getServicesConfStringOrFail("address-lookup-frontend.new-address-callback.url")
   override val surveyRedirectUrl: String = getConfStringOrFail(s"$env.surveyRedirectUrl")
   override val sosRedirectUrl: String = getConfStringOrFail(s"$env.sosRedirectUrl")
   override val mongoDbKnownFactsResultTtl: Int = getConfIntOrFail(s"$env.mongodb.knownfactsresult.ttl")
