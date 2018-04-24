@@ -73,14 +73,8 @@ class CheckAgencyController @Inject() (
   def showCheckAgencyStatus: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       withMaybeContinueUrlCached {
-        agent match {
-          case hasHmrcAsAgentEnrolment(_) =>
-            mark("Count-Subscription-AlreadySubscribed-HasEnrolment")
-            Future successful Redirect(routes.CheckAgencyController.showAlreadySubscribed())
-          case _ =>
-            mark("Count-Subscription-CheckAgency-Start")
-            Future successful Ok(html.check_agency_status(CheckAgencyController.knownFactsForm))
-        }
+        mark("Count-Subscription-CheckAgency-Start")
+        Future successful Ok(html.check_agency_status(CheckAgencyController.knownFactsForm))
       }
     }
   }

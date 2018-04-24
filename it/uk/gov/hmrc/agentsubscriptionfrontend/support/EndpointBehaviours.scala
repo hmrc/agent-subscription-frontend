@@ -16,7 +16,7 @@ trait EndpointBehaviours {
 
   private implicit val materializer: Materializer = app.materializer
 
-  protected def authenticatedRequest(user: SampleUser): FakeRequest[AnyContentAsEmpty.type]
+  protected def authenticatedAs(user: SampleUser): FakeRequest[AnyContentAsEmpty.type]
 
   protected def anAgentAffinityGroupOnlyEndpoint(doRequest: PlayRequest): Unit = {
     "redirect to the company-auth-frontend sign-in page if the current user is not logged in" in {

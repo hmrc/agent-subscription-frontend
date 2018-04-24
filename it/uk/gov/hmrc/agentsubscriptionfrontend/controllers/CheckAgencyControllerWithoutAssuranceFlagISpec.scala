@@ -14,7 +14,7 @@ class CheckAgencyControllerWithoutAssuranceFlagISpec extends CheckAgencyControll
     "redirect to confirm agency page and store known facts result in the session store when a matching registration is found for the UTR and postcode" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -29,7 +29,7 @@ class CheckAgencyControllerWithoutAssuranceFlagISpec extends CheckAgencyControll
     "store isSubscribedToAgentServices = false in session when the business registration found by agent-subscription is not already subscribed" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -42,7 +42,7 @@ class CheckAgencyControllerWithoutAssuranceFlagISpec extends CheckAgencyControll
     "redirect to already subscribed page when the business registration found by agent-subscription is already subscribed" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = true)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 

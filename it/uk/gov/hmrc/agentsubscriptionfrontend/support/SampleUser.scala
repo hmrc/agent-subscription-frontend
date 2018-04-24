@@ -32,14 +32,9 @@ case class SampleUser(userId: String, enrolments: Seq[Enrolment], affinity: Affi
 
 object SampleUser {
 
-  def subscribingAgentEnrolledAsHMRCASAGENT(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
+  def subscribingAgentEnrolledForHMRCASAGENT(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
     "12345-credId",
     Seq(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "TARN0000001")), "Activated")),
-    AffinityGroup.Agent)
-
-  def subscribingAgentEnrolledAsHMRCASAGENTNotActivated(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
-    "12345-credId",
-    Seq(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "TARN0000001")), "NotActivated")),
     AffinityGroup.Agent)
 
   def subscribingAgentEnrolledForNonMTD(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
@@ -54,7 +49,7 @@ object SampleUser {
     Seq(),
     AffinityGroup.Agent)
 
-  def subscribing2ndAgentWithoutEnrolments(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
+  def subscribing2ndCleanAgentWithoutEnrolments(implicit wireMockBaseUrl: WireMockBaseUrl) = SampleUser(
     "54321-credId",
     Seq(),
     AffinityGroup.Agent)

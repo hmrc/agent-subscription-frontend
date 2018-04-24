@@ -36,7 +36,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -55,7 +55,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -73,7 +73,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -89,7 +89,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -105,7 +105,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -122,7 +122,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
         givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
         givenAgentIsNotManuallyAssured(validUtr.value)
 
-        implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
           .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
         val result = await(controller.checkAgencyStatus(request))
 
@@ -138,7 +138,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -154,7 +154,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -168,7 +168,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenRefusalToDealWithUtrIsForbidden(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
       status(result) shouldBe 303
@@ -187,7 +187,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -203,7 +203,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenRefusalToDealWithReturns404(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       an[IllegalStateException] shouldBe thrownBy(await(controller.checkAgencyStatus(request)))
 
@@ -217,7 +217,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
         givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
         givenAgentIsManuallyAssured(validUtr.value)
 
-        implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
           .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
         val result = await(controller.checkAgencyStatus(request))
 
@@ -239,7 +239,7 @@ class CheckAgencyControllerWithAssuranceFlagISpec extends CheckAgencyControllerI
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
 
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 

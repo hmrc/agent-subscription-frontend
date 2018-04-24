@@ -53,29 +53,21 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     behave like anAgentAffinityGroupOnlyEndpoint(controller.showCheckAgencyStatus(_))
 
-    behave like aPageWithFeedbackLinks(controller.showCheckAgencyStatus(_), authenticatedRequest(subscribingCleanAgentWithoutEnrolments))
+    behave like aPageWithFeedbackLinks(controller.showCheckAgencyStatus(_), authenticatedAs(subscribingCleanAgentWithoutEnrolments))
 
     "display the check agency status page if the current user is logged in and has affinity group = Agent" in {
-      val result = await(controller.showCheckAgencyStatus(authenticatedRequest(subscribingCleanAgentWithoutEnrolments)))
+      val result = await(controller.showCheckAgencyStatus(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
       checkHtmlResultWithBodyText(result, "Identify your business")
       metricShouldExistsAndBeenUpdated("Count-Subscription-CheckAgency-Start")
     }
 
     "display the AS Account Page if the current user has HMRC-AS-AGENT enrolment" in {
-      val result = await(controller.showCheckAgencyStatus(authenticatedRequest(subscribingAgentEnrolledAsHMRCASAGENT)))
+      val result = await(controller.showCheckAgencyStatus(authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(redirectUrl)
       metricShouldExistsAndBeenUpdated("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
-    }
-
-    "redirect to Already Subscribed page if current user has HMRC-AS-AGENT enrolment" in {
-      val result = await(controller.showCheckAgencyStatus(authenticatedRequest(subscribingAgentEnrolledAsHMRCASAGENTNotActivated)))
-
-      status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showAlreadySubscribed().url)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-AlreadySubscribed-HasEnrolment")
     }
   }
 
@@ -85,7 +77,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "return a 200 response to redisplay the form with an error message for invalidly-formatted UTR" in {
       val invalidUtr = "0123456"
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> invalidUtr, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -100,7 +92,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "return a 200 response to redisplay the form with an error message for UTR failing to pass Modulus11Check" in {
       val invalidUtr = "2000000001" // Modulus11Check validation fails in this case
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> invalidUtr, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -114,7 +106,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
 
     "return a 200 response to redisplay the form with an error message for invalidly-formatted postcode" in {
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> invalidPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -128,7 +120,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
 
     "return a 200 response to redisplay the form with an error message for empty form parameters" in {
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> "", "postcode" -> "")
       val result = await(controller.checkAgencyStatus(request))
 
@@ -142,7 +134,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "redirect to no-agency-found page when no matching registration found by agent-subscription" in {
       withNonMatchingUtrAndPostcode(validUtr, validPostcode)
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(request))
 
@@ -153,7 +145,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "propagate an exception when there is no organisation name" in {
       withNoOrganisationName(validUtr, validPostcode)
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val e = intercept[IllegalStateException] {
         await(controller.checkAgencyStatus(request))
@@ -167,10 +159,10 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.showHasOtherEnrolments(request))
     behave like aPageWithFeedbackLinks(
-      controller.showHasOtherEnrolments(_), authenticatedRequest(subscribingCleanAgentWithoutEnrolments))
+      controller.showHasOtherEnrolments(_), authenticatedAs(subscribingCleanAgentWithoutEnrolments))
 
     "display the has other enrolments page if the current user is logged in and has affinity group = Agent" in {
-      val result = await(controller.showHasOtherEnrolments(authenticatedRequest(subscribingAgentEnrolledForNonMTD)))
+      val result = await(controller.showHasOtherEnrolments(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
 
       checkHtmlResultWithBodyText(result, "Create your new agent services account")
     }
@@ -181,10 +173,10 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.showNoAgencyFound(request))
     behave like aPageWithFeedbackLinks(request => {
       controller.showNoAgencyFound(request)
-    }, authenticatedRequest(subscribingCleanAgentWithoutEnrolments))
+    }, authenticatedAs(subscribingCleanAgentWithoutEnrolments))
 
     "display the no agency found page if the current user is logged in and has affinity group = Agent" in {
-      val result = await(controller.showNoAgencyFound(authenticatedRequest(subscribingCleanAgentWithoutEnrolments)))
+      val result = await(controller.showNoAgencyFound(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
       checkHtmlResultWithBodyText(result, htmlEscapedMessage("noAgencyFound.title"))
     }
@@ -199,7 +191,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val postcode = "AA11AA"
       val registrationName = "My Agency"
 
-      implicit val request = authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.knownFactsResult = Some(
         KnownFactsResult(utr = utr, postcode = postcode, taxpayerName = registrationName, isSubscribedToAgentServices = false))
 
@@ -213,7 +205,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
 
     "show a button which allows the user to return to Check Agency Status page" in {
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.knownFactsResult = Some(
         KnownFactsResult(utr = Utr("0123456789"), postcode = "AA11AA", taxpayerName = "My Agency", isSubscribedToAgentServices = false))
 
@@ -224,7 +216,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
 
     "show a Continue button which allows the user to go to Subscription Details if isSubscribedToAgentServices=false" in {
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.knownFactsResult = Some(
         KnownFactsResult(utr = Utr("0123456789"), postcode = "AA11AA", taxpayerName = "My Agency", isSubscribedToAgentServices = false))
 
@@ -235,7 +227,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
 
     "show a Continue button which allows the user to go to Already Subscribed if isSubscribedToAgentServices=true" in {
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.knownFactsResult = Some(
         KnownFactsResult(utr = Utr("0123456789"), postcode = "AA11AA", taxpayerName = "My Agency", isSubscribedToAgentServices = true))
 
@@ -246,7 +238,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
 
     "redirect to the Check Agency Status page if there is no KnownFactsResult in session because the user has returned to a bookmark" in {
-      implicit val request = authenticatedRequest(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
       val result = await(controller.showConfirmYourAgency(request))
 
@@ -261,7 +253,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "display the already subscribed page if the current user is logged in and has affinity group = Agent" in {
 
-      val result = await(controller.showAlreadySubscribed(authenticatedRequest(subscribingCleanAgentWithoutEnrolments)))
+      val result = await(controller.showAlreadySubscribed(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
       checkHtmlResultWithBodyText(result, "Your agency is already subscribed")
     }
@@ -270,7 +262,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   "invasive check" should {
     "start invasiveCheck if selected Yes with SaAgentCode reference inputted" in {
 
-      val result = await(controller.invasiveSaAgentCodePost(authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      val result = await(controller.invasiveSaAgentCodePost(authenticatedAs(subscribingCleanAgentWithoutEnrolments)
         .withFormUrlEncodedBody(("confirmResponse", "true"), ("confirmResponse-true-hidden-input", "SA6012"))))
 
       status(result) shouldBe 303
@@ -279,7 +271,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
     "redirect to setup incomplete if selected No" in {
 
-      val result = await(controller.invasiveSaAgentCodePost(authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      val result = await(controller.invasiveSaAgentCodePost(authenticatedAs(subscribingCleanAgentWithoutEnrolments)
         .withFormUrlEncodedBody(("confirmResponse", "false"))))
 
       status(result) shouldBe 303
@@ -289,7 +281,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "Send page back with error when failing the validation of SaAgentCode" in {
 
-      val result = await(controller.invasiveSaAgentCodePost(authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      val result = await(controller.invasiveSaAgentCodePost(authenticatedAs(subscribingCleanAgentWithoutEnrolments)
         .withFormUrlEncodedBody(("confirmResponse", "true"), ("confirmResponse-true-hidden-input", "SA6012AAAA"))))
 
       status(result) shouldBe 200
@@ -300,7 +292,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     "redirect to confirm your agency when successfully submitting nino" in {
       givenNinoAGoodCombinationAndUserHasRelationshipInCesa("nino", "AA123456A", "SA6012")
 
-      implicit val request = authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.knownFactsResult = Some(
         KnownFactsResult(utr = validUtr, postcode = validPostcode, taxpayerName = "My Agency", isSubscribedToAgentServices = false))
 
@@ -318,7 +310,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     "redirect to setup incomplete page when submitting valid nino with no relationship" in {
       givenAUserDoesNotHaveRelationshipInCesa("nino", "AA123456A", "SA6012")
 
-      implicit val request = authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.knownFactsResult = Some(
         KnownFactsResult(utr = validUtr, postcode = validPostcode, taxpayerName = "My Agency", isSubscribedToAgentServices = false))
 
@@ -335,7 +327,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "nino invalid send back 200 with error page" in {
 
-      val result = await(controller.invasiveTaxPayerOption(authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      val result = await(controller.invasiveTaxPayerOption(authenticatedAs(subscribingCleanAgentWithoutEnrolments)
         .withFormUrlEncodedBody(("confirmResponse", "true"), ("confirmResponse-true-hidden-input", "AA123"))))
 
       status(result) shouldBe 200
@@ -344,7 +336,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     "redirect to confirm your agency when successfully submitting UTR" in {
       givenUtrAGoodCombinationAndUserHasRelationshipInCesa("utr", "4000000009", "SA6012")
 
-      implicit val request = authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.knownFactsResult = Some(
         KnownFactsResult(utr = validUtr, postcode = validPostcode, taxpayerName = "My Agency", isSubscribedToAgentServices = false))
 
@@ -362,7 +354,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     "redirect to setup incomplete page when submitting valid utr with no relationship" in {
       givenAUserDoesNotHaveRelationshipInCesa("utr", "4000000009", "SA6012")
 
-      implicit val request = authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.knownFactsResult = Some(
         KnownFactsResult(utr = validUtr, postcode = validPostcode, taxpayerName = "My Agency", isSubscribedToAgentServices = false))
 
@@ -379,7 +371,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "utr invalid send back 200 with error page" in {
 
-      val result = await(controller.invasiveTaxPayerOption(authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      val result = await(controller.invasiveTaxPayerOption(authenticatedAs(subscribingCleanAgentWithoutEnrolments)
         .withFormUrlEncodedBody(("confirmResponse", "false"), ("confirmResponse-false-hidden-input", "42123"))
         .withSession(("saAgentReferenceToCheck" -> "SA6012"))))
 
@@ -388,7 +380,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "return 200 error when submitting without selected radio option" in {
 
-      val result = await(controller.invasiveTaxPayerOption(authenticatedRequest(subscribingCleanAgentWithoutEnrolments)
+      val result = await(controller.invasiveTaxPayerOption(authenticatedAs(subscribingCleanAgentWithoutEnrolments)
         .withFormUrlEncodedBody()
         .withSession(("saAgentReferenceToCheck" -> "SA6012"))))
 

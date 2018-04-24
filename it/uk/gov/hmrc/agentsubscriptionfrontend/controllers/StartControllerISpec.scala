@@ -10,7 +10,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledAsHMRCASAGENT
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{ subscribingAgentEnrolledForHMRCASAGENT, individual }
 import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -135,7 +135,7 @@ class StartControllerISpec extends BaseISpec {
     "the current user is logged in" should {
 
       "display the non-agent next steps page" in {
-        implicit val request = authenticatedRequest(subscribingAgentEnrolledAsHMRCASAGENT)
+        implicit val request = authenticatedAs(individual)
         val result = await(controller.showNonAgentNextSteps(request))
 
         status(result) shouldBe OK
@@ -145,7 +145,7 @@ class StartControllerISpec extends BaseISpec {
       }
 
       "include link to create new account" in {
-        val result = await(controller.showNonAgentNextSteps(authenticatedRequest(subscribingAgentEnrolledAsHMRCASAGENT)))
+        val result = await(controller.showNonAgentNextSteps(authenticatedAs(individual)))
 
         status(result) shouldBe 200
         bodyOf(result) should include("/redirect-to-sos")
@@ -164,7 +164,7 @@ class StartControllerISpec extends BaseISpec {
       }
     }
 
-    behave like aPageWithFeedbackLinks(request => controller.showNonAgentNextSteps(request), authenticatedRequest(subscribingAgentEnrolledAsHMRCASAGENT))
+    behave like aPageWithFeedbackLinks(request => controller.showNonAgentNextSteps(request), authenticatedAs(individual))
   }
 
   "returnAfterGGCredsCreated" should {
