@@ -16,16 +16,13 @@
 
 import java.net.URL
 
-import javax.inject.{ Inject, Named, Provider, Singleton }
 import com.google.inject.AbstractModule
-import com.google.inject.binder.ScopedBindingBuilder
-import com.google.inject.name.Names.named
 import com.google.inject.name.Names
+import com.google.inject.name.Names.named
+import javax.inject.{ Inject, Named, Provider, Singleton }
 import org.slf4j.MDC
 import play.api.{ Configuration, Environment, Logger, LoggerLike }
-import play.modules.reactivemongo.{ ReactiveMongoComponent, ReactiveMongoComponentImpl }
 import uk.gov.hmrc.agentsubscriptionfrontend.config.{ AppConfig, FrontendAppConfig }
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.FrontendAuthConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -35,9 +32,6 @@ import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
-
-import scala.reflect.ClassTag
 
 class FrontendModule(val environment: Environment, val configuration: Configuration) extends AbstractModule with ServicesConfig {
 
@@ -97,11 +91,6 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
       throw new Exception(s"Config property for service not found $propertyName")
     })
   }
-}
-
-@Singleton
-class FrontendAuditConnector @Inject() (@Named("appName") val appName: String) extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
 }
 
 @Singleton
