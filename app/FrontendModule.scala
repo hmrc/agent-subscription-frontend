@@ -19,10 +19,10 @@ import java.net.URL
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.google.inject.name.Names.named
-import javax.inject.{ Inject, Named, Provider, Singleton }
+import javax.inject.{Inject, Named, Provider, Singleton}
 import org.slf4j.MDC
-import play.api.{ Configuration, Environment, Logger, LoggerLike }
-import uk.gov.hmrc.agentsubscriptionfrontend.config.{ AppConfig, FrontendAppConfig }
+import play.api.{Configuration, Environment, Logger, LoggerLike}
+import uk.gov.hmrc.agentsubscriptionfrontend.config.{AppConfig, FrontendAppConfig}
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.FrontendAuthConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -33,7 +33,8 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
-class FrontendModule(val environment: Environment, val configuration: Configuration) extends AbstractModule with ServicesConfig {
+class FrontendModule(val environment: Environment, val configuration: Configuration)
+    extends AbstractModule with ServicesConfig {
 
   override val runModeConfiguration: Configuration = configuration
   override protected def mode = environment.mode
@@ -79,7 +80,8 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
     bind(classOf[String]).annotatedWith(Names.named(propertyName)).toProvider(new PropertyProvider(propertyName))
 
   private class PropertyProvider(confKey: String) extends Provider[String] {
-    override lazy val get = configuration.getString(confKey)
+    override lazy val get = configuration
+      .getString(confKey)
       .getOrElse(throw new IllegalStateException(s"No value found for configuration property $confKey"))
   }
 
@@ -94,19 +96,19 @@ class FrontendModule(val environment: Environment, val configuration: Configurat
 }
 
 @Singleton
-class AgentSubscriptionSessionCache @Inject() (
+class AgentSubscriptionSessionCache @Inject()(
   val http: HttpGet with HttpPut with HttpDelete,
   @Named("appName") val appName: String,
   @Named("cachable.session-cache-baseUrl") val baseUrl: URL,
-  appConfig: AppConfig) extends SessionCache {
+  appConfig: AppConfig)
+    extends SessionCache {
   override lazy val defaultSource = appName
   lazy val domain: String = appConfig.cacheableSessionDomain
   override lazy val baseUri = baseUrl.toExternalForm
 }
 
 @Singleton
-class HttpVerbs @Inject() (val auditConnector: AuditConnector, @Named("appName") val appName: String)
-  extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp
-  with HttpAuditing {
+class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String)
+    extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
   override val hooks = Seq(AuditingHook)
 }

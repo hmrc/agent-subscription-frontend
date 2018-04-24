@@ -37,14 +37,14 @@ object AssuranceResults {
     def unapply(maybeAssuranceResults: Some[AssuranceResults]): Option[AssuranceResults] = maybeAssuranceResults match {
       case Some(AssuranceResults(false, false, Some(true), _)) => maybeAssuranceResults
       case Some(AssuranceResults(false, false, _, Some(true))) => maybeAssuranceResults
-      case _ => None
+      case _                                                   => None
     }
   }
 
   object CheckedInvisibleAssuranceAndFailed {
     def unapply(maybeAssuranceResults: Some[AssuranceResults]): Option[AssuranceResults] = maybeAssuranceResults match {
       case Some(AssuranceResults(false, false, Some(false), Some(false))) => maybeAssuranceResults
-      case _ => None
+      case _                                                              => None
     }
   }
 }

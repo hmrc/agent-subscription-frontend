@@ -24,4 +24,3 @@ case class AssuranceCheckInput(
   userEnteredSaAgentRef: Option[String] = None,
   userEnteredUtr: Option[Utr] = None,
   userEnteredNino: Option[Nino] = None)
-

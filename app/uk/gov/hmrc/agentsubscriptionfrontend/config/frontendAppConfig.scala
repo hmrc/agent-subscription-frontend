@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.config
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import java.util.Collections.emptyList
-import play.api.{ Configuration, Environment }
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.play.config.ServicesConfig
 
@@ -47,7 +47,8 @@ trait AppConfig {
 }
 
 @Singleton
-class FrontendAppConfig @Inject() (val environment: Environment, val configuration: Configuration) extends AppConfig with ServicesConfig {
+class FrontendAppConfig @Inject()(val environment: Environment, val configuration: Configuration)
+    extends AppConfig with ServicesConfig {
 
   override val runModeConfiguration: Configuration = configuration
   override protected def mode = environment.mode
@@ -71,14 +72,19 @@ class FrontendAppConfig @Inject() (val environment: Environment, val configurati
   override val domainWhiteList: Set[String] =
     runModeConfiguration.getStringList("continueUrl.domainWhiteList").getOrElse(emptyList()).toSet
   override val agentAssuranceFlag: Boolean = getConfBooleanOrFail("agentAssuranceFlag")
-  override val addressLookupContinueUrl: String = getServicesConfStringOrFail("address-lookup-frontend.new-address-callback.url")
+  override val addressLookupContinueUrl: String = getServicesConfStringOrFail(
+    "address-lookup-frontend.new-address-callback.url")
   override val surveyRedirectUrl: String = getConfStringOrFail(s"$env.surveyRedirectUrl")
   override val sosRedirectUrl: String = getConfStringOrFail(s"$env.sosRedirectUrl")
   override val mongoDbKnownFactsResultTtl: Int = getConfIntOrFail(s"$env.mongodb.knownfactsresult.ttl")
   override val cacheableSessionDomain: String = getServicesConfStringOrFail("cachable.session-cache.domain")
 
-  def getServicesConfStringOrFail(key: String): String = getConfString(key, throw new Exception(s"Property not found $key"))
-  def getConfStringOrFail(key: String): String = configuration.getString(key).getOrElse(throw new Exception(s"Property not found $key"))
-  def getConfBooleanOrFail(key: String): Boolean = configuration.getBoolean(key).getOrElse(throw new Exception(s"Property not found $key"))
-  def getConfIntOrFail(key: String): Int = configuration.getInt(key).getOrElse(throw new Exception(s"Property not found $key"))
+  def getServicesConfStringOrFail(key: String): String =
+    getConfString(key, throw new Exception(s"Property not found $key"))
+  def getConfStringOrFail(key: String): String =
+    configuration.getString(key).getOrElse(throw new Exception(s"Property not found $key"))
+  def getConfBooleanOrFail(key: String): Boolean =
+    configuration.getBoolean(key).getOrElse(throw new Exception(s"Property not found $key"))
+  def getConfIntOrFail(key: String): Int =
+    configuration.getInt(key).getOrElse(throw new Exception(s"Property not found $key"))
 }

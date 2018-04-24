@@ -3,8 +3,8 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 import java.net.URL
 
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.SsoStub
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{ BaseISpec, MetricTestSupport }
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet }
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, MetricTestSupport}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet}
 import com.kenshoo.play.metrics.Metrics
 
 class SsoConnectorISpec extends BaseISpec with MetricTestSupport {

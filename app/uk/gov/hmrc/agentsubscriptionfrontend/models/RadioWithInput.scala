@@ -18,9 +18,12 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models
 
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.data.validation.{ Constraint, Invalid, Valid, ValidationError }
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 
-case class RadioWithInput(value: Option[Boolean], messageOfTrueRadioChoice: Option[String], messageOfFalseRadioChoice: Option[String])
+case class RadioWithInput(
+  value: Option[Boolean],
+  messageOfTrueRadioChoice: Option[String],
+  messageOfFalseRadioChoice: Option[String])
 
 object RadioWithInput {
   def radioChoice: Constraint[Option[Boolean]] = Constraint[Option[Boolean]] { fieldValue: Option[Boolean] =>
@@ -32,7 +35,8 @@ object RadioWithInput {
 
   val confirmResponseForm: Form[RadioWithInput] = Form[RadioWithInput](
     mapping(
-      "confirmResponse" -> optional(boolean).verifying(radioChoice),
-      "confirmResponse-true-hidden-input" -> optional(text),
-      "confirmResponse-false-hidden-input" -> optional(text))(RadioWithInput.apply)(RadioWithInput.unapply))
+      "confirmResponse"                    -> optional(boolean).verifying(radioChoice),
+      "confirmResponse-true-hidden-input"  -> optional(text),
+      "confirmResponse-false-hidden-input" -> optional(text)
+    )(RadioWithInput.apply)(RadioWithInput.unapply))
 }

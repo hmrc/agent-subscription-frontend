@@ -17,47 +17,48 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{ SampleUser, SessionKeysForTesting }
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{SampleUser, SessionKeysForTesting}
 import uk.gov.hmrc.http.SessionKeys
 
 object AuthStub {
-  def authIsDown(): Unit = {
-    stubFor(post(urlEqualTo("/auth/authorise"))
-      .willReturn(
-        aResponse()
+  def authIsDown(): Unit =
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .willReturn(aResponse()
           .withStatus(500)))
-  }
 
-  def userIsNotAuthenticated(): Unit = {
-    stubFor(post(urlEqualTo("/auth/authorise"))
-      .willReturn(
-        aResponse()
-          .withStatus(401)
-          .withHeader("WWW-Authenticate", "MDTP detail=\"SessionRecordNotFound\"")))
-  }
+  def userIsNotAuthenticated(): Unit =
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .willReturn(
+          aResponse()
+            .withStatus(401)
+            .withHeader("WWW-Authenticate", "MDTP detail=\"SessionRecordNotFound\"")))
 
   def userIsNotAnAgent(user: SampleUser): Seq[(String, String)] = {
-    stubFor(post(urlEqualTo("/auth/authorise"))
-      .willReturn(
-        aResponse()
-          .withStatus(401)
-          .withHeader("WWW-Authenticate", "MDTP detail=\"UnsupportedAffinityGroup\"")))
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .willReturn(
+          aResponse()
+            .withStatus(401)
+            .withHeader("WWW-Authenticate", "MDTP detail=\"UnsupportedAffinityGroup\"")))
     sessionKeysForMockAuth(user)
   }
 
   def userIsAuthenticated(user: SampleUser): Seq[(String, String)] = {
-    val response = s"""{${user.allEnrolments},${user.affinityGroup},"credentials": {"providerId": "${user.userId}", "providerType": "GovernmentGateway"}}"""
-    stubFor(post(urlEqualTo("/auth/authorise"))
-      .willReturn(
-        aResponse()
-          .withStatus(200)
-          .withHeader("Content-Type", "application/json")
-          .withBody(response)))
+    val response =
+      s"""{${user.allEnrolments},${user.affinityGroup},"credentials": {"providerId": "${user.userId}", "providerType": "GovernmentGateway"}}"""
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(response)))
     sessionKeysForMockAuth(user)
   }
 
-  private def sessionKeysForMockAuth(user: SampleUser): Seq[(String, String)] = Seq(
-    SessionKeys.userId -> user.userId,
-    SessionKeysForTesting.token -> "fakeToken")
+  private def sessionKeysForMockAuth(user: SampleUser): Seq[(String, String)] =
+    Seq(SessionKeys.userId -> user.userId, SessionKeysForTesting.token -> "fakeToken")
 
 }

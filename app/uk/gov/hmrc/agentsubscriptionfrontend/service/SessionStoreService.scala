@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 
 import uk.gov.hmrc.agentsubscriptionfrontend.models.ContinueUrlJsonFormat._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{ InitialDetails, KnownFactsResult }
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{InitialDetails, KnownFactsResult}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.binders.ContinueUrl
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SessionStoreService @Inject() (sessionCache: SessionCache) {
+class SessionStoreService @Inject()(sessionCache: SessionCache) {
 
   def fetchKnownFactsResult(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[KnownFactsResult]] =
     sessionCache.fetchAndGetEntry[KnownFactsResult]("knownFactsResult")
 
-  def cacheKnownFactsResult(knownFactsResult: KnownFactsResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  def cacheKnownFactsResult(
+    knownFactsResult: KnownFactsResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     sessionCache.cache("knownFactsResult", knownFactsResult).map(_ => ())
 
   def fetchInitialDetails(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[InitialDetails]] =
@@ -44,9 +45,8 @@ class SessionStoreService @Inject() (sessionCache: SessionCache) {
   def fetchContinueUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[ContinueUrl]] =
     sessionCache.fetchAndGetEntry[ContinueUrl]("continueUrl")
 
-  def cacheContinueUrl(url: ContinueUrl)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
+  def cacheContinueUrl(url: ContinueUrl)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     sessionCache.cache("continueUrl", url).map(_ => ())
-  }
 
   def remove()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     sessionCache.remove().map(_ => ())

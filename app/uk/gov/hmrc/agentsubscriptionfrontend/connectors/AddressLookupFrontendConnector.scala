@@ -20,28 +20,29 @@ import java.net.URL
 
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.{ Inject, Named, Singleton }
+import javax.inject.{Inject, Named, Singleton}
 import play.api.http.HeaderNames.LOCATION
-import play.api.libs.json.{ JsObject, Json }
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AddressLookupFrontendAddress
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet, HttpPost, HttpResponse }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NoStackTrace
 
 @Singleton
-class AddressLookupFrontendConnector @Inject() (
+class AddressLookupFrontendConnector @Inject()(
   @Named("address-lookup-frontend-baseUrl") baseUrl: URL,
   http: HttpGet with HttpPost,
   metrics: Metrics,
-  appConfig: AppConfig) extends HttpAPIMonitor {
+  appConfig: AppConfig)
+    extends HttpAPIMonitor {
 
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
-  def initJourney(call: Call, journeyName: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[String] = {
+  def initJourney(call: Call, journeyName: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[String] =
     monitor(s"ConsumedAPI-Address-Lookup-Frontend-initJourney-POST-$journeyName") {
       val continueJson = Json.obj("continueUrl" -> s"${appConfig.addressLookupContinueUrl}${call.url}")
 
@@ -51,9 +52,9 @@ class AddressLookupFrontendConnector @Inject() (
         }
       }
     }
-  }
 
-  def getAddressDetails(id: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AddressLookupFrontendAddress] = {
+  def getAddressDetails(
+    id: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AddressLookupFrontendAddress] = {
     import AddressLookupFrontendAddress._
 
     monitor(s"ConsumedAPI-Address-Lookup-Frontend-getAddressDetails-GET") {
@@ -61,13 +62,11 @@ class AddressLookupFrontendConnector @Inject() (
     }
   }
 
-  private def confirmJourneyUrl(id: String) = {
+  private def confirmJourneyUrl(id: String) =
     new URL(baseUrl, s"/api/confirmed?id=$id").toString
-  }
 
-  private def initJourneyUrl(journeyName: String): String = {
+  private def initJourneyUrl(journeyName: String): String =
     new URL(baseUrl, s"/api/init/$journeyName").toString
-  }
 }
 
 class ALFLocationHeaderNotSetException extends NoStackTrace

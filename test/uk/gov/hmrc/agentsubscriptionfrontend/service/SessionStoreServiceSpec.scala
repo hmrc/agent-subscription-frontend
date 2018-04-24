@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
-import play.api.libs.json.{ JsValue, Reads, Writes }
+import play.api.libs.json.{JsValue, Reads, Writes}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{ InitialDetails, KnownFactsResult }
-import uk.gov.hmrc.http.cache.client.{ CacheMap, NoSessionException, SessionCache }
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{InitialDetails, KnownFactsResult}
+import uk.gov.hmrc.http.cache.client.{CacheMap, NoSessionException, SessionCache}
 import uk.gov.hmrc.play.binders.ContinueUrl
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ ExecutionContext, Future }
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
+import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.logging.SessionId
 
 class SessionStoreServiceSpec extends UnitSpec {
@@ -37,7 +37,8 @@ class SessionStoreServiceSpec extends UnitSpec {
     "store known facts" in {
       val store = new SessionStoreService(new TestSessionCache())
 
-      val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
+      val knownFactsResult =
+        KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
 
       await(store.cacheKnownFactsResult(knownFactsResult))
 
@@ -85,7 +86,8 @@ class SessionStoreServiceSpec extends UnitSpec {
     "remove the underlying storage for the current session when remove is called" in {
       val store = new SessionStoreService(new TestSessionCache())
 
-      val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
+      val knownFactsResult =
+        KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
 
       await(store.cacheKnownFactsResult(knownFactsResult))
 
@@ -115,7 +117,9 @@ class TestSessionCache extends SessionCache {
   private def testCacheId(implicit hc: HeaderCarrier): Future[String] =
     hc.sessionId.fold(noSession)(c => Future.successful(c.value))
 
-  override def cache[A](formId: String, body: A)(implicit wts: Writes[A], hc: HeaderCarrier, executionContext: ExecutionContext): Future[CacheMap] =
+  override def cache[A](
+    formId: String,
+    body: A)(implicit wts: Writes[A], hc: HeaderCarrier, executionContext: ExecutionContext): Future[CacheMap] =
     testCacheId.map { c =>
       store.put(formId, wts.writes(body))
       CacheMap(c, store.toMap)
@@ -124,7 +128,8 @@ class TestSessionCache extends SessionCache {
   override def fetch()(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[Option[CacheMap]] =
     testCacheId.map(c => Some(CacheMap(c, store.toMap)))
 
-  override def fetchAndGetEntry[T](key: String)(implicit hc: HeaderCarrier, rds: Reads[T], executionContext: ExecutionContext): Future[Option[T]] =
+  override def fetchAndGetEntry[T](
+    key: String)(implicit hc: HeaderCarrier, rds: Reads[T], executionContext: ExecutionContext): Future[Option[T]] =
     Future {
       store.get(key).flatMap(jsValue => rds.reads(jsValue).asOpt)
     }

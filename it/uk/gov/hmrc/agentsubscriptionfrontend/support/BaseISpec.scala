@@ -5,11 +5,11 @@ import com.google.inject.AbstractModule
 import com.kenshoo.play.metrics.Metrics
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
-import play.api.i18n.{ Lang, Messages, MessagesApi }
+import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{ AnyContentAsEmpty, Result }
+import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{ contentType, _ }
+import play.api.test.Helpers.{contentType, _}
 import play.twirl.api.HtmlFormat.escape
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.SsoConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
@@ -21,25 +21,26 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-abstract class BaseISpec extends UnitSpec with OneAppPerSuite with MongoApp with WireMockSupport
-  with EndpointBehaviours with DataStreamStubs with MetricTestSupport {
+abstract class BaseISpec
+    extends UnitSpec with OneAppPerSuite with MongoApp with WireMockSupport with EndpointBehaviours with DataStreamStubs
+    with MetricTestSupport {
 
   override implicit lazy val app: Application = appBuilder.build()
 
-  protected def appBuilder: GuiceApplicationBuilder = {
+  protected def appBuilder: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
-        "microservice.services.auth.port" -> wireMockPort,
-        "microservice.services.agent-subscription.port" -> wireMockPort,
+        "microservice.services.auth.port"                    -> wireMockPort,
+        "microservice.services.agent-subscription.port"      -> wireMockPort,
         "microservice.services.address-lookup-frontend.port" -> wireMockPort,
-        "microservice.services.sso.port" -> wireMockPort,
-        "microservice.services.agent-assurance.port" -> wireMockPort,
-        "auditing.enabled" -> true,
-        "auditing.consumer.baseUri.host" -> wireMockHost,
-        "auditing.consumer.baseUri.port" -> wireMockPort)
+        "microservice.services.sso.port"                     -> wireMockPort,
+        "microservice.services.agent-assurance.port"         -> wireMockPort,
+        "auditing.enabled"                                   -> true,
+        "auditing.consumer.baseUri.host"                     -> wireMockHost,
+        "auditing.consumer.baseUri.port"                     -> wireMockPort
+      )
       .configure(mongoConfiguration)
       .overrides(new TestGuiceModule)
-  }
 
   override def commonStubs(): Unit = {
     givenAuditConnector()
@@ -57,9 +58,8 @@ abstract class BaseISpec extends UnitSpec with OneAppPerSuite with MongoApp with
   protected lazy val testSsoConnector = new SsoConnector(null, null, FakeMetrics) {
     val whitelistedSSODomains = Set("www.foo.com", "foo.org")
 
-    override def validateExternalDomain(domain: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    override def validateExternalDomain(domain: String)(implicit hc: HeaderCarrier): Future[Boolean] =
       Future.successful(whitelistedSSODomains.contains(domain))
-    }
   }
 
   private class TestGuiceModule extends AbstractModule {
@@ -93,7 +93,7 @@ abstract class BaseISpec extends UnitSpec with OneAppPerSuite with MongoApp with
 
   protected def htmlEscapedMessage(key: String, args: Any*): String = escape(Messages(key, args: _*)).toString
 
-  implicit def hc(implicit request: FakeRequest[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+  implicit def hc(implicit request: FakeRequest[_]): HeaderCarrier =
+    HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
 }
-

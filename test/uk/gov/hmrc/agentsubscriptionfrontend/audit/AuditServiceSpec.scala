@@ -21,7 +21,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.verify
 import org.scalatest.concurrent.Eventually
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.time.{ Millis, Span }
+import org.scalatest.time.{Millis, Span}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.{ Authorization, RequestId, SessionId }
+import uk.gov.hmrc.http.logging.{Authorization, RequestId, SessionId}
 
 class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
 
@@ -50,7 +50,8 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
 
       val auditData = new AuditData()
 
-      auditData.set("utr", "abcd")
+      auditData
+        .set("utr", "abcd")
         .set("postcode", "AA1 1AA")
         .set("refuseToDealWith", false)
         .set("isEnrolledSAAgent", true)

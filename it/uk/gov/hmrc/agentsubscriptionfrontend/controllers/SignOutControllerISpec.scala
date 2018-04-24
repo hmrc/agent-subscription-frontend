@@ -3,7 +3,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import java.net.URLEncoder
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{ redirectLocation, _ }
+import play.api.test.Helpers.{redirectLocation, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
@@ -31,23 +31,27 @@ class SignOutControllerISpec extends BaseISpec {
     }
 
     "save the KnownFactsResults in the DB" in {
-      val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
+      val knownFactsResult =
+        KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.knownFactsResult = Some(knownFactsResult)
 
       await(repo.find("knownFactsResult.utr" -> "9876543210").map(_.headOption.map(_.knownFactsResult))) shouldBe None
       await(controller.redirectToSos(request))
-      await(repo.find("knownFactsResult.utr" -> "9876543210").map(_.headOption.map(_.knownFactsResult))) shouldBe Some(knownFactsResult)
+      await(repo.find("knownFactsResult.utr" -> "9876543210").map(_.headOption.map(_.knownFactsResult))) shouldBe Some(
+        knownFactsResult)
     }
 
     "include an ID of the saved KnownFactsResults in the SOS redirect URL" in {
-      val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
+      val knownFactsResult =
+        KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.knownFactsResult = Some(knownFactsResult)
 
       val result = await(controller.redirectToSos(request))
       val id = await(repo.find("knownFactsResult.utr" -> "9876543210").map(_.headOption.map(_.id))).get
-      redirectLocation(result).head should include(s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created%3Fid%3D$id")
+      redirectLocation(result).head should include(
+        s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created%3Fid%3D$id")
     }
 
     "not include an ID in the SOS redirect URL when KnownFactsResults are not yet known" in {
@@ -64,14 +68,16 @@ class SignOutControllerISpec extends BaseISpec {
 
       val result = await(controller.redirectToSos(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
 
-      val sosContinueValueUnencoded = s"/agent-subscription/return-after-gg-creds-created?continue=${ourContinueUrl.encodedUrl}"
+      val sosContinueValueUnencoded =
+        s"/agent-subscription/return-after-gg-creds-created?continue=${ourContinueUrl.encodedUrl}"
       val sosContinueValueEncoded = URLEncoder.encode(sosContinueValueUnencoded, "UTF-8")
-      val expectedSosContinueParam = s"continue=${sosContinueValueEncoded}"
+      val expectedSosContinueParam = s"continue=$sosContinueValueEncoded"
       redirectLocation(result).head should include(expectedSosContinueParam)
     }
 
     "include both an ID and a continue URL in the SOS redirect URL if both a continue URL and KnownFacts exist in the session store" in {
-      val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
+      val knownFactsResult =
+        KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
       val ourContinueUrl = ContinueUrl("/test-continue-url")
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.knownFactsResult = Some(knownFactsResult)
@@ -80,9 +86,10 @@ class SignOutControllerISpec extends BaseISpec {
       val result = await(controller.redirectToSos(request))
       val id = await(repo.find("knownFactsResult.utr" -> "9876543210").map(_.headOption.map(_.id))).get
 
-      val sosContinueValueUnencoded = s"/agent-subscription/return-after-gg-creds-created?id=$id&continue=${ourContinueUrl.encodedUrl}"
+      val sosContinueValueUnencoded =
+        s"/agent-subscription/return-after-gg-creds-created?id=$id&continue=${ourContinueUrl.encodedUrl}"
       val sosContinueValueEncoded = URLEncoder.encode(sosContinueValueUnencoded, "UTF-8")
-      val expectedSosContinueParam = s"continue=${sosContinueValueEncoded}"
+      val expectedSosContinueParam = s"continue=$sosContinueValueEncoded"
       redirectLocation(result).head should include(expectedSosContinueParam)
     }
   }
@@ -111,4 +118,3 @@ class SignOutControllerISpec extends BaseISpec {
     }
   }
 }
-

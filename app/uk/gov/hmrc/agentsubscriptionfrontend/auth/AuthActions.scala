@@ -18,18 +18,18 @@ package uk.gov.hmrc.agentsubscriptionfrontend.auth
 
 import play.api.Mode
 import play.api.mvc.Results._
-import play.api.mvc.{ Request, Result }
+import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ ContinueUrlActions, routes }
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ContinueUrlActions, routes}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.Retrievals.{ affinityGroup, allEnrolments, credentials }
-import uk.gov.hmrc.auth.core.retrieve.{ Credentials, ~ }
+import uk.gov.hmrc.auth.core.retrieve.Retrievals.{allEnrolments, credentials}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class Agent(private val enrolments: Set[Enrolment], private val creds: Credentials) {
 
@@ -61,7 +61,10 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
   def env = appConfig.environment
   def config = appConfig.configuration
 
-  def withSubscribingAgent[A](body: Agent => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+  def withSubscribingAgent[A](body: Agent => Future[Result])(
+    implicit request: Request[A],
+    hc: HeaderCarrier,
+    ec: ExecutionContext): Future[Result] =
     authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
       .retrieve(allEnrolments and credentials) {
         case enrolments ~ creds =>
@@ -77,29 +80,38 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
           } else {
             body(new Agent(enrolments.enrolments, creds))
           }
-      }.recover {
+      }
+      .recover {
         case _: UnsupportedAffinityGroup =>
           mark("Count-Subscription-NonAgent")
           Redirect(routes.StartController.showNonAgentNextSteps())
         case _: NoActiveSession =>
-          toGGLogin(if (appConfig.environment.mode.equals(Mode.Dev)) s"http://${request.host}${request.uri}" else s"${request.uri}")
+          toGGLogin(
+            if (appConfig.environment.mode.equals(Mode.Dev)) s"http://${request.host}${request.uri}"
+            else s"${request.uri}")
       }
 
-  def withAuthenticatedAgent[A](body: => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+  def withAuthenticatedAgent[A](
+    body: => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)(body)
       .recover {
         case _: UnsupportedAffinityGroup =>
           mark("Count-Subscription-NonAgent")
           Redirect(routes.StartController.showNonAgentNextSteps())
         case _: NoActiveSession =>
-          toGGLogin(if (appConfig.environment.mode.equals(Mode.Dev)) s"http://${request.host}${request.uri}" else s"${request.uri}")
+          toGGLogin(
+            if (appConfig.environment.mode.equals(Mode.Dev)) s"http://${request.host}${request.uri}"
+            else s"${request.uri}")
       }
 
-  def withAuthenticatedUser[A](body: => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+  def withAuthenticatedUser[A](
+    body: => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     authorised(AuthProviders(GovernmentGateway))(body)
       .recover {
         case _: NoActiveSession =>
-          toGGLogin(if (appConfig.environment.mode.equals(Mode.Dev)) s"http://${request.host}${request.uri}" else s"${request.uri}")
+          toGGLogin(
+            if (appConfig.environment.mode.equals(Mode.Dev)) s"http://${request.host}${request.uri}"
+            else s"${request.uri}")
       }
 
   private def isEnrolledForHmrcAsAgent(enrolments: Enrolments): Boolean =

@@ -18,40 +18,41 @@ package uk.gov.hmrc.agentsubscriptionfrontend.repository
 
 import java.util.UUID
 
-import javax.inject.{ Inject, Named, Singleton }
+import javax.inject.{Inject, Named, Singleton}
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.indexes.{ Index, IndexType }
-import reactivemongo.bson.{ BSONDocument, BSONObjectID }
+import reactivemongo.api.indexes.{Index, IndexType}
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.StashedKnownFactsResult.StashedKnownFactsResultId
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class KnownFactsResultMongoRepository @Inject() (appConfig: AppConfig, mongoComponent: ReactiveMongoComponent)
-  extends ReactiveRepository[StashedKnownFactsResult, BSONObjectID](
-    "agent-known-facts-results",
-    mongoComponent.mongoConnector.db,
-    StashedKnownFactsResult.format,
-    ReactiveMongoFormats.objectIdFormats) {
+class KnownFactsResultMongoRepository @Inject()(appConfig: AppConfig, mongoComponent: ReactiveMongoComponent)
+    extends ReactiveRepository[StashedKnownFactsResult, BSONObjectID](
+      "agent-known-facts-results",
+      mongoComponent.mongoConnector.db,
+      StashedKnownFactsResult.format,
+      ReactiveMongoFormats.objectIdFormats) {
 
-  override def indexes: Seq[Index] = Seq(
-    Index(
-      key = Seq("id" -> IndexType.Ascending),
-      name = Some("idUnique"),
-      unique = true),
-    Index(
-      key = Seq("createdDate" -> IndexType.Ascending),
-      name = Some("createDate"),
-      unique = false,
-      options = BSONDocument("expireAfterSeconds" -> appConfig.mongoDbKnownFactsResultTtl)))
+  override def indexes: Seq[Index] =
+    Seq(
+      Index(key = Seq("id" -> IndexType.Ascending), name = Some("idUnique"), unique = true),
+      Index(
+        key = Seq("createdDate" -> IndexType.Ascending),
+        name = Some("createDate"),
+        unique = false,
+        options = BSONDocument("expireAfterSeconds" -> appConfig.mongoDbKnownFactsResultTtl)
+      )
+    )
 
-  def findKnownFactsResult(id: StashedKnownFactsResultId)(implicit ec: ExecutionContext): Future[Option[KnownFactsResult]] =
+  def findKnownFactsResult(id: StashedKnownFactsResultId)(
+    implicit ec: ExecutionContext): Future[Option[KnownFactsResult]] =
     find("id" -> id).map(_.headOption.map(_.knownFactsResult))
 
   def create(knownFactsResult: KnownFactsResult)(implicit ec: ExecutionContext): Future[StashedKnownFactsResultId] = {
@@ -63,7 +64,10 @@ class KnownFactsResultMongoRepository @Inject() (appConfig: AppConfig, mongoComp
     remove("id" -> id).map(_ => ())
 }
 
-case class StashedKnownFactsResult(id: StashedKnownFactsResultId, knownFactsResult: KnownFactsResult, createdDate: DateTime = DateTime.now)
+case class StashedKnownFactsResult(
+  id: StashedKnownFactsResultId,
+  knownFactsResult: KnownFactsResult,
+  createdDate: DateTime = DateTime.now)
 
 object StashedKnownFactsResult {
   type StashedKnownFactsResultId = String

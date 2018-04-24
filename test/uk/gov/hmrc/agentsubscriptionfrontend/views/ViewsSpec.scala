@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.views
 
 import org.scalatestplus.play.MixedPlaySpec
-import play.api.{ Configuration, Environment }
+import play.api.{Configuration, Environment}
 import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -56,7 +56,12 @@ class ViewsSpec extends MixedPlaySpec {
     "render title, heading and message" in new App {
       val view = new error_template()
       val html = view.render(
-        "My custom page title", "My custom heading", "My custom message", FakeRequest(), applicationMessages, appConfig)
+        "My custom page title",
+        "My custom heading",
+        "My custom message",
+        FakeRequest(),
+        applicationMessages,
+        appConfig)
 
       contentAsString(html) must {
         include("My custom page title") and
@@ -65,7 +70,9 @@ class ViewsSpec extends MixedPlaySpec {
       }
 
       val hmtl2 = view.f("My custom page title", "My custom heading", "My custom message")(
-        FakeRequest(), applicationMessages, appConfig)
+        FakeRequest(),
+        applicationMessages,
+        appConfig)
       hmtl2 must be(html)
     }
   }
@@ -81,11 +88,13 @@ class ViewsSpec extends MixedPlaySpec {
         contentHeader = Some(Html("contentHeader")),
         bodyClasses = Some("bodyClasses"),
         mainClass = Some("mainClass"),
-        scriptElem = Some(Html("<script src=\"@controllers.routes.Assets.at(\"javascripts/scripts.js\")\" type=\"text/javascript\"></script>")),
+        scriptElem = Some(Html(
+          "<script src=\"@controllers.routes.Assets.at(\"javascripts/scripts.js\")\" type=\"text/javascript\"></script>")),
         userIsLoggedIn = true,
         mainContent = Html("mainContent"),
         request = FakeRequest(),
-        messages = applicationMessages)
+        messages = applicationMessages
+      )
 
       contentAsString(html) must {
         include("My custom page title") and
@@ -105,7 +114,8 @@ class ViewsSpec extends MixedPlaySpec {
         Some("bodyClasses"),
         Some("mainClass"),
         Some(Html("scriptElem")),
-        true)(Html("mainContent"))(FakeRequest(), applicationMessages)
+        true
+      )(Html("mainContent"))(FakeRequest(), applicationMessages)
       hmtl2 must be(html)
     }
 

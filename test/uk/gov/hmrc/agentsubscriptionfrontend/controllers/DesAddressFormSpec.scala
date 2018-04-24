@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import org.mockito.Mockito.{ verify, when }
+import org.mockito.Mockito.{verify, when}
 import org.scalatest.EitherValues
 import org.slf4j.Logger
 import play.api.LoggerLike
@@ -25,7 +25,7 @@ import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DesAddress
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{ ResettingMockitoSugar, testAddressLookupFrontendAddress, testCountry }
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{ResettingMockitoSugar, testAddressLookupFrontendAddress, testCountry}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
@@ -41,26 +41,22 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
   private val validLine4 = "42345678901234567890123456789012345"
 
   private val tooLongLine = "123456789012345678901234567890123456"
-  private def errorsForTooLongLine(key: String) = Seq(
-    FormError(key, "error.address.lines.maxLength", Seq(35)))
+  private def errorsForTooLongLine(key: String) = Seq(FormError(key, "error.address.lines.maxLength", Seq(35)))
 
   private val nonMatchingLine = "<"
-  private def errorsForNonMatchingLine(key: String) = Seq(
-    FormError(key, "error.address.lines.invalid", Seq()))
+  private def errorsForNonMatchingLine(key: String) = Seq(FormError(key, "error.address.lines.invalid", Seq()))
 
   private val tooLongAndNonMatchingLine = "123456789012345678901234567890123456<"
-  private def errorsForTooLongAndNonMatchingLine(key: String) = Seq(
-    FormError(key, "error.address.lines.maxLength", Seq(35)),
-    FormError(key, "error.address.lines.invalid", Seq()))
+  private def errorsForTooLongAndNonMatchingLine(key: String) =
+    Seq(FormError(key, "error.address.lines.maxLength", Seq(35)), FormError(key, "error.address.lines.invalid", Seq()))
 
   private val validPostcode = "AA1 1AA"
-  private val errorsForInvalidPostcode = Seq(
-    FormError("postcode", "error.postcode.invalid", Seq()))
+  private val errorsForInvalidPostcode = Seq(FormError("postcode", "error.postcode.invalid", Seq()))
 
   private val blacklistedPostcode = "BB1 1BB"
-  private val errorsForBlacklistedPostcode = Seq(
-    FormError("postcode", "error.postcode.blacklisted", Seq()))
-  private val blacklistedPostcodes: Set[String] = Set(blacklistedPostcode, "CC1 1CC", "DD1 1DD").map(PostcodesLoader.formatPostcode)
+  private val errorsForBlacklistedPostcode = Seq(FormError("postcode", "error.postcode.blacklisted", Seq()))
+  private val blacklistedPostcodes: Set[String] =
+    Set(blacklistedPostcode, "CC1 1CC", "DD1 1DD").map(PostcodesLoader.formatPostcode)
 
   private val validCountryCode = "GB"
   private val utr = Utr("1234567890")
@@ -89,7 +85,8 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
           addressLine3 = Some(validLine3),
           addressLine4 = Some(validLine4),
           postcode = validPostcode,
-          countryCode = validCountryCode))
+          countryCode = validCountryCode
+        ))
     }
 
     "not throw an error when there is only one line" in {
@@ -121,7 +118,8 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
 
     "pass when there are 5 address line's but log a warning with the utr inside" in {
       when(slf4jLogger.isWarnEnabled).thenReturn(true)
-      val addressLookupFrontendAddress = testAddressLookupFrontendAddress(lines = Seq(validLine, validLine, validLine, validLine, validLine))
+      val addressLookupFrontendAddress =
+        testAddressLookupFrontendAddress(lines = Seq(validLine, validLine, validLine, validLine, validLine))
 
       val validatedForm = desAddressForm.bindAddressLookupFrontendAddress(utr, addressLookupFrontendAddress)
       validatedForm.errors shouldBe empty
@@ -147,8 +145,7 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
 
       val validatedForm = desAddressForm.bindAddressLookupFrontendAddress(utr, addressLookupFrontendAddress)
 
-      validatedForm.errors shouldBe Seq(
-        FormError("addressLine1", "error.address.lines.empty", Seq()))
+      validatedForm.errors shouldBe Seq(FormError("addressLine1", "error.address.lines.empty", Seq()))
     }
 
     "pass when only a few address lines are provided" in {
@@ -190,11 +187,7 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
 
     "validate all lines + postcode and accumulate errors" in {
       val addressLookupFrontendAddress = testAddressLookupFrontendAddress(
-        lines = Seq(
-          tooLongAndNonMatchingLine,
-          nonMatchingLine,
-          tooLongLine,
-          nonMatchingLine),
+        lines = Seq(tooLongAndNonMatchingLine, nonMatchingLine, tooLongLine, nonMatchingLine),
         postcode = Some(blacklistedPostcode))
 
       val validatedForm = desAddressForm.bindAddressLookupFrontendAddress(utr, addressLookupFrontendAddress)
@@ -210,7 +203,8 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
       val addressLookupFrontendAddress = testAddressLookupFrontendAddress(
         lines = Seq(validLine, validLine2, validLine3, validLine4, tooLongAndNonMatchingLine),
         postcode = Some(validPostcode),
-        country = testCountry(code = validCountryCode))
+        country = testCountry(code = validCountryCode)
+      )
 
       val validatedForm = desAddressForm.bindAddressLookupFrontendAddress(utr, addressLookupFrontendAddress)
       validatedForm.errors shouldBe empty
@@ -222,7 +216,8 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
         addressLine3 = Some(validLine3),
         addressLine4 = Some(validLine4),
         postcode = validPostcode,
-        countryCode = validCountryCode)
+        countryCode = validCountryCode
+      )
     }
   }
 

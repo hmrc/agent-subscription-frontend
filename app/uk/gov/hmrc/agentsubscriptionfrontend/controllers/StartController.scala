@@ -18,8 +18,8 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.Inject
-import play.api.i18n.{ I18nSupport, MessagesApi }
-import play.api.mvc.{ Action, AnyContent, Result }
+import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
 
-class StartController @Inject() (
+class StartController @Inject()(
   override val messagesApi: MessagesApi,
   override val authConnector: AuthConnector,
   knownFactsResultMongoRepository: KnownFactsResultMongoRepository,
@@ -38,7 +38,7 @@ class StartController @Inject() (
   val metrics: Metrics,
   override val appConfig: AppConfig,
   sessionStoreService: SessionStoreService)(implicit val aConfig: AppConfig)
-  extends FrontendController with I18nSupport with AuthActions {
+    extends FrontendController with I18nSupport with AuthActions {
 
   import continueUrlActions._
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
@@ -67,15 +67,15 @@ class StartController @Inject() (
         case Some(knownFactsId) =>
           for {
             knownFactsResultOpt <- knownFactsResultMongoRepository.findKnownFactsResult(knownFactsId)
-            _ <- knownFactsResultMongoRepository.delete(knownFactsId)
+            _                   <- knownFactsResultMongoRepository.delete(knownFactsId)
             _ <- knownFactsResultOpt match {
-              case Some(knownFacts) => sessionStoreService.cacheKnownFactsResult(knownFacts)
-              case None => Future.successful(())
-            }
+                  case Some(knownFacts) => sessionStoreService.cacheKnownFactsResult(knownFacts)
+                  case None             => Future.successful(())
+                }
           } yield {
             knownFactsResultOpt match {
               case Some(_) => Redirect(routes.SubscriptionController.showInitialDetails())
-              case None => Redirect(routes.CheckAgencyController.checkAgencyStatus())
+              case None    => Redirect(routes.CheckAgencyController.checkAgencyStatus())
             }
           }
         case None =>

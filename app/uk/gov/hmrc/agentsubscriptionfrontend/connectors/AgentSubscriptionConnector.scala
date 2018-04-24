@@ -17,12 +17,12 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import java.net.URL
-import javax.inject.{ Inject, Named, Singleton }
+import javax.inject.{Inject, Named, Singleton}
 
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{ Arn, Registration, SubscriptionRequest }
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet, HttpPost }
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{Arn, Registration, SubscriptionRequest}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpPost}
 import uk.gov.hmrc.play.encoding.UriPathEncoding.encodePathSegment
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext.fromLoggingDetails
 import com.codahale.metrics.MetricRegistry
@@ -32,29 +32,30 @@ import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import scala.concurrent.Future
 
 @Singleton
-class AgentSubscriptionConnector @Inject() (
+class AgentSubscriptionConnector @Inject()(
   @Named("agent-subscription-baseUrl") baseUrl: URL,
   http: HttpGet with HttpPost,
-  metrics: Metrics) extends HttpAPIMonitor {
+  metrics: Metrics)
+    extends HttpAPIMonitor {
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
-  def getRegistration(utr: Utr, postcode: String)(implicit hc: HeaderCarrier): Future[Option[Registration]] = {
+  def getRegistration(utr: Utr, postcode: String)(implicit hc: HeaderCarrier): Future[Option[Registration]] =
     monitor(s"ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET") {
       val url = getRegistrationUrlFor(utr, postcode)
       http.GET[Option[Registration]](url)
     }
-  }
 
-  def subscribeAgencyToMtd(subscriptionRequest: SubscriptionRequest)(implicit hc: HeaderCarrier): Future[Arn] = {
+  def subscribeAgencyToMtd(subscriptionRequest: SubscriptionRequest)(implicit hc: HeaderCarrier): Future[Arn] =
     monitor(s"ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST") {
       http.POST[SubscriptionRequest, JsValue](subscriptionUrl.toString, subscriptionRequest) map { js =>
         (js \ "arn").as[Arn]
       }
     }
-  }
 
   private val subscriptionUrl = new URL(baseUrl, s"/agent-subscription/subscription")
 
   private def getRegistrationUrlFor(utr: Utr, postcode: String) =
-    new URL(baseUrl, s"/agent-subscription/registration/${encodePathSegment(utr.value)}/postcode/${encodePathSegment(postcode)}").toString
+    new URL(
+      baseUrl,
+      s"/agent-subscription/registration/${encodePathSegment(utr.value)}/postcode/${encodePathSegment(postcode)}").toString
 }

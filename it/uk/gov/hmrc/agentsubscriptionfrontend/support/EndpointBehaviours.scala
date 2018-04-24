@@ -2,7 +2,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import akka.stream.Materializer
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.mvc.{ AnyContent, AnyContentAsEmpty, Request, Result }
+import play.api.mvc.{AnyContent, AnyContentAsEmpty, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
