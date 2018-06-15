@@ -87,7 +87,13 @@ class SubscriptionController @Inject()(
       "knownFactsPostcode" -> postcode,
       "name"               -> agencyName,
       "email"              -> emailAddress,
-      "telephone"          -> telephone)(InitialDetails.apply)(InitialDetails.unapply))
+      "telephone"          -> telephone)(
+      (utrStr, postcode, name, email, telephone) =>
+        FieldMappings
+          .normalizeUtr(utrStr)
+          .map(utr => InitialDetails(utr, postcode, name, email, telephone))
+          .getOrElse(throw new Exception("Invalid utr found after validation")))(id =>
+      Some(id.utr.value, id.knownFactsPostcode, id.name, id.email, id.telephone)))
 
   private case class SubscriptionReturnedHttpError(httpStatusCode: Int) extends Product with Serializable
 

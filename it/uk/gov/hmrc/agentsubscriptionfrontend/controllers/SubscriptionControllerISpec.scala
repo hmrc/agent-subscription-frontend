@@ -90,14 +90,14 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       request => {
         controller.showSubscriptionComplete(request)
       },
-      authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFlash("arn" -> "ARN0001", "agencyName" -> "My Agency")
+      authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")
     )
 
     "display the agency name and ARN" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
 
       val result =
-        await(controller.showSubscriptionComplete(request.withFlash("arn" -> "ARN0001", "agencyName" -> "My Agency")))
+        await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
 
       status(result) shouldBe 200
       checkHtmlResultWithBodyText(result, "You must save this number for your agency's records.")
@@ -117,7 +117,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
         val result =
-          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "ARN0001", "agencyName" -> "My Agency")))
+          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
 
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionComplete.title"))
       }
@@ -125,7 +125,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
 
         val result =
-          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "ARN0001", "agencyName" -> "My Agency")))
+          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
 
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionComplete.title"))
       }
@@ -139,7 +139,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
         sessionStoreService.currentSession(hc(request)).continueUrl = Some(continueUrl)
         val result =
-          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "ARN0001", "agencyName" -> "My Agency")))
+          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
 
         checkHtmlResultWithBodyText(
           result,
@@ -151,7 +151,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
 
         val result =
-          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "ARN0001", "agencyName" -> "My Agency")))
+          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
 
         checkHtmlResultWithBodyText(
           result,
@@ -164,7 +164,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
 
       val result =
-        await(controller.showSubscriptionComplete(request.withFlash("arn" -> "ARN0001", "agencyName" -> "My Agency")))
+        await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
 
       status(result) shouldBe 200
       sessionStoreService.allSessionsRemoved shouldBe true

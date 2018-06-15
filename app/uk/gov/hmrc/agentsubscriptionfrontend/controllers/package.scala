@@ -143,11 +143,17 @@ package object controllers {
         throw new Exception(s"The utr contains an invalid value ${utr.value}")
       }
 
-    def utr: Mapping[Utr] =
-      text
-        .verifying(nonEmptyWithMessage("error.utr.empty"))
-        .transform[Utr](normalizeUtr(_).getOrElse(throw new Exception("The utr contains an invalid value")), _.value)
-        .verifying("error.utr.invalid", utr => isUtrValid(utr.value))
+    private val utrConstraint: Constraint[String] = Constraint[String] { fieldValue: String =>
+      Constraints.nonEmpty(fieldValue) match {
+        case i: Invalid                   => Invalid(ValidationError("error.utr.empty"))
+        case _ if !isUtrValid(fieldValue) => Invalid(ValidationError("error.utr.invalid"))
+        case _                            => Valid
+      }
+    }
+
+    def utr: Mapping[String] =
+      text verifying utrConstraint
+
     def postcode: Mapping[String] =
       of[String](stringFormatWithMessage("error.postcode.empty")) verifying nonEmptyPostcode
     def postcodeWithBlacklist(blacklistedPostcodes: Set[String]): Mapping[String] =

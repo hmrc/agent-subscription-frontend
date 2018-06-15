@@ -31,7 +31,7 @@ class FieldMappingsSpec extends UnitSpec with EitherValues {
     def bind(fieldValue: String) = utrMapping.bind(Map("testKey" -> fieldValue))
 
     "accept valid UTRs" in {
-      bind("2000000000") shouldBe Right(Utr("2000000000"))
+      bind("2000000000") shouldBe Right("2000000000")
     }
 
     "give \"error.required\" error when it is not supplied" in {

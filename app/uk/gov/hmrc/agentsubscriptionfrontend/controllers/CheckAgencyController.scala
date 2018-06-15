@@ -43,7 +43,13 @@ import scala.concurrent.Future
 object CheckAgencyController {
   val knownFactsForm: Form[KnownFacts] =
     Form[KnownFacts](
-      mapping("utr" -> FieldMappings.utr, "postcode" -> FieldMappings.postcode)(KnownFacts.apply)(KnownFacts.unapply))
+      mapping("utr" -> FieldMappings.utr, "postcode" -> FieldMappings.postcode)(
+        (utrStr, postcode) =>
+          FieldMappings
+            .normalizeUtr(utrStr)
+            .map(utr => KnownFacts(utr, postcode))
+            .getOrElse(throw new Exception("Invalid utr found after validation")))(knownFacts =>
+        Some((knownFacts.utr.value, knownFacts.postcode))))
 }
 
 @Singleton
