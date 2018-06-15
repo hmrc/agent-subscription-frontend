@@ -160,7 +160,7 @@ class CheckAgencyController @Inject()(
           html.confirm_your_agency(
             registrationName = knownFactsResult.taxpayerName,
             postcode = knownFactsResult.postcode,
-            utr = knownFactsResult.utr.value,
+            utr = FieldMappings.prettify(knownFactsResult.utr),
             nextPageUrl = lookupNextPageUrl(knownFactsResult.isSubscribedToAgentServices)
           ))
       }.getOrElse {

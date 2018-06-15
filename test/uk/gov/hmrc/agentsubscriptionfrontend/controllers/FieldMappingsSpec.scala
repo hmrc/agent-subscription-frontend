@@ -55,7 +55,7 @@ class FieldMappingsSpec extends UnitSpec with EitherValues {
 
       "it has fewer than 10 digits" in {
         bind("200000") should matchPattern {
-          case Left(List(FormError("testKey", List("error.utr.invalid.format"), _))) =>
+          case Left(List(FormError("testKey", List("error.utr.invalid.length"), _))) =>
         }
       }
 

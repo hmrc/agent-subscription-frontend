@@ -103,7 +103,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
       responseBody should include(htmlEscapedMessage("checkAgencyStatus.title"))
-      responseBody should include(htmlEscapedMessage("error.utr.invalid.length"))
+      responseBody should include(htmlEscapedMessage("error.utr.invalid.format"))
       responseBody should include(invalidUtr)
       responseBody should include(validPostcode)
       noMetricExpectedAtThisPoint()
@@ -131,7 +131,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
       responseBody should include("Identify your business")
-      responseBody should include("You must enter a UTR or reference")
+      responseBody should include(htmlEscapedMessage("error.utr.blank"))
       responseBody should include("You must enter a postcode")
       noMetricExpectedAtThisPoint()
     }
@@ -210,13 +210,13 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
         result,
         htmlEscapedMessage("confirmYourAgency.title"),
         s"$postcode",
-        s"${utr.value}",
+        "01234 56789",
         s"$registrationName")
       metricShouldExistsAndBeenUpdated("Count-Subscription-CleanCreds-Start")
     }
 
-    "accept Utr with spaces" in {
-      val utr = Utr("012   34 56    789")
+    "show utr in the correct format" in {
+      val utr = Utr("0123456789")
       val postcode = "AA11AA"
       val registrationName = "My Agency"
 
@@ -230,7 +230,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       val result = await(controller.showConfirmYourAgency(request))
 
-      checkHtmlResultWithBodyText(result, "0123456789")
+      checkHtmlResultWithBodyText(result, "01234 56789")
       metricShouldExistsAndBeenUpdated("Count-Subscription-CleanCreds-Start")
     }
 
@@ -353,7 +353,6 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
-      checkHtmlResultWithBodyText(result, "20000 00000")
 
       verifyAgentAssuranceAuditRequestSentWithClientIdentifier(Nino("AA123456A"), true, "SA6012", agentAssurancePayeCheck)
       metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Success")
