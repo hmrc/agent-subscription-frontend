@@ -101,6 +101,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       status(result) shouldBe 200
       checkHtmlResultWithBodyText(result, "You must save this number for your agency's records.")
+      checkHtmlResultWithBodyText(result, "AARN-000-0001")
     }
 
     "redirect to session missing page if there is nothing in the flash scope" in {

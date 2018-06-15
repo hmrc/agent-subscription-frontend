@@ -145,8 +145,10 @@ package object controllers {
 
     private val utrConstraint: Constraint[String] = Constraint[String] { fieldValue: String =>
       Constraints.nonEmpty(fieldValue) match {
-        case i: Invalid                   => Invalid(ValidationError("error.utr.empty"))
-        case _ if !isUtrValid(fieldValue) => Invalid(ValidationError("error.utr.invalid"))
+        case _: Invalid => Invalid(ValidationError("error.utr.blank"))
+        case _ if fieldValue.trim.map(_.isDigit).reduce(_ && _) && fieldValue.trim.size > 10 =>
+          Invalid(ValidationError("error.utr.invalid.length"))
+        case _ if !isUtrValid(fieldValue) => Invalid(ValidationError("error.utr.invalid.format"))
         case _                            => Valid
       }
     }
