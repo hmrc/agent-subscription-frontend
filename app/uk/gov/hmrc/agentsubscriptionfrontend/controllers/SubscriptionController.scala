@@ -147,7 +147,7 @@ class SubscriptionController @Inject()(
     val subscriptionDetails = mapper(details, address)
     subscriptionService.subscribeAgencyToMtd(subscriptionDetails) map {
       case Right(arn) => {
-        Right((Arn(arn.arn), subscriptionDetails.name))
+        Right(arn, subscriptionDetails.name)
       }
       case Left(x) => Left(SubscriptionReturnedHttpError(x))
     }

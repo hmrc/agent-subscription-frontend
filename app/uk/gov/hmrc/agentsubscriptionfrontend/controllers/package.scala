@@ -153,8 +153,7 @@ package object controllers {
       }
     }
 
-    def utr: Mapping[String] =
-      text verifying utrConstraint
+    def utr: Mapping[String] = text verifying utrConstraint
 
     def postcode: Mapping[String] =
       of[String](stringFormatWithMessage("error.postcode.empty")) verifying nonEmptyPostcode
