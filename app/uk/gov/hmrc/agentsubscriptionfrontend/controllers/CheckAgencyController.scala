@@ -22,7 +22,7 @@ import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{AnyContent, Request, _}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -154,7 +154,7 @@ class CheckAgencyController @Inject()(
           html.confirm_your_agency(
             registrationName = knownFactsResult.taxpayerName,
             postcode = knownFactsResult.postcode,
-            utr = knownFactsResult.utr,
+            utr = knownFactsResult.utr.value,
             nextPageUrl = lookupNextPageUrl(knownFactsResult.isSubscribedToAgentServices)
           ))
       }.getOrElse {

@@ -20,9 +20,8 @@ import play.api.data.Forms._
 import play.api.data.{Form, FormError, Mapping}
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Constraints, _}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
-import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioWithInput
 
 package object controllers {
 
@@ -120,11 +119,35 @@ package object controllers {
         }
     }
 
+    def normalizeUtr(utrStr: String): Option[Utr] = {
+      val formattedUtr = utrStr.replace(" ", "")
+      if (Utr.isValid(formattedUtr)) Some(Utr(formattedUtr)) else None
+    }
+
+    private def isUtrValid(utrStr: String): Boolean = normalizeUtr(utrStr).nonEmpty
+
+    def prettify(arn: Arn): String = {
+      val unapplyPattern = """([A-Z]ARN)(\d{3})(\d{4})""".r
+
+      unapplyPattern
+        .unapplySeq(arn.value)
+        .map(_.mkString("-"))
+        .getOrElse(throw new Exception(s"The arn contains an invalid value ${arn.value}"))
+    }
+
+    def prettify(utr: Utr): String =
+      if (utr.value.trim.length == 10) {
+        val (first, last) = utr.value.trim.splitAt(5)
+        s"$first $last"
+      } else {
+        throw new Exception(s"The utr contains an invalid value ${utr.value}")
+      }
+
     def utr: Mapping[Utr] =
       text
         .verifying(nonEmptyWithMessage("error.utr.empty"))
-        .transform[Utr](Utr.apply, _.value)
-        .verifying("error.utr.invalid", utr => Utr.isValid(utr.value))
+        .transform[Utr](normalizeUtr(_).getOrElse(throw new Exception("The utr contains an invalid value")), _.value)
+        .verifying("error.utr.invalid", utr => isUtrValid(utr.value))
     def postcode: Mapping[String] =
       of[String](stringFormatWithMessage("error.postcode.empty")) verifying nonEmptyPostcode
     def postcodeWithBlacklist(blacklistedPostcodes: Set[String]): Mapping[String] =
