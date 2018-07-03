@@ -36,7 +36,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{invasive_check_start, invasive_input_option}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, InternalServerException}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
@@ -251,11 +251,13 @@ class CheckAgencyController @Inject()(
             validatedIdentifier match {
               case Left(seqErrors) =>
                 Future.successful(
-                  Ok(invasive_input_option(RadioWithInput.confirmResponseForm.withError(seqErrors.head))))
+                  Ok(invasive_input_option(RadioWithInput.confirmResponseForm.withError(seqErrors.headOption
+                    .getOrElse(throw new InternalServerException("could not provide the user with errors found"))))))
               case Right(identifier) => {
                 val taxIdentifiedType =
                   if (trueIsNinoFalseIsUtr) (Nino(identifier), "nino")
-                  else (FieldMappings.normalizeUtr(identifier).get, "utr")
+                  else (FieldMappings.normalizeUtr(identifier)
+                    .getOrElse(throw new InternalServerException("Utr passed validation but failed the normalize method")), "utr")
                 checkAndRedirect(taxIdentifiedType._1, taxIdentifiedType._2)
               }
             }
