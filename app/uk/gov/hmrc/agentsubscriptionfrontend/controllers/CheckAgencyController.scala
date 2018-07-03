@@ -254,11 +254,16 @@ class CheckAgencyController @Inject()(
                   Ok(invasive_input_option(RadioWithInput.confirmResponseForm.withError(seqErrors.headOption
                     .getOrElse(throw new InternalServerException("could not provide the user with errors found"))))))
               case Right(identifier) => {
-                val taxIdentifiedType =
+                val (taxIdentifier, taxIdentifierName) =
                   if (trueIsNinoFalseIsUtr) (Nino(identifier), "nino")
-                  else (FieldMappings.normalizeUtr(identifier)
-                    .getOrElse(throw new InternalServerException("Utr passed validation but failed the normalize method")), "utr")
-                checkAndRedirect(taxIdentifiedType._1, taxIdentifiedType._2)
+                  else
+                    (
+                      FieldMappings
+                        .normalizeUtr(identifier)
+                        .getOrElse(
+                          throw new InternalServerException("Utr passed validation but failed the normalize method")),
+                      "utr")
+                checkAndRedirect(taxIdentifier, taxIdentifierName)
               }
             }
           }
