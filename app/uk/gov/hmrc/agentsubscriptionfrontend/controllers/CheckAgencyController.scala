@@ -254,7 +254,8 @@ class CheckAgencyController @Inject()(
                   Ok(invasive_input_option(RadioWithInput.confirmResponseForm.withError(seqErrors.head))))
               case Right(identifier) => {
                 val taxIdentifiedType =
-                  if (trueIsNinoFalseIsUtr) (Nino(identifier), "nino") else (Utr(identifier), "utr")
+                  if (trueIsNinoFalseIsUtr) (Nino(identifier), "nino")
+                  else (FieldMappings.normalizeUtr(identifier).get, "utr")
                 checkAndRedirect(taxIdentifiedType._1, taxIdentifiedType._2)
               }
             }
