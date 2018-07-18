@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
+import org.jsoup.Jsoup
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
@@ -23,6 +24,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.audit.AgentSubscriptionFrontendEven
 import uk.gov.hmrc.agentsubscriptionfrontend.models.KnownFactsResult
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub._
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.domain.{Nino, TaxIdentifier}
@@ -50,6 +52,93 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
         "government-gateway.url" -> configuredGovernmentGatewayUrl)
 
   lazy val controller: CheckAgencyController = app.injector.instanceOf[CheckAgencyController]
+
+  "showCheckBusinessType (GET /check-business-type)" should {
+    behave like anAgentAffinityGroupOnlyEndpoint(controller.showCheckBusinessType(_))
+
+    behave like aPageTakingContinueUrlAndCachingInSessionStore(controller.showCheckBusinessType(_),
+      sessionStoreService, userIsAuthenticated(subscribingCleanAgentWithoutEnrolments))
+
+    "contain page titles and header content" in {
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val result = await(controller.showCheckBusinessType(request))
+
+      checkHtmlResultWithBodyText(result,
+        htmlEscapedMessage("checkBusinessType.title"),
+        htmlEscapedMessage("checkBusinessType.progressive.title"),
+        htmlEscapedMessage("checkBusinessType.progressive.content.p1")
+      )
+    }
+
+    "contain radio options for Sole Trader, Limited Company, Partnership, and LLP" in {
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val result = await(controller.showCheckBusinessType(request))
+      val doc = Jsoup.parse(bodyOf(result))
+
+      // Check form's radio inputs have correct values
+      doc.getElementById("businessType-soletrader").`val`() shouldBe "soletrader"
+      doc.getElementById("businessType-limited").`val`() shouldBe "limited"
+      doc.getElementById("businessType-partnership").`val`() shouldBe "partnership"
+      doc.getElementById("businessType-llp").`val`() shouldBe "llp"
+    }
+
+    "contain a link to sign out" in {
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val result = await(controller.showCheckBusinessType(request))
+      val doc = Jsoup.parse(bodyOf(result))
+      val signOutLink = doc.getElementById("sign-out")
+      signOutLink.attr("href") shouldBe routes.SignedOutController.signOutWithContinueUrl.url
+      signOutLink.text() shouldBe htmlEscapedMessage("checkBusinessType.progressive.content.link")
+    }
+  }
+
+  "submitCheckBusinessType (POST /check-business-type)" when {
+    "Sole Trader is chosen" should {
+      "redirect to /check-agency-status" in {
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          .withFormUrlEncodedBody("businessType" -> "soletrader")
+        val result = await(controller.submitCheckBusinessType(request))
+        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus().url
+      }
+    }
+
+    "Limited Company is chosen" should {
+      "redirect to /check-agency-status" in {
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          .withFormUrlEncodedBody("businessType" -> "limited")
+        val result = await(controller.submitCheckBusinessType(request))
+        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus().url
+      }
+    }
+
+    "Partnership is chosen" should {
+      "redirect to /check-agency-status" in {
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          .withFormUrlEncodedBody("businessType" -> "partnership")
+        val result = await(controller.submitCheckBusinessType(request))
+        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus().url
+      }
+    }
+
+    "LLP is chosen" should {
+      "redirect to /check-agency-status" in {
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          .withFormUrlEncodedBody("businessType" -> "llp")
+        val result = await(controller.submitCheckBusinessType(request))
+        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus().url
+      }
+    }
+
+    "choice is missing" should {
+      "return 200 and redisplay the /check-business-type page with an error message for missing choice" in {
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        val result = await(controller.submitCheckBusinessType(request))
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.no-radio-selected"))
+      }
+    }
+
+    behave like anAgentAffinityGroupOnlyEndpoint(controller.submitCheckBusinessType(_))
+  }
 
   "showCheckAgencyStatus" should {
 

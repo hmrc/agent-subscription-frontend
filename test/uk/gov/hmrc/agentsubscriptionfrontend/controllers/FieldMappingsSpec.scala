@@ -536,5 +536,4 @@ class FieldMappingsSpec extends UnitSpec with EitherValues {
       FieldMappings.isValidSaAgentCode("abc12+") shouldBe false
     }
   }
-
 }
