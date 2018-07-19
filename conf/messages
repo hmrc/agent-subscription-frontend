@@ -147,4 +147,4 @@ invasive.confirmResponse.true.utr=Taxpayer''s Self Assessment Unique Taxpayer Re
 confirmResponse.false.hidden.input.label.utr=Self Assessment UTR
 invasive.expandable.p1=Where to find your Self Assessment agent code
 invasive.expandable.p1.open=You got your Self Assessment agent code when you registered in writing as an agent for Self Assessment. You used your agent code to set up your online service.
-error.confirmResponse.invalid=You must choose an option
+error.no-radio-selected.invalid=You must choose an option

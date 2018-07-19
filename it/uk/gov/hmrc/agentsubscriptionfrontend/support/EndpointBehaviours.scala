@@ -83,39 +83,39 @@ trait EndpointBehaviours {
     }
 
     "include absolute continue URL" in {
-      val url = "http://localhost"
-      val (request, result) = doRequestWithContinueUrl(url)
-      assertContinueUrlKept(request, result, url)
+      val continueUrl = "http://localhost"
+      val (request, result) = doRequestWithContinueUrl(continueUrl)
+      assertContinueUrlKept(request, result, continueUrl)
     }
 
     "include relative continue URL" in {
-      val url = "/foo"
-      val (request, result) = doRequestWithContinueUrl(url)
-      assertContinueUrlKept(request, result, url)
+      val continueUrl = "/foo"
+      val (request, result) = doRequestWithContinueUrl(continueUrl)
+      assertContinueUrlKept(request, result, continueUrl)
     }
 
     "include continue URL if it's the absolute www.tax.service.gov.uk continue url" in {
-      val url = "http://www.tax.service.gov.uk/foo/bar?some=true"
-      val (request, result) = doRequestWithContinueUrl(url)
-      assertContinueUrlKept(request, result, url)
+      val continueUrl = "http://www.tax.service.gov.uk/foo/bar?some=true"
+      val (request, result) = doRequestWithContinueUrl(continueUrl)
+      assertContinueUrlKept(request, result, continueUrl)
     }
 
     "include continue URL if it's whitelisted" in {
-      val url = "http://www.foo.com/bar?some=false"
-      val (request, result) = doRequestWithContinueUrl(url)
-      assertContinueUrlKept(request, result, url)
+      val continueUrl = "http://www.foo.com/bar?some=false"
+      val (request, result) = doRequestWithContinueUrl(continueUrl)
+      assertContinueUrlKept(request, result, continueUrl)
     }
 
     "not include a continue URL if it's not whitelisted" in {
-      val url = "http://www.foo.org/bar?some=false"
-      val (request, result) = doRequestWithContinueUrl(url)
-      assertContinueUrlNotKept(request, result, Some(url))
+      val continueUrl = "http://www.foo.org/bar?some=false"
+      val (request, result) = doRequestWithContinueUrl(continueUrl)
+      assertContinueUrlNotKept(request, result, Some(continueUrl))
     }
 
     "not include a continue URL if it contains an invalid character" in {
-      val url = "http://www@foo.com"
-      val (request, result) = doRequestWithContinueUrl(url)
-      assertContinueUrlNotKept(request, result, Some(url))
+      val continueUrl = "http://www@foo.com"
+      val (request, result) = doRequestWithContinueUrl(continueUrl)
+      assertContinueUrlNotKept(request, result, Some(continueUrl))
     }
 
     "not include a continue URL if it's not provided" in {
@@ -126,6 +126,8 @@ trait EndpointBehaviours {
   }
 
   protected def anEndpointTakingContinueUrlAndRedirectingWithIt(action: PlayRequest): Unit = {
+    aPageTakingContinueUrl(action, Seq(), checkRedirectHasContinueUrl, checkRedirectHasNoContinueUrl)
+
     def continueParamRegex(expectedContinueUrl: String) = s"[\\?&]continue=${urlencoded(expectedContinueUrl)}".r
 
     def checkRedirectHasContinueUrl(request: Request[AnyContent], result: Result, expectedContinueUrl: String) = {
@@ -137,30 +139,27 @@ trait EndpointBehaviours {
       status(result) shouldBe 303
       result.header.headers(LOCATION) should not include "continue="
     }
-
-    aPageTakingContinueUrl(action, Seq(), checkRedirectHasContinueUrl, checkRedirectHasNoContinueUrl)
   }
 
   protected def aPageTakingContinueUrlAndContainingItAsALink(action: PlayRequest): Unit = {
+    aPageTakingContinueUrl(action, Seq(), checkResultHasLinkWithContinueUrl, checkResultHasOnlyLinksWithoutContinueUrl)
+
     def checkResultHasLinkWithContinueUrl(request: Request[AnyContent], result: Result, expectedContinueUrl: String) = {
       status(result) shouldBe 200
       bodyOf(result) should include regex(s""".*<a .*href=.*\\?continue=${urlencoded(expectedContinueUrl)}.*</a>""".r)
     }
 
-    def checkResultHasNoLinkWithContinueUrl(request: Request[AnyContent], result: Result, expectedContinueUrl: Option[String]) = {
+    def checkResultHasOnlyLinksWithoutContinueUrl(request: Request[AnyContent], result: Result, expectedContinueUrl: Option[String]) = {
       status(result) shouldBe 200
-      expectedContinueUrl match {
-        case Some(continueUrl) =>
-          bodyOf(result) should not include regex(s""".*<a .*href=.*\\?continue=${urlencoded(continueUrl)}.*</a>""".r)
-        case None =>
-          bodyOf(result) should not include regex(s""".*<a .*href=.*\\?continue=.*</a>""".r)
-      }
+      bodyOf(result) should include regex(s""".*<a .*href=.*\\.*</a>""".r)
+      val encodedUrl = urlencoded(expectedContinueUrl.getOrElse(""))
+      bodyOf(result) should not include regex(s""".*<a .*href=.*\\?continue=$encodedUrl.*</a>""".r)
     }
-
-    aPageTakingContinueUrl(action, Seq(), checkResultHasLinkWithContinueUrl, checkResultHasNoLinkWithContinueUrl)
   }
 
   protected def aPageTakingContinueUrlAndCachingInSessionStore(action: PlayRequest, sessionStoreService: TestSessionStoreService, sessionKeys: => Seq[(String, String)]): Unit = {
+    aPageTakingContinueUrl(action, sessionKeys, checkContinueUrlIsInCache, checkContinueUrlIsNotInCache)
+
     def hc(request: Request[AnyContent]) = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     def checkContinueUrlIsInCache(request: Request[AnyContent], result: Result, expectedContinueUrl: String) = {
@@ -176,7 +175,5 @@ trait EndpointBehaviours {
         sessionStoreService.currentSession(hc(request)).continueUrl shouldBe None
       }
     }
-
-    aPageTakingContinueUrl(action, sessionKeys, checkContinueUrlIsInCache, checkContinueUrlIsNotInCache)
   }
 }

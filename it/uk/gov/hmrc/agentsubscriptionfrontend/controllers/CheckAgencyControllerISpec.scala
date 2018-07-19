@@ -93,40 +93,22 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   }
 
   "submitCheckBusinessType (POST /check-business-type)" when {
+    behave like anAgentAffinityGroupOnlyEndpoint(controller.submitCheckBusinessType(_))
+
     "Sole Trader is chosen" should {
-      "redirect to /check-agency-status" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          .withFormUrlEncodedBody("businessType" -> "soletrader")
-        val result = await(controller.submitCheckBusinessType(request))
-        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus().url
-      }
+      behave like aChoiceRedirectingToCheckAgencyStatus("soletrader")
     }
 
     "Limited Company is chosen" should {
-      "redirect to /check-agency-status" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          .withFormUrlEncodedBody("businessType" -> "limited")
-        val result = await(controller.submitCheckBusinessType(request))
-        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus().url
-      }
+      behave like aChoiceRedirectingToCheckAgencyStatus("limited")
     }
 
     "Partnership is chosen" should {
-      "redirect to /check-agency-status" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          .withFormUrlEncodedBody("businessType" -> "partnership")
-        val result = await(controller.submitCheckBusinessType(request))
-        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus().url
-      }
+      behave like aChoiceRedirectingToCheckAgencyStatus("partnership")
     }
 
     "LLP is chosen" should {
-      "redirect to /check-agency-status" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          .withFormUrlEncodedBody("businessType" -> "llp")
-        val result = await(controller.submitCheckBusinessType(request))
-        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus().url
-      }
+      behave like aChoiceRedirectingToCheckAgencyStatus("llp")
     }
 
     "choice is missing" should {
@@ -137,7 +119,14 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       }
     }
 
-    behave like anAgentAffinityGroupOnlyEndpoint(controller.submitCheckBusinessType(_))
+    def aChoiceRedirectingToCheckAgencyStatus(businessTypeValue: String) = {
+      "redirect to /check-agency-status" in {
+        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          .withFormUrlEncodedBody("businessType" -> businessTypeValue)
+        val result = await(controller.submitCheckBusinessType(request))
+        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus().url
+      }
+    }
   }
 
   "showCheckAgencyStatus" should {

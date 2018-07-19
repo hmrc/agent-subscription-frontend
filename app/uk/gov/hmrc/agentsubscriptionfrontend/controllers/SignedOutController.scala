@@ -54,8 +54,9 @@ class SignedOutController @Inject()(
 
   def signOutWithContinueUrl = Action.async { implicit request =>
     sessionStoreService.fetchContinueUrl.map { maybeContinueUrl =>
-      val signOutUrl = addParamsToUrl(appConfig.companyAuthSignInUrl, "continue" -> maybeContinueUrl.map(_.url))
-      SeeOther(signOutUrl).withNewSession
+      val signOutUrlWithContinueUrl =
+        addParamsToUrl(appConfig.companyAuthSignInUrl, "continue" -> maybeContinueUrl.map(_.url))
+      SeeOther(signOutUrlWithContinueUrl).withNewSession
     }
   }
 

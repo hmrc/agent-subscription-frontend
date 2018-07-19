@@ -146,10 +146,8 @@ class SubscriptionController @Inject()(
     implicit hc: HeaderCarrier): Future[Either[SubscriptionReturnedHttpError, (Arn, String)]] = {
     val subscriptionDetails = mapper(details, address)
     subscriptionService.subscribeAgencyToMtd(subscriptionDetails) map {
-      case Right(arn) => {
-        Right(arn, subscriptionDetails.name)
-      }
-      case Left(x) => Left(SubscriptionReturnedHttpError(x))
+      case Right(arn) => Right((arn, subscriptionDetails.name))
+      case Left(x)    => Left(SubscriptionReturnedHttpError(x))
     }
   }
 

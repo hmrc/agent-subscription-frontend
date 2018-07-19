@@ -85,9 +85,10 @@ abstract class BaseISpec
     status(result) shouldBe OK
     contentType(result) shouldBe Some("text/html")
     charset(result) shouldBe Some("utf-8")
+    val resultBody = bodyOf(result)
     expectedSubstrings.foreach { expectedSubstring =>
       expectedSubstring.trim should not be ""
-      bodyOf(result) should include(expectedSubstring)
+      resultBody should include(expectedSubstring)
     }
   }
 
