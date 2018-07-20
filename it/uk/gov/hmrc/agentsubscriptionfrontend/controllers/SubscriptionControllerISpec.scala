@@ -110,7 +110,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val result = await(controller.showSubscriptionComplete(request))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showCheckAgencyStatus().url)
+      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showCheckBusinessType().url)
     }
 
     "tolerate a possible short delay in the new enrolment becoming visible in auth" when {
@@ -270,7 +270,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       }
     }
 
-    "redirect back to check-agency-status" when {
+    "redirect back to check-business-type" when {
       "subscription form has errors and current session is missing" in {
         AgentSubscriptionStub.subscriptionWillSucceed(utr, subscriptionRequest())
 
@@ -280,7 +280,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
         val result = await(controller.submitInitialDetails(request))
         status(result) shouldBe 303
-        redirectLocation(result).head shouldBe routes.CheckAgencyController.showCheckAgencyStatus().url
+        redirectLocation(result).head shouldBe routes.CheckAgencyController.showCheckBusinessType().url
         noMetricExpectedAtThisPoint()
       }
     }
@@ -544,14 +544,14 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
     }
 
-    "redirect to check-agency-status if there is no valid session" in {
+    "redirect to check-business-type if there is no valid session" in {
       implicit val request = desAddressForm()
       sessionStoreService.currentSession.initialDetails = None
 
       val result = await(controller.submitModifiedAddress()(request))
 
       status(result) shouldBe 303
-      redirectLocation(result).head shouldBe routes.CheckAgencyController.showCheckAgencyStatus().url
+      redirectLocation(result).head shouldBe routes.CheckAgencyController.showCheckBusinessType().url
       noMetricExpectedAtThisPoint()
     }
 
