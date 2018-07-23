@@ -75,7 +75,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       checkHtmlResultWithBodyText(result, s"""value="${utr.value}"""", s"""value="$knownFactsPostcode"""")
     }
 
-    "redirect to the Check Agency Status page if there is no KnownFactsResult in session because the user has returned to a bookmark" in {
+    "redirect to the Check Business Type page if there is no KnownFactsResult in session because the user has returned to a bookmark" in {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       val result = await(controller.showInitialDetails(request))
@@ -109,8 +109,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       val result = await(controller.showSubscriptionComplete(request))
 
-      status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showCheckBusinessType().url)
+      resultShouldBeSessionDataMissing(result)
     }
 
     "tolerate a possible short delay in the new enrolment becoming visible in auth" when {
@@ -279,8 +278,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         implicit val request = subscriptionDetailsRequest("name", Seq("name" -> "InvalidAgencyName!@"))
 
         val result = await(controller.submitInitialDetails(request))
-        status(result) shouldBe 303
-        redirectLocation(result).head shouldBe routes.CheckAgencyController.showCheckBusinessType().url
+        resultShouldBeSessionDataMissing(result)
         noMetricExpectedAtThisPoint()
       }
     }
@@ -519,7 +517,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       }
     }
 
-    "redirect to the Check Agency Status page if there is no initial details in session because the user has returned to a bookmark" in {
+    "redirect to the Check Business Type page if there is no initial details in session because the user has returned to a bookmark" in {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.knownFactsResult = Some(myAgencyKnownFactsResult)
       sessionStoreService.currentSession.initialDetails = None
@@ -550,8 +548,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       val result = await(controller.submitModifiedAddress()(request))
 
-      status(result) shouldBe 303
-      redirectLocation(result).head shouldBe routes.CheckAgencyController.showCheckBusinessType().url
+      resultShouldBeSessionDataMissing(result)
       noMetricExpectedAtThisPoint()
     }
 

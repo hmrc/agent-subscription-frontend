@@ -39,11 +39,8 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   val postcode = "AA11AA"
   val registrationName = "My Agency"
 
-  val testCasesBusinessTypeIdentifierInput: Seq[Tuple2[String, Boolean]] = CheckAgencyController.validBusinessTypes
-    .map(bussTypeIdentifier => (bussTypeIdentifier, true)) :+ ("unCateredBusinessTypeIdentifier", false)
-
-
   def agentAssuranceRun: Boolean
+
   def agentAssurancePayeCheck: Boolean
 
   private lazy val redirectUrl: String = "http://localhost:9401/agent-services-account"
@@ -100,8 +97,14 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   "submitCheckBusinessType (POST /check-business-type)" when {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.submitCheckBusinessType(_))
 
-    testCasesBusinessTypeIdentifierInput.foreach { e =>
-      aChoiceRedirectingToCheckAgencyStatus(e._1, e._2)
+    CheckAgencyController.validBusinessTypes.foreach { validBusinessTypeIdentifier =>
+      s"redirect to /check-agency-status when valid businessTypeIdentifier: $validBusinessTypeIdentifier" in {
+        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          .withFormUrlEncodedBody("businessType" -> validBusinessTypeIdentifier)
+
+        val result = await(controller.submitCheckBusinessType(request))
+        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus(Some(validBusinessTypeIdentifier)).url
+      }
     }
 
     "choice is missing" should {
@@ -112,30 +115,40 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       }
     }
 
-    def aChoiceRedirectingToCheckAgencyStatus(businessTypeValue: String, isValidBusinessTypeIdentifier: Boolean) = {
-      s"redirect to /check-agency-status when valid else throw BadRequestException when businessTypeIdentifier: $businessTypeValue" in {
-        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          .withFormUrlEncodedBody("businessType" -> businessTypeValue)
+    s"400 Exception ,when businessTypeIdentifier invalid" in {
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("businessType" -> "unCateredBusinessTypeIdentifier")
 
-        isValidBusinessTypeIdentifier match {
-          case true => {
-            val result = await(controller.submitCheckBusinessType(request))
-            result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus(Some(businessTypeValue)).url
-          }
-          case false => an[BadRequestException] shouldBe thrownBy(await(controller.submitCheckBusinessType(request)))
-        }
-      }
+      an[BadRequestException] shouldBe thrownBy(await(controller.submitCheckBusinessType(request)))
     }
   }
 
   "showCheckAgencyStatus" should {
     val playRequestValidBusinessTypeIdentifier =
-      controller.showCheckAgencyStatus(Some(testCasesBusinessTypeIdentifierInput.head._1))
+      controller.showCheckAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))
 
     behave like anAgentAffinityGroupOnlyEndpoint(playRequestValidBusinessTypeIdentifier(_))
 
     behave like aPageWithFeedbackLinks(playRequestValidBusinessTypeIdentifier(_),
       authenticatedAs(subscribingCleanAgentWithoutEnrolments))
+
+    "showCheckAgencyStatus cache continue url WITH NO business Identifier Input" should {
+      //withMaybeContinueUrlCached because, Currently still needed as a user might be arriving from: trusts registration flow or gov.uk guidence page, make sure this is not the case anymore before removing
+      behave like aPageTakingContinueUrlAndCachingInSessionStore(controller.showCheckAgencyStatus(None)(_),
+        sessionStoreService, userIsAuthenticated(subscribingCleanAgentWithoutEnrolments), expectedStatusCode = 303)
+    }
+
+    "showCheckAgencyStatus cache continue url WITH INVALID business Identifier Input" should {
+      //withMaybeContinueUrlCached because, Currently still needed as a user might be arriving from: trusts registration flow or gov.uk guidence page, make sure this is not the case anymore before removing
+      behave like aPageTakingContinueUrlAndCachingInSessionStore(controller.showCheckAgencyStatus(Some("invalidBusinessTypeIdentifier"))(_),
+        sessionStoreService, userIsAuthenticated(subscribingCleanAgentWithoutEnrolments), expectedStatusCode = 303)
+    }
+
+    "showCheckAgencyStatus cache continue url WITH valid business type identifier Input" should {
+      //withMaybeContinueUrlCached because, Currently still needed as a user might be arriving from: trusts registration flow or gov.uk guidence page, make sure this is not the case anymore before removing
+      behave like aPageTakingContinueUrlAndCachingInSessionStore(playRequestValidBusinessTypeIdentifier(_),
+        sessionStoreService, userIsAuthenticated(subscribingCleanAgentWithoutEnrolments))
+    }
 
     "display the check agency status page if the current user is logged in and has affinity group = Agent" in {
       val result = await(playRequestValidBusinessTypeIdentifier(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
@@ -152,37 +165,40 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       metricShouldExistsAndBeenUpdated("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
     }
 
-    testCasesBusinessTypeIdentifierInput.foreach { e =>
-      submitBusinessTypeIdentifier(e._1, e._2)
-    }
-    def submitBusinessTypeIdentifier(businessTypeIdentifier: String, isValidBusinessType: Boolean): Unit = {
-      s"if valid businessTypeIdentifier show page else redirect to obtain identifier again," +
-        s" test input is valid: $isValidBusinessType while using identifier: $businessTypeIdentifier" in {
-        val result = await(controller.showCheckAgencyStatus(Some(businessTypeIdentifier))(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
+    CheckAgencyController.validBusinessTypes.foreach { validBusinessTypeIdentifier =>
 
-        isValidBusinessType match {
-          case true => {
-            status(result) shouldBe 200
-            val bodyString = bodyOf(result)
-            bodyString should include(htmlEscapedMessage("checkAgencyStatus.title"))
-            bodyString should include(htmlEscapedMessage(s"checkAgencyStatus.label.utr.$businessTypeIdentifier"))
-          }
-          case false => redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showCheckBusinessType.url)
-        }
+      s"show check Agency Status page for valid businessTypeIdentifier: $validBusinessTypeIdentifier" in {
+        val result = await(controller.showCheckAgencyStatus(Some(validBusinessTypeIdentifier))(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
+        status(result) shouldBe 200
+        val bodyString = bodyOf(result)
+        bodyString should include(htmlEscapedMessage("checkAgencyStatus.title"))
+        bodyString should include(htmlEscapedMessage(s"checkAgencyStatus.label.utr.$validBusinessTypeIdentifier"))
       }
+    }
+
+    s"redirect to obtain identifier again, when Invalid businessTypeIdentifier" in {
+      val result = await(controller.showCheckAgencyStatus(Some("unCateredBusinessTypeIdentifier"))(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
+
+      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showCheckBusinessType.url)
+    }
+
+    s"redirect to obtain identifier again, empty businessTypeIdentifier" in {
+      val result = await(controller.showCheckAgencyStatus(None)(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
+
+      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showCheckBusinessType.url)
     }
   }
 
   "checkAgencyStatus" should {
 
     behave like anAgentAffinityGroupOnlyEndpoint(request =>
-      controller.checkAgencyStatus(Some(testCasesBusinessTypeIdentifierInput.head._1))(request))
+      controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request))
 
     "return a 200 response to redisplay the form with an error message for invalidly-formatted UTR" in {
       val invalidUtr = "0123456"
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> invalidUtr, "postcode" -> validPostcode)
-      val result = await(controller.checkAgencyStatus(Some(testCasesBusinessTypeIdentifierInput.head._1))(request))
+      val result = await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request))
 
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
@@ -197,7 +213,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val invalidUtr = "2000000001" // Modulus11Check validation fails in this case
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> invalidUtr, "postcode" -> validPostcode)
-      val result = await(controller.checkAgencyStatus(Some(testCasesBusinessTypeIdentifierInput.head._1))(request))
+      val result = await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request))
 
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
@@ -211,7 +227,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     "return a 200 response to redisplay the form with an error message for invalidly-formatted postcode" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> invalidPostcode)
-      val result = await(controller.checkAgencyStatus(Some(testCasesBusinessTypeIdentifierInput.head._1))(request))
+      val result = await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request))
 
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
@@ -225,12 +241,12 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
     "return a 200 response to redisplay the form with an error message for empty form parameters" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> "", "postcode" -> "")
-      val result = await(controller.checkAgencyStatus(Some(testCasesBusinessTypeIdentifierInput.head._1))(request))
+      val result = await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request))
 
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
-      responseBody should include (htmlEscapedMessage("checkAgencyStatus.title"))
-      responseBody should include (htmlEscapedMessage("error.utr.blank"))
+      responseBody should include(htmlEscapedMessage("checkAgencyStatus.title"))
+      responseBody should include(htmlEscapedMessage("error.utr.blank"))
       responseBody should include("You must enter a postcode")
       noMetricExpectedAtThisPoint()
     }
@@ -239,7 +255,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       withNonMatchingUtrAndPostcode(validUtr, validPostcode)
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
-      val result = await(controller.checkAgencyStatus(Some(testCasesBusinessTypeIdentifierInput.head._1))(request))
+      val result = await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showNoAgencyFound().url)
@@ -251,7 +267,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val e = intercept[IllegalStateException] {
-        await(controller.checkAgencyStatus(Some(testCasesBusinessTypeIdentifierInput.head._1))(request))
+        await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request))
       }
       e.getMessage should include(validUtr.value)
     }
@@ -377,7 +393,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       metricShouldExistsAndBeenUpdated("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
     }
 
-    "redirect to the Check Agency Status page if there is no KnownFactsResult in session because the user has returned to a bookmark" in {
+    "redirect to the Check Business Type  page if there is no KnownFactsResult in session because the user has returned to a bookmark" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
       val result = await(controller.showConfirmYourAgency(request))
@@ -502,7 +518,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
           isSubscribedToAgentServices = false))
 
       val result = await(controller.invasiveTaxPayerOption(request
-            .withFormUrlEncodedBody(("confirmResponse", "true"), ("confirmResponse-true-hidden-input", "AA123456A"))))
+        .withFormUrlEncodedBody(("confirmResponse", "true"), ("confirmResponse-true-hidden-input", "AA123456A"))))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.invasiveCheckStart().url)
@@ -635,39 +651,39 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   }
 
   def verifyAgentAssuranceAuditRequestSent(
-    passPayeAgentAssuranceCheck: Option[Boolean],
-    passSaAgentAssuranceCheck: Option[Boolean]): Unit = {
+                                            passPayeAgentAssuranceCheck: Option[Boolean],
+                                            passSaAgentAssuranceCheck: Option[Boolean]): Unit = {
     val optional = Seq(
       passPayeAgentAssuranceCheck.map("passPayeAgentAssuranceCheck" -> _.toString),
-      passSaAgentAssuranceCheck.map("passSaAgentAssuranceCheck"     -> _.toString)).flatten
+      passSaAgentAssuranceCheck.map("passSaAgentAssuranceCheck" -> _.toString)).flatten
 
     verifyAuditRequestSent(
       1,
       AgentSubscriptionFrontendEvent.AgentAssurance,
       detail = Map(
-        "utr"               -> validUtr.value,
-        "postcode"          -> validPostcode,
+        "utr" -> validUtr.value,
+        "postcode" -> validPostcode,
         "isEnrolledSAAgent" -> "true",
-        "saAgentRef"        -> "FOO1234",
+        "saAgentRef" -> "FOO1234",
         //TODO "refuseToDealWith" -> ?,
         "isEnrolledPAYEAgent" -> "true",
-        "payeAgentRef"        -> "HZ1234",
-        "authProviderId"      -> "12345-credId",
-        "authProviderType"    -> "GovernmentGateway"
+        "payeAgentRef" -> "HZ1234",
+        "authProviderId" -> "12345-credId",
+        "authProviderType" -> "GovernmentGateway"
       ) ++ optional,
       tags = Map("transactionName" -> "agent-assurance", "path" -> "/")
     )
   }
 
   def verifyAgentAssuranceAuditRequestSentWithClientIdentifier(
-    identifier: TaxIdentifier,
-    passCESAAgentAssuranceCheck: Boolean,
-    saAgentRef: String,
-    aAssurancePayeCheck: Boolean): Unit = {
+                                                                identifier: TaxIdentifier,
+                                                                passCESAAgentAssuranceCheck: Boolean,
+                                                                saAgentRef: String,
+                                                                aAssurancePayeCheck: Boolean): Unit = {
 
     val clientIdentifier = identifier match {
-      case nino @ Nino(_) => ("userEnteredNino" -> nino.value)
-      case utr @ Utr(_)   => ("userEnteredUtr"  -> utr.value)
+      case nino@Nino(_) => ("userEnteredNino" -> nino.value)
+      case utr@Utr(_) => ("userEnteredUtr" -> utr.value)
     }
     val payeAudit = if (aAssurancePayeCheck) Seq("passPayeAgentAssuranceCheck" -> "false") else Seq.empty
 
@@ -675,15 +691,15 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       1,
       AgentSubscriptionFrontendEvent.AgentAssurance,
       detail = Map(
-        "utr"                         -> validUtr.value,
-        "postcode"                    -> validPostcode,
-        "isEnrolledSAAgent"           -> "false",
-        "passSaAgentAssuranceCheck"   -> "false",
-        "isEnrolledPAYEAgent"         -> "false",
+        "utr" -> validUtr.value,
+        "postcode" -> validPostcode,
+        "isEnrolledSAAgent" -> "false",
+        "passSaAgentAssuranceCheck" -> "false",
+        "isEnrolledPAYEAgent" -> "false",
         "passCESAAgentAssuranceCheck" -> passCESAAgentAssuranceCheck.toString,
-        "authProviderId"              -> "12345-credId",
-        "authProviderType"            -> "GovernmentGateway",
-        "userEnteredSaAgentRef"       -> saAgentRef
+        "authProviderId" -> "12345-credId",
+        "authProviderType" -> "GovernmentGateway",
+        "userEnteredSaAgentRef" -> saAgentRef
       ) + clientIdentifier ++ payeAudit,
       tags = Map("transactionName" -> "agent-assurance", "path" -> "/")
     )
