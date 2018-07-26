@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
 import play.api.http.Status
-import uk.gov.hmrc.agentmtdidentifiers.model.Arn
+import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionDetails
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -28,8 +28,29 @@ import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+case class SubscriptionReturnedHttpError(httpStatusCode: Int) extends Product with Serializable
+
+object SubscriptionState extends Enumeration {
+  type SubscriptionState = Value
+  val BrandNewSubscription, IsOnlySubscribedInETMP, IsSubscribedToAgentServices, NoRegistrationFound = Value
+}
+
+case class SubscriptionProcess(state: SubscriptionState.Value, details: Option[Registration])
+
 @Singleton
 class SubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector) {
+
+  import SubscriptionDetails._
+
+  def subscribe(details: InitialDetails, address: DesAddress)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext): Future[Either[SubscriptionReturnedHttpError, (Arn, String)]] = {
+    val subscriptionDetails = mapper(details, address)
+    subscribeAgencyToMtd(subscriptionDetails) map {
+      case Right(arn) => Right((arn, subscriptionDetails.name))
+      case Left(x)    => Left(SubscriptionReturnedHttpError(x))
+    }
+  }
 
   def subscribeAgencyToMtd(subscriptionDetails: SubscriptionDetails)(
     implicit hc: HeaderCarrier,
@@ -61,4 +82,50 @@ class SubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptio
       case e => throw e
     }
   }
+
+  def completePartialSubscription(details: CompletePartialSubscriptionBody)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext): Future[(Boolean, Option[Arn])] =
+    for {
+      subscriptionProgress <- getSubscriptionStatus(details.utr, details.knownFacts.postcode) //FixMe APB-2805 this check should happen previously and can be stored in the session
+      isPartiallySubscribed = subscriptionProgress.state == SubscriptionState.IsOnlySubscribedInETMP
+      (wasPartiallySubscribed, optSucceededAllocatingArn) <- isPartiallySubscribed match {
+                                                              case true =>
+                                                                agentSubscriptionConnector
+                                                                  .completePartialSubscription(details)
+                                                                  .map(arn => (true, Some.apply(arn)))
+                                                                  .recover {
+                                                                    case e: Upstream4xxResponse
+                                                                        if Seq(Status.FORBIDDEN, Status.CONFLICT) contains e.upstreamResponseCode =>
+                                                                      (true, None)
+                                                                    case e => throw e
+                                                                  }
+                                                              case false =>
+                                                                Future successful (false, None)
+                                                            }
+    } yield (wasPartiallySubscribed, optSucceededAllocatingArn)
+
+  def getSubscriptionStatus(utr: Utr, postcode: String)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext): Future[SubscriptionProcess] =
+    agentSubscriptionConnector.getRegistration(utr, postcode).map {
+
+      case Some(reg) if reg.isSubscribedToAgentServices && reg.isSubscribedToETMP =>
+        SubscriptionProcess(SubscriptionState.IsSubscribedToAgentServices, Some(reg))
+
+      case Some(Registration(None, _, _)) =>
+        throw new IllegalStateException(s"The agency with UTR ${utr.value} has a missing organisation/individual name.")
+
+      case Some(reg) if !reg.isSubscribedToAgentServices && reg.isSubscribedToETMP =>
+        SubscriptionProcess(SubscriptionState.IsOnlySubscribedInETMP, Some(reg))
+
+      case Some(reg) if !reg.isSubscribedToAgentServices && !reg.isSubscribedToETMP =>
+        SubscriptionProcess(SubscriptionState.BrandNewSubscription, Some(reg))
+
+      case Some(reg) =>
+        throw new IllegalStateException(
+          s"UnPractical state in subscriptionProcess for registration details: ${reg.toString}")
+
+      case None => SubscriptionProcess(SubscriptionState.NoRegistrationFound, None)
+    }
 }

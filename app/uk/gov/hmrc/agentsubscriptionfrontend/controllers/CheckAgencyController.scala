@@ -31,7 +31,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector, AgentSubscriptionConnector}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AssuranceResults._
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{AssuranceService, SessionStoreService}
+import uk.gov.hmrc.agentsubscriptionfrontend.service._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{invasive_check_start, invasive_input_option}
@@ -40,6 +40,7 @@ import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, InternalServerException}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import play.api.data.Forms._
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
 
 import scala.concurrent.Future
 
@@ -72,6 +73,7 @@ class CheckAgencyController @Inject()(
   override val messagesApi: MessagesApi,
   override val authConnector: AuthConnector,
   val agentSubscriptionConnector: AgentSubscriptionConnector,
+  val subscriptionService: SubscriptionService,
   val sessionStoreService: SessionStoreService,
   val continueUrlActions: ContinueUrlActions,
   auditService: AuditService,
@@ -184,18 +186,35 @@ class CheckAgencyController @Inject()(
         }
       }
 
-    agentSubscriptionConnector.getRegistration(knownFacts.utr, knownFacts.postcode) flatMap {
-      case Some(Registration(Some(taxpayerName), isSubscribedToAgentServices)) if !isSubscribedToAgentServices =>
-        processCheckAgencyStatus(knownFacts.utr, taxpayerName, isSubscribedToAgentServices)
-      case Some(Registration(_, isSubscribedToAgentServices)) if isSubscribedToAgentServices =>
+    subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode).flatMap {
+      case SubscriptionProcess(SubscriptionState.BrandNewSubscription, Some(registrationDetails)) =>
+        processCheckAgencyStatus(
+          knownFacts.utr,
+          registrationDetails.taxpayerName.get,
+          registrationDetails.isSubscribedToAgentServices)
+      case SubscriptionProcess(SubscriptionState.IsOnlySubscribedInETMP, Some(registrationDetails)) =>
+        agent match {
+          case hasNonEmptyEnrolments(_) =>
+            Future successful Redirect(routes.CheckAgencyController.showHasOtherEnrolments())
+          case _ => {
+            subscriptionService
+              .completePartialSubscription(
+                CompletePartialSubscriptionBody(knownFacts.utr, SubscriptionRequestKnownFacts(knownFacts.postcode)))
+              .map {
+                case (_, Some(arn)) =>
+                  Redirect(routes.SubscriptionController.showSubscriptionComplete()).flashing("arn" -> arn.value)
+                case _ => throw new InternalServerException("partialSubscription fix executed, but failed to complete")
+              }
+          }
+        }
+      case SubscriptionProcess(SubscriptionState.IsSubscribedToAgentServices, _) => {
         mark("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
         Future successful Redirect(routes.CheckAgencyController.showAlreadySubscribed())
-      case Some(_) =>
-        throw new IllegalStateException(
-          s"The agency with UTR ${knownFacts.utr} has a missing organisation/individual name.")
-      case None =>
+      }
+      case _ => {
         mark("Count-Subscription-NoAgencyFound")
         Future successful Redirect(routes.CheckAgencyController.showNoAgencyFound())
+      }
     }
   }
 

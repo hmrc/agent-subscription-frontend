@@ -18,14 +18,17 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.Inject
+
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{CompletePartialSubscriptionBody, SubscriptionRequestKnownFacts}
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
-import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
@@ -37,7 +40,8 @@ class StartController @Inject()(
   val continueUrlActions: ContinueUrlActions,
   val metrics: Metrics,
   override val appConfig: AppConfig,
-  sessionStoreService: SessionStoreService)(implicit val aConfig: AppConfig)
+  sessionStoreService: SessionStoreService,
+  subscriptionService: SubscriptionService)(implicit val aConfig: AppConfig)
     extends FrontendController with I18nSupport with AuthActions {
 
   import continueUrlActions._
@@ -62,7 +66,7 @@ class StartController @Inject()(
   }
 
   def returnAfterGGCredsCreated(id: Option[String] = None): Action[AnyContent] = Action.async { implicit request =>
-    withMaybeContinueUrlCached {
+    withMaybeContinueUrlCached { //TODO APB-2805 subscriptionService.completePartialSubscription checks whether details are partially subscribed, we can store additionally here
       id match {
         case Some(knownFactsId) =>
           for {
@@ -72,8 +76,24 @@ class StartController @Inject()(
                   case Some(knownFacts) => sessionStoreService.cacheKnownFactsResult(knownFacts)
                   case None             => Future.successful(())
                 }
+            (wasPartiallySubscribed, optAllocatedArn) <- knownFactsResultOpt match {
+                                                          case Some(knownFact) =>
+                                                            subscriptionService.completePartialSubscription(
+                                                              CompletePartialSubscriptionBody(
+                                                                knownFact.utr,
+                                                                SubscriptionRequestKnownFacts(knownFact.postcode)))
+                                                          case None => Future successful (false, None)
+                                                        }
           } yield {
             knownFactsResultOpt match {
+              case Some(_) if wasPartiallySubscribed => {
+                val obtainedArn = optAllocatedArn
+                  .getOrElse(
+                    throw new InternalServerException("partialSubscription fix executed, but failed to obtain arn"))
+                  .value
+                Redirect(routes.SubscriptionController.showSubscriptionComplete())
+                  .flashing("arn" -> obtainedArn)
+              }
               case Some(_) => Redirect(routes.SubscriptionController.showInitialDetails())
               case None    => Redirect(routes.CheckAgencyController.showCheckBusinessType())
             }
