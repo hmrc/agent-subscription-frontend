@@ -79,20 +79,17 @@ class StartController @Inject()(
             _                   <- sessionStoreService.cacheKnownFactsResult(knownFacts)
             subscriptionProcess <- subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode)
             isPartiallySubscribed = subscriptionProcess.state == SubscriptionState.IsOnlySubscribedInETMP
-            continuedSubscription <- if (isPartiallySubscribed)
-                                      subscriptionService
-                                        .completePartialSubscription(knownFacts.utr, knownFacts.postcode)
-                                    else Future successful None
-          } yield {
-            continuedSubscription match {
-              case Some(arnAfterPartialSubscriptionFix) => {
-                mark("Count-Subscription-PartialSubscriptionCompleted")
-                Redirect(routes.SubscriptionController.showSubscriptionComplete())
-                  .flashing("arn" -> arnAfterPartialSubscriptionFix.value)
-              }
-              case None => Redirect(routes.SubscriptionController.showInitialDetails())
-            }
-          }
+            continuedSubscriptionResponse <- if (isPartiallySubscribed)
+                                              subscriptionService
+                                                .completePartialSubscription(knownFacts.utr, knownFacts.postcode)
+                                                .map { arn =>
+                                                  mark("Count-Subscription-PartialSubscriptionCompleted")
+                                                  Redirect(routes.SubscriptionController.showSubscriptionComplete())
+                                                    .flashing("arn" -> arn.value)
+                                                } else
+                                              Future successful Redirect(
+                                                routes.SubscriptionController.showInitialDetails())
+          } yield continuedSubscriptionResponse
         case None => Future successful Redirect(routes.CheckAgencyController.showCheckBusinessType())
       }
       decideOnSubscription

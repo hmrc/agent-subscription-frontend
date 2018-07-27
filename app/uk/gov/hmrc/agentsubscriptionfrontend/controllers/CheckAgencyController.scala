@@ -199,13 +199,9 @@ class CheckAgencyController @Inject()(
           case _ => {
             subscriptionService
               .completePartialSubscription(knownFacts.utr, knownFacts.postcode)
-              .map {
-                case Some(arn) => {
-                  mark("Count-Subscription-PartialSubscriptionCompleted")
-                  Redirect(routes.SubscriptionController.showSubscriptionComplete()).flashing("arn" -> arn.value)
-                }
-                case None =>
-                  throw new InternalServerException("partialSubscription fix executed, but failed to complete")
+              .map { arn =>
+                mark("Count-Subscription-PartialSubscriptionCompleted")
+                Redirect(routes.SubscriptionController.showSubscriptionComplete()).flashing("arn" -> arn.value)
               }
           }
         }

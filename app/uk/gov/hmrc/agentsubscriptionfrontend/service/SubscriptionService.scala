@@ -85,15 +85,13 @@ class SubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptio
 
   def completePartialSubscription(utr: Utr, postCode: String)(
     implicit hc: HeaderCarrier,
-    ec: ExecutionContext): Future[Option[Arn]] =
+    ec: ExecutionContext): Future[Arn] =
     agentSubscriptionConnector
       .completePartialSubscription(CompletePartialSubscriptionBody(utr, SubscriptionRequestKnownFacts(postCode)))
-      .map(arn => Some(arn))
       .recover {
         case e: Upstream4xxResponse => {
           if (Seq(Status.FORBIDDEN, Status.CONFLICT) contains e.upstreamResponseCode) {
-            Logger.warn(
-              s"Unexpected statuses in code, even though eligibality check for partialSubscriptionFix should have happened, with status: ${e.upstreamResponseCode}")
+            Logger.warn(s"Eligibility checks failed for partialSubscriptionFix, with status: ${e.upstreamResponseCode}")
           }
           throw e
         }
