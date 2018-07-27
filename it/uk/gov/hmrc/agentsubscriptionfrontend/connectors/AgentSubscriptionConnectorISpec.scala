@@ -165,6 +165,18 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
     }
 
+    "throw BadRequestException if BadRequest" in {
+      givenCleanMetricRegistry()
+      AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 400)
+
+      val e = intercept[BadRequestException] {
+        await(connector.completePartialSubscription(partialSubscriptionRequest))
+      }
+
+      e.responseCode shouldBe 400
+      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
+    }
+
     "throw Upstream5xxResponse if postcodes don't match" in {
       givenCleanMetricRegistry()
       AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 500)

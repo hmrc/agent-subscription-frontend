@@ -32,7 +32,7 @@ case class SubscriptionReturnedHttpError(httpStatusCode: Int) extends Product wi
 
 object SubscriptionState extends Enumeration {
   type SubscriptionState = Value
-  val BrandNewSubscription, IsOnlySubscribedInETMP, IsSubscribedToAgentServices, NoRegistrationFound = Value
+  val BrandNewSubscription, IsOnlySubscribedInETMP, IsSubscribedToAgentServices, NoSubscriptionInEtmp = Value
 }
 
 case class SubscriptionProcess(state: SubscriptionState.Value, details: Option[Registration])
@@ -83,34 +83,28 @@ class SubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptio
     }
   }
 
-  def completePartialSubscription(details: CompletePartialSubscriptionBody)(
+  def completePartialSubscription(utr: Utr, postCode: String)(
     implicit hc: HeaderCarrier,
-    ec: ExecutionContext): Future[(Boolean, Option[Arn])] =
-    for {
-      subscriptionProgress <- getSubscriptionStatus(details.utr, details.knownFacts.postcode) //FixMe APB-2805 this check should happen previously and can be stored in the session
-      isPartiallySubscribed = subscriptionProgress.state == SubscriptionState.IsOnlySubscribedInETMP
-      (wasPartiallySubscribed, optSucceededAllocatingArn) <- isPartiallySubscribed match {
-                                                              case true =>
-                                                                agentSubscriptionConnector
-                                                                  .completePartialSubscription(details)
-                                                                  .map(arn => (true, Some.apply(arn)))
-                                                                  .recover {
-                                                                    case e: Upstream4xxResponse
-                                                                        if Seq(Status.FORBIDDEN, Status.CONFLICT) contains e.upstreamResponseCode =>
-                                                                      (true, None)
-                                                                    case e => throw e
-                                                                  }
-                                                              case false =>
-                                                                Future successful (false, None)
-                                                            }
-    } yield (wasPartiallySubscribed, optSucceededAllocatingArn)
+    ec: ExecutionContext): Future[Option[Arn]] =
+    agentSubscriptionConnector
+      .completePartialSubscription(CompletePartialSubscriptionBody(utr, SubscriptionRequestKnownFacts(postCode)))
+      .map(arn => Some(arn))
+      .recover {
+        case e: Upstream4xxResponse => {
+          if (Seq(Status.FORBIDDEN, Status.CONFLICT) contains e.upstreamResponseCode) {
+            Logger.warn(
+              s"Unexpected statuses in code, even though eligibality check for partialSubscriptionFix should have happened, with status: ${e.upstreamResponseCode}")
+          }
+          throw e
+        }
+      }
 
   def getSubscriptionStatus(utr: Utr, postcode: String)(
     implicit hc: HeaderCarrier,
     ec: ExecutionContext): Future[SubscriptionProcess] =
     agentSubscriptionConnector.getRegistration(utr, postcode).map {
 
-      case Some(reg) if reg.isSubscribedToAgentServices && reg.isSubscribedToETMP =>
+      case Some(reg) if reg.isSubscribedToAgentServices =>
         SubscriptionProcess(SubscriptionState.IsSubscribedToAgentServices, Some(reg))
 
       case Some(Registration(None, _, _)) =>
@@ -122,10 +116,6 @@ class SubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptio
       case Some(reg) if !reg.isSubscribedToAgentServices && !reg.isSubscribedToETMP =>
         SubscriptionProcess(SubscriptionState.BrandNewSubscription, Some(reg))
 
-      case Some(reg) =>
-        throw new IllegalStateException(
-          s"UnPractical state in subscriptionProcess for registration details: ${reg.toString}")
-
-      case None => SubscriptionProcess(SubscriptionState.NoRegistrationFound, None)
+      case None => SubscriptionProcess(SubscriptionState.NoSubscriptionInEtmp, None)
     }
 }

@@ -14,7 +14,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{individual, subscribingAgentEnrolledForHMRCASAGENT}
 import uk.gov.hmrc.play.binders.ContinueUrl
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub
-import uk.gov.hmrc.http.Upstream5xxResponse
+import uk.gov.hmrc.http.{Upstream4xxResponse, Upstream5xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -149,17 +149,33 @@ class StartControllerISpec extends BaseISpec {
       redirectLocation(result).head should include(routes.SubscriptionController.showInitialDetails().url)
     }
 
-    "throw IllegalStateException, somehow user isSubscribedToAgentServices but NOT isSubscribedToETMP" in {
+    "throw Upstream4xxResponse, 403 when executing partialSubscriptionFix" in {
       val knownFactsResult =
         KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
       val persistedId = await(repo.create(knownFactsResult))
 
-      AgentSubscriptionStub.withMatchingUtrAndPostcode(knownFactsResult.utr, knownFactsResult.postcode, isSubscribedToAgentServices = true, isSubscribedToETMP = false)
+      AgentSubscriptionStub.withMatchingUtrAndPostcode(knownFactsResult.utr, knownFactsResult.postcode, isSubscribedToAgentServices = false, isSubscribedToETMP = true)
 
-      an[IllegalStateException] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
+      AgentSubscriptionStub.partialSubscriptionWillReturnStatus(CompletePartialSubscriptionBody(utr = knownFactsResult.utr,
+        knownFacts = SubscriptionRequestKnownFacts(knownFactsResult.postcode)), 403)
+
+      an[Upstream4xxResponse] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
     }
 
-    "throw Upstream5xxResponse, somehow user isSubscribedToAgentServices but NOT isSubscribedToETMP" in {
+    "throw Upstream4xxResponse, 409 when executing partialSubscriptionFix" in {
+      val knownFactsResult =
+        KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
+      val persistedId = await(repo.create(knownFactsResult))
+
+      AgentSubscriptionStub.withMatchingUtrAndPostcode(knownFactsResult.utr, knownFactsResult.postcode, isSubscribedToAgentServices = false, isSubscribedToETMP = true)
+
+      AgentSubscriptionStub.partialSubscriptionWillReturnStatus(CompletePartialSubscriptionBody(utr = knownFactsResult.utr,
+        knownFacts = SubscriptionRequestKnownFacts(knownFactsResult.postcode)), 409)
+
+      an[Upstream4xxResponse] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
+    }
+
+    "throw Upstream5xxResponse, 500 when executing partialSubscriptionFix" in {
       val knownFactsResult =
         KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true)
       val persistedId = await(repo.create(knownFactsResult))

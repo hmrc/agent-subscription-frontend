@@ -23,14 +23,12 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{CompletePartialSubscriptionBody, SubscriptionRequestKnownFacts}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{CompletePartialSubscriptionBody, KnownFactsResult, SubscriptionRequestKnownFacts}
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.KnownFactsResultMongoRepository
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionService}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionService, SubscriptionState}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
 import scala.concurrent.Future
 
 class StartController @Inject()(
@@ -66,41 +64,38 @@ class StartController @Inject()(
   }
 
   def returnAfterGGCredsCreated(id: Option[String] = None): Action[AnyContent] = Action.async { implicit request =>
-    withMaybeContinueUrlCached { //TODO APB-2805 subscriptionService.completePartialSubscription checks whether details are partially subscribed, we can store additionally here
-      id match {
-        case Some(knownFactsId) =>
+    withMaybeContinueUrlCached {
+
+      val knownFactsResultOpt: Future[Option[KnownFactsResult]] = if (id.isDefined) {
+        for {
+          knownFactsResultOpt <- knownFactsResultMongoRepository.findKnownFactsResult(id.get)
+          _                   <- knownFactsResultMongoRepository.delete(id.get)
+        } yield knownFactsResultOpt
+      } else Future successful None
+
+      val decideOnSubscription = knownFactsResultOpt.flatMap {
+        case Some(knownFacts) =>
           for {
-            knownFactsResultOpt <- knownFactsResultMongoRepository.findKnownFactsResult(knownFactsId)
-            _                   <- knownFactsResultMongoRepository.delete(knownFactsId)
-            _ <- knownFactsResultOpt match {
-                  case Some(knownFacts) => sessionStoreService.cacheKnownFactsResult(knownFacts)
-                  case None             => Future.successful(())
-                }
-            (wasPartiallySubscribed, optAllocatedArn) <- knownFactsResultOpt match {
-                                                          case Some(knownFact) =>
-                                                            subscriptionService.completePartialSubscription(
-                                                              CompletePartialSubscriptionBody(
-                                                                knownFact.utr,
-                                                                SubscriptionRequestKnownFacts(knownFact.postcode)))
-                                                          case None => Future successful (false, None)
-                                                        }
+            _                   <- sessionStoreService.cacheKnownFactsResult(knownFacts)
+            subscriptionProcess <- subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode)
+            isPartiallySubscribed = subscriptionProcess.state == SubscriptionState.IsOnlySubscribedInETMP
+            continuedSubscription <- if (isPartiallySubscribed)
+                                      subscriptionService
+                                        .completePartialSubscription(knownFacts.utr, knownFacts.postcode)
+                                    else Future successful None
           } yield {
-            knownFactsResultOpt match {
-              case Some(_) if wasPartiallySubscribed => {
-                val obtainedArn = optAllocatedArn
-                  .getOrElse(
-                    throw new InternalServerException("partialSubscription fix executed, but failed to obtain arn"))
-                  .value
+            continuedSubscription match {
+              case Some(arnAfterPartialSubscriptionFix) => {
+                mark("Count-Subscription-PartialSubscriptionCompleted")
                 Redirect(routes.SubscriptionController.showSubscriptionComplete())
-                  .flashing("arn" -> obtainedArn)
+                  .flashing("arn" -> arnAfterPartialSubscriptionFix.value)
               }
-              case Some(_) => Redirect(routes.SubscriptionController.showInitialDetails())
-              case None    => Redirect(routes.CheckAgencyController.showCheckBusinessType())
+              case None => Redirect(routes.SubscriptionController.showInitialDetails())
             }
           }
-        case None =>
-          Future.successful(Redirect(routes.CheckAgencyController.showCheckBusinessType()))
+        case None => Future successful Redirect(routes.CheckAgencyController.showCheckBusinessType())
       }
+      decideOnSubscription
     }
   }
 

@@ -29,7 +29,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.domain.{Nino, TaxIdentifier}
-import uk.gov.hmrc.http.{BadRequestException, Upstream5xxResponse}
+import uk.gov.hmrc.http.{BadRequestException, Upstream4xxResponse, Upstream5xxResponse}
 
 trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
   val validUtr = Utr("2000000000")
@@ -292,7 +292,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result) shouldBe Some(routes.SubscriptionController.showSubscriptionComplete().url)
     }
 
-    "goGetCleanCreds, creds with enrolment/s are not allowed when partiallySubscribed User" in {
+    "showHasOtherEnrolments, creds with enrolment/s are not allowed when partiallySubscribed User" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = false, isSubscribedToETMP = true)
       AgentSubscriptionStub.partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(validUtr,
         knownFacts = SubscriptionRequestKnownFacts(validPostcode)))
@@ -301,6 +301,26 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
       val result = await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request))
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showHasOtherEnrolments().url)
+    }
+
+    "Upstream4xxResponse partialSubscriptionFix failed with 403" in {
+      withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = false, isSubscribedToETMP = true)
+      AgentSubscriptionStub.partialSubscriptionWillReturnStatus(CompletePartialSubscriptionBody(validUtr,
+        knownFacts = SubscriptionRequestKnownFacts(validPostcode)), 403)
+
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      an[Upstream4xxResponse] shouldBe thrownBy(await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request)))
+    }
+
+    "Upstream4xxResponse partialSubscriptionFix failed with 409 as someone has already been allocated the enrolment" in {
+      withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = false, isSubscribedToETMP = true)
+      AgentSubscriptionStub.partialSubscriptionWillReturnStatus(CompletePartialSubscriptionBody(validUtr,
+        knownFacts = SubscriptionRequestKnownFacts(validPostcode)), 409)
+
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      an[Upstream4xxResponse] shouldBe thrownBy(await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request)))
     }
 
     "Upstream5xxResponse partialSubscriptionFix failed for partiallySubscribed User" in {
