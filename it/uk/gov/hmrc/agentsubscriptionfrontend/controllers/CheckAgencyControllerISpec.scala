@@ -157,7 +157,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(playRequestValidBusinessTypeIdentifier(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
       checkHtmlResultWithBodyText(result, htmlEscapedMessage("checkAgencyStatus.title"))
-      metricShouldExistsAndBeenUpdated("Count-Subscription-CheckAgency-Start")
+      metricShouldExistAndBeUpdated("Count-Subscription-CheckAgency-Start")
     }
 
     "display the AS Account Page if the current user has HMRC-AS-AGENT enrolment" in {
@@ -165,7 +165,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(redirectUrl)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
+      metricShouldExistAndBeUpdated("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
     }
 
     CheckAgencyController.validBusinessTypes.foreach { validBusinessTypeIdentifier =>
@@ -262,7 +262,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showNoAgencyFound().url)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-NoAgencyFound")
+      metricShouldExistAndBeUpdated("Count-Subscription-NoAgencyFound")
     }
 
     "propagate an exception when there is no organisation name" in {
@@ -394,7 +394,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
         s"$postcode",
         "01234 56789",
         s"$registrationName")
-      metricShouldExistsAndBeenUpdated("Count-Subscription-CleanCreds-Start")
+      metricShouldExistAndBeUpdated("Count-Subscription-CleanCreds-Start")
     }
 
     "show utr in the correct format" in {
@@ -413,7 +413,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.showConfirmYourAgency(request))
 
       checkHtmlResultWithBodyText(result, "01234 56789")
-      metricShouldExistsAndBeenUpdated("Count-Subscription-CleanCreds-Start")
+      metricShouldExistAndBeUpdated("Count-Subscription-CleanCreds-Start")
     }
 
     "show a button which allows the user to return to Check Business Type page" in {
@@ -428,7 +428,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.showConfirmYourAgency(request))
 
       checkHtmlResultWithBodyText(result, routes.CheckAgencyController.showCheckBusinessType.url)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-CleanCreds-Start")
+      metricShouldExistAndBeUpdated("Count-Subscription-CleanCreds-Start")
     }
 
     "show a Continue button which allows the user to go to Subscription Details if isSubscribedToAgentServices=false" in {
@@ -443,7 +443,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.showConfirmYourAgency(request))
 
       checkHtmlResultWithBodyText(result, routes.SubscriptionController.showInitialDetails().url)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-CleanCreds-Start")
+      metricShouldExistAndBeUpdated("Count-Subscription-CleanCreds-Start")
     }
 
     "show a Continue button which allows the user to go to Already Subscribed if isSubscribedToAgentServices=true" in {
@@ -458,7 +458,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.showConfirmYourAgency(request))
 
       checkHtmlResultWithBodyText(result, routes.CheckAgencyController.showAlreadySubscribed().url)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
+      metricShouldExistAndBeUpdated("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
     }
 
     "redirect to the Check Business Type  page if there is no KnownFactsResult in session because the user has returned to a bookmark" in {
@@ -508,7 +508,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.StartController.setupIncomplete().url)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Declined")
+      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Declined")
     }
 
     "Send page back with error when failing the validation of SaAgentCode with invalid characters" in {
@@ -600,7 +600,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
 
       verifyAgentAssuranceAuditRequestSentWithClientIdentifier(Nino("AA123456A"), true, "SA6012", agentAssurancePayeCheck)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Success")
+      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Success")
     }
 
     "redirect to invasive check start when no SACode in session to obtain it again" in {
@@ -642,7 +642,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result) shouldBe Some(routes.StartController.setupIncomplete().url)
 
       verifyAgentAssuranceAuditRequestSentWithClientIdentifier(Nino("AA123456A"), false, "SA6012", agentAssurancePayeCheck)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Failed")
+      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Failed")
     }
 
     "nino invalid send back 200 with error page" in {
@@ -699,7 +699,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
 
       verifyAgentAssuranceAuditRequestSentWithClientIdentifier(Utr("4000000009"), true, "SA6012", agentAssurancePayeCheck)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Success")
+      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Success")
     }
 
     "redirect to setup incomplete page when submitting valid utr with no relationship" in {
@@ -723,7 +723,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result) shouldBe Some(routes.StartController.setupIncomplete().url)
 
       verifyAgentAssuranceAuditRequestSentWithClientIdentifier(Utr("4000000009"), false, "SA6012", agentAssurancePayeCheck)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Failed")
+      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Failed")
     }
 
     "utr blank invasiveCheck" in {

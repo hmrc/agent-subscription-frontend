@@ -63,7 +63,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val result = await(controller.showInitialDetails(request))
       status(result) shouldBe 200
       checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionDetails.title"))
-      metricShouldExistsAndBeenUpdated("Count-Subscription-CleanCreds-Success")
+      metricShouldExistAndBeUpdated("Count-Subscription-CleanCreds-Success")
     }
 
     "populate form with utr and postcode" in {
@@ -309,7 +309,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         flash(result2).get("arn") shouldBe Some("ARN00001")
 
         verifySubscriptionRequestSent(subscriptionRequest())
-        metricShouldExistsAndBeenUpdated(
+        metricShouldExistAndBeUpdated(
           "Count-Subscription-AddressLookup-Start",
           "Count-Subscription-AddressLookup-Success",
           "Count-Subscription-Complete")
@@ -338,7 +338,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
         verifySubscriptionRequestSent(subscriptionRequest())
         // add check for Logger(getClass).warn here
-        metricShouldExistsAndBeenUpdated(
+        metricShouldExistAndBeUpdated(
           "Count-Subscription-AddressLookup-Start",
           "Count-Subscription-AddressLookup-Success",
           "Count-Subscription-Complete")
@@ -442,7 +442,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
           controller.returnFromAddressLookup("addr1")(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
         sessionStoreService.allSessionsRemoved shouldBe false
-        metricShouldExistsAndBeenUpdated(
+        metricShouldExistAndBeUpdated(
           "Count-Subscription-AddressLookup-Start",
           "Count-Subscription-AddressLookup-Success",
           "Count-Subscription-Failed",
@@ -469,7 +469,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.CheckAgencyController.showAlreadySubscribed().url
         sessionStoreService.allSessionsRemoved shouldBe false
-        metricShouldExistsAndBeenUpdated(
+        metricShouldExistAndBeUpdated(
           "Count-Subscription-AddressLookup-Start",
           "Count-Subscription-AddressLookup-Success",
           "Count-Subscription-AlreadySubscribed-APIResponse",

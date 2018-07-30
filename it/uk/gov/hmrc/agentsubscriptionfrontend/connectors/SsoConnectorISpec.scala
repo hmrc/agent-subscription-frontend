@@ -23,7 +23,7 @@ class SsoConnectorISpec extends BaseISpec with MetricTestSupport {
       val result = await(connector.validateExternalDomain("foo.com"))
       result shouldBe true
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-SSO-validateExternalDomain-GET")
+      timerShouldExistAndBeUpdated("ConsumedAPI-SSO-validateExternalDomain-GET")
     }
 
     "return false for a nonwhitelisted url" in {
@@ -33,7 +33,7 @@ class SsoConnectorISpec extends BaseISpec with MetricTestSupport {
       val result = await(connector.validateExternalDomain("invalid-example.com"))
       result shouldBe false
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-SSO-validateExternalDomain-GET")
+      timerShouldExistAndBeUpdated("ConsumedAPI-SSO-validateExternalDomain-GET")
     }
 
     "return false for an invalid url" in {
@@ -43,7 +43,7 @@ class SsoConnectorISpec extends BaseISpec with MetricTestSupport {
       val result = await(connector.validateExternalDomain("invalid-example"))
       result shouldBe false
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-SSO-validateExternalDomain-GET")
+      timerShouldExistAndBeUpdated("ConsumedAPI-SSO-validateExternalDomain-GET")
     }
   }
 }
