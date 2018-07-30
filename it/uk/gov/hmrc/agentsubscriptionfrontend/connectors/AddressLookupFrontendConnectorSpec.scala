@@ -29,7 +29,7 @@ class AddressLookupFrontendConnectorSpec extends BaseISpec with MetricTestSuppor
         postcode = Some(postcode),
         country = Country("GB", Some("United Kingdom")))
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Address-Lookup-Frontend-getAddressDetails-GET")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Address-Lookup-Frontend-getAddressDetails-GET")
     }
   }
 

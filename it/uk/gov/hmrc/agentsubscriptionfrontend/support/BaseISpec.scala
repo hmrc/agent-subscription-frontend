@@ -35,6 +35,7 @@ abstract class BaseISpec
         "microservice.services.address-lookup-frontend.port" -> wireMockPort,
         "microservice.services.sso.port"                     -> wireMockPort,
         "microservice.services.agent-assurance.port"         -> wireMockPort,
+        "microservice.services.agent-mapping.port"         -> wireMockPort,
         "auditing.enabled"                                   -> true,
         "auditing.consumer.baseUri.host"                     -> wireMockHost,
         "auditing.consumer.baseUri.port"                     -> wireMockPort

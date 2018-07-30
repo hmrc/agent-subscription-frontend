@@ -31,7 +31,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       result.get.isSubscribedToAgentServices shouldBe true
       result.get.isSubscribedToETMP shouldBe true
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
     }
 
     "return a not subscribed Registration when agent-subscription returns a 200 response (for a matching UTR and postcode)" in {
@@ -43,7 +43,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       result.get.taxpayerName shouldBe Some("My Agency")
       result.get.isSubscribedToAgentServices shouldBe false
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
     }
 
     "return a not subscribed with record in ETMP Registration when partially subscribed" in {
@@ -56,7 +56,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       result.get.isSubscribedToETMP shouldBe true
       result.get.isSubscribedToAgentServices shouldBe false
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
     }
 
     "URL-path-encode path parameters" in {
@@ -66,7 +66,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       val result: Option[Registration] = await(connector.getRegistration(Utr("01234/56789"), "AA1 1AA/&"))
       result.isDefined shouldBe true
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
     }
 
     "return None when agent-subscription returns a 404 response (for a non-matching UTR and postcode)" in {
@@ -76,7 +76,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       val result: Option[Registration] = await(connector.getRegistration(utr, "AA1 1AA"))
       result shouldBe None
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
     }
 
     "throw an exception when agent-subscription returns a 500 response" in {
@@ -87,7 +87,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
         await(connector.getRegistration(utr, "AA1 1AA"))
       }
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET")
     }
   }
 
@@ -100,7 +100,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
 
       result shouldBe Arn("ARN00001")
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST")
     }
 
     "throw Upstream4xxResponse if subscription already exists" in {
@@ -113,7 +113,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
 
       e.upstreamResponseCode shouldBe 409
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST")
     }
 
     "throw Upstream4xxResponse if postcodes don't match" in {
@@ -126,7 +126,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
 
       e.upstreamResponseCode shouldBe 403
 
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST")
     }
   }
 
@@ -138,7 +138,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       val result = await(connector.completePartialSubscription(partialSubscriptionRequest))
 
       result shouldBe Arn("ARN00001")
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
     }
 
     "throw Upstream4xxResponse if enrolment is already allocated to someone" in {
@@ -150,7 +150,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       }
 
       e.upstreamResponseCode shouldBe 409
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
     }
 
     "throw Upstream4xxResponse if details do not match any record" in {
@@ -162,7 +162,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       }
 
       e.upstreamResponseCode shouldBe 403
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
     }
 
     "throw BadRequestException if BadRequest" in {
@@ -174,7 +174,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       }
 
       e.responseCode shouldBe 400
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
     }
 
     "throw Upstream5xxResponse if postcodes don't match" in {
@@ -186,7 +186,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       }
 
       e.upstreamResponseCode shouldBe 500
-      timerShouldExistsAndBeenUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
+      timerShouldExistAndBeUpdated("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT")
     }
   }
 
