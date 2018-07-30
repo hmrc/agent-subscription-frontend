@@ -32,7 +32,7 @@ case class SubscriptionReturnedHttpError(httpStatusCode: Int) extends Product wi
 
 object SubscriptionState extends Enumeration {
   type SubscriptionState = Value
-  val BrandNewSubscription, IsOnlySubscribedInETMP, IsSubscribedToAgentServices, NoSubscriptionInEtmp = Value
+  val Unsubscribed, SubscribedAndNotEnrolled, SubscribedAndEnrolled, NoRegistrationFound = Value
 }
 
 case class SubscriptionProcess(state: SubscriptionState.Value, details: Option[Registration])
@@ -83,18 +83,16 @@ class SubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptio
     }
   }
 
-  def completePartialSubscription(utr: Utr, postCode: String)(
+  def completePartialSubscription(utr: Utr, businessPostCode: String)(
     implicit hc: HeaderCarrier,
     ec: ExecutionContext): Future[Arn] =
     agentSubscriptionConnector
-      .completePartialSubscription(CompletePartialSubscriptionBody(utr, SubscriptionRequestKnownFacts(postCode)))
+      .completePartialSubscription(
+        CompletePartialSubscriptionBody(utr, SubscriptionRequestKnownFacts(businessPostCode)))
       .recover {
-        case e: Upstream4xxResponse => {
-          if (Seq(Status.FORBIDDEN, Status.CONFLICT) contains e.upstreamResponseCode) {
-            Logger.warn(s"Eligibility checks failed for partialSubscriptionFix, with status: ${e.upstreamResponseCode}")
-          }
+        case e: Upstream4xxResponse if Seq(Status.FORBIDDEN, Status.CONFLICT) contains e.upstreamResponseCode =>
+          Logger.warn(s"Eligibility checks failed for partialSubscriptionFix, with status: ${e.upstreamResponseCode}")
           throw e
-        }
       }
 
   def getSubscriptionStatus(utr: Utr, postcode: String)(
@@ -103,17 +101,17 @@ class SubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptio
     agentSubscriptionConnector.getRegistration(utr, postcode).map {
 
       case Some(reg) if reg.isSubscribedToAgentServices =>
-        SubscriptionProcess(SubscriptionState.IsSubscribedToAgentServices, Some(reg))
+        SubscriptionProcess(SubscriptionState.SubscribedAndEnrolled, Some(reg))
 
       case Some(Registration(None, _, _)) =>
         throw new IllegalStateException(s"The agency with UTR ${utr.value} has a missing organisation/individual name.")
 
       case Some(reg) if !reg.isSubscribedToAgentServices && reg.isSubscribedToETMP =>
-        SubscriptionProcess(SubscriptionState.IsOnlySubscribedInETMP, Some(reg))
+        SubscriptionProcess(SubscriptionState.SubscribedAndNotEnrolled, Some(reg))
 
       case Some(reg) if !reg.isSubscribedToAgentServices && !reg.isSubscribedToETMP =>
-        SubscriptionProcess(SubscriptionState.BrandNewSubscription, Some(reg))
+        SubscriptionProcess(SubscriptionState.Unsubscribed, Some(reg))
 
-      case None => SubscriptionProcess(SubscriptionState.NoSubscriptionInEtmp, None)
+      case None => SubscriptionProcess(SubscriptionState.NoRegistrationFound, None)
     }
 }

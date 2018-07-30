@@ -78,7 +78,7 @@ class StartController @Inject()(
           for {
             _                   <- sessionStoreService.cacheKnownFactsResult(knownFacts)
             subscriptionProcess <- subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode)
-            isPartiallySubscribed = subscriptionProcess.state == SubscriptionState.IsOnlySubscribedInETMP
+            isPartiallySubscribed = subscriptionProcess.state == SubscriptionState.SubscribedAndNotEnrolled
             continuedSubscriptionResponse <- if (isPartiallySubscribed)
                                               subscriptionService
                                                 .completePartialSubscription(knownFacts.utr, knownFacts.postcode)
