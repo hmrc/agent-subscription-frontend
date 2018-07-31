@@ -225,41 +225,35 @@ class CheckAgencyController @Inject()(
 
   def invasiveCheckStart: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Future.successful(Ok(invasive_check_start(RadioWithInput.confirmResponseForm)))
+      Future.successful(Ok(invasive_check_start(RadioWithInput.invasiveCheckStartSaAgentCode)))
     }
   }
 
   def invasiveSaAgentCodePost: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      RadioWithInput.confirmResponseForm
+      RadioWithInput.invasiveCheckStartSaAgentCode
         .bindFromRequest()
         .fold(
           formWithErrors => {
             Future.successful(Ok(invasive_check_start(formWithErrors)))
           },
           correctForm => {
-            if (correctForm.value.getOrElse(false)) {
-              val saAgentReference = correctForm.messageOfTrueRadioChoice.getOrElse("")
-
-              val validationResult = FieldMappings.saAgentCode
-                .withPrefix("confirmResponse-true-hidden-input")
-                .bind(Map("confirmResponse-true-hidden-input" -> saAgentReference.replace(" ", "")))
-
-              validationResult match {
-                case Right(code) =>
-                  Future.successful(Redirect(routes.CheckAgencyController.invasiveTaxPayerOptionGet())
-                    .withSession(request.session + ("saAgentReferenceToCheck" -> code)))
-                case Left(formErrors) =>
-                  formErrors.headOption
-                    .map(error =>
-                      Future.successful(Ok(invasive_check_start(RadioWithInput.confirmResponseForm.withError(error)))))
-                    .getOrElse(
-                      throw new InternalServerException("SaAgentCode form validation returned empty errors object"))
+            correctForm.hasSaAgentCode
+              .map {
+                case true => {
+                  val saAgentCode = correctForm.saAgentCode
+                    .getOrElse(throw new IllegalStateException(
+                      "Form validation should enforce saAgentCode is always defined if hasSaAgentCode is true"))
+                  Future successful Redirect(routes.CheckAgencyController.invasiveTaxPayerOptionGet())
+                    .withSession(request.session + ("saAgentReferenceToCheck" -> saAgentCode))
+                }
+                case false => {
+                  mark("Count-Subscription-InvasiveCheck-Declined")
+                  Future successful Redirect(routes.StartController.setupIncomplete())
+                }
               }
-            } else {
-              mark("Count-Subscription-InvasiveCheck-Declined")
-              Future.successful(Redirect(routes.StartController.setupIncomplete()))
-            }
+              .getOrElse(throw new IllegalStateException(
+                "InvasiveCheck invasiveCheckStartSaAgentCode.hasSaAgentCode should always be defined"))
           }
         )
     }
@@ -267,52 +261,33 @@ class CheckAgencyController @Inject()(
 
   def invasiveTaxPayerOptionGet: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Future.successful(Ok(invasive_input_option(RadioWithInput.confirmResponseForm)))
+      Future.successful(Ok(invasive_input_option(RadioWithInput.invasiveCheckTaxPayerOption)))
     }
   }
 
   def invasiveTaxPayerOption: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-      RadioWithInput.confirmResponseForm
+      RadioWithInput.invasiveCheckTaxPayerOption
         .bindFromRequest()
         .fold(
           formWithErrors => {
-            Future.successful(Ok(invasive_input_option(formWithErrors)))
+            if (formWithErrors.errors.exists(_.message == "error.radio-variant.invalid")) {
+              Logger.warn("Selected invasive tax payer form variant was invalid")
+              throw new BadRequestException("submitted form value did not contain valid tax payer option form variant")
+            }
+            Future successful Ok(invasive_input_option(formWithErrors))
           },
           correctForm => {
-            val trueIsNinoFalseIsUtr = correctForm.value.getOrElse(false)
-
-            val validatedIdentifier = if (trueIsNinoFalseIsUtr) {
-              val id = correctForm.messageOfTrueRadioChoice.getOrElse("")
-              Nino.isValid(id) match {
-                case true  => Right(id)
-                case false => Left(Seq(FormError("confirmResponse-true-hidden-input", "error.nino.invalid")))
+            correctForm.variant
+              .map {
+                case "utr"  => checkAndRedirect(Utr(correctForm.utr.get), "utr")
+                case "nino" => checkAndRedirect(Nino(correctForm.nino.get), "nino")
+                case "cannotProvide" => {
+                  mark("Count-Subscription-Could-Not-Provide-Tax-Payer-Identifier")
+                  Future successful Redirect(routes.StartController.setupIncomplete())
+                }
               }
-            } else {
-              val utrStr = correctForm.messageOfFalseRadioChoice.getOrElse("")
-              FieldMappings.utr
-                .withPrefix("confirmResponse-false-hidden-input")
-                .bind(Map("confirmResponse-false-hidden-input" -> utrStr))
-            }
-
-            validatedIdentifier match {
-              case Left(seqErrors) =>
-                Future.successful(
-                  Ok(invasive_input_option(RadioWithInput.confirmResponseForm.withError(seqErrors.headOption
-                    .getOrElse(throw new InternalServerException("could not provide the user with errors found"))))))
-              case Right(identifier) => {
-                val (taxIdentifier, taxIdentifierName) =
-                  if (trueIsNinoFalseIsUtr) (Nino(identifier), "nino")
-                  else
-                    (
-                      FieldMappings
-                        .normalizeUtr(identifier)
-                        .getOrElse(
-                          throw new InternalServerException("Utr passed validation but failed the normalize method")),
-                      "utr")
-                checkAndRedirect(taxIdentifier, taxIdentifierName)
-              }
-            }
+              .getOrElse(throw new IllegalStateException("Form should return an error before reaching here"))
           }
         )
     }
