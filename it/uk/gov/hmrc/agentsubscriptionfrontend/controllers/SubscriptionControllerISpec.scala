@@ -17,14 +17,16 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import org.jsoup.Jsoup
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
-import uk.gov.hmrc.http.HttpException
+import uk.gov.hmrc.http.{BadRequestException, HttpException}
 import uk.gov.hmrc.play.binders.ContinueUrl
 
 class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec {
@@ -83,6 +85,113 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       resultShouldBeSessionDataMissing(result)
     }
   }
+
+  "showLinkAccountType (GET /link-account)" should {
+    behave like anAgentAffinityGroupOnlyEndpoint(controller.showLinkAccount(_))
+
+    trait RequestAndResult {
+      val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+      val result = await(controller.showLinkAccount(request))
+      val doc = Jsoup.parse(bodyOf(result))
+    }
+
+    "contain page titles and content" in new RequestAndResult {
+      checkHtmlResultContainsMsgs(
+        result,
+        "linkAccount.title",
+        "linkAccount.p1",
+        "linkAccount.p2",
+        "linkAccount.bullet-list.1",
+        "linkAccount.bullet-list.2",
+        "linkAccount.p3",
+        "linkAccount.p4",
+        "linkAccount.legend",
+        "linkAccount.option.yes",
+        "linkAccount.option.no"
+      )
+    }
+
+    "contain radio options for Yes and No" in new RequestAndResult {
+      // Check form's radio inputs have correct values
+      doc.getElementById("autoMapping-yes").`val`() shouldBe "yes"
+      doc.getElementById("autoMapping-no").`val`() shouldBe "no"
+    }
+
+    "form should POST to /link-account" in new RequestAndResult {
+      val form = doc.select("form").first()
+      form.attr("method") shouldBe "POST"
+      form.attr("action") shouldBe routes.SubscriptionController.submitLinkAccount().url
+    }
+
+    "contain a continue button to submit form" in new RequestAndResult {
+      val continueBtn = doc.getElementById("continue")
+      continueBtn.hasClass("button") shouldBe true
+      continueBtn.attr("type") shouldBe "submit"
+      continueBtn.text() shouldBe htmlEscapedMessage("button.continue")
+    }
+
+    "tolerate a possible short delay in the new enrolment becoming visible in auth" when {
+      "there was a delay and the new enrolment is not yet visible in auth" in {
+        val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        val result = await(controller.showLinkAccount(request))
+        checkHtmlResultContainsMsgs(result, "linkAccount.title")
+      }
+      "there was no delay and the new enrolment is visible in auth" in {
+        val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+        val result = await(controller.showLinkAccount(request))
+        checkHtmlResultContainsMsgs(result, "linkAccount.title")
+      }
+    }
+  }
+
+  "showLinkAccountType (POST /link-account)" when {
+    behave like anAgentAffinityGroupOnlyEndpoint(controller.submitLinkAccount(_))
+
+    CheckAgencyController.validBusinessTypes.foreach { validBusinessTypeIdentifier =>
+      s"redirect to /check-agency-status when valid businessTypeIdentifier: $validBusinessTypeIdentifier" in {
+        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          .withFormUrlEncodedBody("businessType" -> validBusinessTypeIdentifier)
+
+        val result = await(controller.submitLinkAccount(request))
+        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus(Some(validBusinessTypeIdentifier)).url
+      }
+    }
+
+    "choice is missing" should {
+      "return 200 and redisplay the /check-business-type page with an error message for missing choice" in {
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        val result = await(controller.submitLinkAccount(request))
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.no-radio-selected"))
+      }
+    }
+
+    s"400 Exception ,when businessTypeIdentifier invalid" in {
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("businessType" -> "unCateredBusinessTypeIdentifier")
+
+      an[BadRequestException] shouldBe thrownBy(await(controller.submitLinkAccount(request)))
+    }
+
+    "tolerate a possible short delay in the new enrolment becoming visible in auth" when {
+      "there was a delay and the new enrolment is not yet visible in auth" in {
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+
+        val result =
+          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
+
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionComplete.title"))
+      }
+      "there was no delay and the new enrolment is visible in auth" in {
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+
+        val result =
+          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
+
+        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionComplete.title"))
+      }
+    }
+  }
+
 
   "showSubscriptionComplete" should {
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.showSubscriptionComplete(request))

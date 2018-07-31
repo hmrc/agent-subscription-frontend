@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
+import cats.Show.ops.toAllShowOps
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
-
 import play.api.Logger
 import play.api.data.Form
-import play.api.data.Forms.mapping
+import play.api.data.Forms.{mapping, optional, text}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, _}
@@ -30,6 +30,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AddressLookupFrontendConnector
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.validBusinessTypes
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings._
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -37,7 +38,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, Subsc
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
@@ -81,6 +82,14 @@ class SubscriptionController @Inject()(
   private val blacklistedPostCodes: Set[String] = appConfig.blacklistedPostcodes
 
   val desAddressForm = new DesAddressForm(Logger, blacklistedPostCodes)
+
+  private val linkAccountForm: Form[LinkAccount] =
+    Form[LinkAccount](
+      mapping("autoMapping" -> optional(text).verifying(FieldMappings.radioInputSelected))(LinkAccount.apply)(
+        LinkAccount.unapply)
+        .verifying(
+          "error.link-account-value.invalid",
+          submittedLinkAccount => Seq("yes", "no").contains(submittedLinkAccount.autoMapping.getOrElse(""))))
 
   private val initialDetailsForm = Form[InitialDetails](
     mapping(
@@ -193,6 +202,37 @@ class SubscriptionController @Inject()(
           }
         )
     }
+  }
+
+  val showLinkAccount: Action[AnyContent] = Action.async { implicit request =>
+    withAuthenticatedAgent {
+      //request.flash.get("arn") match { //TODO
+      Future successful Ok(html.link_account(linkAccountForm))
+      //}
+    }
+  }
+
+  val submitLinkAccount: Action[AnyContent] = Action.async { implicit request =>
+    //withAuthenticatedAgent {
+    //request.flash.get("arn") match {
+    linkAccountForm
+      .bindFromRequest()
+      .fold(
+        formWithErrors => {
+          if (formWithErrors.errors.exists(_.message == "error.link-account-value.invalid")) {
+            throw new BadRequestException("Form submitted with strange input value")
+          } else {
+            Future.successful(Ok(html.link_account(formWithErrors)))
+          }
+        },
+        validatedLinkAccount => {
+          Future.successful(Redirect(routes.SubscriptionController.showSubscriptionComplete()))
+          //TODO:
+          //.flashing("arn" -> arn.value))
+        }
+      )
+    //}
+    //}
   }
 
   val showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>

@@ -93,6 +93,23 @@ abstract class BaseISpec
     }
   }
 
+  protected def checkHtmlResultContainsMsgs(result: Result, expectedMessageKeys: String*): Unit = {
+    status(result) shouldBe OK
+    contentType(result) shouldBe Some("text/html")
+    charset(result) shouldBe Some("utf-8")
+
+    expectedMessageKeys.foreach { messageKey =>
+      withClue(s"Expected message key '$messageKey' to exist: ") {
+        Messages.isDefinedAt(messageKey) shouldBe true
+      }
+
+      val expectedContent = Messages(messageKey)
+      withClue(s"Expected content ('$expectedContent') for message key '$messageKey' to be in request body: ") {
+        bodyOf(result) should include(htmlEscapedMessage(expectedContent))
+      }
+    }
+  }
+
   private val messagesApi = app.injector.instanceOf[MessagesApi]
   private implicit val messages: Messages = messagesApi.preferred(Seq.empty[Lang])
 
