@@ -23,6 +23,7 @@ import play.api.data.validation.{Constraint, Constraints, _}
 import play.api.i18n.Messages
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.domain.Nino
 
 package object controllers {
   object FieldMappings {
@@ -167,6 +168,17 @@ package object controllers {
 
     def utr: Mapping[String] = text verifying utrConstraint
 
+    private val ninoConstraint: Constraint[String] = Constraint[String] { fieldValue: String =>
+      val formattedField = fieldValue.replace(" ", "")
+
+      Nino.isValid(formattedField) match {
+        case true  => Valid
+        case false => Invalid(ValidationError("error.nino.invalid"))
+      }
+    }
+
+    def nino: Mapping[String] = text verifying ninoConstraint
+
     def postcode: Mapping[String] =
       of[String](stringFormatWithMessage("error.postcode.empty")) verifying nonEmptyPostcode
 
@@ -215,5 +227,4 @@ package object controllers {
     def nonEmptyTextWithMsg(errorMessageKey: String): Mapping[String] =
       text verifying nonEmptyWithMessage(errorMessageKey)
   }
-
 }
