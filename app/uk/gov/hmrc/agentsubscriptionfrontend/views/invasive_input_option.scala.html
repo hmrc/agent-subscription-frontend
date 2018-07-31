@@ -51,7 +51,7 @@
                     <label for="variant_utr">@Messages("invasive.radioResponse.utr")</label>
                 </div>
                 <div class="panel panel-border-narrow js-hidden @if(radioResponseForm.error("utr").isDefined){form-group-error}" id="utrRadioInput">
-                    <label class="form-label" for="utr">@Messages("radioResponse.hidden.input.label.utr")</label>
+                    <label class="form-label" for="utr">@Messages("invasive.radioResponse.hidden.input.label.utr")</label>
                     @if(radioResponseForm.error("utr").isDefined){<span class="error-message">@Messages(radioResponseForm.errors.head.message)</span>}
                     <input class="form-control @if(radioResponseForm.error("utr").isDefined){form-control-error}" name="utr" type="text" id="utr">
                 </div>

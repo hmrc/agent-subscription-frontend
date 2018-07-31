@@ -554,4 +554,18 @@ class FieldMappingsSpec extends UnitSpec with EitherValues {
       }
     }
   }
+
+  "Nino" should {
+    val ninoMapping = FieldMappings.nino.withPrefix("testKey")
+
+    def bind(fieldValue: String) = ninoMapping.bind(Map("testKey" -> fieldValue))
+
+    "accept valid Nino" in {
+      bind("AA980984B") shouldBe Right("AA980984B")
+    }
+
+    "reject with error when invalid Nino" in {
+      bind("AAAAAAAA0").left.value should contain only FormError("testKey", "error.nino.invalid")
+    }
+  }
 }

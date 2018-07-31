@@ -717,7 +717,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.StartController.setupIncomplete.url)
 
-      metricShouldExistsAndBeenUpdated("Count-Subscription-Could-Not-Provide-Tax-Payer-Identifier")
+      metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Could-Not-Provide-Tax-Payer-Identifier")
     }
 
     "return 200 error when submitting without selected radio option" in {

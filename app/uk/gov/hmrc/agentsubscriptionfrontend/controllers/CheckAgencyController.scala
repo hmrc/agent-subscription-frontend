@@ -283,7 +283,7 @@ class CheckAgencyController @Inject()(
                 case "utr"  => checkAndRedirect(Utr(correctForm.utr.get), "utr")
                 case "nino" => checkAndRedirect(Nino(correctForm.nino.get), "nino")
                 case "cannotProvide" => {
-                  mark("Count-Subscription-Could-Not-Provide-Tax-Payer-Identifier")
+                  mark("Count-Subscription-InvasiveCheck-Could-Not-Provide-Tax-Payer-Identifier")
                   Future successful Redirect(routes.StartController.setupIncomplete())
                 }
               }
