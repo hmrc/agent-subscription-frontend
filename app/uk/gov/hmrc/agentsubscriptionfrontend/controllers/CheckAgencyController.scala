@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
 import play.api.Logger
-import play.api.data.{Form, FormError}
+import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{AnyContent, Request, _}
@@ -37,7 +37,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{invasive_check_start, invasive_input_option}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, InternalServerException}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import play.api.data.Forms._
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
@@ -161,15 +161,24 @@ class CheckAgencyController @Inject()(
           registrationDetails.taxpayerName.get,
           registrationDetails.isSubscribedToAgentServices,
           knownFacts)
-      case SubscriptionProcess(SubscriptionState.SubscribedAndNotEnrolled, Some(_)) =>
-        withCleanCreds {
-          subscriptionService
-            .completePartialSubscription(knownFacts.utr, knownFacts.postcode)
-            .map { arn =>
-              mark("Count-Subscription-PartialSubscriptionCompleted")
-              Redirect(routes.SubscriptionController.showSubscriptionComplete()).flashing("arn" -> arn.value)
-            }
-        }
+      case SubscriptionProcess(SubscriptionState.SubscribedAndNotEnrolled, Some(reg)) =>
+        for {
+          _ <- sessionStoreService.cacheKnownFactsResult(
+                KnownFactsResult(
+                  knownFacts.utr,
+                  knownFacts.postcode,
+                  reg.taxpayerName.get,
+                  reg.isSubscribedToAgentServices))
+
+          result <- withCleanCreds {
+                     subscriptionService
+                       .completePartialSubscription(knownFacts.utr, knownFacts.postcode)
+                       .map { arn =>
+                         mark("Count-Subscription-PartialSubscriptionCompleted")
+                         Redirect(routes.SubscriptionController.showSubscriptionComplete()).flashing("arn" -> arn.value)
+                       }
+                   }
+        } yield result
       case SubscriptionProcess(SubscriptionState.SubscribedAndEnrolled, _) => {
         mark("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
         Future successful Redirect(routes.CheckAgencyController.showAlreadySubscribed())
