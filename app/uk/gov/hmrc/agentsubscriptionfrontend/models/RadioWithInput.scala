@@ -26,9 +26,9 @@ case class RadioInvasiveTaxPayerOption(variant: Option[String], utr: Option[Stri
 
 object ValidVariantsTaxPayerOptionForm extends Enumeration {
   type ValidVariantsTaxPayerOptionForm = String
-  val Utr = Value("utr")
-  val Nino = Value("nino")
-  val CannotProvide = Value("cannotProvide")
+  val UtrV = Value("utr")
+  val NinoV = Value("nino")
+  val CannotProvideV = Value("cannotProvide")
 }
 
 object RadioWithInput {

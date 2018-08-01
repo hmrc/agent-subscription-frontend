@@ -37,10 +37,11 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{invasive_check_start, invasive_input_option}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, InternalServerException}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import play.api.data.Forms._
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
+import uk.gov.hmrc.agentsubscriptionfrontend.models.ValidVariantsTaxPayerOptionForm._
 
 import scala.concurrent.Future
 
@@ -283,9 +284,9 @@ class CheckAgencyController @Inject()(
                 "Form validation should return error when submitting unavailable variant"))
 
             ValidVariantsTaxPayerOptionForm.withName(retrievedVariant) match {
-              case ValidVariantsTaxPayerOptionForm.Utr => checkAndRedirect(Utr(correctForm.utr.get), "utr")
-              case ValidVariantsTaxPayerOptionForm.Nino => checkAndRedirect(Nino(correctForm.nino.get), "nino")
-              case ValidVariantsTaxPayerOptionForm.CannotProvide => {
+              case UtrV  => checkAndRedirect(Utr(correctForm.utr.get), "utr")
+              case NinoV => checkAndRedirect(Nino(correctForm.nino.get), "nino")
+              case CannotProvideV => {
                 mark("Count-Subscription-InvasiveCheck-Could-Not-Provide-Tax-Payer-Identifier")
                 Future successful Redirect(routes.StartController.setupIncomplete())
               }
