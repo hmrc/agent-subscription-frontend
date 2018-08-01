@@ -576,7 +576,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
 
       verifyAgentAssuranceAuditRequestSentWithClientIdentifier(Nino("AA123456A"), true, "SA6012", agentAssurancePayeCheck)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Success")
+      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Success")
     }
 
     "redirect to confirm your agency when successfully submitting nino WITH RANDOM SPACES IN" in {
@@ -675,7 +675,7 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
 
       verifyAgentAssuranceAuditRequestSentWithClientIdentifier(Utr("4000000009"), true, "SA6012", agentAssurancePayeCheck)
-      metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Success")
+      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Success")
     }
 
     "redirect to confirm your agency when successfully submitting UTR with random spaces" in {
