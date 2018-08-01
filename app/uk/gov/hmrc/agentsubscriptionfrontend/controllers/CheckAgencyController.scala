@@ -284,8 +284,8 @@ class CheckAgencyController @Inject()(
                 "Form validation should return error when submitting unavailable variant"))
 
             ValidVariantsTaxPayerOptionForm.withName(retrievedVariant) match {
-              case UtrV  => checkAndRedirect(Utr(correctForm.utr.get), "utr")
-              case NinoV => checkAndRedirect(Nino(correctForm.nino.get), "nino")
+              case UtrV  => checkAndRedirect(FieldMappings.normalizeUtr(correctForm.utr.get).get, "utr")
+              case NinoV => checkAndRedirect(FieldMappings.normalizeNino(correctForm.nino.get).get, "nino")
               case CannotProvideV => {
                 mark("Count-Subscription-InvasiveCheck-Could-Not-Provide-Tax-Payer-Identifier")
                 Future successful Redirect(routes.StartController.setupIncomplete())

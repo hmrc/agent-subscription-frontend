@@ -167,8 +167,13 @@ package object controllers {
 
     def utr: Mapping[String] = text verifying utrConstraint
 
+    def normalizeNino(ninoStr: String): Option[Nino] = {
+      val formattedNino = ninoStr.replaceAll("\\s", "")
+      if (Nino.isValid(formattedNino)) Some(Nino(formattedNino)) else None
+    }
+
     private val ninoConstraint: Constraint[String] = Constraint[String] { fieldValue: String =>
-      val formattedField = fieldValue.replace("\\s", "")
+      val formattedField = fieldValue.replaceAll("\\s", "")
 
       Nino.isValid(formattedField) match {
         case true  => Valid

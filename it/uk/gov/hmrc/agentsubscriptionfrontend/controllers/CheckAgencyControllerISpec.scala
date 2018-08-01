@@ -573,6 +573,30 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Success")
     }
 
+    "redirect to confirm your agency when successfully submitting nino WITH RANDOM SPACES IN" in {
+      givenNinoAGoodCombinationAndUserHasRelationshipInCesa("nino", "AA123456A", "SA6012")
+
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      sessionStoreService.currentSession.knownFactsResult = Some(
+        KnownFactsResult(
+          utr = validUtr,
+          postcode = validPostcode,
+          taxpayerName = "My Agency",
+          isSubscribedToAgentServices = false))
+
+      val result = await(
+        controller.invasiveTaxPayerOption(
+          request
+            .withFormUrlEncodedBody(("variant", "nino"), ("nino", "AA1   2 3 4 5 6        A "))
+            .withSession("saAgentReferenceToCheck" -> "SA6012")))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
+
+      verifyAgentAssuranceAuditRequestSentWithClientIdentifier(Nino("AA123456A"), true, "SA6012", agentAssurancePayeCheck)
+      metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Success")
+    }
+
     "redirect to invasive check start when no SACode in session to obtain it again" in {
       givenNinoAGoodCombinationAndUserHasRelationshipInCesa("nino", "AA123456A", "SA6012")
 
@@ -639,6 +663,30 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
         controller.invasiveTaxPayerOption(
           request
             .withFormUrlEncodedBody(("variant", "utr"), ("utr", "4000000009"))
+            .withSession("saAgentReferenceToCheck" -> "SA6012")))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
+
+      verifyAgentAssuranceAuditRequestSentWithClientIdentifier(Utr("4000000009"), true, "SA6012", agentAssurancePayeCheck)
+      metricShouldExistsAndBeenUpdated("Count-Subscription-InvasiveCheck-Success")
+    }
+
+    "redirect to confirm your agency when successfully submitting UTR with random spaces" in {
+      givenUtrAGoodCombinationAndUserHasRelationshipInCesa("utr", "4000000009", "SA6012")
+
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      sessionStoreService.currentSession.knownFactsResult = Some(
+        KnownFactsResult(
+          utr = validUtr,
+          postcode = validPostcode,
+          taxpayerName = "My Agency",
+          isSubscribedToAgentServices = false))
+
+      val result = await(
+        controller.invasiveTaxPayerOption(
+          request
+            .withFormUrlEncodedBody(("variant", "utr"), ("utr", "   40000      00     009  "))
             .withSession("saAgentReferenceToCheck" -> "SA6012")))
 
       status(result) shouldBe 303
