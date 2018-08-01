@@ -17,10 +17,9 @@
 package uk.gov.hmrc.agentsubscriptionfrontend
 
 import play.api.data.Forms._
-import play.api.data.{Form, FormError, Mapping}
+import play.api.data.{FormError, Mapping}
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Constraints, _}
-import play.api.i18n.Messages
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.domain.Nino
@@ -169,7 +168,7 @@ package object controllers {
     def utr: Mapping[String] = text verifying utrConstraint
 
     private val ninoConstraint: Constraint[String] = Constraint[String] { fieldValue: String =>
-      val formattedField = fieldValue.replace(" ", "")
+      val formattedField = fieldValue.replace("\\s", "")
 
       Nino.isValid(formattedField) match {
         case true  => Valid

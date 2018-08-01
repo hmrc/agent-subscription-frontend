@@ -24,9 +24,14 @@ import uk.gov.voa.play.form.ConditionalMappings.{mandatoryIfEqual, mandatoryIfTr
 case class RadioInvasiveStartSaAgentCode(hasSaAgentCode: Option[Boolean], saAgentCode: Option[String])
 case class RadioInvasiveTaxPayerOption(variant: Option[String], utr: Option[String], nino: Option[String])
 
-object RadioWithInput {
-  val validVariantsForTaxPayerOptionForm = Seq("utr", "nino", "cannotProvide")
+object ValidVariantsTaxPayerOptionForm extends Enumeration {
+  type ValidVariantsTaxPayerOptionForm = String
+  val Utr = Value("utr")
+  val Nino = Value("nino")
+  val CannotProvide = Value("cannotProvide")
+}
 
+object RadioWithInput {
   //uses variant "cannotProvide" to determine action if user cannot provide allowed options: utr or nino
   val invasiveCheckTaxPayerOption: Form[RadioInvasiveTaxPayerOption] = Form[RadioInvasiveTaxPayerOption](
     mapping(
@@ -36,7 +41,8 @@ object RadioWithInput {
     )(RadioInvasiveTaxPayerOption.apply)(RadioInvasiveTaxPayerOption.unapply).verifying(
       "error.radio-variant.invalid",
       submittedTaxPayerOption =>
-        validVariantsForTaxPayerOptionForm.contains(submittedTaxPayerOption.variant.getOrElse(""))))
+        ValidVariantsTaxPayerOptionForm.values.exists(_.toString == submittedTaxPayerOption.variant.getOrElse(""))
+    ))
 
   val invasiveCheckStartSaAgentCode: Form[RadioInvasiveStartSaAgentCode] = Form[RadioInvasiveStartSaAgentCode](
     mapping(

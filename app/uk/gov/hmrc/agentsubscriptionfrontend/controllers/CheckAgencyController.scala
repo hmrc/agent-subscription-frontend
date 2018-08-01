@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
 import play.api.Logger
-import play.api.data.{Form, FormError}
+import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{AnyContent, Request, _}
@@ -278,16 +278,18 @@ class CheckAgencyController @Inject()(
             Future successful Ok(invasive_input_option(formWithErrors))
           },
           correctForm => {
-            correctForm.variant
-              .map {
-                case "utr"  => checkAndRedirect(Utr(correctForm.utr.get), "utr")
-                case "nino" => checkAndRedirect(Nino(correctForm.nino.get), "nino")
-                case "cannotProvide" => {
-                  mark("Count-Subscription-InvasiveCheck-Could-Not-Provide-Tax-Payer-Identifier")
-                  Future successful Redirect(routes.StartController.setupIncomplete())
-                }
+            val retrievedVariant = correctForm.variant
+              .getOrElse(throw new IllegalStateException(
+                "Form validation should return error when submitting unavailable variant"))
+
+            ValidVariantsTaxPayerOptionForm.withName(retrievedVariant) match {
+              case ValidVariantsTaxPayerOptionForm.Utr => checkAndRedirect(Utr(correctForm.utr.get), "utr")
+              case ValidVariantsTaxPayerOptionForm.Nino => checkAndRedirect(Nino(correctForm.nino.get), "nino")
+              case ValidVariantsTaxPayerOptionForm.CannotProvide => {
+                mark("Count-Subscription-InvasiveCheck-Could-Not-Provide-Tax-Payer-Identifier")
+                Future successful Redirect(routes.StartController.setupIncomplete())
               }
-              .getOrElse(throw new IllegalStateException("Form should return an error before reaching here"))
+            }
           }
         )
     }

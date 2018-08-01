@@ -706,6 +706,14 @@ trait CheckAgencyControllerISpec extends BaseISpec with SessionDataMissingSpec {
       bodyOf(result) should include(htmlEscapedMessage("error.utr.invalid.length"))
     }
 
+    "Invalid form 'variant' cannot determine which option user selected  " in {
+      an[BadRequestException] shouldBe thrownBy(await(
+        controller.invasiveTaxPayerOption(
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+            .withFormUrlEncodedBody(("variant", "someInvalidVariant"), ("utr", "4000000009"))
+            .withSession("saAgentReferenceToCheck" -> "SA6012"))))
+    }
+
     "redirect to setUpIncomplete when successfully selecting ICannotProvideEitherOfTheseDetails" in {
       givenUtrAGoodCombinationAndUserHasRelationshipInCesa("utr", "4000000009", "SA6012")
 
