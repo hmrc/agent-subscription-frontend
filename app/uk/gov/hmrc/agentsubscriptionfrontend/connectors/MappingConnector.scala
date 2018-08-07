@@ -37,7 +37,7 @@ class MappingConnector @Inject()(
     extends HttpAPIMonitor {
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
-  private val mappingUrl = new URL(baseUrl, s"/agent-mapping/mapping")
+  private val mappingUrl = new URL(baseUrl, s"/agent-mapping/mappings")
 
   def isEligibile(implicit hc: HeaderCarrier): Future[Boolean] =
     monitor(s"ConsumedAPI-Agent-Mapping-eligibility-GET") {

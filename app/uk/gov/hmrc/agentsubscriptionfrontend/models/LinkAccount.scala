@@ -16,4 +16,22 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-case class LinkAccount(autoMapping: Option[String])
+sealed trait LinkAccountAnswer extends Product with Serializable
+
+object LinkAccountAnswer {
+  case object Yes extends LinkAccountAnswer
+  case object No extends LinkAccountAnswer
+
+  def apply(str: String): LinkAccountAnswer = str.toLowerCase match {
+    case "yes" => Yes
+    case "no"  => No
+  }
+
+  def unapply(answer: LinkAccountAnswer): Option[String] =
+    answer match {
+      case Yes => Some("yes")
+      case No  => Some("no")
+    }
+}
+
+case class LinkAccount(autoMapping: LinkAccountAnswer)

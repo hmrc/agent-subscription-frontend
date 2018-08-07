@@ -33,6 +33,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AddressLookupFrontendCo
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.validBusinessTypes
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings._
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
+import uk.gov.hmrc.agentsubscriptionfrontend.models.LinkAccountAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionReturnedHttpError, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
@@ -86,11 +87,11 @@ class SubscriptionController @Inject()(
 
   private val linkAccountForm: Form[LinkAccount] =
     Form[LinkAccount](
-      mapping("autoMapping" -> optional(text).verifying(FieldMappings.radioInputSelected))(LinkAccount.apply)(
-        LinkAccount.unapply)
+      mapping("autoMapping" -> optional(text).verifying(FieldMappings.radioInputSelected))(ans =>
+        LinkAccount(LinkAccountAnswer.apply(ans.getOrElse(""))))(lc => Some(LinkAccountAnswer.unapply(lc.autoMapping)))
         .verifying(
           "error.link-account-value.invalid",
-          submittedLinkAccount => Seq("yes", "no").contains(submittedLinkAccount.autoMapping.getOrElse(""))))
+          submittedLinkAccount => Seq(Yes, No).contains(submittedLinkAccount.autoMapping)))
 
   private val initialDetailsForm = Form[InitialDetails](
     mapping(
@@ -239,22 +240,9 @@ class SubscriptionController @Inject()(
               }
             },
             validatedLinkAccount => {
-              sessionStoreService.fetchKnownFactsResult.flatMap {
-                _.map(_.utr).fold(Future.successful(sessionMissingRedirect())) { utr =>
-                  for {
-                    wasEligibleForMappingOpt <- sessionStoreService.fetchMappingEligible
-                    response <- wasEligibleForMappingOpt match {
-                      case Some(true)  =>
-                        mappingConnector.updatePreSubscriptionWithArn(utr).map { _ =>
-                          Redirect(routes.SubscriptionController.showSubscriptionComplete())
-                        }
-                      case Some(false) =>
-                        Future.successful(Redirect(routes.SubscriptionController.showSubscriptionComplete()))
-                      case None        =>
-                        Future.successful(sessionMissingRedirect())
-                    }
-                  } yield response
-                }
+              validatedLinkAccount.autoMapping match {
+                case Yes => linkAccountResponse(mappingConnector.updatePreSubscriptionWithArn)
+                case No  => linkAccountResponse(mappingConnector.deletePreSubscription)
               }
             }
           )
@@ -284,4 +272,12 @@ class SubscriptionController @Inject()(
       }
     }
   }
+
+  private def linkAccountResponse[A](
+    body: Utr => Future[Unit])(implicit hc: HeaderCarrier, request: Request[A]): Future[Result] =
+    sessionStoreService.fetchKnownFactsResult.flatMap {
+      _.map(_.utr).fold(Future.successful(sessionMissingRedirect())) { utr =>
+        body(utr).map(_ => Redirect(routes.SubscriptionController.showSubscriptionComplete()))
+      }
+    }
 }

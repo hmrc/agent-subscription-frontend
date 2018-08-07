@@ -5,9 +5,9 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 
 object MappingStubs {
-  private val urlEligibility = "/agent-mapping/mapping/eligibility"
-  private def urlPreSubscription(utr: String) = s"/agent-mapping/mapping/pre-subscription/$utr"
-  private def urlUpdateToPostSubscription(utr: String) = s"/agent-mapping/mapping/post-subscription/$utr"
+  private val urlEligibility = "/agent-mapping/mappings/eligibility"
+  private def urlPreSubscription(utr: String) = s"/agent-mapping/mappings/pre-subscription/$utr"
+  private def urlUpdateToPostSubscription(utr: String) = s"/agent-mapping/mappings/post-subscription/$utr"
 
   def givenMappingEligibilityIsEligible: StubMapping =
     stubFor(

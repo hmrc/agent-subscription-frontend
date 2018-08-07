@@ -23,10 +23,9 @@ import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, MappingStubs}
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
-import uk.gov.hmrc.http.{BadRequestException, HttpException}
+import uk.gov.hmrc.http.HttpException
 import uk.gov.hmrc.play.binders.ContinueUrl
 
 class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec {
@@ -157,6 +156,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
         .withFormUrlEncodedBody("autoMapping" -> autoMappingFormValue)
         .withSession("arn" -> "AARN0000001")
+      sessionStoreService.currentSession(hc(request)).knownFactsResult = Some(myAgencyKnownFactsResult)
     }
 
     class RequestAndResult(autoMappingFormValue: String) extends Request(autoMappingFormValue) {
@@ -164,17 +164,21 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     }
 
     "choice is Yes" should {
-      "redirect to /subscription-complete" in new RequestAndResult(autoMappingFormValue = "yes") {
+      "redirect to /subscription-complete" in new Request(autoMappingFormValue = "yes") {
+        MappingStubs.givenMappingUpdateToPostSubscription(utr,200)
+
+        val result = await(controller.submitLinkAccount(request))
         result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showSubscriptionComplete().url
       }
 
-      "keep the ARN in the session" in new RequestAndResult(autoMappingFormValue = "yes") {
+      "keep the ARN in the session" in new Request(autoMappingFormValue = "yes") {
+        MappingStubs.givenMappingUpdateToPostSubscription(utr,200)
+        val result = await(controller.submitLinkAccount(request))
         result.session(request)("arn") shouldBe "AARN0000001"
       }
 
       "update the pre-subscription mappings with the ARN" in new Request(autoMappingFormValue = "yes") {
         MappingStubs.givenMappingUpdateToPostSubscription(utr)
-        sessionStoreService.currentSession(hc(request)).knownFactsResult = Some(myAgencyKnownFactsResult)
 
         val result = await(controller.submitLinkAccount(request))
 
@@ -183,17 +187,20 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     }
 
     "choice is No" should {
-      "redirect to /subscription-complete" in new RequestAndResult(autoMappingFormValue = "no") {
+      "redirect to /subscription-complete" in new Request(autoMappingFormValue = "no") {
+        MappingStubs.givenMappingDeletePreSubscription(utr)
+        val result = await(controller.submitLinkAccount(request))
         result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showSubscriptionComplete().url
       }
 
-      "keep the ARN in the session" in new RequestAndResult(autoMappingFormValue = "no") {
+      "keep the ARN in the session" in new Request(autoMappingFormValue = "no") {
+        MappingStubs.givenMappingDeletePreSubscription(utr)
+        val result = await(controller.submitLinkAccount(request))
         result.session(request)("arn") shouldBe "AARN0000001"
       }
 
       "delete the pre-subscription mappings" in new Request(autoMappingFormValue = "no") {
         MappingStubs.givenMappingDeletePreSubscription(utr)
-        sessionStoreService.currentSession(hc(request)).knownFactsResult = Some(myAgencyKnownFactsResult)
 
         val result = await(controller.submitLinkAccount(request))
 
@@ -213,7 +220,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
     "form value is invalid" should {
       "result in a BadRequest" in new Request(autoMappingFormValue = "somethingInvalid") {
-        a[BadRequestException] shouldBe thrownBy(await(controller.submitLinkAccount(request)))
+        a[Exception] shouldBe thrownBy(await(controller.submitLinkAccount(request)))
       }
     }
 
@@ -431,12 +438,14 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.submitInitialDetails(request))
 
     "send subscription request and redirect to subscription complete" when {
-      "all fields are supplied" in {
+      "all fields are supplied and was not eligible for mapping" in {
         AgentSubscriptionStub.subscriptionWillSucceed(utr, subscriptionRequest())
 
         givenAddressLookupInit("agents-subscr", "/api/dummy/callback")
 
         implicit val request = subscriptionDetailsRequest()
+        sessionStoreService.currentSession.wasEligibleForMapping = Some(false)
+
         val result = await(controller.submitInitialDetails(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe "/api/dummy/callback"
@@ -449,14 +458,40 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result2) shouldBe 303
         redirectLocation(result2).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
         sessionStoreService.allSessionsRemoved shouldBe false
-        flash(result2).get("arn") shouldBe Some("ARN00001")
+        result2.session.get("arn") shouldBe Some("ARN00001")
 
         verifySubscriptionRequestSent(subscriptionRequest())
         metricShouldExistAndBeUpdated(
           "Count-Subscription-AddressLookup-Start",
           "Count-Subscription-AddressLookup-Success",
           "Count-Subscription-Complete")
+      }
 
+      "all fields are supplied and was eligible for mapping" in {
+        AgentSubscriptionStub.subscriptionWillSucceed(utr, subscriptionRequest())
+
+        givenAddressLookupInit("agents-subscr", "/api/dummy/callback")
+
+        implicit val request = subscriptionDetailsRequest()
+        sessionStoreService.currentSession.wasEligibleForMapping = Some(true)
+
+        val result = await(controller.submitInitialDetails(request))
+        status(result) shouldBe 303
+        redirectLocation(result).head shouldBe "/api/dummy/callback"
+
+        val addressId = "addr1"
+        stubAddressLookupReturnedAddress(addressId, subscriptionRequest())
+        val result2 =
+          await(controller.returnFromAddressLookup(addressId)(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
+
+        status(result2) shouldBe 303
+        redirectLocation(result2).head shouldBe routes.SubscriptionController.showLinkAccount().url
+
+        verifySubscriptionRequestSent(subscriptionRequest())
+        metricShouldExistAndBeUpdated(
+          "Count-Subscription-AddressLookup-Start",
+          "Count-Subscription-AddressLookup-Success",
+          "Count-Subscription-Complete")
       }
 
       "all fields are supplied but address contains more than 4 lines" in {
@@ -465,6 +500,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         givenAddressLookupInit("agents-subscr", "/api/dummy/callback")
 
         implicit val request = subscriptionDetailsRequest()
+        sessionStoreService.currentSession.wasEligibleForMapping = Some(false)
         val result = await(controller.submitInitialDetails(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe "/api/dummy/callback"
@@ -477,7 +513,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         status(result2) shouldBe 303
         redirectLocation(result2).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
         sessionStoreService.allSessionsRemoved shouldBe false
-        flash(result2).get("arn") shouldBe Some("ARN00001")
+        result2.session.get("arn") shouldBe Some("ARN00001")
 
         verifySubscriptionRequestSent(subscriptionRequest())
         // add check for Logger(getClass).warn here
@@ -534,38 +570,46 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       givenAddressLookupInit("agents-subscr", "/api/dummy/callback")
 
-      val user1Result1 = await(controller.submitInitialDetails(subscriptionDetailsRequest()))
+      val fakeRequest1 = subscriptionDetailsRequest()
+      sessionStoreService.currentSession(hc(fakeRequest1)).wasEligibleForMapping = Some(false)
+
+      val user1Result1 = await(controller.submitInitialDetails(fakeRequest1))
       status(user1Result1) shouldBe 303
       redirectLocation(user1Result1).head shouldBe "/api/dummy/callback"
 
       val request2 = subscriptionRequest2()
       AgentSubscriptionStub.subscriptionWillSucceed(utr, request2, "ARN00002")
 
-      val user2Result1 = await(controller.submitInitialDetails(subscriptionDetailsRequest2()))
+      val fakeRequest2 = subscriptionDetailsRequest2()
+      sessionStoreService.currentSession(hc(fakeRequest2)).wasEligibleForMapping = Some(false)
+
+      val user2Result1 = await(controller.submitInitialDetails(fakeRequest2))
       status(user2Result1) shouldBe 303
       redirectLocation(user2Result1).head shouldBe "/api/dummy/callback"
 
       stubAddressLookupReturnedAddress("addr1", request)
+      val fakeRequest3 = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       val user1Result2 =
-        await(controller.returnFromAddressLookup("addr1")(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
+        await(controller.returnFromAddressLookup("addr1")(fakeRequest3))
 
       status(user1Result2) shouldBe 303
       redirectLocation(user1Result2).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
       verifySubscriptionRequestSent(request)
 
       sessionStoreService.allSessionsRemoved shouldBe false
-      flash(user1Result2).get("arn") shouldBe Some("ARN00001")
+      user1Result2.session(fakeRequest3).get("arn") shouldBe Some("ARN00001")
 
       stubAddressLookupReturnedAddress("addr2", request2)
+      val fakeRequest4 = authenticatedAs(user = subscribing2ndCleanAgentWithoutEnrolments)
       val user2Result2 = await(
-        controller.returnFromAddressLookup("addr2")(authenticatedAs(user = subscribing2ndCleanAgentWithoutEnrolments)))
+        controller.returnFromAddressLookup("addr2")(fakeRequest4))
       verifySubscriptionRequestSent(request)
 
       status(user2Result2) shouldBe 303
       redirectLocation(user2Result2).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
 
       sessionStoreService.allSessionsRemoved shouldBe false
-      flash(user2Result2).get("arn") shouldBe Some("ARN00002")
+      user2Result2.session(fakeRequest4).get("arn") shouldBe Some("ARN00002")
     }
 
     "redirect to subscription failed" when {

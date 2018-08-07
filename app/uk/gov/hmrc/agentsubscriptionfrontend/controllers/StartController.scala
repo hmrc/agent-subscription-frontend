@@ -74,7 +74,7 @@ class StartController @Inject()(
         } yield knownFactsResultOpt
       } else Future successful None
 
-      val decideOnSubscription = knownFactsResultOpt.flatMap {
+      knownFactsResultOpt.flatMap {
         case Some(knownFacts) =>
           for {
             _                   <- sessionStoreService.cacheKnownFactsResult(knownFacts)
@@ -94,7 +94,6 @@ class StartController @Inject()(
           } yield continuedSubscriptionResponse
         case None => Future successful Redirect(routes.CheckAgencyController.showCheckBusinessType())
       }
-      decideOnSubscription
     }
   }
 
