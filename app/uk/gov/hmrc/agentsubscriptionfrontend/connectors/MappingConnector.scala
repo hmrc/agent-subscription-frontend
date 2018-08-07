@@ -23,7 +23,8 @@ import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Named, Singleton}
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpPost, HttpPut}
+import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext.fromLoggingDetails
 
 import scala.concurrent.Future
@@ -31,7 +32,7 @@ import scala.concurrent.Future
 @Singleton
 class MappingConnector @Inject()(
   @Named("agent-mapping-baseUrl") baseUrl: URL,
-  http: HttpGet with HttpPost with HttpPut,
+  http: HttpGet with HttpPost with HttpPut with HttpDelete,
   metrics: Metrics)
     extends HttpAPIMonitor {
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
@@ -44,5 +45,29 @@ class MappingConnector @Inject()(
         .GET[JsValue](s"$mappingUrl/eligibility")
         .map(_ \ "hasEligibleEnrolments")
         .map(_.as[Boolean])
+    }
+
+  def createPreSubscription(utr: Utr)(implicit hc: HeaderCarrier): Future[Unit] =
+    monitor(s"ConsumedAPI-Agent-Mapping-createPreSubscription-PUT") {
+      http
+        .PUT[String, HttpResponse](s"$mappingUrl/pre-subscription/${utr.value}", "")
+        .map(_ => ())
+        .recover {
+          case ex: Upstream4xxResponse if ex.upstreamResponseCode == 409 => ()
+        }
+    }
+
+  def updatePreSubscriptionWithArn(utr: Utr)(implicit hc: HeaderCarrier): Future[Unit] =
+    monitor(s"ConsumedAPI-Agent-Mapping-updatePreSubscriptionWithArn-PUT") {
+      http
+        .PUT[String, HttpResponse](s"$mappingUrl/post-subscription/${utr.value}", "")
+        .map(_ => ())
+    }
+
+  def deletePreSubscription(utr: Utr)(implicit hc: HeaderCarrier): Future[Unit] =
+    monitor(s"ConsumedAPI-Agent-Mapping-deletePreSubscription-DELETE") {
+      http
+        .DELETE(s"$mappingUrl/pre-subscription/${utr.value}")
+        .map(_ => ())
     }
 }

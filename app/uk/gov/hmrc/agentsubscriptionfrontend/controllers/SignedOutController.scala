@@ -38,8 +38,8 @@ class SignedOutController @Inject()(
     for {
       knownFactOpt <- sessionStoreService.fetchKnownFactsResult
       id <- knownFactOpt match {
-             case Some(x) => knownFactsResultMongoRepository.create(x).map(Option.apply)
-             case None    => Future successful None
+             case Some(knownFact) => knownFactsResultMongoRepository.create(knownFact).map(Option.apply)
+             case None            => Future successful None
            }
       agentSubContinueUrl <- sessionStoreService.fetchContinueUrl
     } yield {

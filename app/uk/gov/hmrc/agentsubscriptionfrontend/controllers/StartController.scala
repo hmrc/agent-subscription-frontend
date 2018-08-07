@@ -39,7 +39,8 @@ class StartController @Inject()(
   val metrics: Metrics,
   override val appConfig: AppConfig,
   sessionStoreService: SessionStoreService,
-  subscriptionService: SubscriptionService)(implicit val aConfig: AppConfig)
+  subscriptionService: SubscriptionService,
+  subscriptionCtrlr: SubscriptionController)(implicit val aConfig: AppConfig)
     extends FrontendController with I18nSupport with AuthActions {
 
   import continueUrlActions._
@@ -79,16 +80,17 @@ class StartController @Inject()(
             _                   <- sessionStoreService.cacheKnownFactsResult(knownFacts)
             subscriptionProcess <- subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode)
             isPartiallySubscribed = subscriptionProcess.state == SubscriptionState.SubscribedAndNotEnrolled
-            continuedSubscriptionResponse <- if (isPartiallySubscribed)
+            continuedSubscriptionResponse <- if (isPartiallySubscribed) {
                                               subscriptionService
                                                 .completePartialSubscription(knownFacts.utr, knownFacts.postcode)
-                                                .map { arn =>
+                                                .flatMap { arn =>
                                                   mark("Count-Subscription-PartialSubscriptionCompleted")
-                                                  Redirect(routes.SubscriptionController.showSubscriptionComplete())
-                                                    .flashing("arn" -> arn.value)
-                                                } else
+                                                  subscriptionCtrlr.redirectUponSuccessfulSubscription(arn)
+                                                }
+                                            } else {
                                               Future successful Redirect(
                                                 routes.SubscriptionController.showInitialDetails())
+                                            }
           } yield continuedSubscriptionResponse
         case None => Future successful Redirect(routes.CheckAgencyController.showCheckBusinessType())
       }

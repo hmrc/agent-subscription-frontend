@@ -22,7 +22,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, MappingStubs}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
@@ -77,7 +77,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       checkHtmlResultWithBodyText(result, s"""value="${utr.value}"""", s"""value="$knownFactsPostcode"""")
     }
 
-    "redirect to the Check Business Type page if there is no KnownFactsResult in session because the user has returned to a bookmark" in {
+    "redirect to the /check-business-type page if there is no KnownFactsResult in session because the user has returned to a bookmark" in {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       val result = await(controller.showInitialDetails(request))
@@ -91,6 +91,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
     trait RequestAndResult {
       val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+        .withSession("arn" -> "AARN0000001")
       val result = await(controller.showLinkAccount(request))
       val doc = Jsoup.parse(bodyOf(result))
     }
@@ -132,62 +133,96 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
     "tolerate a possible short delay in the new enrolment becoming visible in auth" when {
       "there was a delay and the new enrolment is not yet visible in auth" in {
-        val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withSession("arn" -> "AARN0000001")
         val result = await(controller.showLinkAccount(request))
         checkHtmlResultContainsMsgs(result, "linkAccount.title")
       }
       "there was no delay and the new enrolment is visible in auth" in {
-        val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+        val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT).withSession("arn" -> "AARN0000001")
         val result = await(controller.showLinkAccount(request))
         checkHtmlResultContainsMsgs(result, "linkAccount.title")
       }
+    }
+
+    "redirect to /check-business-type if subscribed arn is missing from session" in {
+      val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      resultShouldBeSessionDataMissing(await(controller.showLinkAccount(request)))
     }
   }
 
   "showLinkAccountType (POST /link-account)" when {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.submitLinkAccount(_))
 
-    CheckAgencyController.validBusinessTypes.foreach { validBusinessTypeIdentifier =>
-      s"redirect to /check-agency-status when valid businessTypeIdentifier: $validBusinessTypeIdentifier" in {
-        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          .withFormUrlEncodedBody("businessType" -> validBusinessTypeIdentifier)
+    class Request(autoMappingFormValue: String) {
+      val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+        .withFormUrlEncodedBody("autoMapping" -> autoMappingFormValue)
+        .withSession("arn" -> "AARN0000001")
+    }
+
+    class RequestAndResult(autoMappingFormValue: String) extends Request(autoMappingFormValue) {
+      val result = await(controller.submitLinkAccount(request))
+    }
+
+    "choice is Yes" should {
+      "redirect to /subscription-complete" in new RequestAndResult(autoMappingFormValue = "yes") {
+        result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showSubscriptionComplete().url
+      }
+
+      "keep the ARN in the session" in new RequestAndResult(autoMappingFormValue = "yes") {
+        result.session(request)("arn") shouldBe "AARN0000001"
+      }
+
+      "update the pre-subscription mappings with the ARN" in new Request(autoMappingFormValue = "yes") {
+        MappingStubs.givenMappingUpdateToPostSubscription(utr)
+        sessionStoreService.currentSession(hc(request)).knownFactsResult = Some(myAgencyKnownFactsResult)
 
         val result = await(controller.submitLinkAccount(request))
-        result.header.headers(LOCATION) shouldBe routes.CheckAgencyController.checkAgencyStatus(Some(validBusinessTypeIdentifier)).url
+
+        MappingStubs.verifyMappingUpdateToPostSubscriptionCalled(utr)
+      }
+    }
+
+    "choice is No" should {
+      "redirect to /subscription-complete" in new RequestAndResult(autoMappingFormValue = "no") {
+        result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showSubscriptionComplete().url
+      }
+
+      "keep the ARN in the session" in new RequestAndResult(autoMappingFormValue = "no") {
+        result.session(request)("arn") shouldBe "AARN0000001"
+      }
+
+      "delete the pre-subscription mappings" in new Request(autoMappingFormValue = "no") {
+        MappingStubs.givenMappingDeletePreSubscription(utr)
+        sessionStoreService.currentSession(hc(request)).knownFactsResult = Some(myAgencyKnownFactsResult)
+
+        val result = await(controller.submitLinkAccount(request))
+
+        MappingStubs.verifyMappingDeletePreSubscriptionCalled(utr)
       }
     }
 
     "choice is missing" should {
-      "return 200 and redisplay the /check-business-type page with an error message for missing choice" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      "return 200 and redisplay the /link-account page with an error message for missing choice" in {
+        val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+          .withSession("arn" -> "AARN0000001")
         val result = await(controller.submitLinkAccount(request))
+
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("error.no-radio-selected"))
       }
     }
 
-    s"400 Exception ,when businessTypeIdentifier invalid" in {
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-        .withFormUrlEncodedBody("businessType" -> "unCateredBusinessTypeIdentifier")
-
-      an[BadRequestException] shouldBe thrownBy(await(controller.submitLinkAccount(request)))
+    "form value is invalid" should {
+      "result in a BadRequest" in new Request(autoMappingFormValue = "somethingInvalid") {
+        a[BadRequestException] shouldBe thrownBy(await(controller.submitLinkAccount(request)))
+      }
     }
 
-    "tolerate a possible short delay in the new enrolment becoming visible in auth" when {
-      "there was a delay and the new enrolment is not yet visible in auth" in {
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+    "ARN is missing from session" should {
+      "redirect to /check-business-type" in {
+        val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+          .withFormUrlEncodedBody("autoMapping" -> "yes")
 
-        val result =
-          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
-
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionComplete.title"))
-      }
-      "there was no delay and the new enrolment is visible in auth" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
-
-        val result =
-          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
-
-        checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionComplete.title"))
+        resultShouldBeSessionDataMissing(controller.submitLinkAccount(request))
       }
     }
   }
@@ -199,23 +234,23 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       request => {
         controller.showSubscriptionComplete(request)
       },
-      authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")
+      authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        .withSession("arn" -> "AARN0000001")
     )
 
     "display the agency name and ARN" in {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+      val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+        .withSession("arn" -> "AARN0000001")
 
-      val result =
-        await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
+      val result = await(controller.showSubscriptionComplete(request))
 
       status(result) shouldBe 200
       checkHtmlResultWithBodyText(result, "You must save this number for your agency's records.")
       checkHtmlResultWithBodyText(result, "AARN-000-0001")
     }
 
-    "redirect to session missing page if there is nothing in the flash scope" in {
+    "redirect to session missing page if the arn is missing from the session" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
-
       val result = await(controller.showSubscriptionComplete(request))
 
       resultShouldBeSessionDataMissing(result)
@@ -224,17 +259,15 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     "tolerate a possible short delay in the new enrolment becoming visible in auth" when {
       "there was a delay and the new enrolment is not yet visible in auth" in {
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-
-        val result =
-          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
+          .withSession("arn" -> "AARN0000001")
+        val result = await(controller.showSubscriptionComplete(request))
 
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionComplete.title"))
       }
       "there was no delay and the new enrolment is visible in auth" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
-
-        val result =
-          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
+          .withSession("arn" -> "AARN0000001")
+        val result = await(controller.showSubscriptionComplete(request))
 
         checkHtmlResultWithBodyText(result, htmlEscapedMessage("subscriptionComplete.title"))
       }
@@ -243,12 +276,12 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     "contain a button to continue journey" when {
       "a continue URL exists in the session, show a generic 'Continue' button using that URL" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+          .withSession("arn" -> "AARN0000001")
 
         val continueUrl = ContinueUrl("/test-continue-url")
 
         sessionStoreService.currentSession(hc(request)).continueUrl = Some(continueUrl)
-        val result =
-          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
+        val result = await(controller.showSubscriptionComplete(request))
 
         checkHtmlResultWithBodyText(
           result,
@@ -258,9 +291,9 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       "no continue URL exists in the session, show a button with a link in AS services" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+          .withSession("arn" -> "AARN0000001")
 
-        val result =
-          await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
+        val result = await(controller.showSubscriptionComplete(request))
 
         checkHtmlResultWithBodyText(
           result,
@@ -271,12 +304,13 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
     "remove existing session" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+        .withSession("arn" -> "AARN0000001")
 
-      val result =
-        await(controller.showSubscriptionComplete(request.withFlash("arn" -> "AARN0000001", "agencyName" -> "My Agency")))
+      val result = await(controller.showSubscriptionComplete(request))
 
       status(result) shouldBe 200
       sessionStoreService.allSessionsRemoved shouldBe true
+      result.session(request).get("arn") shouldBe None
     }
   }
 
@@ -639,7 +673,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
   }
 
   "submitModifiedAddress" should {
-    "display submit-modified-address and submit revised form if there are no errors" in {
+    "subscribe and redirect to /subscription-complete if there are no form errors" in {
       AgentSubscriptionStub.subscriptionWillSucceed(utr, subscriptionRequest())
 
       implicit val request = desAddressForm()
@@ -649,6 +683,8 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       status(result) shouldBe 303
       redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
+
+      verifySubscriptionRequestSent(subscriptionRequest())
     }
 
     "redirect to check-business-type if there is no valid session" in {
