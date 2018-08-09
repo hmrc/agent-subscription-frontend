@@ -251,22 +251,27 @@ class SubscriptionController @Inject()(
   }
 
   val showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>
+    def recoverSessionStoreWithNone[T]: PartialFunction[Throwable, Option[T]] = {
+      case NonFatal(ex) =>
+        Logger(getClass).warn("Session store service failure", ex)
+        None
+    }
+
     withAuthenticatedAgent {
       request.session.get("arn") match {
         case Some(arn) =>
-          sessionStoreService.fetchContinueUrl
-            .recover {
-              case NonFatal(ex) =>
-                Logger(getClass).warn("Session store service failure", ex)
-                None
-            }
-            .andThen { case _ => sessionStoreService.remove() }
-            .map { continueUrlOpt =>
-              val continueUrl = continueUrlOpt.map(_.url).getOrElse(appConfig.agentServicesAccountUrl)
-              val isUrlToASAccount = continueUrlOpt.isEmpty
-              Ok(html.subscription_complete(continueUrl, isUrlToASAccount, prettify(Arn(arn))))
-                .removingFromSession("arn")
-            }
+          for {
+            continueUrlOpt           <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
+            wasEligibleForMappingOpt <- sessionStoreService.fetchMappingEligible.recover(recoverSessionStoreWithNone)
+            _                        <- sessionStoreService.remove()
+          } yield {
+            val continueUrl = continueUrlOpt.map(_.url).getOrElse(appConfig.agentServicesAccountUrl)
+            val isUrlToASAccount = continueUrlOpt.isEmpty
+            val wasEligibleForMapping = wasEligibleForMappingOpt.contains(true)
+            val prettifiedArn = prettify(Arn(arn))
+            Ok(html.subscription_complete(continueUrl, isUrlToASAccount, wasEligibleForMapping, prettifiedArn))
+              .removingFromSession("arn")
+          }
         case _ =>
           Future.successful(sessionMissingRedirect())
       }

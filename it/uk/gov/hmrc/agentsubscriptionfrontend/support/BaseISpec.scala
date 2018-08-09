@@ -3,6 +3,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.support
 import com.codahale.metrics.MetricRegistry
 import com.google.inject.AbstractModule
 import com.kenshoo.play.metrics.Metrics
+import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, Messages, MessagesApi}
@@ -82,30 +83,52 @@ abstract class BaseISpec
     FakeRequest().withSession(sessionKeys: _*)
   }
 
-  protected def checkHtmlResultWithBodyText(result: Result, expectedSubstrings: String*): Unit = {
-    status(result) shouldBe OK
-    contentType(result) shouldBe Some("text/html")
-    charset(result) shouldBe Some("utf-8")
-    val resultBody = bodyOf(result)
-    expectedSubstrings.foreach { expectedSubstring =>
-      expectedSubstring.trim should not be ""
-      resultBody should include(expectedSubstring)
+  protected def checkMessageIsDefined(messageKey: String) = {
+    withClue(s"Message key ($messageKey) should be defined: ") {
+      Messages.isDefinedAt(messageKey) shouldBe true
     }
   }
 
-  protected def checkHtmlResultContainsMsgs(result: Result, expectedMessageKeys: String*): Unit = {
+  protected def checkIsHtml200(result: Result) = {
     status(result) shouldBe OK
-    contentType(result) shouldBe Some("text/html")
     charset(result) shouldBe Some("utf-8")
+    contentType(result) shouldBe Some("text/html")
+  }
 
-    expectedMessageKeys.foreach { messageKey =>
-      withClue(s"Expected message key '$messageKey' to exist: ") {
-        Messages.isDefinedAt(messageKey) shouldBe true
+  protected def containSubstrings(expectedSubstrings: String*): Matcher[Result] = {
+    new Matcher[Result] {
+      override def apply(result: Result): MatchResult = {
+        checkIsHtml200(result)
+
+        val resultBody = bodyOf(result)
+        val (strsPresent, strsMissing) = expectedSubstrings.partition{ expectedSubstring =>
+          expectedSubstring.trim should not be ""
+          resultBody.contains(expectedSubstring)
+        }
+
+        MatchResult(strsMissing.isEmpty,
+          s"Expected substrings are missing in the response: ${strsMissing.mkString("\"", "\", \"", "\"")}",
+          s"Expected substrings are present in the response : ${strsPresent.mkString("\"", "\", \"", "\"")}")
       }
+    }
+  }
 
-      val expectedContent = Messages(messageKey)
-      withClue(s"Expected content ('$expectedContent') for message key '$messageKey' to be in request body: ") {
-        bodyOf(result) should include(htmlEscapedMessage(expectedContent))
+  protected def containMessages(expectedMessageKeys: String*): Matcher[Result] = {
+    new Matcher[Result] {
+      override def apply(result: Result): MatchResult = {
+        expectedMessageKeys.foreach(checkMessageIsDefined)
+        checkIsHtml200(result)
+
+        val resultBody = bodyOf(result)
+        val (msgsPresent, msgsMissing) = expectedMessageKeys.partition { messageKey =>
+          resultBody.contains(htmlEscapedMessage(messageKey))
+        }
+
+        MatchResult(
+          msgsMissing.isEmpty,
+          s"Content is missing in the response for message keys: ${msgsMissing.mkString(", ")}",
+          s"Content is present in the response for message keys: ${msgsPresent.mkString(", ")}"
+        )
       }
     }
   }
