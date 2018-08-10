@@ -133,6 +133,12 @@ abstract class BaseISpec
     }
   }
 
+  protected def withMetricsTimerUpdate(expectedMetricName: String)(testCode: => Unit): Unit = {
+    givenCleanMetricRegistry()
+    testCode
+    timerShouldExistAndBeUpdated(expectedMetricName)
+  }
+
   private val messagesApi = app.injector.instanceOf[MessagesApi]
   private implicit val messages: Messages = messagesApi.preferred(Seq.empty[Lang])
 

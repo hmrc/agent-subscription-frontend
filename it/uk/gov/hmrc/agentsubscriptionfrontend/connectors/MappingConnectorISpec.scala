@@ -18,12 +18,6 @@ class MappingConnectorISpec extends BaseISpec with MetricTestSupport {
       app.injector.instanceOf[HttpGet with HttpPost with HttpPut with HttpDelete],
       app.injector.instanceOf[Metrics])
 
-  private def withMetricsTimerUpdate(expectedMetricName: String)(testCode: => Unit): Unit = {
-    givenCleanMetricRegistry()
-    testCode
-    timerShouldExistAndBeUpdated(expectedMetricName)
-  }
-
   "isEligible" when {
     val withMetrics = withMetricsTimerUpdate("ConsumedAPI-Agent-Mapping-eligibility-GET") _
 
