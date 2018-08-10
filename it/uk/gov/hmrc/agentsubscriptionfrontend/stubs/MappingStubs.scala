@@ -6,8 +6,8 @@ import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 
 object MappingStubs {
   private val urlEligibility = "/agent-mapping/mappings/eligibility"
-  private def urlPreSubscription(utr: String) = s"/agent-mapping/mappings/pre-subscription/$utr"
-  private def urlUpdateToPostSubscription(utr: String) = s"/agent-mapping/mappings/post-subscription/$utr"
+  private def urlPreSubscription(utr: String) = s"/agent-mapping/mappings/pre-subscription/utr/$utr"
+  private def urlUpdateToPostSubscription(utr: String) = s"/agent-mapping/mappings/post-subscription/utr/$utr"
 
   def givenMappingEligibilityIsEligible: StubMapping =
     stubFor(
