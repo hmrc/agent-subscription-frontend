@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import cats.Show.ops.toAllShowOps
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
@@ -30,7 +29,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AddressLookupFrontendConnector, MappingConnector}
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.validBusinessTypes
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings._
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models.LinkAccountAnswer.{No, Yes}
@@ -42,7 +40,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 case class SubscriptionDetails(
@@ -151,7 +149,7 @@ class SubscriptionController @Inject()(
     })
 
   private def redirectSubscriptionResponse(either: Either[SubscriptionReturnedHttpError, (Arn, String)])(
-    implicit hc: HeaderCarrier): Future[Result] =
+    implicit request: Request[AnyContent]): Future[Result] =
     either match {
       case Right((arn, _)) =>
         mark("Count-Subscription-Complete")
@@ -166,14 +164,14 @@ class SubscriptionController @Inject()(
         throw new HttpException("Subscription failed", status)
     }
 
-  private[controllers] def redirectUponSuccessfulSubscription(arn: Arn)(implicit hc: HeaderCarrier) =
+  private[controllers] def redirectUponSuccessfulSubscription(arn: Arn)(implicit request: Request[AnyContent]) =
     for (wasEligibileForMapping <- sessionStoreService.fetchMappingEligible) yield {
       val redirectLocation = wasEligibileForMapping match {
         case Some(true) => routes.SubscriptionController.showLinkAccount()
         case _          => routes.SubscriptionController.showSubscriptionComplete()
       }
 
-      Redirect(redirectLocation).withSession("arn" -> arn.value)
+      Redirect(redirectLocation).withSession(request.session + ("arn" -> arn.value))
     }
 
   def returnFromAddressLookup(id: String): Action[AnyContent] = Action.async { implicit request =>

@@ -50,7 +50,7 @@ class MappingConnector @Inject()(
   def createPreSubscription(utr: Utr)(implicit hc: HeaderCarrier): Future[Unit] =
     monitor(s"ConsumedAPI-Agent-Mapping-createPreSubscription-PUT") {
       http
-        .PUT[String, HttpResponse](s"$mappingUrl/pre-subscription/${utr.value}", "")
+        .PUT[String, HttpResponse](s"$mappingUrl/pre-subscription/utr/${utr.value}", "")
         .map(_ => ())
         .recover {
           case ex: Upstream4xxResponse if ex.upstreamResponseCode == 409 => ()
@@ -60,14 +60,14 @@ class MappingConnector @Inject()(
   def updatePreSubscriptionWithArn(utr: Utr)(implicit hc: HeaderCarrier): Future[Unit] =
     monitor(s"ConsumedAPI-Agent-Mapping-updatePreSubscriptionWithArn-PUT") {
       http
-        .PUT[String, HttpResponse](s"$mappingUrl/post-subscription/${utr.value}", "")
+        .PUT[String, HttpResponse](s"$mappingUrl/post-subscription/utr/${utr.value}", "")
         .map(_ => ())
     }
 
   def deletePreSubscription(utr: Utr)(implicit hc: HeaderCarrier): Future[Unit] =
     monitor(s"ConsumedAPI-Agent-Mapping-deletePreSubscription-DELETE") {
       http
-        .DELETE(s"$mappingUrl/pre-subscription/${utr.value}")
+        .DELETE(s"$mappingUrl/pre-subscription/utr/${utr.value}")
         .map(_ => ())
     }
 }
