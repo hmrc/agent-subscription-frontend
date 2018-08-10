@@ -26,7 +26,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, MappingStubs}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
-import uk.gov.hmrc.http.HttpException
+import uk.gov.hmrc.http.{BadRequestException, HttpException}
 import uk.gov.hmrc.play.binders.ContinueUrl
 
 class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec {
@@ -209,7 +209,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
     "form value is invalid" should {
       "result in a BadRequest" in new RequestWithSessionDetails(autoMappingFormValue = "somethingInvalid") {
-        a[Exception] shouldBe thrownBy(resultOf(request))
+        a[BadRequestException] shouldBe thrownBy(resultOf(request))
       }
     }
 

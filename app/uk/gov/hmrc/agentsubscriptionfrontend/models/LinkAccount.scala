@@ -15,6 +15,7 @@
  */
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
+import uk.gov.hmrc.http.BadRequestException
 
 sealed trait LinkAccountAnswer extends Product with Serializable
 
@@ -25,6 +26,7 @@ object LinkAccountAnswer {
   def apply(str: String): LinkAccountAnswer = str.toLowerCase match {
     case "yes" => Yes
     case "no"  => No
+    case _ => throw new BadRequestException("Strange form input value")
   }
 
   def unapply(answer: LinkAccountAnswer): Option[String] =
