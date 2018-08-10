@@ -16,9 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import java.net.URLEncoder
-
-import javax.inject.{Inject, Named, Singleton}
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.Action
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.MappingConnector
@@ -46,10 +44,8 @@ class SignedOutController @Inject()(
                  isEligibleForMapping <- mappingConnector.isEligibile
                  _ <- if (isEligibleForMapping) mappingConnector.createPreSubscription(knownFact.utr)
                      else Future.successful(())
-                 idOpt <- chainedSessionRepository
-                           .create(ChainedSessionDetails(knownFact, isEligibleForMapping))
-                           .map(Option.apply)
-               } yield idOpt
+                 id <- chainedSessionRepository.create(ChainedSessionDetails(knownFact, isEligibleForMapping))
+               } yield Some(id)
              }
              case None => Future successful None
            }

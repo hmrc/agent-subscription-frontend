@@ -26,7 +26,7 @@ object LinkAccountAnswer {
   def apply(str: String): LinkAccountAnswer = str.toLowerCase match {
     case "yes" => Yes
     case "no"  => No
-    case _ => throw new BadRequestException("Strange form input value")
+    case _     => throw new BadRequestException("Strange form input value")
   }
 
   def unapply(answer: LinkAccountAnswer): Option[String] =

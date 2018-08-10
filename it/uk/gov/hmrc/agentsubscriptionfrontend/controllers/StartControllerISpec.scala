@@ -1,7 +1,5 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import java.net.URLEncoder
-
 import org.jsoup.Jsoup
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
@@ -9,12 +7,11 @@ import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{ChainedSessionDetails, CompletePartialSubscriptionBody, KnownFactsResult, SubscriptionRequestKnownFacts}
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.ChainedSessionDetailsRepository
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, AuthStub}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{individual, subscribingAgentEnrolledForHMRCASAGENT}
-import uk.gov.hmrc.play.binders.ContinueUrl
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.individual
 import uk.gov.hmrc.http.{Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -153,7 +150,7 @@ class StartControllerISpec extends BaseISpec {
       }
     }
 
-    "redirect to correct page if given a valid KnownFactsResult ID and agent is partially subscribed (subscribed in ETMP but not enrolled)" when {
+    "redirect to correct page if given a valid StashedChainedSessionDetails ID and agent is partially subscribed (subscribed in ETMP but not enrolled)" when {
       "agent was eligible for mapping, should redirect to /link-account" in new ValidKnownFactsCached(wasEligibleForMapping = true) with PartiallySubscribedAgentStub {
         AgentSubscriptionStub.partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(utr = knownFactsResult.utr,
           knownFacts = SubscriptionRequestKnownFacts(knownFactsResult.postcode)))
@@ -196,7 +193,7 @@ class StartControllerISpec extends BaseISpec {
       an[Upstream5xxResponse] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
     }
 
-    "redirect to the /check-business-type page if given an invalid KnownFactsResult ID" in new ValidKnownFactsCached {
+    "redirect to the /check-business-type page if given an invalid ChainedSessionDetails ID" in new ValidKnownFactsCached {
       val invalidId = s"A$persistedId"
 
       val result = await(controller.returnAfterGGCredsCreated(id = Some(invalidId))(FakeRequest()))
@@ -205,14 +202,14 @@ class StartControllerISpec extends BaseISpec {
       redirectLocation(result).head should include(routes.CheckAgencyController.showCheckBusinessType().url)
     }
 
-    "redirect to /check-business-type page if there is no valid KnownFactsResult ID" in {
+    "redirect to /check-business-type page if there is no valid ChainedSessionDetails ID" in {
       val result = await(controller.returnAfterGGCredsCreated(id = None)(FakeRequest()))
 
       status(result) shouldBe 303
       redirectLocation(result).head should include(routes.CheckAgencyController.showCheckBusinessType().url)
     }
 
-    "delete the persisted KnownFactsResult if given a valid KnownFactsResult ID" in new ValidKnownFactsCached with UnsubscribedAgentStub {
+    "delete the persisted ChainedSessionDetails if given a valid ChainedSessionDetails ID" in new ValidKnownFactsCached with UnsubscribedAgentStub {
       await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest()))
 
       await(repo.findChainedSessionDetails(persistedId)) shouldBe None
@@ -234,7 +231,7 @@ class StartControllerISpec extends BaseISpec {
       sessionStoreService.currentSession.wasEligibleForMapping shouldBe Some(wasEligibleForMapping)
     }
 
-    "place a provided continue URL in session store, if given a valid KnownFactsResult ID" in new ValidKnownFactsCached with UnsubscribedAgentStub {
+    "place a provided continue URL in session store, if given a valid ChainedSessionDetails ID" in new ValidKnownFactsCached with UnsubscribedAgentStub {
       val continueUrl = ContinueUrl("/test-continue-url")
       implicit val request = FakeRequest(GET, s"?id=$persistedId&continue=${continueUrl.encodedUrl}")
 
