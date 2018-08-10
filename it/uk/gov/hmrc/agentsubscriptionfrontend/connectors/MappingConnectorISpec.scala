@@ -103,28 +103,34 @@ class MappingConnectorISpec extends BaseISpec with MetricTestSupport {
       }
     }
 
-    "fail with Upstream4xxException if agent-mapping fails with a 401 response" in withMetrics {
-      MappingStubs.givenMappingUpdateToPostSubscription(Utr("1234567890"), httpReturnCode = 401)
-      intercept[Upstream4xxResponse] {
-        await(connector.updatePreSubscriptionWithArn(Utr("1234567890")))
-      }.upstreamResponseCode shouldBe 401
-      MappingStubs.verifyMappingUpdateToPostSubscriptionCalled(Utr("1234567890"))
+    "agent-mapping returns a 401 response" should {
+      "fail with Upstream4xxException" in withMetrics {
+        MappingStubs.givenMappingUpdateToPostSubscription(Utr("1234567890"), httpReturnCode = 401)
+        intercept[Upstream4xxResponse] {
+          await(connector.updatePreSubscriptionWithArn(Utr("1234567890")))
+        }.upstreamResponseCode shouldBe 401
+        MappingStubs.verifyMappingUpdateToPostSubscriptionCalled(Utr("1234567890"))
+      }
     }
 
-    "fail with Upstream4xxException if agent-mapping fails with a 403 response" in withMetrics {
-      MappingStubs.givenMappingUpdateToPostSubscription(Utr("1234567890"), httpReturnCode = 403)
-      intercept[Upstream4xxResponse] {
-        await(connector.updatePreSubscriptionWithArn(Utr("1234567890")))
-      }.upstreamResponseCode shouldBe 403
-      MappingStubs.verifyMappingUpdateToPostSubscriptionCalled(Utr("1234567890"))
+    "agent-mapping returns a 403 response" should {
+      "fail with Upstream4xxException" in withMetrics {
+        MappingStubs.givenMappingUpdateToPostSubscription(Utr("1234567890"), httpReturnCode = 403)
+        intercept[Upstream4xxResponse] {
+          await(connector.updatePreSubscriptionWithArn(Utr("1234567890")))
+        }.upstreamResponseCode shouldBe 403
+        MappingStubs.verifyMappingUpdateToPostSubscriptionCalled(Utr("1234567890"))
+      }
     }
 
-    "fail with Upstream5xxException if agent-mapping fails with a 503 response" in withMetrics {
-      MappingStubs.givenMappingUpdateToPostSubscription(Utr("1234567890"), httpReturnCode = 503)
-      intercept[Upstream5xxResponse] {
-        await(connector.updatePreSubscriptionWithArn(Utr("1234567890")))
-      }.upstreamResponseCode shouldBe 503
-      MappingStubs.verifyMappingUpdateToPostSubscriptionCalled(Utr("1234567890"))
+    "agent-mapping returns a 503 response" should {
+      "fail with Upstream5xxException" in withMetrics {
+        MappingStubs.givenMappingUpdateToPostSubscription(Utr("1234567890"), httpReturnCode = 503)
+        intercept[Upstream5xxResponse] {
+          await(connector.updatePreSubscriptionWithArn(Utr("1234567890")))
+        }.upstreamResponseCode shouldBe 503
+        MappingStubs.verifyMappingUpdateToPostSubscriptionCalled(Utr("1234567890"))
+      }
     }
   }
 
@@ -139,20 +145,24 @@ class MappingConnectorISpec extends BaseISpec with MetricTestSupport {
       }
     }
 
-    "fail with Upstream4xxException if agent-mapping fails with a 401 response" in withMetrics {
-      MappingStubs.givenMappingDeletePreSubscription(Utr("1234567890"), httpReturnCode = 401)
-      intercept[Upstream4xxResponse] {
-        await(connector.deletePreSubscription(Utr("1234567890")))
-      }.upstreamResponseCode shouldBe 401
-      MappingStubs.verifyMappingDeletePreSubscriptionCalled(Utr("1234567890"))
+    "agent-mapping returns a 401 response" should {
+      "fail with Upstream4xxException" in withMetrics {
+        MappingStubs.givenMappingDeletePreSubscription(Utr("1234567890"), httpReturnCode = 401)
+        intercept[Upstream4xxResponse] {
+          await(connector.deletePreSubscription(Utr("1234567890")))
+        }.upstreamResponseCode shouldBe 401
+        MappingStubs.verifyMappingDeletePreSubscriptionCalled(Utr("1234567890"))
+      }
     }
 
-    "fail with Upstream5xxException if agent-mapping fails with a 503 response" in withMetrics {
-      MappingStubs.givenMappingDeletePreSubscription(Utr("1234567890"), httpReturnCode = 503)
-      intercept[Upstream5xxResponse] {
-        await(connector.deletePreSubscription(Utr("1234567890")))
-      }.upstreamResponseCode shouldBe 503
-      MappingStubs.verifyMappingDeletePreSubscriptionCalled(Utr("1234567890"))
+    "agent-mapping returns a 503 response" should {
+      "fail with Upstream5xxException" in withMetrics {
+        MappingStubs.givenMappingDeletePreSubscription(Utr("1234567890"), httpReturnCode = 503)
+        intercept[Upstream5xxResponse] {
+          await(connector.deletePreSubscription(Utr("1234567890")))
+        }.upstreamResponseCode shouldBe 503
+        MappingStubs.verifyMappingDeletePreSubscriptionCalled(Utr("1234567890"))
+      }
     }
   }
 }
