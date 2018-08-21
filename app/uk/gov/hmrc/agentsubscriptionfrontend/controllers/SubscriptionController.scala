@@ -298,7 +298,7 @@ class SubscriptionController @Inject()(
             }
           }
         }
-      case false => Future successful Redirect(routes.StartController.start())
+      case false => Future.successful(BadRequest)
     }
   }
 
@@ -326,7 +326,7 @@ class SubscriptionController @Inject()(
               )
           }
         }
-      case false => Future successful Redirect(routes.StartController.start())
+      case false => Future.successful(BadRequest)
     }
   }
 

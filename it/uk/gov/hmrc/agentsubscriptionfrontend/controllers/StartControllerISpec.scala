@@ -15,7 +15,8 @@ import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class StartControllerISpec(autoMapFF: Boolean) extends BaseISpec {
+trait StartControllerISpec extends BaseISpec {
+  protected def featureFlagAutoMapping: Boolean
 
   protected lazy val controller: StartController = app.injector.instanceOf[StartController]
   protected lazy val configuredGovernmentGatewayUrl = "http://configured-government-gateway.gov.uk/"
@@ -39,7 +40,7 @@ class StartControllerISpec(autoMapFF: Boolean) extends BaseISpec {
   override protected def appBuilder: GuiceApplicationBuilder =
     super.appBuilder
       .configure("government-gateway.url" -> configuredGovernmentGatewayUrl,
-        "features.auto-map-agent-enrolments" -> autoMapFF)
+        "features.auto-map-agent-enrolments" -> featureFlagAutoMapping)
 
 
   object FixturesForReturnAfterGGCredsCreated {
@@ -261,7 +262,9 @@ class StartControllerISpec(autoMapFF: Boolean) extends BaseISpec {
   }
 }
 
-private class StartControllerWithAutoMappingOn extends StartControllerISpec(autoMapFF = true) {
+class StartControllerWithAutoMappingOn extends StartControllerISpec {
+  override def featureFlagAutoMapping: Boolean = true
+
   "returnAfterGGCredsCreated" should {
     import FixturesForReturnAfterGGCredsCreated.{ValidKnownFactsCached, PartiallySubscribedAgentStub, UnsubscribedAgentStub}
 
@@ -294,18 +297,20 @@ private class StartControllerWithAutoMappingOn extends StartControllerISpec(auto
   }
 }
 
-private class StartControllerWithAutoMappingOff extends StartControllerISpec(autoMapFF = false) {
+class StartControllerWithAutoMappingOff extends StartControllerISpec {
+  override def featureFlagAutoMapping: Boolean = false
+
   "returnAfterGGCredsCreated" should {
     import FixturesForReturnAfterGGCredsCreated.ValidKnownFactsCached
 
-    "Do not store wasEligibleForMapping in sessionStore" in new ValidKnownFactsCached(wasEligibleForMapping = None) {
+    "do not store wasEligibleForMapping in sessionStore" in new ValidKnownFactsCached(wasEligibleForMapping = None) {
       implicit val request = FakeRequest()
 
       await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest()))
       sessionStoreService.currentSession.wasEligibleForMapping shouldBe None
     }
 
-    "Do not store wasEligibleForMapping in sessionStore even if wasEligibleForMapping exists" in new ValidKnownFactsCached(wasEligibleForMapping = Some(true)) {
+    "do not store wasEligibleForMapping in sessionStore even if wasEligibleForMapping exists" in new ValidKnownFactsCached(wasEligibleForMapping = Some(true)) {
       implicit val request = FakeRequest()
 
       await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest()))

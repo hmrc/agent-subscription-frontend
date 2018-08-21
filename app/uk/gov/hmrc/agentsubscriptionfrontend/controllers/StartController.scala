@@ -79,12 +79,14 @@ class StartController @Inject()(
           val knownFacts = chainedSessionDetails.knownFacts
           for {
             _ <- sessionStoreService.cacheKnownFactsResult(knownFacts)
-            _ <- if (appConfig.autoMapAgentEnrolments)
+            _ <- if (appConfig.autoMapAgentEnrolments) {
                   sessionStoreService.cacheMappingEligible(
                     chainedSessionDetails.wasEligibleForMapping
                       .getOrElse(
                         throw new IllegalStateException("chainedSessionDetails did not cache wasEligibleForMapping")))
-                else Future successful ()
+                } else {
+                  Future.successful(())
+                }
             subscriptionProcess <- subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode)
             isPartiallySubscribed = subscriptionProcess.state == SubscriptionState.SubscribedButNotEnrolled
             continuedSubscriptionResponse <- if (isPartiallySubscribed) {
