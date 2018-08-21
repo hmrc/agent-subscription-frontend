@@ -2,6 +2,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import java.net.URLEncoder
 
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
@@ -18,6 +19,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SignOutControllerISpec extends BaseISpec {
   private lazy val controller: SignedOutController = app.injector.instanceOf[SignedOutController]
+
+  def autoMapAgentEnrolmentsFlag = true
+
+  override protected def appBuilder: GuiceApplicationBuilder =
+    super.appBuilder
+      .configure("features.auto-map-agent-enrolments" -> autoMapAgentEnrolmentsFlag)
 
   private lazy val sosRedirectUrl = "/government-gateway-registration-frontend?accountType=agent"
 
@@ -47,7 +54,7 @@ class SignOutControllerISpec extends BaseISpec {
         MappingStubs.givenMappingCreatePreSubscription(Utr("9876543210"))
 
         await(controller.redirectToSos(request))
-        findByUtr("9876543210").map(_.chainedSessionDetails) shouldBe Some(ChainedSessionDetails(knownFactsResult, wasEligibleForMapping = true))
+        findByUtr("9876543210").map(_.chainedSessionDetails) shouldBe Some(ChainedSessionDetails(knownFactsResult, wasEligibleForMapping = Some(true)))
         MappingStubs.verifyMappingEligibilityCalled(times = 1)
         MappingStubs.verifyMappingCreatePreSubscriptionCalled(Utr("9876543210"), times = 1)
       }
@@ -58,7 +65,7 @@ class SignOutControllerISpec extends BaseISpec {
         MappingStubs.givenMappingEligibilityIsNotEligible
 
         await(controller.redirectToSos(request))
-        findByUtr("9876543210").map(_.chainedSessionDetails) shouldBe Some(ChainedSessionDetails(knownFactsResult, wasEligibleForMapping = false))
+        findByUtr("9876543210").map(_.chainedSessionDetails) shouldBe Some(ChainedSessionDetails(knownFactsResult, wasEligibleForMapping = Some(false)))
         MappingStubs.verifyMappingEligibilityCalled(times = 1)
         MappingStubs.verifyMappingCreatePreSubscriptionCalled(Utr("9876543210"), times = 0)
       }

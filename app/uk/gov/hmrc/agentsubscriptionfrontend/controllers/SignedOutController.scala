@@ -41,8 +41,10 @@ class SignedOutController @Inject()(
       id <- knownFactOpt match {
              case Some(knownFact) => {
                for {
-                 isEligibleForMapping <- mappingConnector.isEligibile
-                 _ <- if (isEligibleForMapping) mappingConnector.createPreSubscription(knownFact.utr)
+                 isEligibleForMapping <- if (appConfig.autoMapAgentEnrolments) mappingConnector.isEligibile.map(Some(_))
+                                        else Future successful None
+                 _ <- if (appConfig.autoMapAgentEnrolments && isEligibleForMapping.get)
+                       mappingConnector.createPreSubscription(knownFact.utr)
                      else Future.successful(())
                  id <- chainedSessionRepository.create(ChainedSessionDetails(knownFact, isEligibleForMapping))
                } yield Some(id)

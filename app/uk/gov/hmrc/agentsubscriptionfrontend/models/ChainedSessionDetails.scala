@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models
 import play.api.libs.json.Json
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 
-case class ChainedSessionDetails(knownFacts: KnownFactsResult, wasEligibleForMapping: Boolean)
+case class ChainedSessionDetails(knownFacts: KnownFactsResult, wasEligibleForMapping: Option[Boolean])
 
 case class KnownFactsResult(
   utr: Utr,

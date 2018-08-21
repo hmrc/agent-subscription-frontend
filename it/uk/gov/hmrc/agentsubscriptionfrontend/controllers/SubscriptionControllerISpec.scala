@@ -18,6 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.jsoup.Jsoup
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, Request}
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
@@ -32,6 +33,12 @@ import uk.gov.hmrc.play.binders.ContinueUrl
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec {
+
+  def autoMapAgentEnrolmentsFlag = true
+
+  override protected def appBuilder: GuiceApplicationBuilder =
+    super.appBuilder
+      .configure("features.auto-map-agent-enrolments" -> autoMapAgentEnrolmentsFlag)
 
   private val utr = Utr("2000000000")
   private val knownFactsPostcode = "AA1 2AA"

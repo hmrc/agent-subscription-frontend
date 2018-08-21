@@ -36,9 +36,12 @@ class StartControllerISpec extends BaseISpec {
         "GB")
     )
 
+  def autoMapAgentEnrolmentsFlag = true
+
   override protected def appBuilder: GuiceApplicationBuilder =
     super.appBuilder
-      .configure("government-gateway.url" -> configuredGovernmentGatewayUrl)
+      .configure("government-gateway.url" -> configuredGovernmentGatewayUrl,
+      "features.auto-map-agent-enrolments" -> autoMapAgentEnrolmentsFlag)
 
   "context root" should {
     "redirect to start page" in {
@@ -128,7 +131,7 @@ class StartControllerISpec extends BaseISpec {
           Some("AddressLine4 A"),
           Some("AA11AA"),
           "GB")), Some("someone@example.com"))
-      val persistedId = await(repo.create(ChainedSessionDetails(knownFactsResult, wasEligibleForMapping)))
+      val persistedId = await(repo.create(ChainedSessionDetails(knownFactsResult, Some(wasEligibleForMapping))))
     }
 
     trait UnsubscribedAgentStub { self: ValidKnownFactsCached =>

@@ -228,14 +228,17 @@ class SubscriptionController @Inject()(
     }
 
   private[controllers] def redirectUponSuccessfulSubscription(arn: Arn)(implicit request: Request[AnyContent]) =
-    for (wasEligibileForMapping <- sessionStoreService.fetchMappingEligible) yield {
-      val redirectLocation = wasEligibileForMapping match {
-        case Some(true) => routes.SubscriptionController.showLinkAccount()
-        case _          => routes.SubscriptionController.showSubscriptionComplete()
-      }
-
-      Redirect(redirectLocation).withSession(request.session + ("arn" -> arn.value))
-    }
+    for (redirectLocation <- if (appConfig.autoMapAgentEnrolments) {
+                              sessionStoreService.fetchMappingEligible
+                                .map(_.getOrElse {
+                                  Logger.warn("chainedSessionDetails did not cache wasEligibleForMapping")
+                                  false //TODO ASA-72 should throw IllegalStateException, but in current code user is already subscribed so we must show complete page
+                                } match {
+                                  case true  => routes.SubscriptionController.showLinkAccount()
+                                  case false => routes.SubscriptionController.showSubscriptionComplete()
+                                })
+                            } else Future successful routes.SubscriptionController.showSubscriptionComplete())
+      yield Redirect(redirectLocation).withSession(request.session + ("arn" -> arn.value))
 
   def returnFromAddressLookup(id: String): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
@@ -286,36 +289,44 @@ class SubscriptionController @Inject()(
   }
 
   val showLinkAccount: Action[AnyContent] = Action.async { implicit request =>
-    withAuthenticatedAgent {
-      Future.successful {
-        request.session.get("arn").fold(sessionMissingRedirect()) { _ =>
-          Ok(html.link_account(linkAccountForm))
+    appConfig.autoMapAgentEnrolments match {
+      case true =>
+        withAuthenticatedAgent {
+          Future.successful {
+            request.session.get("arn").fold(sessionMissingRedirect()) { _ =>
+              Ok(html.link_account(linkAccountForm))
+            }
+          }
         }
-      }
+      case false => Future successful Redirect(routes.StartController.start())
     }
   }
 
   val submitLinkAccount: Action[AnyContent] = Action.async { implicit request =>
-    withAuthenticatedAgent {
-      request.session.get("arn").fold(Future.successful(sessionMissingRedirect())) { arn =>
-        linkAccountForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors => {
-              if (formWithErrors.errors.exists(_.message == "error.link-account-value.invalid")) {
-                throw new BadRequestException("Form submitted with strange input value")
-              } else {
-                Future.successful(Ok(html.link_account(formWithErrors)))
-              }
-            },
-            validatedLinkAccount => {
-              validatedLinkAccount.autoMapping match {
-                case Yes => linkAccountResponse(mappingConnector.updatePreSubscriptionWithArn)
-                case No  => linkAccountResponse(mappingConnector.deletePreSubscription)
-              }
-            }
-          )
-      }
+    appConfig.autoMapAgentEnrolments match {
+      case true =>
+        withAuthenticatedAgent {
+          request.session.get("arn").fold(Future.successful(sessionMissingRedirect())) { arn =>
+            linkAccountForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors => {
+                  if (formWithErrors.errors.exists(_.message == "error.link-account-value.invalid")) {
+                    throw new BadRequestException("Form submitted with strange input value")
+                  } else {
+                    Future.successful(Ok(html.link_account(formWithErrors)))
+                  }
+                },
+                validatedLinkAccount => {
+                  validatedLinkAccount.autoMapping match {
+                    case Yes => linkAccountResponse(mappingConnector.updatePreSubscriptionWithArn)
+                    case No  => linkAccountResponse(mappingConnector.deletePreSubscription)
+                  }
+                }
+              )
+          }
+        }
+      case false => Future successful Redirect(routes.StartController.start())
     }
   }
 
