@@ -17,58 +17,27 @@ import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SignOutControllerISpec extends BaseISpec {
-  private lazy val controller: SignedOutController = app.injector.instanceOf[SignedOutController]
-
-  def autoMapAgentEnrolmentsFlag = true
+class SignOutControllerISpec(autoMapFF: Boolean) extends BaseISpec {
+  protected lazy val sosRedirectUrl = "/government-gateway-registration-frontend?accountType=agent"
+  protected lazy val controller: SignedOutController = app.injector.instanceOf[SignedOutController]
+  protected lazy val repo = app.injector.instanceOf[ChainedSessionDetailsRepository]
 
   override protected def appBuilder: GuiceApplicationBuilder =
     super.appBuilder
-      .configure("features.auto-map-agent-enrolments" -> autoMapAgentEnrolmentsFlag)
-
-  private lazy val sosRedirectUrl = "/government-gateway-registration-frontend?accountType=agent"
-
-  private lazy val repo = app.injector.instanceOf[ChainedSessionDetailsRepository]
+      .configure("features.auto-map-agent-enrolments" -> autoMapFF)
 
   private val fakeRequest = FakeRequest()
+  val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true, None, None)
+  def findByUtr(utr: String): Option[StashedChainedSessionDetails] = {
+    await(repo.find("chainedSessionDetails.knownFacts.utr" -> utr).map(_.headOption))
+  }
 
   "redirect to SOS" should {
-    val knownFactsResult = KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = true, None, None)
-    def findByUtr(utr: String): Option[StashedChainedSessionDetails] = {
-      await(repo.find("chainedSessionDetails.knownFacts.utr" -> utr).map(_.headOption))
-    }
-
     "redirect to SOS page" in {
       val result = await(controller.redirectToSos(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
 
       status(result) shouldBe 303
       redirectLocation(result).head should include(sosRedirectUrl)
-    }
-
-    "save the ChainedSessionDetails in the DB" when {
-
-      "was eligible for mapping" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-        sessionStoreService.currentSession.knownFactsResult = Some(knownFactsResult)
-        MappingStubs.givenMappingEligibilityIsEligible
-        MappingStubs.givenMappingCreatePreSubscription(Utr("9876543210"))
-
-        await(controller.redirectToSos(request))
-        findByUtr("9876543210").map(_.chainedSessionDetails) shouldBe Some(ChainedSessionDetails(knownFactsResult, wasEligibleForMapping = Some(true)))
-        MappingStubs.verifyMappingEligibilityCalled(times = 1)
-        MappingStubs.verifyMappingCreatePreSubscriptionCalled(Utr("9876543210"), times = 1)
-      }
-
-      "was not eligible for mapping" in {
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-        sessionStoreService.currentSession.knownFactsResult = Some(knownFactsResult)
-        MappingStubs.givenMappingEligibilityIsNotEligible
-
-        await(controller.redirectToSos(request))
-        findByUtr("9876543210").map(_.chainedSessionDetails) shouldBe Some(ChainedSessionDetails(knownFactsResult, wasEligibleForMapping = Some(false)))
-        MappingStubs.verifyMappingEligibilityCalled(times = 1)
-        MappingStubs.verifyMappingCreatePreSubscriptionCalled(Utr("9876543210"), times = 0)
-      }
     }
 
     "check for mapping eligibility call fails" in {
@@ -97,29 +66,6 @@ class SignOutControllerISpec extends BaseISpec {
       val id = findByUtr("9876543210").map(_.id).get
       redirectLocation(result).head should include(
         s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created%3Fid%3D$id")
-    }
-
-    "not include an ID in the SOS redirect URL when KnownFactsResults are not yet known" in {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      MappingStubs.givenMappingEligibilityIsNotEligible
-
-      val result = await(controller.redirectToSos(request))
-      redirectLocation(result).head should include(s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created")
-    }
-
-    "include a continue URL in the SOS redirect URL if a continue URL exists in the session store" in {
-      val ourContinueUrl = ContinueUrl("/test-continue-url")
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      sessionStoreService.currentSession(hc(request)).continueUrl = Some(ourContinueUrl)
-      MappingStubs.givenMappingEligibilityIsNotEligible
-
-      val result = await(controller.redirectToSos(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
-
-      val sosContinueValueUnencoded =
-        s"/agent-subscription/return-after-gg-creds-created?continue=${ourContinueUrl.encodedUrl}"
-      val sosContinueValueEncoded = URLEncoder.encode(sosContinueValueUnencoded, "UTF-8")
-      val expectedSosContinueParam = s"continue=$sosContinueValueEncoded"
-      redirectLocation(result).head should include(expectedSosContinueParam)
     }
 
     "include both an ID and a continue URL in the SOS redirect URL if both a continue URL and KnownFacts exist in the session store" in {
@@ -211,4 +157,59 @@ class SignOutControllerISpec extends BaseISpec {
       result.session.get("sessionId") shouldBe empty
     }
   }
+}
+
+private class SignOutControllerWithAutoMappingOn extends SignOutControllerISpec(autoMapFF = true) {
+  "save the ChainedSessionDetails in the DB" when {
+
+    "was eligible for mapping" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      sessionStoreService.currentSession.knownFactsResult = Some(knownFactsResult)
+      MappingStubs.givenMappingEligibilityIsEligible
+      MappingStubs.givenMappingCreatePreSubscription(Utr("9876543210"))
+
+      await(controller.redirectToSos(request))
+      findByUtr("9876543210").map(_.chainedSessionDetails) shouldBe Some(ChainedSessionDetails(knownFactsResult, wasEligibleForMapping = Some(true)))
+      MappingStubs.verifyMappingEligibilityCalled(times = 1)
+      MappingStubs.verifyMappingCreatePreSubscriptionCalled(Utr("9876543210"), times = 1)
+    }
+
+    "was not eligible for mapping" in {
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      sessionStoreService.currentSession.knownFactsResult = Some(knownFactsResult)
+      MappingStubs.givenMappingEligibilityIsNotEligible
+
+      await(controller.redirectToSos(request))
+      findByUtr("9876543210").map(_.chainedSessionDetails) shouldBe Some(ChainedSessionDetails(knownFactsResult, wasEligibleForMapping = Some(false)))
+      MappingStubs.verifyMappingEligibilityCalled(times = 1)
+      MappingStubs.verifyMappingCreatePreSubscriptionCalled(Utr("9876543210"), times = 0)
+    }
+  }
+
+  "include a continue URL in the SOS redirect URL if a continue URL exists in the session store" in {
+    val ourContinueUrl = ContinueUrl("/test-continue-url")
+    implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+    sessionStoreService.currentSession(hc(request)).continueUrl = Some(ourContinueUrl)
+    MappingStubs.givenMappingEligibilityIsNotEligible
+
+    val result = await(controller.redirectToSos(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
+
+    val sosContinueValueUnencoded =
+      s"/agent-subscription/return-after-gg-creds-created?continue=${ourContinueUrl.encodedUrl}"
+    val sosContinueValueEncoded = URLEncoder.encode(sosContinueValueUnencoded, "UTF-8")
+    val expectedSosContinueParam = s"continue=$sosContinueValueEncoded"
+    redirectLocation(result).head should include(expectedSosContinueParam)
+  }
+
+  "not include an ID in the SOS redirect URL when KnownFactsResults are not yet known" in {
+    implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+    MappingStubs.givenMappingEligibilityIsNotEligible
+
+    val result = await(controller.redirectToSos(request))
+    redirectLocation(result).head should include(s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created")
+  }
+}
+
+private class SignOutControllerWithAutoMappingOff extends SignOutControllerISpec(autoMapFF = false) {
+
 }
