@@ -926,14 +926,14 @@ class SubscriptionControllerWithAutoMappingOff extends SubscriptionControllerISp
   }
 
   "showLinkAccount (GET /link-account)" should {
-    "400 bad request" in {
+    "500 bad request" in {
       val result = await(controller.showLinkAccount(FakeRequest()))
       status(result) shouldBe 500
     }
   }
 
   "submitLinkAccount (POST /link-account)" should {
-    "400 bad request" in {
+    "500 bad request" in {
       val result = await(controller.submitLinkAccount(FakeRequest()))
       status(result) shouldBe 500
     }
