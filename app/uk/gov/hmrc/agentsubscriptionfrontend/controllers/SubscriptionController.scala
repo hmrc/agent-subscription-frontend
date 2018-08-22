@@ -18,6 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
+
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms.{mapping, optional, text}
@@ -30,6 +31,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AddressLookupFrontendConnector, MappingConnector}
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.FieldMappings._
+import uk.gov.hmrc.agentsubscriptionfrontend.models.StoreEligibility.{IsEligible, IsNotEligible, MappingUnavailable}
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -229,14 +231,16 @@ class SubscriptionController @Inject()(
 
   private[controllers] def redirectUponSuccessfulSubscription(arn: Arn)(implicit request: Request[AnyContent]) =
     for (redirectLocation <- if (appConfig.autoMapAgentEnrolments) {
-                              sessionStoreService.fetchMappingEligible
-                                .map(_.getOrElse {
-                                  Logger.warn("chainedSessionDetails did not cache wasEligibleForMapping")
-                                  false //TODO ASA-72 should throw IllegalStateException, but in current code user is already subscribed so we must show complete page
-                                } match {
-                                  case true  => routes.SubscriptionController.showLinkAccount()
-                                  case false => routes.SubscriptionController.showSubscriptionComplete()
-                                })
+                              sessionStoreService.fetchMappingEligible.map {
+                                StoreEligibility.apply(_) match {
+                                  case IsEligible    => routes.SubscriptionController.showLinkAccount()
+                                  case IsNotEligible => routes.SubscriptionController.showSubscriptionComplete()
+                                  case MappingUnavailable => {
+                                    Logger.warn("chainedSessionDetails did not cache wasEligibleForMapping")
+                                    routes.SubscriptionController.showSubscriptionComplete()
+                                  }
+                                }
+                              }
                             } else Future successful routes.SubscriptionController.showSubscriptionComplete())
       yield Redirect(redirectLocation).withSession(request.session + ("arn" -> arn.value))
 

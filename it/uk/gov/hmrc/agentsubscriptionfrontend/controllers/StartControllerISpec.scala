@@ -272,8 +272,8 @@ class StartControllerWithAutoMappingOn extends StartControllerISpec {
       "not session store wasEligibleForMapping as flag is false" in new ValidKnownFactsCached(wasEligibleForMapping = None) {
         implicit val request = FakeRequest()
 
-        an[IllegalStateException] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
-        sessionStoreService.currentSession.wasEligibleForMapping shouldBe None
+        val result = await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest()))
+        sessionStoreService.currentSession.wasEligibleForMapping shouldBe Some(false)
       }
     }
 
