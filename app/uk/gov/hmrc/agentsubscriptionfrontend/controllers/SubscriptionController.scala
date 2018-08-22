@@ -302,7 +302,7 @@ class SubscriptionController @Inject()(
             }
           }
         }
-      case false => Future.successful(BadRequest)
+      case false => Future.successful(InternalServerError)
     }
   }
 
@@ -330,7 +330,7 @@ class SubscriptionController @Inject()(
               )
           }
         }
-      case false => Future.successful(BadRequest)
+      case false => Future.successful(InternalServerError)
     }
   }
 
