@@ -256,20 +256,20 @@ class SubscriptionController @Inject()(
 
   def submitModifiedAddress: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      desAddressForm.form
-        .bindFromRequest()
-        .fold(
-          formWithErrors => Future successful Ok(html.address_form_with_errors(formWithErrors)),
-          validDesAddress =>
-            withInitialDetails { initialDetails =>
+      withInitialDetails { initialDetails =>
+        desAddressForm.form
+          .bindFromRequest()
+          .fold(
+            formWithErrors => Future successful Ok(html.address_form_with_errors(formWithErrors)),
+            validDesAddress =>
               sessionStoreService
                 .cacheInitialDetails(
                   initialDetails.copy(
                     businessAddress = BusinessAddress(validDesAddress)
                   ))
                 .map(_ => Redirect(routes.SubscriptionController.showCheckAnswers()))
-          }
-        )
+          )
+      }
     }
   }
 
@@ -277,10 +277,8 @@ class SubscriptionController @Inject()(
     appConfig.autoMapAgentEnrolments match {
       case true =>
         withAuthenticatedAgent {
-          Future.successful {
-            request.session.get("arn").fold(sessionMissingRedirect()) { _ =>
-              Ok(html.link_account(linkAccountForm))
-            }
+          withArnFromSession { _ =>
+            Future.successful(Ok(html.link_account(linkAccountForm)))
           }
         }
       case false => Future.successful(InternalServerError)
@@ -291,7 +289,7 @@ class SubscriptionController @Inject()(
     appConfig.autoMapAgentEnrolments match {
       case true =>
         withAuthenticatedAgent {
-          request.session.get("arn").fold(Future.successful(sessionMissingRedirect())) { arn =>
+          withArnFromSession { _ =>
             linkAccountForm
               .bindFromRequest()
               .fold(
@@ -323,22 +321,19 @@ class SubscriptionController @Inject()(
     }
 
     withAuthenticatedAgent {
-      request.session.get("arn") match {
-        case Some(arn) =>
-          for {
-            continueUrlOpt           <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
-            wasEligibleForMappingOpt <- sessionStoreService.fetchMappingEligible.recover(recoverSessionStoreWithNone)
-            _                        <- sessionStoreService.remove()
-          } yield {
-            val continueUrl = continueUrlOpt.map(_.url).getOrElse(appConfig.agentServicesAccountUrl)
-            val isUrlToASAccount = continueUrlOpt.isEmpty
-            val wasEligibleForMapping = wasEligibleForMappingOpt.contains(true)
-            val prettifiedArn = prettify(Arn(arn))
-            Ok(html.subscription_complete(continueUrl, isUrlToASAccount, wasEligibleForMapping, prettifiedArn))
-              .removingFromSession("arn")
-          }
-        case _ =>
-          Future.successful(sessionMissingRedirect())
+      withArnFromSession { arn =>
+        for {
+          continueUrlOpt           <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
+          wasEligibleForMappingOpt <- sessionStoreService.fetchMappingEligible.recover(recoverSessionStoreWithNone)
+          _                        <- sessionStoreService.remove()
+        } yield {
+          val continueUrl = continueUrlOpt.map(_.url).getOrElse(appConfig.agentServicesAccountUrl)
+          val isUrlToASAccount = continueUrlOpt.isEmpty
+          val wasEligibleForMapping = wasEligibleForMappingOpt.contains(true)
+          val prettifiedArn = prettify(arn)
+          Ok(html.subscription_complete(continueUrl, isUrlToASAccount, wasEligibleForMapping, prettifiedArn))
+            .removingFromSession("arn")
+        }
       }
     }
   }
