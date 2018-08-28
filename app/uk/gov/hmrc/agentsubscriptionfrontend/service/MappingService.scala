@@ -31,10 +31,8 @@ class MappingService @Inject()(
   mappingConnector: MappingConnector,
   sessionStoreService: SessionStoreService,
   chainedSessionRepository: ChainedSessionDetailsRepository) {
-  private lazy val isAutoMappingEnabled = appConfig.autoMapAgentEnrolments
-
   def preSubscriptionMapping(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MappingEligibility] =
-    if (isAutoMappingEnabled) {
+    if (appConfig.autoMapAgentEnrolments) {
       for {
         knownFactsOpt <- sessionStoreService.fetchKnownFactsResult
         mappingEligibility <- knownFactsOpt
