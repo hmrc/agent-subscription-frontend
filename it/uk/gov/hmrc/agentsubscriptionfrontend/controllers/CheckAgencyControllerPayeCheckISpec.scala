@@ -10,8 +10,8 @@ class CheckAgencyControllerPayeCheckISpec extends CheckAgencyControllerISpec {
   override def agentAssuranceRun: Boolean = true
   override def agentAssurancePayeCheck: Boolean = false
 
-  "checkAgencyStatus with the agentAssuranceFlag set to true and agentAssurancePayeCheck to false" should {
-    "redirect to confirm agency page and store known facts result in the session store when a matching registration is found for the UTR and postcode" in {
+  "submitBusinessDetailsForm with the agentAssuranceFlag set to true and agentAssurancePayeCheck to false" should {
+    "redirect to confirm business page and store known facts result in the session store when a matching registration is found for the UTR and postcode" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
@@ -20,10 +20,10 @@ class CheckAgencyControllerPayeCheckISpec extends CheckAgencyControllerISpec {
 
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
-      val result = await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request))
+      val result = await(controller.submitBusinessDetailsForm(Some(CheckAgencyController.validBusinessTypes.head))(request))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmYourAgency().url)
+      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmBusinessForm().url)
       sessionStoreService.currentSession.knownFactsResult shouldBe Some(
         KnownFactsResult(validUtr, validPostcode, "My Agency", isSubscribedToAgentServices = false, Some(businessAddress), Some("someone@example.com")))
       verifyAgentAssuranceAuditRequestSent(
@@ -41,7 +41,7 @@ class CheckAgencyControllerPayeCheckISpec extends CheckAgencyControllerISpec {
 
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
-      val result = await(controller.checkAgencyStatus(Some(CheckAgencyController.validBusinessTypes.head))(request))
+      val result = await(controller.submitBusinessDetailsForm(Some(CheckAgencyController.validBusinessTypes.head))(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.CheckAgencyController.invasiveCheckStart().url)

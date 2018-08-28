@@ -101,7 +101,7 @@ class SubscriptionController @Inject()(
   val showCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent {
       case hasNonEmptyEnrolments(_) =>
-        Future.successful(Redirect(routes.CheckAgencyController.showHasOtherEnrolments()))
+        Future.successful(Redirect(routes.CheckAgencyController.showCreateNewAccount()))
       case _ =>
         mark("Count-Subscription-CleanCreds-Success")
         withInitialDetails { details =>
@@ -123,7 +123,7 @@ class SubscriptionController @Inject()(
   val submitCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent {
       case hasNonEmptyEnrolments(_) =>
-        Future.successful(Redirect(routes.CheckAgencyController.showHasOtherEnrolments()))
+        Future.successful(Redirect(routes.CheckAgencyController.showCreateNewAccount()))
       case _ =>
         withInitialDetails { details =>
           val desAddress = DesAddress(

@@ -86,7 +86,7 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       val result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
-      result.header.headers("Location") should include("/agent-subscription/has-other-enrolments")
+      result.header.headers("Location") should include("/agent-subscription/create-new-account")
       noMetricExpectedAtThisPoint()
     }
 
@@ -141,7 +141,7 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       val result = await(controller.submitCheckAnswers(request))
       status(result) shouldBe 303
-      result.header.headers("Location") should include("/agent-subscription/has-other-enrolments")
+      result.header.headers("Location") should include("/agent-subscription/create-new-account")
       noMetricExpectedAtThisPoint()
     }
 

@@ -24,7 +24,7 @@
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = error_prefix(confirmAgencyRadioForm) +  Messages("confirmYourAgency.title"), bodyClasses = None) {
 
-    <a href="@routes.CheckAgencyController.checkAgencyStatus(request.session.get("businessType"))" class="link-back">@Messages("button.back")</a>
+    <a href="@routes.CheckAgencyController.submitBusinessDetailsForm(request.session.get("businessType"))" class="link-back">@Messages("button.back")</a>
 
     @if(confirmAgencyRadioForm.hasErrors) {
         @errorSummary(Messages("error.summary.heading"), confirmAgencyRadioForm, Seq.empty, Some("check-agency-status"))
@@ -51,7 +51,7 @@
   <br />
 
     @form(
-        action = routes.CheckAgencyController.submitConfirmYourAgency(),
+        action = routes.CheckAgencyController.submitConfirmBusinessForm(),
         'class -> "form js-form") {
 
         <div class="form-group">
