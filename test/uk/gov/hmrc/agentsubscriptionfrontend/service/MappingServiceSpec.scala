@@ -45,11 +45,11 @@ class MappingServiceSpec extends UnitSpec with ResettingMockitoSugar {
       mockSessionStoreService,
       mockChainedSessionDetailsRepository)
 
-  "preSubscriptionMapping" when {
+  "captureTempMappingsPreSubscription" when {
     "auto mapping is enabled" should {
       "return UnknownEligibility if session store does not contain known facts" in new AutoMappingEnabled {
         when(mockSessionStoreService.fetchKnownFactsResult).thenReturn(Future.successful(None))
-        await(mappingService.preSubscriptionMapping) shouldBe UnknownEligibility
+        await(mappingService.captureTempMappingsPreSubscription) shouldBe UnknownEligibility
         verifyZeroInteractions(mockMappingConnector)
       }
 
@@ -57,7 +57,7 @@ class MappingServiceSpec extends UnitSpec with ResettingMockitoSugar {
         s"return mapping outcome if session store contains known facts and mapping returns $eligibility" in new AutoMappingEnabled
         with KnownFactsInSessionStore {
           when(mockMappingConnector.createPreSubscription(Utr("9876543210"))).thenReturn(Future.successful(eligibility))
-          await(mappingService.preSubscriptionMapping) shouldBe eligibility
+          await(mappingService.captureTempMappingsPreSubscription) shouldBe eligibility
         }
       }
 
@@ -66,14 +66,14 @@ class MappingServiceSpec extends UnitSpec with ResettingMockitoSugar {
         val someException = new Exception("Some mapping problem")
         when(mockMappingConnector.createPreSubscription(Utr("9876543210"))).thenReturn(Future.failed(someException))
         intercept[Exception] {
-          await(mappingService.preSubscriptionMapping)
+          await(mappingService.captureTempMappingsPreSubscription)
         } shouldBe someException
       }
     }
 
     "auto mapping is disabled" should {
       "return UnknownEligibility" in new AutoMappingDisabled {
-        await(mappingService.preSubscriptionMapping) shouldBe UnknownEligibility
+        await(mappingService.captureTempMappingsPreSubscription) shouldBe UnknownEligibility
         verifyZeroInteractions(mockMappingConnector)
       }
     }

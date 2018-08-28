@@ -38,7 +38,7 @@ class SignedOutController @Inject()(
 
   def redirectToSos = Action.async { implicit request =>
     for {
-      mappingEligibility     <- mappingService.preSubscriptionMapping
+      mappingEligibility     <- mappingService.captureTempMappingsPreSubscription
       chainedSessionIdOpt    <- prepareChainedSession(mappingEligibility)
       agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
     } yield {

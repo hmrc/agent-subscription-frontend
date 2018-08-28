@@ -31,7 +31,7 @@ class MappingService @Inject()(
   mappingConnector: MappingConnector,
   sessionStoreService: SessionStoreService,
   chainedSessionRepository: ChainedSessionDetailsRepository) {
-  def preSubscriptionMapping(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MappingEligibility] =
+  def captureTempMappingsPreSubscription(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MappingEligibility] =
     if (appConfig.autoMapAgentEnrolments) {
       for {
         knownFactsOpt <- sessionStoreService.fetchKnownFactsResult
