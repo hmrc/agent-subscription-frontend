@@ -25,7 +25,7 @@
     <a href="@routes.BusinessIdentificationController.showBusinessTypeForm()" class="link-back">@Messages("button.back")</a>
 
     @if(knownFactsForm.hasErrors) {
-        @errorSummary(Messages("error.summary.heading"), knownFactsForm, Seq.empty, Some("check-agency-status"))
+        @errorSummary(Messages("error.summary.heading"), knownFactsForm, Seq.empty, Some("business-details"))
     }
 
     <h1 class="heading-large">@Messages("businessDetails.title")</h1>

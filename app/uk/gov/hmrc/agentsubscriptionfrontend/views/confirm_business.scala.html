@@ -27,7 +27,7 @@
     <a href="@routes.BusinessIdentificationController.submitBusinessDetailsForm(request.session.get("businessType"))" class="link-back">@Messages("button.back")</a>
 
     @if(confirmBusinessRadioForm.hasErrors) {
-        @errorSummary(Messages("error.summary.heading"), confirmBusinessRadioForm, Seq.empty, Some("check-business-status"))
+        @errorSummary(Messages("error.summary.heading"), confirmBusinessRadioForm, Seq.empty, Some("confirm-business"))
     }
 
 

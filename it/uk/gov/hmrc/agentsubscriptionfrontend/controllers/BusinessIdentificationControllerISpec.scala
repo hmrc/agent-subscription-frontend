@@ -111,7 +111,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
     }
 
     "choice is missing" should {
-      "return 200 and redisplay the /check-business-type page with an error message for missing choice" in {
+      "return 200 and redisplay the /business-type page with an error message for missing choice" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         val result = await(controller.submitBusinessTypeForm(request))
         result should containMessages("error.no-radio-selected")
@@ -254,7 +254,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       noMetricExpectedAtThisPoint()
     }
 
-    "redirect to no-agency-found page when no matching registration found by agent-subscription" in {
+    "redirect to no-match page when no matching registration found by agent-subscription" in {
       withNonMatchingUtrAndPostcode(validUtr, validPostcode)
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
@@ -422,7 +422,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       result should containSubstrings("01234 56789")
     }
 
-    "show a back button which allows the user to return to the check-agency-status page" in {
+    "show a back button which allows the user to return to the business-details page" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withSession("businessType" -> "sole_trader")
       sessionStoreService.currentSession.knownFactsResult = Some(
         KnownFactsResult(
@@ -491,7 +491,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
     }
 
     "User chooses No" should {
-      "redirect to the check-agency-status page" in {
+      "redirect to the business-details page" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
           .withSession("businessType" -> "sole_trader")
           .withFormUrlEncodedBody("confirmBusiness" -> "no")
@@ -509,7 +509,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
     }
 
     "choice is missing" should {
-      "return 200 and redisplay the /confirm-your-agency page with an error message for missing choice" in {
+      "return 200 and redisplay the /confirm-business page with an error message for missing choice" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
           .withSession("businessType" -> "sole_trader")
           .withFormUrlEncodedBody("confirmBusiness" -> "")

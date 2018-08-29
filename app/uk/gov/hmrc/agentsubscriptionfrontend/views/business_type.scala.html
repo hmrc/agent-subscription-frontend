@@ -30,7 +30,7 @@
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = error_prefix(businessTypeRadioForm) + Messages("checkBusinessType.title"), bodyClasses = None) {
     @if(businessTypeRadioForm.hasErrors) {
-        @errorSummary(Messages("error.summary.heading"), businessTypeRadioForm, Seq.empty, Some("check-business-type"))
+        @errorSummary(Messages("error.summary.heading"), businessTypeRadioForm, Seq.empty, Some("business-type"))
     }
 
     @form(

@@ -113,7 +113,7 @@ trait StartControllerISpec extends BaseISpec {
       bodyOf(result) should include("Agent services account: sign in or set up")
     }
 
-    "contain a start button pointing to /check-business-type" in {
+    "contain a start button pointing to /business-type" in {
       val result = await(controller.start(FakeRequest()))
       val doc = Jsoup.parse(bodyOf(result))
       val startLink = doc.getElementById("start")
@@ -221,7 +221,7 @@ trait StartControllerISpec extends BaseISpec {
       an[Upstream5xxResponse] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
     }
 
-    "redirect to the /check-business-type page if given an invalid ChainedSessionDetails ID" in new ValidKnownFactsCached {
+    "redirect to the /business-type page if given an invalid ChainedSessionDetails ID" in new ValidKnownFactsCached {
       val invalidId = s"A$persistedId"
 
       val result = await(controller.returnAfterGGCredsCreated(id = Some(invalidId))(FakeRequest()))
@@ -230,7 +230,7 @@ trait StartControllerISpec extends BaseISpec {
       redirectLocation(result).head should include(routes.BusinessIdentificationController.showBusinessTypeForm().url)
     }
 
-    "redirect to /check-business-type page if there is no valid ChainedSessionDetails ID" in {
+    "redirect to /business-type page if there is no valid ChainedSessionDetails ID" in {
       val result = await(controller.returnAfterGGCredsCreated(id = None)(FakeRequest()))
 
       status(result) shouldBe 303
