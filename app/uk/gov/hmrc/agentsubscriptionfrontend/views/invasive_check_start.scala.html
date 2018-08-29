@@ -28,7 +28,7 @@
     }
 
 
-    @form(action = routes.CheckAgencyController.invasiveSaAgentCodePost(), 'class -> "form js-form") {
+    @form(action = routes.BusinessIdentificationController.invasiveSaAgentCodePost(), 'class -> "form js-form") {
         <div class="form-group @if(radioResponseForm.error("hasSaAgentCode").isDefined){form-group-error}" id="radioResponse">
             <fieldset>
                 <legend>

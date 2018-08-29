@@ -156,7 +156,7 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         val result = await(controller.submitCheckAnswers(request))
 
         status(result) shouldBe 303
-        redirectLocation(result).head shouldBe routes.CheckAgencyController.showAlreadySubscribed().url
+        redirectLocation(result).head shouldBe routes.BusinessIdentificationController.showAlreadySubscribed().url
         sessionStoreService.allSessionsRemoved shouldBe false
         metricShouldExistAndBeUpdated(
           "Count-Subscription-AlreadySubscribed-APIResponse",

@@ -111,7 +111,7 @@ class StartController @Inject()(
                                                 .map(_ => Redirect(routes.SubscriptionController.showCheckAnswers()))
                                             }
           } yield continuedSubscriptionResponse
-        case None => Future successful Redirect(routes.CheckAgencyController.showBusinessTypeForm())
+        case None => Future successful Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
       }
     }
   }

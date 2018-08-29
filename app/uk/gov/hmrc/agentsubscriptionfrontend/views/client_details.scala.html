@@ -27,7 +27,7 @@
         @errorSummary(Messages("error.summary.heading"),radioResponseForm, Seq.empty, Some("confirmResponseSomethingTrackingGGA"))
     }
 
-    @form(action = routes.CheckAgencyController.showClientDetailsForm, 'class -> "form js-form") {
+    @form(action = routes.BusinessIdentificationController.showClientDetailsForm, 'class -> "form js-form") {
         <div class="form-group @if(radioResponseForm.error("variant").isDefined){form-group-error}" id="radioResponse">
             <fieldset>
                 <legend>

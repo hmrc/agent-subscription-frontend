@@ -6,7 +6,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.withMatchingUtrAndPostcode
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
 
-class CheckAgencyControllerPayeCheckISpec extends CheckAgencyControllerISpec {
+class CheckAgencyControllerPayeCheckISpec extends BusinessIdentificationControllerISpec {
   override def agentAssuranceRun: Boolean = true
   override def agentAssurancePayeCheck: Boolean = false
 
@@ -20,10 +20,10 @@ class CheckAgencyControllerPayeCheckISpec extends CheckAgencyControllerISpec {
 
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
-      val result = await(controller.submitBusinessDetailsForm(Some(CheckAgencyController.validBusinessTypes.head))(request))
+      val result = await(controller.submitBusinessDetailsForm(Some(BusinessIdentificationController.validBusinessTypes.head))(request))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.showConfirmBusinessForm().url)
+      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showConfirmBusinessForm().url)
       sessionStoreService.currentSession.knownFactsResult shouldBe Some(
         KnownFactsResult(validUtr, validPostcode, "My Agency", isSubscribedToAgentServices = false, Some(businessAddress), Some("someone@example.com")))
       verifyAgentAssuranceAuditRequestSent(
@@ -41,10 +41,10 @@ class CheckAgencyControllerPayeCheckISpec extends CheckAgencyControllerISpec {
 
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
-      val result = await(controller.submitBusinessDetailsForm(Some(CheckAgencyController.validBusinessTypes.head))(request))
+      val result = await(controller.submitBusinessDetailsForm(Some(BusinessIdentificationController.validBusinessTypes.head))(request))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.CheckAgencyController.invasiveCheckStart().url)
+      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.invasiveCheckStart().url)
       verifyAgentAssuranceAuditRequestSent(
         passPayeAgentAssuranceCheck = None,
         passSaAgentAssuranceCheck = Some(false))

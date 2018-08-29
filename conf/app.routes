@@ -5,20 +5,20 @@ GET         /start                                uk.gov.hmrc.agentsubscriptionf
 GET         /not-agent             uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.showNotAgent
 GET         /return-after-gg-creds-created        uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.returnAfterGGCredsCreated(id: Option[String] ?= None)
 
-GET         /business-type                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.showBusinessTypeForm
-POST        /business-type                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.submitBusinessTypeForm
-GET         /business-details                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.showBusinessDetailsForm(businessType: Option[String])
-POST        /business-details                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.submitBusinessDetailsForm(businessType: Option[String])
-GET         /no-match                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.showNoAgencyFound
-GET         /confirm-business                uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.showConfirmBusinessForm
-POST        /confirm-business                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.submitConfirmBusinessForm
-GET         /already-subscribed                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.showAlreadySubscribed
-GET         /create-new-account                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.showCreateNewAccount
+GET         /business-type                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showBusinessTypeForm
+POST        /business-type                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitBusinessTypeForm
+GET         /business-details                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showBusinessDetailsForm(businessType: Option[String])
+POST        /business-details                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitBusinessDetailsForm(businessType: Option[String])
+GET         /no-match                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showNoAgencyFound
+GET         /confirm-business                uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showConfirmBusinessForm
+POST        /confirm-business                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitConfirmBusinessForm
+GET         /already-subscribed                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showAlreadySubscribed
+GET         /create-new-account                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showCreateNewAccount
 
-GET         /enter-agent-code                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.invasiveCheckStart
-POST        /enter-agent-code                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.invasiveSaAgentCodePost
-GET         /client-details                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.showClientDetailsForm
-POST        /client-details                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.CheckAgencyController.submitClientDetailsForm
+GET         /enter-agent-code                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.invasiveCheckStart
+POST        /enter-agent-code                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.invasiveSaAgentCodePost
+GET         /client-details                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showClientDetailsForm
+POST        /client-details                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitClientDetailsForm
 
 GET         /check-answers                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCheckAnswers
 POST        /check-answers                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.submitCheckAnswers
@@ -40,7 +40,7 @@ GET         /redirect-to-sos                      uk.gov.hmrc.agentsubscriptionf
 GET         /redirect-to-asaccount                uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToASAccountPage
 GET         /start-survey                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.startSurvey
 GET         /sign-out                             uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.signOutWithContinueUrl
-GET         /redirect-to-checkbusinesstype        uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToCheckBusinessType
+GET         /redirect-to-businesstype        uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToBusinessTypeForm
 
 GET         /cannot-create-account                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.showCannotCreateAccount
 

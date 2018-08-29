@@ -118,13 +118,13 @@ trait SignOutControllerISpec extends BaseISpec {
     }
   }
 
-  "redirectToCheckBusinessType" should {
+  "redirectToBusinessTypeForm" should {
     "logout and redirect to Business Type page" in {
       implicit val request = fakeRequest.withSession("sessionId" -> "SomeSession")
 
       request.session.get("sessionId") should not be empty
 
-      val result = await(controller.redirectToCheckBusinessType(request))
+      val result = await(controller.redirectToBusinessTypeForm(request))
 
       status(result) shouldBe 303
       redirectLocation(result).head should include("business-type")
