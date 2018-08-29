@@ -156,8 +156,8 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
     "display the check agency status page if the current user is logged in and has affinity group = Agent" in {
       val result = await(playRequestValidBusinessTypeIdentifier(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
-      result should containMessages("checkAgencyStatus.title")
-      metricShouldExistAndBeUpdated("Count-Subscription-CheckAgency-Start")
+      result should containMessages("businessDetails.title")
+      metricShouldExistAndBeUpdated("Count-Subscription-BusinessDetails-Start")
     }
 
     "display the AS Account Page if the current user has HMRC-AS-AGENT enrolment" in {
@@ -174,8 +174,8 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
         val result = await(controller.showBusinessDetailsForm(Some(validBusinessTypeIdentifier))(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
         status(result) shouldBe 200
         val bodyString = bodyOf(result)
-        bodyString should include(htmlEscapedMessage("checkAgencyStatus.title"))
-        bodyString should include(htmlEscapedMessage(s"checkAgencyStatus.label.utr.$validBusinessTypeIdentifier"))
+        bodyString should include(htmlEscapedMessage("businessDetails.title"))
+        bodyString should include(htmlEscapedMessage(s"businessDetails.label.utr.$validBusinessTypeIdentifier"))
       }
     }
 
@@ -205,7 +205,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
-      responseBody should include(htmlEscapedMessage("checkAgencyStatus.title"))
+      responseBody should include(htmlEscapedMessage("businessDetails.title"))
       responseBody should include(htmlEscapedMessage("error.utr.invalid.length"))
       responseBody should include(invalidUtr)
       responseBody should include(validPostcode)
@@ -220,7 +220,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
-      responseBody should include(htmlEscapedMessage("checkAgencyStatus.title"))
+      responseBody should include(htmlEscapedMessage("businessDetails.title"))
       responseBody should include(htmlEscapedMessage("error.utr.invalid.format"))
       responseBody should include(invalidUtr)
       responseBody should include(validPostcode)
@@ -234,7 +234,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
-      responseBody should include(htmlEscapedMessage("checkAgencyStatus.title"))
+      responseBody should include(htmlEscapedMessage("businessDetails.title"))
       responseBody should include("Enter a valid postcode, for example AA1 1AA")
       responseBody should include(validUtr.value)
       responseBody should include(invalidPostcode)
@@ -248,7 +248,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
-      responseBody should include(htmlEscapedMessage("checkAgencyStatus.title"))
+      responseBody should include(htmlEscapedMessage("businessDetails.title"))
       responseBody should include(htmlEscapedMessage("error.utr.blank"))
       responseBody should include("You must enter a postcode")
       noMetricExpectedAtThisPoint()
@@ -294,7 +294,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       redirectLocation(result) shouldBe Some(routes.SubscriptionController.showSubscriptionComplete().url)
     }
 
-    "showHasOtherEnrolments, creds with enrolment/s are not allowed when partiallySubscribed User" in {
+    "showCreateNewAccount, creds with enrolment/s are not allowed when partiallySubscribed User" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = false, isSubscribedToETMP = true)
       AgentSubscriptionStub.partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(validUtr,
         knownFacts = SubscriptionRequestKnownFacts(validPostcode)))
@@ -351,7 +351,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
     "display the has other enrolments page if the current user is logged in and has affinity group = Agent" in {
       val result = await(controller.showCreateNewAccount(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
 
-      result should containMessages("hasOtherEnrolments.title")
+      result should containMessages("createNewAccount.title")
     }
   }
 
@@ -390,10 +390,10 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       val result = await(controller.showConfirmBusinessForm(request))
 
       result should containMessages(
-        "confirmYourAgency.title",
+        "confirmBusiness.title",
         "button.back",
-        "confirmYourAgency.option.yes",
-        "confirmYourAgency.option.no")
+        "confirmBusiness.option.yes",
+        "confirmBusiness.option.no")
 
       result should containSubstrings(s"$postcode",
         "01234 56789",
@@ -446,7 +446,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
     }
   }
 
-  "submitConfirmYourAgency" when {
+  "submitConfirmBusiness" when {
 
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.showConfirmBusinessForm(request))
 
@@ -454,7 +454,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       "redirect to showAlreadySubscribed if the user is already subscribed and isSubscribedToAgentServices=true" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
           .withSession("businessType" -> "sole_trader")
-          .withFormUrlEncodedBody("confirmYourAgency" -> "yes")
+          .withFormUrlEncodedBody("confirmBusiness" -> "yes")
         sessionStoreService.currentSession.knownFactsResult = Some(
           KnownFactsResult(
             utr = Utr("0123456789"),
@@ -472,7 +472,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       "redirect to showCheckAnswers if the user has clean creds and isSubscribedToAgentServices=false" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
           .withSession("businessType" -> "sole_trader")
-          .withFormUrlEncodedBody("confirmYourAgency" -> "yes")
+          .withFormUrlEncodedBody("confirmBusiness" -> "yes")
         sessionStoreService.currentSession.knownFactsResult = Some(
           KnownFactsResult(
             utr = Utr("0123456789"),
@@ -494,7 +494,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       "redirect to the check-agency-status page" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
           .withSession("businessType" -> "sole_trader")
-          .withFormUrlEncodedBody("confirmYourAgency" -> "no")
+          .withFormUrlEncodedBody("confirmBusiness" -> "no")
         sessionStoreService.currentSession.knownFactsResult = Some(
         KnownFactsResult(
         utr = Utr("0123456789"),
@@ -512,7 +512,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       "return 200 and redisplay the /confirm-your-agency page with an error message for missing choice" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
           .withSession("businessType" -> "sole_trader")
-          .withFormUrlEncodedBody("confirmYourAgency" -> "")
+          .withFormUrlEncodedBody("confirmBusiness" -> "")
 
         sessionStoreService.currentSession.knownFactsResult = Some(
           KnownFactsResult(
@@ -523,7 +523,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
         val result = await(controller.submitConfirmBusinessForm(request))
 
-        result should containMessages("confirmYourAgency.title", "error.no-radio-selected")
+        result should containMessages("confirmBusiness.title", "error.no-radio-selected")
       }
     }
 
@@ -531,7 +531,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       "result in a BadRequest" in {
         implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
           .withSession("businessType" -> "sole_trader")
-          .withFormUrlEncodedBody("confirmYourAgency" -> "INVALID")
+          .withFormUrlEncodedBody("confirmBusiness" -> "INVALID")
         sessionStoreService.currentSession.knownFactsResult = Some(
           KnownFactsResult(
             utr = Utr("0123456789"),

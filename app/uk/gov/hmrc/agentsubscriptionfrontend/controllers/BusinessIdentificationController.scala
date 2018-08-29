@@ -68,11 +68,11 @@ object BusinessIdentificationController {
 
   val confirmBusinessForm: Form[ConfirmBusiness] =
     Form[ConfirmBusiness](
-      mapping("confirmYourAgency" -> optional(text).verifying(FieldMappings.radioInputSelected))(answer =>
+      mapping("confirmBusiness" -> optional(text).verifying(FieldMappings.radioInputSelected))(answer =>
         ConfirmBusiness(RadioInputAnswer.apply(answer.getOrElse(""))))(answer =>
         Some(RadioInputAnswer.unapply(answer.confirm)))
         .verifying(
-          "error.confirm-agency-value.invalid",
+          "error.confirm-business-value.invalid",
           submittedAnswer => Seq(Yes, No).contains(submittedAnswer.confirm)))
 }
 
@@ -133,7 +133,7 @@ class BusinessIdentificationController @Inject()(
         businessType match {
           case Some(businessTypeIdentifier)
               if BusinessIdentificationController.validBusinessTypes.contains(businessTypeIdentifier) => {
-            mark("Count-Subscription-CheckAgency-Start")
+            mark("Count-Subscription-BusinessDetails-Start")
             Future successful Ok(
               html.business_details(BusinessIdentificationController.knownFactsForm, businessTypeIdentifier))
           }
@@ -156,7 +156,7 @@ class BusinessIdentificationController @Inject()(
             .fold(
               formWithErrors => Future successful Ok(html.business_details(formWithErrors, businessTypeIdentifier)),
               knownFacts =>
-                checkAgencyStatusGivenValidForm(knownFacts).map(
+                checkBusinessDetailsGivenValidForm(knownFacts).map(
                   _.withSession(request.session + ("businessType" -> businessTypeIdentifier)))
             )
         }
@@ -165,11 +165,11 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  private def checkAgencyStatusGivenValidForm(
+  private def checkBusinessDetailsGivenValidForm(
     knownFacts: KnownFacts)(implicit hc: HeaderCarrier, request: Request[AnyContent], agent: Agent): Future[Result] =
     subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode).flatMap {
       case SubscriptionProcess(SubscriptionState.Unsubscribed, Some(registrationDetails)) =>
-        processCheckAgencyStatus(
+        processCheckBusinessStatus(
           knownFacts.utr,
           registrationDetails.taxpayerName.get,
           knownFacts,
@@ -222,7 +222,7 @@ class BusinessIdentificationController @Inject()(
       withKnownFactsResult { knownFactsResult =>
         Future successful Ok(
           html.confirm_business(
-            confirmAgencyRadioForm = BusinessIdentificationController.confirmBusinessForm,
+            confirmBusinessRadioForm = BusinessIdentificationController.confirmBusinessForm,
             registrationName = knownFactsResult.taxpayerName,
             utr = FieldMappings.prettify(knownFactsResult.utr),
             businessAddress = knownFactsResult.address.getOrElse(throw new Exception("address object missing"))
@@ -238,11 +238,11 @@ class BusinessIdentificationController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors => {
-              if (formWithErrors.errors.exists(_.message == "error.confirm-agency-value.invalid")) {
+              if (formWithErrors.errors.exists(_.message == "error.confirm-business-value.invalid")) {
                 throw new BadRequestException("Form submitted with strange input value")
               } else {
                 Future.successful(Ok(html.confirm_business(
-                  confirmAgencyRadioForm = formWithErrors,
+                  confirmBusinessRadioForm = formWithErrors,
                   registrationName = knownFactsResult.taxpayerName,
                   utr = FieldMappings.prettify(knownFactsResult.utr),
                   businessAddress = knownFactsResult.address.getOrElse(throw new Exception("address object missing"))
@@ -413,7 +413,7 @@ class BusinessIdentificationController @Inject()(
     } yield ()
   }
 
-  private def processCheckAgencyStatus(
+  private def processCheckBusinessStatus(
     utr: Utr,
     taxpayerName: String,
     knownFacts: KnownFacts,
@@ -432,7 +432,7 @@ class BusinessIdentificationController @Inject()(
       case maybeAssured @ (None | ManuallyAssured(_) | CheckedInvisibleAssuranceAndPassed(_)) => {
         cacheKnownFactsAndAudit(maybeAssured, taxpayerName, knownFacts, registration)
           .map { _ =>
-            mark("Count-Subscription-CheckAgency-Success")
+            mark("Count-Subscription-ConfirmBusiness-Success")
             Redirect(routes.BusinessIdentificationController.showConfirmBusinessForm())
           }
       }

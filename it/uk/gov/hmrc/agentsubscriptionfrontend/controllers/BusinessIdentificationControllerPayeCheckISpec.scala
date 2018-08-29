@@ -6,7 +6,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.withMatchingUtrAndPostcode
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
 
-class CheckAgencyControllerPayeCheckISpec extends BusinessIdentificationControllerISpec {
+class BusinessIdentificationControllerPayeCheckISpec extends BusinessIdentificationControllerISpec {
   override def agentAssuranceRun: Boolean = true
   override def agentAssurancePayeCheck: Boolean = false
 
@@ -29,7 +29,7 @@ class CheckAgencyControllerPayeCheckISpec extends BusinessIdentificationControll
       verifyAgentAssuranceAuditRequestSent(
         passPayeAgentAssuranceCheck = None,
         passSaAgentAssuranceCheck = Some(true))
-      metricShouldExistAndBeUpdated("Count-Subscription-CheckAgency-Success")
+      metricShouldExistAndBeUpdated("Count-Subscription-ConfirmBusiness-Success")
     }
 
     "fail when a matching registration is found for the UTR and postcode for an agent when failing the SaAgent check" in {

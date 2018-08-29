@@ -49,7 +49,7 @@ class BusinessIdentificationControllerWithAssuranceFlagISpec extends BusinessIde
       verifyAgentAssuranceAuditRequestSent(
         passPayeAgentAssuranceCheck = Some(true),
         passSaAgentAssuranceCheck = Some(true))
-      metricShouldExistAndBeUpdated("Count-Subscription-CheckAgency-Success")
+      metricShouldExistAndBeUpdated("Count-Subscription-ConfirmBusiness-Success")
     }
 
     "store isSubscribedToAgentServices = false in session when the business registration found by agent-subscription is not already subscribed" in {
@@ -69,7 +69,7 @@ class BusinessIdentificationControllerWithAssuranceFlagISpec extends BusinessIde
       verifyAgentAssuranceAuditRequestSent(
         passPayeAgentAssuranceCheck = Some(true),
         passSaAgentAssuranceCheck = Some(true))
-      metricShouldExistAndBeUpdated("Count-Subscription-CheckAgency-Success")
+      metricShouldExistAndBeUpdated("Count-Subscription-ConfirmBusiness-Success")
     }
 
     "redirect to already subscribed page when the business registration found by agent-subscription is already subscribed" in {
@@ -141,7 +141,7 @@ class BusinessIdentificationControllerWithAssuranceFlagISpec extends BusinessIde
       verifyAuditRequestNotSent(AgentSubscriptionFrontendEvent.AgentAssurance)
     }
 
-    "proceed to showConfirmYourAgency when there is not an acceptable number of PAYE client, but there is enough SA Clients" in {
+    "proceed to showConfirmBusiness when there is not an acceptable number of PAYE client, but there is enough SA Clients" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
@@ -159,7 +159,7 @@ class BusinessIdentificationControllerWithAssuranceFlagISpec extends BusinessIde
         passSaAgentAssuranceCheck = Some(true))
     }
 
-    "proceed to showConfirmYourAgency when there in not an acceptable number of SA client, but there is enough PAYE Clients" in {
+    "proceed to showConfirmBusiness when there in not an acceptable number of SA client, but there is enough PAYE Clients" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsNotAnAgentWithAnAcceptableNumberOfSAClients
