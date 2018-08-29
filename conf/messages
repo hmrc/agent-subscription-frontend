@@ -63,14 +63,14 @@ alreadySubscribed.title=Your business already has an agent services account
 alreadySubscribed.p1=Contact your administrator to get access to your business''s agent services account.
 
 #Check business type
-checkBusinessType.title=What type of business are you?
-checkBusinessType.option.sole-trader=Sole trader
-checkBusinessType.option.limited-company=Limited company
-checkBusinessType.option.partnership=Partnership
-checkBusinessType.option.partnership-llp=Limited liability partnership (LLP)
-checkBusinessType.progressive.title=My business type is not listed here
-checkBusinessType.progressive.content.p1=You can only get an agent services account if your business is a sole trader, limited company, partnership or limited liability partnership.
-checkBusinessType.progressive.content.link=Finish and sign out
+businessType.title=What type of business are you?
+businessType.option.sole-trader=Sole trader
+businessType.option.limited-company=Limited company
+businessType.option.partnership=Partnership
+businessType.option.partnership-llp=Limited liability partnership (LLP)
+businessType.progressive.title=My business type is not listed here
+businessType.progressive.content.p1=You can only get an agent services account if your business is a sole trader, limited company, partnership or limited liability partnership.
+businessType.progressive.content.link=Finish and sign out
 
 #Business details
 businessDetails.title=Enter your business details

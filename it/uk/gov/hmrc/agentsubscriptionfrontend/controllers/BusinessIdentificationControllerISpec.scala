@@ -69,9 +69,9 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       val result = await(controller.showBusinessTypeForm(request))
 
-      result should containMessages("checkBusinessType.title",
-        "checkBusinessType.progressive.title",
-        "checkBusinessType.progressive.content.p1"
+      result should containMessages("businessType.title",
+        "businessType.progressive.title",
+        "businessType.progressive.content.p1"
       )
     }
 
@@ -93,7 +93,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       val doc = Jsoup.parse(bodyOf(result))
       val signOutLink = doc.getElementById("sign-out")
       signOutLink.attr("href") shouldBe routes.SignedOutController.signOutWithContinueUrl.url
-      signOutLink.text() shouldBe htmlEscapedMessage("checkBusinessType.progressive.content.link")
+      signOutLink.text() shouldBe htmlEscapedMessage("businessType.progressive.content.link")
     }
   }
 
