@@ -24,7 +24,7 @@
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(radioResponseForm) + Messages("invasive.title.saCode"), bodyClasses = None) {
 
     @if(radioResponseForm.hasErrors) {
-        @errorSummary(Messages("error.summary.heading"), radioResponseForm, Seq.empty, Some("confirmResponseSomethingTrackingGGA"))
+        @errorSummary(Messages("error.summary.heading"), radioResponseForm, Seq.empty, Some("enter-agent-code"))
     }
 
 

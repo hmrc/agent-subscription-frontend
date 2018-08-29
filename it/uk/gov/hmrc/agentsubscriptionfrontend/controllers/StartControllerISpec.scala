@@ -126,7 +126,7 @@ trait StartControllerISpec extends BaseISpec {
     behave like aPageTakingContinueUrlAndContainingItAsALink(request => controller.start(request))
   }
 
-  "showNonAgentNextSteps" when {
+  "showNotAgent" when {
     "the current user is logged in" should {
 
       "display the non-agent next steps page" in {

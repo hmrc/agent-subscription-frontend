@@ -102,9 +102,6 @@ businessDetails.label.postcode.hint=This is the postcode of your registered busi
 notSubscribed.title=You can create an agent services account
 notSubscribed.p1=We''ve checked <strong class="bold">{0}</strong> and it doesn''t have an agent services account.
 
-#Subscription failed
-subscription.failed.title=Subscription failed
-
 #Invalid address
 invalidAddress.title=Invalid address
 invalidAddress.p1=Sorry, the address is not in a format that our system can accept. Please change the address to fix the problems described below:
@@ -166,7 +163,6 @@ button.finishSignOut=Finish and sign out
 #Setup Incomplete
 setupIncomplete.title=You cannot set up an agent services account with the details you entered
 setupIncomplete.p1=<a href="{0}">Try again using a different agent user ID</a> if your agency uses more than one Government Gateway account, for example for Self Assessment or PAYE.
-
 
 #Invasive check
 invasive.title.saCode=Do you have a Self Assessment agent code?
