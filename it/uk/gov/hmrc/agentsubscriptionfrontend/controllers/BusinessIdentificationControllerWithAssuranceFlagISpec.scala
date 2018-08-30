@@ -31,7 +31,7 @@ class BusinessIdentificationControllerWithAssuranceFlagISpec extends BusinessIde
   override def agentAssurancePayeCheck: Boolean = true
 
   "submitBusinessDetailsForm with the agentAssuranceFlag set to true" should {
-    "redirect to confirm agency page and store known facts result in the session store when a matching registration is found for the UTR and postcode" in {
+    "redirect to /confirm-business page and store known facts result in the session store when a matching registration is found for the UTR and postcode" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       givenUserIsAnAgentWithAnAcceptableNumberOfPAYEClients
       givenUserIsAnAgentWithAnAcceptableNumberOfSAClients
@@ -237,7 +237,7 @@ class BusinessIdentificationControllerWithAssuranceFlagISpec extends BusinessIde
       verifyCheckRefusalToDealWith(1, validUtr.value)
     }
 
-    "proceed direct to showConfirmYourAgency and skip assurance checks " +
+    "proceed direct to showConfirmBusinessForm and skip assurance checks " +
       "when agent's UTR is not in the Refusal to Deal With list but is in the Manually Assured Agents list" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)

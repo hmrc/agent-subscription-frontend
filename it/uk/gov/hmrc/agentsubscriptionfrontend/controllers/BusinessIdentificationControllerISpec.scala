@@ -373,7 +373,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.showConfirmBusinessForm(request))
 
-    "display the confirm your agency page if the current user is logged in and has affinity group = Agent" in {
+    "display the confirm business page if the current user is logged in and has affinity group = Agent" in {
       val utr = Utr("0123456789")
       val postcode = "AA11AA"
       val registrationName = "My Agency"
@@ -629,7 +629,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       noMetricExpectedAtThisPoint()
     }
 
-    "redirect to confirm your agency when successfully submitting nino" in {
+    "redirect to confirm business when successfully submitting nino" in {
       givenNinoAGoodCombinationAndUserHasRelationshipInCesa("nino", "AA123456A", "SA6012")
 
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
@@ -654,7 +654,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Success")
     }
 
-    "redirect to confirm your agency when successfully submitting nino WITH RANDOM SPACES IN" in {
+    "redirect to confirm business when successfully submitting nino WITH RANDOM SPACES IN" in {
       givenNinoAGoodCombinationAndUserHasRelationshipInCesa("nino", "AA123456A", "SA6012")
 
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
@@ -731,7 +731,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       status(result) shouldBe 200
     }
 
-    "redirect to confirm your agency when successfully submitting UTR" in {
+    "redirect to confirm business when successfully submitting UTR" in {
       givenUtrAGoodCombinationAndUserHasRelationshipInCesa("utr", "4000000009", "SA6012")
 
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
@@ -756,7 +756,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Success")
     }
 
-    "redirect to confirm your agency when successfully submitting UTR with random spaces" in {
+    "redirect to confirm business when successfully submitting UTR with random spaces" in {
       givenUtrAGoodCombinationAndUserHasRelationshipInCesa("utr", "4000000009", "SA6012")
 
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
