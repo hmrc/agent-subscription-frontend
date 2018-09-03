@@ -201,6 +201,8 @@ checkAnswers.confirm.button=Confirm details and create account
 checkAnswers.change.button=Change
 
 businessName.title=What is your business name?
+businessName.updated.title=Update your business name
+businessName.updated.p1=Your business name must only include a to z, numbers, commas, full stops, apostrophes, hyphens, ampersands, forward and backward slashes, and spaces
 businessName.description=Your business name will not be updated in other government services.
 businessName.continue.button=Continue
 
