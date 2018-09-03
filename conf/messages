@@ -145,11 +145,6 @@ subscriptionComplete.p1=Make a note of your account reference number <strong cla
 subscriptionComplete.p2=<a href="{0}">Check the guidance</a> to find out how to:
 subscriptionComplete.bullet-list.1=sign in to your agent services account
 subscriptionComplete.bullet-list.2=use new HMRC services on behalf of your clients
-subscriptionComplete.link-clients.h2=Now you have linked your clients
-subscriptionComplete.link-clients.p1=If your clients are signed up to report their income and expenses, or their VAT returns, through software, you can now:
-subscriptionComplete.link-clients.p2=You will still need to use your software or Government Gateway accounts to manage your client lists.
-subscriptionComplete.link-clients.bullet-list.1=use software to access information about these clients
-subscriptionComplete.link-clients.bullet-list.2=act on your client''s behalf for these services without having to ask for their authorisation again
 
 subscriptionComplete.button.continueToASAccount=Go to your agent services account
 subscriptionComplete.button.continueJourney=Continue
