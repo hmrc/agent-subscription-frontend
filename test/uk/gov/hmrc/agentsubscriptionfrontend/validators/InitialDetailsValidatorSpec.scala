@@ -100,6 +100,11 @@ class InitialDetailsValidatorSpec extends UnitSpec {
           validator.validate(validInitialDetails.copy(name = "Some'name")) shouldBe Failure(InvalidBusinessName)
         }
 
+        "it contains backward slashes" in {
+          validator.validate(validInitialDetails.copy(name = """Some valid name\""")) shouldBe Failure(
+            InvalidBusinessName)
+        }
+
         "it's longer than 40 characters (number of characters DES and ES8 will accept)" in {
           validator.validate(validInitialDetails.copy(name = "12345678911234567892123456789312345678941234567")) shouldBe Failure(
             InvalidBusinessName)
@@ -113,7 +118,7 @@ class InitialDetailsValidatorSpec extends UnitSpec {
           validator.validate(validInitialDetails.copy(name = "Some valid name")) shouldBe Pass
         }
 
-        "return Pass if the name contains forward and backward slashes" in {
+        "return Pass if the name contains forward slashes" in {
           validator.validate(validInitialDetails.copy(name = """Some valid name/""")) shouldBe Pass
         }
       }
