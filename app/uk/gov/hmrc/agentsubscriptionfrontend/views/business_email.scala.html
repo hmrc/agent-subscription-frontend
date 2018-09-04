@@ -19,10 +19,10 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessEmail
 
-@(businessEmailForm: Form[BusinessEmail], email: Option[String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(businessEmailForm: Form[BusinessEmail], invalidDesEmail: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(businessEmailForm) +  Messages("businessEmail.title"), bodyClasses = None) {
-   @if(email.nonEmpty) {
+   @if(!invalidDesEmail) {
        <a href="@routes.SubscriptionController.showCheckAnswers()" class="link-back">@Messages("button.back")</a>
    }
 

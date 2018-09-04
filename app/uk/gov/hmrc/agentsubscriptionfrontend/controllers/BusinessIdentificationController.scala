@@ -318,7 +318,7 @@ class BusinessIdentificationController @Inject()(
             businessEmailForm.fill(BusinessEmail(details.email.get))
           else businessEmailForm
 
-        Future.successful(Ok(html.business_email(form, details.email)))
+        Future.successful(Ok(html.business_email(form, isValidEmail(details))))
       }
     }
   }
@@ -329,7 +329,7 @@ class BusinessIdentificationController @Inject()(
         businessEmailForm
           .bindFromRequest()
           .fold(
-            formWithErrors => Future.successful(Ok(html.business_email(formWithErrors, details.email))),
+            formWithErrors => Future.successful(Ok(html.business_email(formWithErrors, isValidEmail(details)))),
             validForm => {
               val updatedDetails = details.copy(email = Some(validForm.email))
               sessionStoreService
@@ -344,11 +344,8 @@ class BusinessIdentificationController @Inject()(
   val showBusinessNameForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withInitialDetails { details =>
-        val desErrorExists = initialDetailsValidator.validate(details) match {
-          case Failure(responses) if responses.contains(InvalidBusinessName) => true
-          case _                                                             => false
-        }
-        Future.successful(Ok(html.business_name(businessNameForm.fill(BusinessName(details.name)), desErrorExists)))
+        Future.successful(
+          Ok(html.business_name(businessNameForm.fill(BusinessName(details.name)), isValidBusinessName(details))))
       }
     }
   }
@@ -359,7 +356,7 @@ class BusinessIdentificationController @Inject()(
         businessNameForm
           .bindFromRequest()
           .fold(
-            formWithErrors => Future.successful(Ok(html.business_name(formWithErrors))),
+            formWithErrors => Future.successful(Ok(html.business_name(formWithErrors, isValidBusinessName(details)))),
             validForm => {
               val updatedDetails = details.copy(name = validForm.name)
               sessionStoreService
@@ -528,4 +525,14 @@ class BusinessIdentificationController @Inject()(
   private def cacheInitialDetailsAndRedirect(initialDetails: InitialDetails)(call: => Call)(
     implicit hc: HeaderCarrier): Future[Call] =
     sessionStoreService.cacheInitialDetails(initialDetails).map(_ => call)
+
+  def isValidBusinessName(details: InitialDetails): Boolean = initialDetailsValidator.validate(details) match {
+    case Failure(responses) if responses.contains(InvalidBusinessName) => true
+    case _                                                             => false
+  }
+
+  def isValidEmail(details: InitialDetails): Boolean = initialDetailsValidator.validate(details) match {
+    case Failure(responses) if responses.contains(InvalidEmail) => true
+    case _                                                      => false
+  }
 }

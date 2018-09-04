@@ -663,6 +663,26 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       result should containMessages("businessName.title", "error.business-name.empty")
     }
 
+    "show validation error when the form is submitted with non des complaint name after check-answers page" in {
+      implicit val request =
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("name" -> "Some name *")
+      sessionStoreService.currentSession.initialDetails = Some(initialDetails)
+
+      val result = await(controller.submitBusinessNameForm(request))
+
+      result should containMessages("businessName.title", "error.business-name.invalid")
+    }
+
+    "show validation error when the form is submitted with non des complaint name" in {
+      implicit val request =
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("name" -> "Some name *")
+      sessionStoreService.currentSession.initialDetails = Some(initialDetails.copy(name= "Some name &"))
+
+      val result = await(controller.submitBusinessNameForm(request))
+
+      result should containMessages("businessName.updated.title", "error.business-name.invalid")
+    }
+
     "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
