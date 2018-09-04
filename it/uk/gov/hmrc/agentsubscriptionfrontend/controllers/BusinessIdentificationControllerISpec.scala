@@ -607,7 +607,6 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       val doc = Jsoup.parse(bodyOf(result))
       doc.getElementById("name").`val` shouldBe initialDetails.name
 
-
       val backLink = doc.getElementsByClass("link-back")
       backLink.attr("href") shouldBe routes.SubscriptionController.showCheckAnswers().url
 
@@ -624,9 +623,6 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       result should containMessages("businessName.updated.title", "businessName.updated.p1",  "businessName.description", "businessName.continue.button")
       val doc = Jsoup.parse(bodyOf(result))
       doc.getElementById("name").`val` shouldBe "My Agency &"
-
-      val backLink = doc.getElementsByClass("link-back")
-      backLink.attr("href") shouldBe routes.BusinessIdentificationController.showConfirmBusinessForm().url
 
       val form = doc.select("form").first()
       form.attr("method") shouldBe "POST"
@@ -687,6 +683,23 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       result should containMessages("businessEmail.title", "businessEmail.description", "businessEmail.continue.button")
       val doc = Jsoup.parse(bodyOf(result))
       doc.getElementById("email").`val` shouldBe initialDetails.email.get
+
+      val backLink = doc.getElementsByClass("link-back")
+      backLink.attr("href") shouldBe routes.SubscriptionController.showCheckAnswers().url
+
+      val form = doc.select("form").first()
+      form.attr("method") shouldBe "POST"
+      form.attr("action") shouldBe routes.BusinessIdentificationController.submitBusinessEmailForm().url
+    }
+
+    "display business email form when email address in initial details is empty" in {
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      sessionStoreService.currentSession.initialDetails = Some(initialDetails.copy(email = None))
+
+      val result = await(controller.showBusinessEmailForm(request))
+      result should containMessages("businessEmail.title", "businessEmail.description", "businessEmail.continue.button")
+      val doc = Jsoup.parse(bodyOf(result))
+      doc.getElementById("email").`val` shouldBe ""
 
       val form = doc.select("form").first()
       form.attr("method") shouldBe "POST"

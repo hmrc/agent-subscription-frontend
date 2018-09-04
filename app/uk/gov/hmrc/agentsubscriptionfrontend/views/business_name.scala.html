@@ -21,10 +21,10 @@
 
 @(businessNameForm: Form[BusinessName], desErrorExists: Boolean = false)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(businessNameForm) +  Messages("businessName.title"), bodyClasses = None) {
-    @if(desErrorExists) {
-        <a href="@routes.BusinessIdentificationController.showConfirmBusinessForm()" class="link-back">@Messages("button.back")</a>
-    } else {
+@title = @{ if(desErrorExists) Messages("businessName.updated.title") else Messages("businessName.title") }
+
+@uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(businessNameForm) + title, bodyClasses = None) {
+    @if(!desErrorExists) {
         <a href="@routes.SubscriptionController.showCheckAnswers()" class="link-back">@Messages("button.back")</a>
     }
 

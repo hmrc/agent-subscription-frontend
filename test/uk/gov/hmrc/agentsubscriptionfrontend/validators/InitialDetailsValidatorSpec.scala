@@ -112,6 +112,10 @@ class InitialDetailsValidatorSpec extends UnitSpec {
         "return Pass if the name is valid" in {
           validator.validate(validInitialDetails.copy(name = "Some valid name")) shouldBe Pass
         }
+
+        "return Pass if the name contains forward and backward slashes" in {
+          validator.validate(validInitialDetails.copy(name = """Some valid name/""")) shouldBe Pass
+        }
       }
     }
   }
