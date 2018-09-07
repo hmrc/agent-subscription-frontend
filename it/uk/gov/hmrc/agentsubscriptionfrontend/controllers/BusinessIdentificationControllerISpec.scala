@@ -37,7 +37,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMissingSpec {
   val validUtr = Utr("2000000000")
   val validPostcode = "AA1 1AA"
-  private val invalidPostcode = "not a postcode"
+  private val invalidPostcode = "11AAAA"
 
   val utr = Utr("0123456789")
   val postcode = "AA11AA"
@@ -217,7 +217,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
       responseBody should include(htmlEscapedMessage("businessDetails.title"))
-      responseBody should include(htmlEscapedMessage("error.utr.invalid.length"))
+      responseBody should include(htmlEscapedMessage("error.sautr.invalid"))
       responseBody should include(invalidUtr)
       responseBody should include(validPostcode)
       noMetricExpectedAtThisPoint()
@@ -232,7 +232,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
       responseBody should include(htmlEscapedMessage("businessDetails.title"))
-      responseBody should include(htmlEscapedMessage("error.utr.invalid.format"))
+      responseBody should include(htmlEscapedMessage("error.sautr.invalid"))
       responseBody should include(invalidUtr)
       responseBody should include(validPostcode)
       noMetricExpectedAtThisPoint()
@@ -260,7 +260,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       status(result) shouldBe OK
       val responseBody = bodyOf(result)
       responseBody should include(htmlEscapedMessage("businessDetails.title"))
-      responseBody should include(htmlEscapedMessage("error.utr.blank"))
+      responseBody should include(htmlEscapedMessage("error.sautr.blank"))
       responseBody should include("Enter a postcode")
       noMetricExpectedAtThisPoint()
     }
@@ -1042,7 +1042,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
             .withSession("saAgentReferenceToCheck" -> "SA6012")))
 
       status(result) shouldBe 200
-      bodyOf(result) should include(htmlEscapedMessage("error.utr.blank"))
+      bodyOf(result) should include(htmlEscapedMessage("error.client.sautr.blank"))
     }
 
     "utr invalid send back 200 with error page" in {
@@ -1053,7 +1053,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
             .withSession("saAgentReferenceToCheck" -> "SA6012")))
 
       status(result) shouldBe 200
-      bodyOf(result) should include(htmlEscapedMessage("error.utr.invalid.format"))
+      bodyOf(result) should include(htmlEscapedMessage("error.client.sautr.invalid"))
     }
 
     "utr wrong length" in {
@@ -1064,7 +1064,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
             .withSession("saAgentReferenceToCheck" -> "SA6012")))
 
       status(result) shouldBe 200
-      bodyOf(result) should include(htmlEscapedMessage("error.utr.invalid.length"))
+      bodyOf(result) should include(htmlEscapedMessage("error.client.sautr.invalid"))
     }
 
     "Invalid form 'variant' cannot determine which option user selected  " in {

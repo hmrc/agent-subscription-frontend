@@ -51,7 +51,7 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
     Seq(FormError(key, "error.address.lines.maxLength", Seq(35)), FormError(key, "error.address.lines.invalid", Seq()))
 
   private val validPostcode = "AA1 1AA"
-  private val errorsForInvalidPostcode = Seq(FormError("postcode", "error.postcode.invalid", Seq()))
+  private val errorsForInvalidPostcode = Seq(FormError("postcode", "error.postcode.maxlength", Seq()))
 
   private val blacklistedPostcode = "BB1 1BB"
   private val errorsForBlacklistedPostcode = Seq(FormError("postcode", "error.postcode.blacklisted", Seq()))

@@ -23,6 +23,8 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.Postcod
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 
+import scala.util.Random
+
 class CommonValidatorsSpec extends UnitSpec with EitherValues {
 
   "utr bind" should {
@@ -117,7 +119,7 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
       }
 
       "it only contains a space" in {
-        bind(" ").left.value should contain only FormError("testKey",blank)
+        bind(" ").left.value should contain only FormError("testKey", blank)
       }
     }
 
@@ -294,7 +296,9 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
       bind(fieldValue) should matchPattern { case Left(List(FormError("testKey", List("error.email"), _))) => }
 
     def shouldRejectFieldValueAsInvalidChars(fieldValue: String): Unit =
-      bind(fieldValue) should matchPattern { case Left(List(FormError("testKey", List("error.email.invalidchars"), _))) => }
+      bind(fieldValue) should matchPattern {
+        case Left(List(FormError("testKey", List("error.email.invalidchars"), _))) =>
+      }
 
     def shouldAcceptFieldValue(fieldValue: String): Unit =
       bind(fieldValue) shouldBe Right(fieldValue)
@@ -306,6 +310,12 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
 
       "input is empty" in {
         bind("").left.value should contain only FormError("testKey", "error.business-email.empty")
+      }
+
+      "input has length more than 132 characters" in {
+        bind(s"${Random.alphanumeric.take(132).mkString}@example.com").left.value should contain only FormError(
+          "testKey",
+          "error.email.maxlength")
       }
 
       "input is only whitespace" in {

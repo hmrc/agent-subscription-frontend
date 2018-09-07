@@ -20,6 +20,7 @@ error.email= Enter a valid email address, like yourname@example.com
 
 ##Errors
 error.email.invalidchars=Business email address must only contain letters a to z, numbers, full stops, hyphens, underscores and @ signs
+error.email.maxlength=Business email address must be 132 characters or less
 error.postcode.invalid = Enter a valid postcode, for example AA1 1AA
 error.postcode.invalidchars=Postcode must only include letters a to z, numbers and spaces, like AA1 1AA
 error.postcode.blacklisted = You can''t use the postcode you''ve entered

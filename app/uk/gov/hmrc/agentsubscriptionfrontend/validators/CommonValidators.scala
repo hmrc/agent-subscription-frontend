@@ -131,6 +131,8 @@ object CommonValidators {
         i
       case Valid =>
         fieldValue match {
+          case value if value.size > 132 =>
+            Invalid(ValidationError("error.email.maxlength"))
           case value if !value.matches(emailSpecialCharsRegex) =>
             Invalid(ValidationError("error.email.invalidchars"))
           case _ => Constraints.emailAddress(fieldValue)
