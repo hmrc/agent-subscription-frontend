@@ -25,13 +25,20 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters
 import uk.gov.hmrc.domain.Nino
 
 object CommonValidators {
-  private val desPostcodeRegex = "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$"
-  private val postcodeSpecialCharsRegex = """^[A-Za-z0-9 _]*[A-Za-z0-9][A-Za-z0-9 _]*$"""
-  private val emailSpecialCharsRegex = """^[a-zA-Z 0-9\.\@\_\-]*$"""
-  private val desTextRegex = "^[A-Za-z0-9 \\-,.&'\\/]*$"
+  private val DesPostcodeRegex = "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$"
+  private val PostcodeSpecialCharsRegex = """^[A-Za-z0-9 _]*[A-Za-z0-9][A-Za-z0-9 _]*$"""
+  private val EmailSpecialCharsRegex = """^[a-zA-Z 0-9\.\@\_\-]*$"""
+  private val DesTextRegex = "^[A-Za-z0-9 \\-,.&'\\/]*$"
 
   private type UtrErrors = (String, String)
-  private val defaultUtrErrors = ("error.utr.blank", "error.utr.invalid")
+  private val DefaultUtrErrors = ("error.utr.blank", "error.utr.invalid")
+
+  private val EmailMaxLength = 132
+  private val PostcodeMaxLength = 8
+  private val AddresslineMaxLength = 35
+  private val BusinessNameMaxLength = 40
+  private val UtrMaxLength = 10
+  private val SaAgentCodeMaxLength = 6
 
   def saAgentCode = text verifying saAgentCodeConstraint
 
@@ -49,7 +56,7 @@ object CommonValidators {
       case "partnership" | "llp" =>
         ("error.partnershiputr.blank", "error.partnershiputr.invalid")
       case _ =>
-        defaultUtrErrors
+        DefaultUtrErrors
     }
 
     text verifying utrConstraint(utrErrors)
@@ -70,7 +77,7 @@ object CommonValidators {
 
   def businessName: Mapping[String] =
     text
-      .verifying(maxLength(40, "error.business-name.maxlength"))
+      .verifying(maxLength(BusinessNameMaxLength, "error.business-name.maxlength"))
       .verifying(
         checkOneAtATime(
           noAmpersand("error.business-name.invalid"),
@@ -81,13 +88,13 @@ object CommonValidators {
 
   def addressLine1: Mapping[String] =
     text
-      .verifying(maxLength(35, "error.address.lines.maxLength"))
+      .verifying(maxLength(AddresslineMaxLength, "error.address.lines.maxLength"))
       .verifying(desText(msgKeyRequired = "error.address.lines.empty", msgKeyInvalid = "error.address.lines.invalid"))
 
   def addressLine234: Mapping[Option[String]] =
     optional(
       text
-        .verifying(maxLength(35, "error.address.lines.maxLength"))
+        .verifying(maxLength(AddresslineMaxLength, "error.address.lines.maxLength"))
         .verifying(
           desText(msgKeyRequired = "error.address.lines.empty", msgKeyInvalid = "error.address.lines.invalid")))
 
@@ -131,9 +138,9 @@ object CommonValidators {
         i
       case Valid =>
         fieldValue match {
-          case value if value.size > 132 =>
+          case value if value.size > EmailMaxLength =>
             Invalid(ValidationError("error.email.maxlength"))
-          case value if !value.matches(emailSpecialCharsRegex) =>
+          case value if !value.matches(EmailSpecialCharsRegex) =>
             Invalid(ValidationError("error.email.invalidchars"))
           case _ => Constraints.emailAddress(fieldValue)
         }
@@ -146,10 +153,10 @@ object CommonValidators {
         i
       case Valid =>
         fieldValue match {
-          case value if value.size > 8 => Invalid(ValidationError("error.postcode.maxlength"))
-          case value if !value.matches(postcodeSpecialCharsRegex) =>
+          case value if value.size > PostcodeMaxLength => Invalid(ValidationError("error.postcode.maxlength"))
+          case value if !value.matches(PostcodeSpecialCharsRegex) =>
             Invalid(ValidationError("error.postcode.invalidchars"))
-          case value if !value.matches(desPostcodeRegex) => Invalid(ValidationError("error.postcode.invalid"))
+          case value if !value.matches(DesPostcodeRegex) => Invalid(ValidationError("error.postcode.invalid"))
           case _                                         => Valid
         }
     }
@@ -165,7 +172,7 @@ object CommonValidators {
         case i: Invalid => i
         case Valid =>
           fieldValue match {
-            case value if !value.matches(desTextRegex) => Invalid(ValidationError(msgKeyInvalid))
+            case value if !value.matches(DesTextRegex) => Invalid(ValidationError(msgKeyInvalid))
             case _                                     => Valid
           }
       }
@@ -181,7 +188,7 @@ object CommonValidators {
       Invalid(ValidationError("error.saAgentCode.blank"))
     else if (!formattedCode.matches("""^[a-zA-Z0-9]*$"""))
       Invalid(ValidationError("error.saAgentCode.invalid"))
-    else if (formattedCode.length != 6)
+    else if (formattedCode.length != SaAgentCodeMaxLength)
       Invalid(ValidationError("error.saAgentCode.length"))
     else
       Valid
@@ -197,14 +204,14 @@ object CommonValidators {
 
   private def isUtrValid(utrStr: String): Boolean = TaxIdentifierFormatters.normalizeUtr(utrStr).nonEmpty
 
-  private def utrConstraint(errorMessages: UtrErrors = defaultUtrErrors): Constraint[String] = Constraint[String] {
+  private def utrConstraint(errorMessages: UtrErrors = DefaultUtrErrors): Constraint[String] = Constraint[String] {
     fieldValue: String =>
       val formattedField = fieldValue.replace(" ", "")
       val (blank, invalid) = errorMessages
 
       Constraints.nonEmpty(formattedField) match {
         case _: Invalid => Invalid(ValidationError(blank))
-        case _ if formattedField.map(_.isDigit).reduce(_ && _) && formattedField.size != 10 =>
+        case _ if formattedField.map(_.isDigit).reduce(_ && _) && formattedField.size != UtrMaxLength =>
           Invalid(ValidationError(invalid))
         case _ if !isUtrValid(fieldValue) => Invalid(ValidationError(invalid))
         case _                            => Valid

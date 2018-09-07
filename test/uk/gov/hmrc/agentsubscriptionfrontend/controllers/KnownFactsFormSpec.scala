@@ -23,8 +23,6 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 class KnownFactsFormSpec extends UnitSpec {
 
-  def form = BusinessIdentificationForms.knownFactsForm("")
-
   "knownFactsForm" should {
 
     behave like checkKnownFactsForm("sole_trader")(BusinessIdentificationForms.knownFactsForm("sole_trader"))
