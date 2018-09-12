@@ -34,38 +34,17 @@
 
         <fieldset>
 
+          @for(index <- 1 to 4) {
             <div class="form-group">
             @input(
-                addressForm("addressLine1"),
-                '_label -> Messages("updateBusinessAddress.address_line_1.title"),
+                addressForm(s"addressLine$index"),
+                '_label -> Messages(s"updateBusinessAddress.address_line_$index.title"),
                 '_inputClass -> "form-control input--cleared",
                 '_labelClass -> "heading-small soft--ends"
             )
             </div>
-            <div class="form-group">
-            @input(
-                addressForm("addressLine2"),
-                '_label -> Messages("updateBusinessAddress.address_line_2.title"),
-                '_inputClass -> "form-control input--cleared",
-                '_labelClass -> "heading-small soft--ends"
-            )
-            </div>
-            <div class="form-group">
-            @input(
-                addressForm("addressLine3"),
-                '_label -> Messages("updateBusinessAddress.address_line_3.title"),
-                '_inputClass -> "form-control input--cleared",
-                '_labelClass -> "heading-small soft--ends"
-            )
-            </div>
-            <div class="form-group">
-            @input(
-                addressForm("addressLine4"),
-                '_label -> Messages("updateBusinessAddress.address_line_4.title"),
-                '_inputClass -> "form-control input--cleared",
-                '_labelClass -> "heading-small soft--ends"
-            )
-            </div>
+          }
+
             <div class="form-group">
             @input(
                 addressForm("postcode"),
