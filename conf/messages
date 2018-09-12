@@ -227,7 +227,7 @@ businessEmail.description=Your business email address will not be updated in oth
 businessEmail.continue.button=Continue
 
 updateBusinessAddress.title=Update your business address
-updateBusinessAddress.p1=Make sure your business address only includes letters a to z, numbers, apostrophes, ampersands, commas, hyphens, full stops, forward slashes, and spaces.
+updateBusinessAddress.p1=Make sure your business address only includes letters a to z, numbers, commas, full stops, apostrophes, hyphens, forward slashes, and spaces.
 updateBusinessAddress.p2=Your business address will not be updated in other government services.
 updateBusinessAddress.address_line_1.title = Address line 1
 updateBusinessAddress.address_line_2.title = Address line 2 (Optional)
