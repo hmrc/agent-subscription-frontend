@@ -70,9 +70,9 @@ package object controllers {
     val updateBusinessAddressForm = Form[UpdateBusinessAddressForm](
       mapping(
         "addressLine1" -> addressLine1,
-        "addressLine2" -> addressLine234,
-        "addressLine3" -> addressLine234,
-        "addressLine4" -> addressLine234,
+        "addressLine2" -> addressLine234(2),
+        "addressLine3" -> addressLine234(3),
+        "addressLine4" -> addressLine234(4),
         "postcode"     -> postcode
       )(UpdateBusinessAddressForm.apply)(UpdateBusinessAddressForm.unapply))
 

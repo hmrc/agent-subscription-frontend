@@ -22,7 +22,7 @@
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(addressForm) + Messages("updateBusinessAddress.title"), bodyClasses = None) {
     @if(addressForm.hasErrors) {
-        @errorSummary(Messages("error.summary.heading"), addressForm, Seq.empty, Some("return-from-address-lookup"))
+        @errorSummary(Messages("error.summary.heading"), addressForm, Seq.empty, Some("update-business-address"))
     }
     <h1 class="heading-xlarge">@Messages("updateBusinessAddress.title")</h1>
 

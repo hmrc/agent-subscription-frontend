@@ -249,7 +249,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  private def lookupNextPage(initialDetails: InitialDetails)(implicit hc: HeaderCarrier) = {
+  private def lookupNextPage(initialDetails: InitialDetails)(implicit hc: HeaderCarrier): Future[Call] = {
     val redirectCall = initialDetailsValidator.validate(initialDetails) match {
       case Failure(responses) if responses.contains(InvalidBusinessName) =>
         routes.BusinessIdentificationController.showBusinessNameForm()
