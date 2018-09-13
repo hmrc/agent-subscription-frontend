@@ -25,7 +25,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters
 import uk.gov.hmrc.domain.Nino
 
 object CommonValidators {
-  private val DesPostcodeRegex = "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$"
+  private val DesPostcodeRegex = "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$"
   private val PostcodeSpecialCharsRegex = """^[A-Za-z0-9 ]*$"""
   private val EmailSpecialCharsRegex = """^[a-zA-Z 0-9\.\@\_\-]*$"""
   private val DesTextRegex = "^[A-Za-z0-9 \\-,.&'\\/]*$"
@@ -180,7 +180,7 @@ object CommonValidators {
       }
     }
 
-  private def validateBlacklist(postcode: String, blacklistedPostcodes: Set[String]): Boolean =
+  def validateBlacklist(postcode: String, blacklistedPostcodes: Set[String]): Boolean =
     !blacklistedPostcodes.contains(PostcodesLoader.formatPostcode(postcode))
 
   private val saAgentCodeConstraint: Constraint[String] = Constraint[String] { fieldValue: String =>
