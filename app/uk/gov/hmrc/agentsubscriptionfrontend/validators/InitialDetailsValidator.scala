@@ -48,10 +48,13 @@ class InitialDetailsValidator @Inject()(appConfig: AppConfig) {
     postcodeOpt
       .map { postcode =>
         val formattedPostcode = postcode.trim.toUpperCase()
-        val bfpoCondition =
-          !(formattedPostcode.startsWith("BF") || formattedPostcode.startsWith("BFPO"))
 
-        if (validateBlacklist(formattedPostcode, blacklistedPostcodes) && bfpoCondition) Pass
+        // Checks for BFPO postcodes. Those postcodes starts with either BF or BFPO
+        val isBfpo =
+          !(formattedPostcode.startsWith("BF") || formattedPostcode.startsWith("BFPO"))
+        val isValid = validateBlacklist(formattedPostcode, blacklistedPostcodes)
+
+        if (isValid && isBfpo) Pass
         else Failure(DisallowedPostcode)
       }
       .getOrElse(Pass)
