@@ -18,6 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
+
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms.{mapping, optional, text}
@@ -30,6 +31,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AddressLookupFrontendConnector, MappingConnector}
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
+import uk.gov.hmrc.agentsubscriptionfrontend.models.MappingEligibility.IsEligible
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionReturnedHttpError, SubscriptionService}
@@ -68,7 +70,6 @@ class SubscriptionController @Inject()(
       case hasNonEmptyEnrolments(_) =>
         Future.successful(Redirect(routes.BusinessIdentificationController.showCreateNewAccount()))
       case _ =>
-        mark("Count-Subscription-CleanCreds-Success")
         withInitialDetails { details =>
           Future.successful {
             Ok(
@@ -97,7 +98,7 @@ class SubscriptionController @Inject()(
             details.businessAddress.postalCode.getOrElse(throw new Exception("Postcode should not be empty")),
             details.businessAddress.countryCode
           )
-          subscriptionService.subscribe(details, desAddress).flatMap(redirectSubscriptionResponse)
+          subscriptionService.subscribe(details, desAddress).flatMap(redirectSubscriptionResponse(_, details.utr))
         }
     }
   }
@@ -113,12 +114,12 @@ class SubscriptionController @Inject()(
     }
   }
 
-  private def redirectSubscriptionResponse(either: Either[SubscriptionReturnedHttpError, (Arn, String)])(
+  private def redirectSubscriptionResponse(either: Either[SubscriptionReturnedHttpError, (Arn, String)], utr: Utr)(
     implicit request: Request[AnyContent]): Future[Result] =
     either match {
       case Right((arn, _)) =>
         mark("Count-Subscription-Complete")
-        commonRouting.redirectUponSuccessfulSubscription(arn)
+        commonRouting.completeMappingWhenAvailable(Some(utr))
 
       case Left(SubscriptionReturnedHttpError(CONFLICT)) =>
         mark("Count-Subscription-AlreadySubscribed-APIResponse")
@@ -174,7 +175,7 @@ class SubscriptionController @Inject()(
     appConfig.autoMapAgentEnrolments match {
       case true =>
         withAuthenticatedAgent {
-          withArnFromSession { _ =>
+          withInitialDetails { _ =>
             Future.successful(Ok(html.link_clients(linkClientsForm)))
           }
         }
@@ -185,27 +186,27 @@ class SubscriptionController @Inject()(
   val submitLinkClients: Action[AnyContent] = Action.async { implicit request =>
     appConfig.autoMapAgentEnrolments match {
       case true =>
-        withAuthenticatedAgent {
-          withArnFromSession { _ =>
-            linkClientsForm
-              .bindFromRequest()
-              .fold(
-                formWithErrors => {
-                  if (formWithErrors.errors.exists(_.message == "error.link-clients-value.invalid")) {
-                    throw new BadRequestException("Form submitted with strange input value")
-                  } else {
-                    Future.successful(Ok(html.link_clients(formWithErrors)))
-                  }
-                },
-                validatedLinkClients => {
-                  validatedLinkClients.autoMapping match {
-                    case Yes => linkClientsResponse(mappingConnector.updatePreSubscriptionWithArn)
-                    case No  => linkClientsResponse(mappingConnector.deletePreSubscription)
-                  }
-                }
-              )
-          }
-        }
+        linkClientsForm
+          .bindFromRequest()
+          .fold(
+            formWithErrors => {
+              if (formWithErrors.errors.exists(_.message == "error.link-clients-value.invalid")) {
+                throw new BadRequestException("Form submitted with strange input value")
+              } else {
+                Future.successful(Ok(html.link_clients(formWithErrors)))
+              }
+            },
+            validatedLinkClients => {
+              validatedLinkClients.autoMapping match {
+                case Yes =>
+                  Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
+                    .withSession(request.session + ("performAutoMapping" -> "true"))
+                case No =>
+                  Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
+                    .withSession(request.session - "performAutoMapping")
+              }
+            }
+          )
       case false => Future.successful(InternalServerError)
     }
   }
@@ -217,27 +218,19 @@ class SubscriptionController @Inject()(
         None
     }
 
-    withAuthenticatedAgent {
-      withArnFromSession { arn =>
-        for {
-          continueUrlOpt           <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
-          wasEligibleForMappingOpt <- sessionStoreService.fetchMappingEligible.recover(recoverSessionStoreWithNone)
-          _                        <- sessionStoreService.remove()
-        } yield {
-          val continueUrl = continueUrlOpt.map(_.url).getOrElse(appConfig.agentServicesAccountUrl)
-          val isUrlToASAccount = continueUrlOpt.isEmpty
-          val wasEligibleForMapping = wasEligibleForMappingOpt.contains(true)
-          val prettifiedArn = TaxIdentifierFormatters.prettify(arn)
-          Ok(html.subscription_complete(continueUrl, isUrlToASAccount, wasEligibleForMapping, prettifiedArn))
-            .removingFromSession("arn")
-        }
+    withSubscribedAgent { arn =>
+      for {
+        continueUrlOpt           <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
+        wasEligibleForMappingOpt <- sessionStoreService.fetchMappingEligible.recover(recoverSessionStoreWithNone)
+        _                        <- sessionStoreService.remove()
+      } yield {
+        val continueUrl = continueUrlOpt.map(_.url).getOrElse(appConfig.agentServicesAccountUrl)
+        val isUrlToASAccount = continueUrlOpt.isEmpty
+        val wasEligibleForMapping = wasEligibleForMappingOpt.contains(true)
+        val prettifiedArn = TaxIdentifierFormatters.prettify(arn)
+        Ok(html.subscription_complete(continueUrl, isUrlToASAccount, wasEligibleForMapping, prettifiedArn))
+          .removingFromSession("arn")
       }
     }
   }
-
-  private def linkClientsResponse[A](
-    body: Utr => Future[Unit])(implicit hc: HeaderCarrier, request: Request[A]): Future[Result] =
-    withKnownFactsResult { knownFactResult =>
-      body(knownFactResult.utr).map(_ => Redirect(routes.SubscriptionController.showSubscriptionComplete()))
-    }
 }

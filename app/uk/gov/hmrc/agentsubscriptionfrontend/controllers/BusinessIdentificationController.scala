@@ -262,7 +262,6 @@ class BusinessIdentificationController @Inject()(
         mark("Count-Subscription-CleanCreds-Start")
         routes.SubscriptionController.showCheckAnswers()
     }
-
     cacheInitialDetailsAndRedirect(initialDetails)(redirectCall)
   }
 

@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.auth
 import play.api.Mode
 import play.api.mvc.Results._
 import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.agentmtdidentifiers.model.Arn
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ContinueUrlActions, routes}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
@@ -60,6 +61,26 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
 
   def env = appConfig.environment
   def config = appConfig.configuration
+
+  def withSubscribedAgent[A](body: Arn => Future[Result])(
+    implicit request: Request[A],
+    hc: HeaderCarrier,
+    ec: ExecutionContext): Future[Result] =
+    authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
+      .retrieve(allEnrolments) {
+        case enrolments =>
+          body(
+            getEnrolmentValue(enrolments, "HMRC-AS-AGENT", "AgentReferenceNumber")
+              .map(Arn(_))
+              .getOrElse(throw new InsufficientEnrolments("could not find the HMRC-AS-AGENT enrolment to continue")))
+      }
+      .recover {
+        case _: UnsupportedAffinityGroup =>
+          mark("Count-Subscription-NonAgent")
+          Redirect(routes.StartController.showNotAgent())
+        case _: NoActiveSession =>
+          toGGLogin(if (appConfig.isDevMode) s"http://${request.host}${request.uri}" else s"${request.uri}")
+      }
 
   def withSubscribingAgent[A](body: Agent => Future[Result])(
     implicit request: Request[A],
@@ -110,4 +131,10 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
 
   private def isEnrolledForHmrcAsAgent(enrolments: Enrolments): Boolean =
     enrolments.enrolments.find(_.key equals "HMRC-AS-AGENT").exists(_.isActivated)
+
+  private def getEnrolmentValue(enrolments: Enrolments, serviceName: String, identifierKey: String) =
+    for {
+      enrolment  <- enrolments.getEnrolment(serviceName)
+      identifier <- enrolment.getIdentifier(identifierKey)
+    } yield identifier.value
 }

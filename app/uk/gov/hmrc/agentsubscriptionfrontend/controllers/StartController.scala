@@ -96,12 +96,16 @@ class StartController @Inject()(
                                                 .completePartialSubscription(knownFacts.utr, knownFacts.postcode)
                                                 .flatMap { arn =>
                                                   mark("Count-Subscription-PartialSubscriptionCompleted")
-                                                  commonRouting.redirectUponSuccessfulSubscription(arn)
+                                                  commonRouting.completeMappingWhenAvailable(None)
                                                 }
                                             } else {
                                               sessionStoreService
                                                 .cacheInitialDetails(chainedSessionDetails.initialDetails)
-                                                .map(_ => Redirect(routes.SubscriptionController.showCheckAnswers()))
+                                                .flatMap(
+                                                  _ =>
+                                                    commonRouting
+                                                      .handleAutoMapping(chainedSessionDetails.initialDetails)
+                                                      .map(Redirect))
                                             }
           } yield continuedSubscriptionResponse
         case None => Future successful Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
