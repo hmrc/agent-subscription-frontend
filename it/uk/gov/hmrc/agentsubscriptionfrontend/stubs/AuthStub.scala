@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import play.api.test.FakeRequest
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{SampleUser, SessionKeysForTesting}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -57,6 +58,40 @@ object AuthStub {
             .withBody(response)))
     sessionKeysForMockAuth(user)
   }
+
+  def authenticatedAgent[A](request: FakeRequest[A], arn: String): FakeRequest[A] = {
+    givenAuthorisedFor(
+      s"""
+         |{
+         |  "authorise": [
+         |    { "identifiers":[], "state":"Activated", "enrolment": "HMRC-AS-AGENT },
+         |    { "authProviders": ["GovernmentGateway"] }
+         |  ],
+         |  "retrieve":["authorisedEnrolments"]
+         |}
+           """.stripMargin,
+      s"""
+         |{
+         |"authorisedEnrolments": [
+         |  { "key":"HMRC-AS-AGENT, "identifiers": [
+         |    {"key":"AgentReferenceNumber, "value": "$arn"}
+         |  ]}
+         |]}
+          """.stripMargin
+    )
+    request.withSession(SessionKeys.authToken -> "Bearer XYZ")
+  }
+
+  def givenAuthorisedFor(payload: String, responseBody: String): Unit =
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .withRequestBody(equalToJson(payload, true, true))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(responseBody)))
+
 
   private def sessionKeysForMockAuth(user: SampleUser): Seq[(String, String)] =
     Seq(SessionKeys.userId -> user.userId, SessionKeysForTesting.token -> "fakeToken")
