@@ -59,12 +59,12 @@ object AuthStub {
     sessionKeysForMockAuth(user)
   }
 
-  def authenticatedAgent[A](request: FakeRequest[A], arn: String): FakeRequest[A] = {
+  def authenticatedAgent(arn: String) = {
     givenAuthorisedFor(
       s"""
          |{
          |  "authorise": [
-         |    { "identifiers":[], "state":"Activated", "enrolment": "HMRC-AS-AGENT },
+         |    { "identifiers":[], "state":"Activated", "enrolment": "HMRC-AS-AGENT" },
          |    { "authProviders": ["GovernmentGateway"] }
          |  ],
          |  "retrieve":["authorisedEnrolments"]
@@ -73,13 +73,12 @@ object AuthStub {
       s"""
          |{
          |"authorisedEnrolments": [
-         |  { "key":"HMRC-AS-AGENT, "identifiers": [
-         |    {"key":"AgentReferenceNumber, "value": "$arn"}
+         |  { "key":"HMRC-AS-AGENT", "identifiers": [
+         |    {"key":"AgentReferenceNumber", "value": "$arn"}
          |  ]}
          |]}
           """.stripMargin
     )
-    request.withSession(SessionKeys.authToken -> "Bearer XYZ")
   }
 
   def givenAuthorisedFor(payload: String, responseBody: String): Unit =

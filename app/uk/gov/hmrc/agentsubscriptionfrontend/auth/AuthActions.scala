@@ -25,7 +25,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ContinueUrlActions, ro
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.Retrievals.{allEnrolments, credentials}
+import uk.gov.hmrc.auth.core.retrieve.Retrievals.{allEnrolments, authorisedEnrolments, credentials}
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
@@ -66,8 +66,8 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
     implicit request: Request[A],
     hc: HeaderCarrier,
     ec: ExecutionContext): Future[Result] =
-    authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
-      .retrieve(allEnrolments) {
+    authorised(Enrolment("HMRC-AS-AGENT") and AuthProviders(GovernmentGateway))
+      .retrieve(authorisedEnrolments) {
         case enrolments =>
           body(
             getEnrolmentValue(enrolments, "HMRC-AS-AGENT", "AgentReferenceNumber")
