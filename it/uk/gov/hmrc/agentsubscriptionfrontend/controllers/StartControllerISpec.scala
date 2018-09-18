@@ -218,21 +218,21 @@ trait StartControllerISpec extends BaseISpec {
       }
     }
 
-    "throw Upstream4xxResponse if agent-subscription returns 403 when completing partial subscription" in new ValidKnownFactsCached with PartiallySubscribedAgentStub {
+    "throw Upstream4xxResponse if agent-subscription returns 403 when completing partial subscription" in new ValidKnownFactsCached(includeInitialDetails = false) with PartiallySubscribedAgentStub {
       AgentSubscriptionStub.partialSubscriptionWillReturnStatus(CompletePartialSubscriptionBody(utr = knownFactsResult.utr,
         knownFacts = SubscriptionRequestKnownFacts(knownFactsResult.postcode)), 403)
 
       an[Upstream4xxResponse] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
     }
 
-    "throw Upstream4xxResponse if agent-subscription returns 409 when completing partial subscription" in new ValidKnownFactsCached with PartiallySubscribedAgentStub {
+    "throw Upstream4xxResponse if agent-subscription returns 409 when completing partial subscription" in new ValidKnownFactsCached(includeInitialDetails = false) with PartiallySubscribedAgentStub {
       AgentSubscriptionStub.partialSubscriptionWillReturnStatus(CompletePartialSubscriptionBody(utr = knownFactsResult.utr,
         knownFacts = SubscriptionRequestKnownFacts(knownFactsResult.postcode)), 409)
 
       an[Upstream4xxResponse] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
     }
 
-    "throw Upstream5xxResponse, 500 when executing partialSubscriptionFix" in new ValidKnownFactsCached with PartiallySubscribedAgentStub {
+    "throw Upstream5xxResponse, 500 when executing partialSubscriptionFix" in new ValidKnownFactsCached(includeInitialDetails = false) with PartiallySubscribedAgentStub {
       AgentSubscriptionStub.partialSubscriptionWillReturnStatus(CompletePartialSubscriptionBody(utr = knownFactsResult.utr,
         knownFacts = SubscriptionRequestKnownFacts(knownFactsResult.postcode)), 500)
 
@@ -295,7 +295,7 @@ class StartControllerWithAutoMappingOn extends StartControllerISpec {
       }
     }
 
-    "agent was eligible for mapping, should redirect to /link-clients" in new ValidKnownFactsCached(wasEligibleForMapping = Some(true)) with PartiallySubscribedAgentStub {
+    "agent was eligible for mapping, should redirect to /link-clients" in new ValidKnownFactsCached(wasEligibleForMapping = Some(true), includeInitialDetails = false) with PartiallySubscribedAgentStub {
       AgentSubscriptionStub.partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(utr = knownFactsResult.utr,
         knownFacts = SubscriptionRequestKnownFacts(knownFactsResult.postcode)))
 
