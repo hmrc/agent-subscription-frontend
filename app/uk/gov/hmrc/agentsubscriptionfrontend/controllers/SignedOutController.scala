@@ -57,7 +57,7 @@ class SignedOutController @Inject()(
       knownFactsOpt     <- sessionStoreService.fetchKnownFactsResult
       initialDetailsOpt <- sessionStoreService.fetchInitialDetails
       id <- (knownFactsOpt, initialDetailsOpt) match {
-             case (Some(knownFacts), Some(initialDetails)) =>
+             case (Some(knownFacts), initialDetails) =>
                chainedSessionRepository
                  .create(ChainedSessionDetails(knownFacts, mappingEligibility.isEligible, initialDetails))
                  .map(id => Some(id))

@@ -45,7 +45,7 @@ trait StartControllerISpec extends BaseISpec {
 
   object FixturesForReturnAfterGGCredsCreated {
 
-    class ValidKnownFactsCached(val wasEligibleForMapping: Option[Boolean] = Some(false)) {
+    class ValidKnownFactsCached(val wasEligibleForMapping: Option[Boolean] = Some(false), includeIntialDetails: Boolean = true) {
       val knownFactsResult =
         KnownFactsResult(Utr("9876543210"), "AA11AA", "Test organisation name", isSubscribedToAgentServices = false, Some(BusinessAddress(
           "AddressLine1 A",
@@ -61,14 +61,15 @@ trait StartControllerISpec extends BaseISpec {
         Some("AddressLine4 A"),
         Some("AA11AA"),
         "GB")
-      private  val validInitialDetails =
-        InitialDetails(
+      private  val validInitialDetails = if(includeIntialDetails)
+        Some(InitialDetails(
           Utr("9876543210"),
           "AA11AA",
           "My Agency",
           Some("agency@example.com"),
           validBusinessAddress
-        )
+        )) else None
+
       val persistedId = await(repo.create(ChainedSessionDetails(knownFactsResult, wasEligibleForMapping, validInitialDetails)))
     }
 
@@ -204,7 +205,7 @@ trait StartControllerISpec extends BaseISpec {
     "redirect to correct page if given a valid StashedChainedSessionDetails ID and agent is partially subscribed (subscribed in ETMP but not enrolled)" when {
 
 
-      "agent was not eligible for mapping, should redirect to /subscription-complete" in new ValidKnownFactsCached(wasEligibleForMapping = Some(false)) with PartiallySubscribedAgentStub {
+      "agent was not eligible for mapping, should redirect to /subscription-complete" in new ValidKnownFactsCached(wasEligibleForMapping = Some(false), includeIntialDetails = false) with PartiallySubscribedAgentStub {
         AgentSubscriptionStub.partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(utr = knownFactsResult.utr,
           knownFacts = SubscriptionRequestKnownFacts(knownFactsResult.postcode)), arn = "TARN00023")
 

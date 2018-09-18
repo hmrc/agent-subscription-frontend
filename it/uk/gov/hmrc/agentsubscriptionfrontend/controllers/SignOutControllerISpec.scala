@@ -202,7 +202,7 @@ class SignOutControllerWithAutoMappingOn extends SignOutControllerISpec {
           ChainedSessionDetails(
             knownFactsResult,
             wasEligibleForMapping = Some(true),
-            validInitialDetails
+            Some(validInitialDetails)
           )
         )
         verifyMappingCreatePreSubscriptionCalled(Utr("9876543210"), times = 1)
@@ -220,7 +220,7 @@ class SignOutControllerWithAutoMappingOn extends SignOutControllerISpec {
           ChainedSessionDetails(
             knownFactsResult,
             wasEligibleForMapping = Some(false),
-            validInitialDetails
+            Some(validInitialDetails)
           )
         )
         verifyMappingCreatePreSubscriptionCalled(Utr("9876543210"), times = 1)
@@ -253,7 +253,7 @@ class SignOutControllerWithAutoMappingOff extends SignOutControllerISpec {
         ChainedSessionDetails(
           knownFactsResult,
           wasEligibleForMapping = None,
-          validInitialDetails
+          Some(validInitialDetails)
         )
       )
     }
