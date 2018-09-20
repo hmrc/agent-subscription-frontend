@@ -61,7 +61,7 @@ trait StartControllerISpec extends BaseISpec {
         Some("AddressLine4 A"),
         Some("AA11AA"),
         "GB")
-      private  val validInitialDetails =
+      private val validInitialDetails =
         InitialDetails(
           Utr("9876543210"),
           "AA11AA",
@@ -213,7 +213,6 @@ trait StartControllerISpec extends BaseISpec {
 
         status(result) shouldBe 303
         redirectLocation(result).head should include(routes.SubscriptionController.showSubscriptionComplete().url)
-        result.session.get("arn") shouldBe Some("TARN00023")
       }
     }
 
@@ -298,10 +297,12 @@ class StartControllerWithAutoMappingOn extends StartControllerISpec {
       AgentSubscriptionStub.partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(utr = knownFactsResult.utr,
         knownFacts = SubscriptionRequestKnownFacts(knownFactsResult.postcode)))
 
-      val result = await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest()))
+      implicit val request = FakeRequest()
+      val result = await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(request))
 
       status(result) shouldBe 303
       redirectLocation(result).head should include(routes.SubscriptionController.showLinkClients().url)
+      result.session.get("isPartiallySubscribed").isDefined shouldBe true
     }
 
     "place the mapping eligibility back in session store, if given a valid ChainedSessionDetails ID" in new ValidKnownFactsCached with UnsubscribedAgentStub {

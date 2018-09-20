@@ -20,8 +20,6 @@ import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
-import play.api.data.Form
-import play.api.data.Forms.{mapping, optional, text}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{AnyContent, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
@@ -29,16 +27,14 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AddressLookupFrontendConnector, MappingConnector}
-import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
-import uk.gov.hmrc.agentsubscriptionfrontend.models.MappingEligibility.IsEligible
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionReturnedHttpError, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{Monitoring, TaxIdentifierFormatters}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpException}
+import uk.gov.hmrc.http.{BadRequestException, HttpException}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
@@ -70,6 +66,7 @@ class SubscriptionController @Inject()(
       case hasNonEmptyEnrolments(_) =>
         Future.successful(Redirect(routes.BusinessIdentificationController.showCreateNewAccount()))
       case _ =>
+        mark("Count-Subscription-CleanCreds-Success")
         withInitialDetails { details =>
           Future.successful {
             Ok(
@@ -119,7 +116,7 @@ class SubscriptionController @Inject()(
     either match {
       case Right((arn, _)) =>
         mark("Count-Subscription-Complete")
-        commonRouting.completeMappingWhenAvailable(Some(utr))
+        commonRouting.completeMappingWhenAvailable(utr, completedPartialSub = false)
 
       case Left(SubscriptionReturnedHttpError(CONFLICT)) =>
         mark("Count-Subscription-AlreadySubscribed-APIResponse")
@@ -174,7 +171,7 @@ class SubscriptionController @Inject()(
   val showLinkClients: Action[AnyContent] = Action.async { implicit request =>
     appConfig.autoMapAgentEnrolments match {
       case true =>
-        withAuthenticatedAgent {
+        withSubscribingAgent { _ =>
           withInitialDetails { _ =>
             Future.successful(Ok(html.link_clients(linkClientsForm)))
           }
@@ -186,27 +183,47 @@ class SubscriptionController @Inject()(
   val submitLinkClients: Action[AnyContent] = Action.async { implicit request =>
     appConfig.autoMapAgentEnrolments match {
       case true =>
-        linkClientsForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors => {
-              if (formWithErrors.errors.exists(_.message == "error.link-clients-value.invalid")) {
-                throw new BadRequestException("Form submitted with strange input value")
-              } else {
-                Future.successful(Ok(html.link_clients(formWithErrors)))
-              }
-            },
-            validatedLinkClients => {
-              validatedLinkClients.autoMapping match {
-                case Yes =>
-                  Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
-                    .withSession(request.session + ("performAutoMapping" -> "true"))
-                case No =>
-                  Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
-                    .withSession(request.session - "performAutoMapping")
-              }
-            }
-          )
+        withSubscribingAgent { _ =>
+          withInitialDetails { inititalDetails =>
+            linkClientsForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors => {
+                  if (formWithErrors.errors.exists(_.message == "error.link-clients-value.invalid")) {
+                    throw new BadRequestException("Form submitted with strange input value")
+                  } else {
+                    Future.successful(Ok(html.link_clients(formWithErrors)))
+                  }
+                },
+                validatedLinkClients => {
+                  val isPartiallySubscribed = request.session.get("isPartiallySubscribed").isDefined
+
+                  validatedLinkClients.autoMapping match {
+                    case Yes =>
+                      if (isPartiallySubscribed)
+                        for {
+                          completePartialSub <- subscriptionService.completePartialSubscription(
+                                                 inititalDetails.utr,
+                                                 inititalDetails.knownFactsPostcode)
+                          _ = mark("Count-Subscription-PartialSubscriptionCompleted")
+                          returnResult <- commonRouting.completeMappingWhenAvailable(
+                                           inititalDetails.utr,
+                                           completedPartialSub = true)
+
+                        } yield returnResult
+                      else
+                        Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
+                          .withSession(request.session + ("performAutoMapping" -> "true"))
+
+                    case No =>
+                      Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
+                        .withSession(request.session - "performAutoMapping")
+                  }
+                }
+              )
+          }
+        }
+
       case false => Future.successful(InternalServerError)
     }
   }

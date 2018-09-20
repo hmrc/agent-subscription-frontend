@@ -24,7 +24,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{ChainedSessionDetails, InitialDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.ChainedSessionDetails
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.ChainedSessionDetailsRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionService, SubscriptionState}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
@@ -92,20 +92,17 @@ class StartController @Inject()(
             subscriptionProcess <- subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode)
             isPartiallySubscribed = subscriptionProcess.state == SubscriptionState.SubscribedButNotEnrolled
             continuedSubscriptionResponse <- if (isPartiallySubscribed) {
-                                              subscriptionService
-                                                .completePartialSubscription(knownFacts.utr, knownFacts.postcode)
-                                                .flatMap { arn =>
-                                                  mark("Count-Subscription-PartialSubscriptionCompleted")
-                                                  commonRouting.completeMappingWhenAvailable(None)
-                                                }
+                                              commonRouting
+                                                .handlePartialSubscription(
+                                                  knownFacts.utr,
+                                                  knownFacts.postcode,
+                                                  chainedSessionDetails.wasEligibleForMapping)
                                             } else {
                                               sessionStoreService
                                                 .cacheInitialDetails(chainedSessionDetails.initialDetails)
-                                                .flatMap(
-                                                  _ =>
-                                                    commonRouting
-                                                      .handleAutoMapping(chainedSessionDetails.initialDetails)
-                                                      .map(Redirect))
+                                                .flatMap(_ =>
+                                                  commonRouting
+                                                    .handleAutoMapping(chainedSessionDetails.wasEligibleForMapping))
                                             }
           } yield continuedSubscriptionResponse
         case None => Future successful Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
