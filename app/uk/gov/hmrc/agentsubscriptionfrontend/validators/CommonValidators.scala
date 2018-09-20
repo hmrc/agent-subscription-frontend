@@ -204,8 +204,6 @@ object CommonValidators {
       }
   }
 
-  private def isUtrValid(utrStr: String): Boolean = TaxIdentifierFormatters.normalizeUtr(utrStr).nonEmpty
-
   private def utrConstraint(errorMessages: UtrErrors = DefaultUtrErrors): Constraint[String] = Constraint[String] {
     fieldValue: String =>
       val formattedField = fieldValue.replace(" ", "")
@@ -213,10 +211,9 @@ object CommonValidators {
 
       Constraints.nonEmpty(formattedField) match {
         case _: Invalid => Invalid(ValidationError(blank))
-        case _ if formattedField.map(_.isDigit).reduce(_ && _) && formattedField.size != UtrMaxLength =>
+        case _ if !formattedField.map(_.isDigit).reduce(_ && _) || formattedField.size != UtrMaxLength =>
           Invalid(ValidationError(invalid))
-        case _ if !isUtrValid(fieldValue) => Invalid(ValidationError(invalid))
-        case _                            => Valid
+        case _ => Valid
       }
   }
 

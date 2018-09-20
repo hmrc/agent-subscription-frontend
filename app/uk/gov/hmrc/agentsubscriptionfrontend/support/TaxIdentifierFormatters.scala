@@ -20,9 +20,12 @@ import uk.gov.hmrc.domain.Nino
 
 object TaxIdentifierFormatters {
 
+  private val UtrMaxLength = 10
+
   def normalizeUtr(utrStr: String): Option[Utr] = {
     val formattedUtr = utrStr.replace(" ", "")
-    if (Utr.isValid(formattedUtr)) Some(Utr(formattedUtr)) else None
+    if (formattedUtr.map(_.isDigit).reduce(_ && _) && formattedUtr.size == UtrMaxLength) Some(Utr(formattedUtr))
+    else None
   }
 
   def prettify(arn: Arn): String = {
