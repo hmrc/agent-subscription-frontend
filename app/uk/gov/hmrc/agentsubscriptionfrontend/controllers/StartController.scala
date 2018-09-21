@@ -92,6 +92,8 @@ class StartController @Inject()(
             subscriptionProcess <- subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode)
             isPartiallySubscribed = subscriptionProcess.state == SubscriptionState.SubscribedButNotEnrolled
             continuedSubscriptionResponse <- if (isPartiallySubscribed) {
+                                              mark("Count-Subscription-PartialSubscriptionCompleted")
+                                              //mark needs to be inside handlePartialSubscription
                                               commonRouting
                                                 .handlePartialSubscription(
                                                   knownFacts.utr,
@@ -99,10 +101,11 @@ class StartController @Inject()(
                                                   chainedSessionDetails.wasEligibleForMapping)
                                             } else {
                                               sessionStoreService
-                                                .cacheInitialDetails(chainedSessionDetails.initialDetails)
+                                                .cacheInitialDetails(chainedSessionDetails.initialDetails.getOrElse(
+                                                  throw new Exception("initial details is empty")))
                                                 .flatMap(_ =>
-                                                  commonRouting
-                                                    .handleAutoMapping(chainedSessionDetails.wasEligibleForMapping))
+                                                  commonRouting.handleAutoMapping(
+                                                    chainedSessionDetails.wasEligibleForMapping))
                                             }
           } yield continuedSubscriptionResponse
         case None => Future successful Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
