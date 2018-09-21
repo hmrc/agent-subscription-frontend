@@ -34,14 +34,31 @@
 
     <p>@Messages("linkClients.p2")</p>
 
-    <ul class="list list-bullet">
-        <li>@Messages("linkClients.bullet-list.1")</li>
-        <li>@Messages("linkClients.bullet-list.2")</li>
-    </ul>
+    <div class="form-group">
+        <details role="group">
+            <summary role="button" aria-expanded="false">
+                <span class="summary">@Messages("linkClients.expand.button")</span>
+            </summary>
+        </details>
+    </div>
 
-    <p>@Messages("linkClients.p3")</p>
+    <div class="form-group">
+        <details role="group">
+            <summary role="button" aria-controls="details-content-99ee20e1-c513-460b-83d1-2311b314d0b9" aria-expanded="false">
+                <span class="summary">@Messages("linkClients.expand.button")</span></summary>
+            <div class="panel panel-border-narrow" id="details-content-99ee20e1-c513-460b-83d1-2311b314d0b9" aria-hidden="true">
+                <p>@Messages("linkClients.expand.p1")</p><p>
+                <p>@Messages("linkClients.expand.p2")</p><p>
+                <p>@Messages("linkClients.expand.p3")</p><p>
 
-    <p>@Messages("linkClients.p4")</p>
+                </p><ul class="list-bullet list">
+                <li>@Messages("linkClients.expand.bullet1")</li>
+                <li>@Messages("linkClients.expand.bullet2")</li>
+            </ul>
+                <p>@Messages("linkClients.expand.p4")</p><p>
+            </div>
+        </details>
+    </div>
 
     @if(linkClientsRadioForm.hasErrors) {
         @errorSummary(Messages("error.summary.heading"), linkClientsRadioForm, Seq.empty, Some("link-clients"))

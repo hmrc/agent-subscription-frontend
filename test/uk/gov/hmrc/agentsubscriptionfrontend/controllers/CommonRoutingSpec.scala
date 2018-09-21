@@ -132,18 +132,7 @@ class CommonRoutingSpec extends UnitSpec with ResettingMockitoSugar with WithFak
       "user not eligible for mapping " in {
         when(mockAppConfig.autoMapAgentEnrolments).thenReturn(false)
         when(mockSubscriptionService.completePartialSubscription(utr, postcode)).thenReturn(Future successful arn)
-//        when(commonRouting.mark("Count-Subscription-PartialSubscriptionCompleted")).thenAnswer(new Answer[Void]() {
-//          override def answer(invocation: InvocationOnMock): Void = {
-//            null:Void
-//          }
-//        })
-//        when(commonRouting.mark("Count-Subscription-PartialSubscriptionCompleted"))
-//        kenshooRegistry.getMeters.getOrDefault(name, kenshooRegistry.meter(name)).mark()
 
-//        doNothing().when(subject).login(any[UsernamePasswordToken])
-
-//        when(mockMetrics.defaultRegistry.getMeters
-//          .getOrDefault("Count-Subscription-PartialSubscriptionCompleted", mockMetrics.defaultRegistry.meter("Count-Subscription-PartialSubscriptionCompleted")).mark())
         val result = await(commonRouting.handlePartialSubscription(utr, "AA11AA", Some(false)))
 
         status(result) shouldBe 303
