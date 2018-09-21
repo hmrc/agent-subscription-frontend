@@ -209,9 +209,11 @@ object CommonValidators {
       val formattedField = fieldValue.replace(" ", "")
       val (blank, invalid) = errorMessages
 
+      def isNumber(str: String): Boolean = str.map(_.isDigit).reduceOption(_ && _).getOrElse(false)
+
       Constraints.nonEmpty(formattedField) match {
         case _: Invalid => Invalid(ValidationError(blank))
-        case _ if !formattedField.map(_.isDigit).reduce(_ && _) || formattedField.size != UtrMaxLength =>
+        case _ if !isNumber(formattedField) || formattedField.size != UtrMaxLength =>
           Invalid(ValidationError(invalid))
         case _ => Valid
       }

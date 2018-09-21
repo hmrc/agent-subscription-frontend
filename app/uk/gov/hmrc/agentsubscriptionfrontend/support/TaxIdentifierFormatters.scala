@@ -24,7 +24,9 @@ object TaxIdentifierFormatters {
 
   def normalizeUtr(utrStr: String): Option[Utr] = {
     val formattedUtr = utrStr.replace(" ", "")
-    if (formattedUtr.map(_.isDigit).reduce(_ && _) && formattedUtr.size == UtrMaxLength) Some(Utr(formattedUtr))
+    def isNumber(str: String): Boolean = str.map(_.isDigit).reduceOption(_ && _).getOrElse(false)
+
+    if (isNumber(formattedUtr) && formattedUtr.size == UtrMaxLength) Some(Utr(formattedUtr))
     else None
   }
 
