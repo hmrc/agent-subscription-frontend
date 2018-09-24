@@ -66,6 +66,7 @@ class CommonRouting @Inject()(
         Future successful Redirect(routes.SubscriptionController.showLinkClients())
           .withSession(request.session + ("isPartiallySubscribed" -> "true"))
       case _ => {
+        mark("Count-Subscription-PartialSubscriptionCompleted")
         subscriptionService
           .completePartialSubscription(kfcUtr, kfcPostcode)
           .map { _ =>

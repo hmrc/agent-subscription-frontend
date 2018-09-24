@@ -92,8 +92,6 @@ class StartController @Inject()(
             subscriptionProcess <- subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode)
             isPartiallySubscribed = subscriptionProcess.state == SubscriptionState.SubscribedButNotEnrolled
             continuedSubscriptionResponse <- if (isPartiallySubscribed) {
-                                              mark("Count-Subscription-PartialSubscriptionCompleted")
-                                              //mark needs to be inside handlePartialSubscription
                                               commonRouting
                                                 .handlePartialSubscription(
                                                   knownFacts.utr,

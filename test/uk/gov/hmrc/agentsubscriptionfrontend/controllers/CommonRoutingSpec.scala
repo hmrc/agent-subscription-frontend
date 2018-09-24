@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import com.kenshoo.play.metrics.Metrics
 import org.mockito.Mockito.{times, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -24,17 +23,15 @@ import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.MappingConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SubscriptionService
-import uk.gov.hmrc.agentsubscriptionfrontend.support.ResettingMockitoSugar
+import uk.gov.hmrc.agentsubscriptionfrontend.support.MockedMetrics
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-
 import scala.concurrent.{ExecutionContext, Future}
 
-class CommonRoutingSpec extends UnitSpec with ResettingMockitoSugar with WithFakeApplication {
+class CommonRoutingSpec extends UnitSpec with WithFakeApplication with MockedMetrics {
   private val mockMappingConnector = resettingMock[MappingConnector]
   private val mockSubscriptionService = resettingMock[SubscriptionService]
   private val mockAppConfig = resettingMock[AppConfig]
-  private val mockMetrics = resettingMock[Metrics]
 
   private val commonRouting =
     new CommonRouting(mockMappingConnector, mockMetrics, mockSubscriptionService, mockAppConfig)
@@ -132,21 +129,25 @@ class CommonRoutingSpec extends UnitSpec with ResettingMockitoSugar with WithFak
       "user not eligible for mapping " in {
         when(mockAppConfig.autoMapAgentEnrolments).thenReturn(false)
         when(mockSubscriptionService.completePartialSubscription(utr, postcode)).thenReturn(Future successful arn)
+        mockMetrics("Count-Subscription-PartialSubscriptionCompleted")
 
         val result = await(commonRouting.handlePartialSubscription(utr, "AA11AA", Some(false)))
 
         status(result) shouldBe 303
         redirectLocation(result).get shouldBe routes.SubscriptionController.showSubscriptionComplete().url
+        verifyMetricCalled("Count-Subscription-PartialSubscriptionCompleted")
       }
 
       "autoMapping is off still complete partial subscription" in {
         when(mockAppConfig.autoMapAgentEnrolments).thenReturn(false)
         when(mockSubscriptionService.completePartialSubscription(utr, postcode)).thenReturn(Future successful arn)
+        mockMetrics("Count-Subscription-PartialSubscriptionCompleted")
+
         val result = commonRouting.handlePartialSubscription(utr, "AA11AA", None)
 
         status(result) shouldBe 303
         redirectLocation(result).get shouldBe routes.SubscriptionController.showSubscriptionComplete().url
-
+        verifyMetricCalled("Count-Subscription-PartialSubscriptionCompleted")
       }
     }
 
