@@ -28,8 +28,6 @@ trait Monitoring {
 
   def mark[T](name: String): Unit = {
     Logger("metrics").info(name)
-    kenshooRegistry.getMeters
-      .getOrDefault(name, kenshooRegistry.meter(name))
-      .mark()
+    kenshooRegistry.getMeters.getOrDefault(name, kenshooRegistry.meter(name)).mark()
   }
 }
