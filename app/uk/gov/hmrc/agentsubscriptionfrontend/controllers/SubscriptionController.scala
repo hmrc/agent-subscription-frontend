@@ -203,9 +203,8 @@ class SubscriptionController @Inject()(
                     case Yes =>
                       if (isPartiallySubscribed)
                         for {
-                          _ <- subscriptionService.completePartialSubscription(
-                                                 inititalDetails.utr,
-                                                 inititalDetails.knownFactsPostcode)
+                          _ <- subscriptionService
+                                .completePartialSubscription(inititalDetails.utr, inititalDetails.knownFactsPostcode)
                           _ = mark("Count-Subscription-PartialSubscriptionCompleted")
                           returnResult <- completeMappingWhenAvailable(inititalDetails.utr, completedPartialSub = true)
 

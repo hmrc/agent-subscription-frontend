@@ -661,11 +661,15 @@ class SubscriptionControllerWithAutoMappingOn extends SubscriptionControllerISpe
       behave like anAgentAffinityGroupOnlyEndpoint(resultOf)
 
         "redirect to /check-answers choice is Yes" in new RequestWithSessionDetails(autoMappingFormValue = "yes") {
-          resultOf(request).header.headers(LOCATION) shouldBe routes.SubscriptionController.showCheckAnswers().url
+          val result = resultOf(request)
+          result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showCheckAnswers().url
+          result.session.get("performAutoMapping") shouldBe Some("true")
         }
 
         "redirect to /check-answers choice is No" in new RequestWithSessionDetails(autoMappingFormValue = "no") {
-          resultOf(request).header.headers(LOCATION) shouldBe routes.SubscriptionController.showCheckAnswers().url
+          val result = resultOf(request)
+          result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showCheckAnswers().url
+          result.session.get("performAutoMapping") shouldBe None
         }
 
       "choice is missing" should {
