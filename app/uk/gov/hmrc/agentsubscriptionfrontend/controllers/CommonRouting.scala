@@ -19,7 +19,6 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import play.api.mvc.Results._
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.MappingConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.MappingEligibility
@@ -38,8 +37,9 @@ class CommonRouting @Inject()(
     implicit request: Request[AnyContent],
     hc: HeaderCarrier,
     ec: ExecutionContext): Future[Result] =
-      MappingEligibility.apply(eligibleForMapping) match {
-        case IsEligible if appConfig.autoMapAgentEnrolments => Future successful Redirect(routes.SubscriptionController.showLinkClients())
-        case _          => Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
-      }
+    MappingEligibility.apply(eligibleForMapping) match {
+      case IsEligible if appConfig.autoMapAgentEnrolments =>
+        Future successful Redirect(routes.SubscriptionController.showLinkClients())
+      case _ => Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
+    }
 }
