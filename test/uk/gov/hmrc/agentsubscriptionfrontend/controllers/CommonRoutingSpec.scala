@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
+import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.MappingConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SubscriptionService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.ResettingMockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class CommonRoutingSpec extends UnitSpec with WithFakeApplication with ResettingMockitoSugar {
   private val mockMappingConnector = resettingMock[MappingConnector]
@@ -39,45 +39,6 @@ class CommonRoutingSpec extends UnitSpec with WithFakeApplication with Resetting
   private val utr = Utr("9876543210")
   private implicit val hc = HeaderCarrier()
   private implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
-
-//  "completeMappingWhenAvailable" should {
-//    implicit def request = FakeRequest().withSession("performAutoMapping" -> "true")
-//
-//    "redirect to showSubscriptionComplete" when {
-//      "autoMapping is on and they are eligible for mapping" in {
-//        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(true)
-//        when(mockMappingConnector.updatePreSubscriptionWithArn(utr)).thenReturn(Future successful ())
-//
-//        val result = commonRouting.completeMappingWhenAvailable(utr)
-//        status(result) shouldBe 303
-//        verify(mockMappingConnector, times(1)).updatePreSubscriptionWithArn(utr)
-//
-//        redirectLocation(result).get shouldBe routes.SubscriptionController.showSubscriptionComplete().url
-//      }
-//
-//      "autoMapping is ON and they are not eligible for mapping hence why was not offered the decision to add decision to session" in {
-//        implicit def request = FakeRequest()
-//
-//        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(false)
-//
-//        val result = commonRouting.completeMappingWhenAvailable(utr)
-//        status(result) shouldBe 303
-//        verify(mockMappingConnector, times(0)).updatePreSubscriptionWithArn(utr)
-//
-//        redirectLocation(result).get shouldBe routes.SubscriptionController.showSubscriptionComplete().url
-//      }
-//
-//      "autoMapping is OFF do not attempt mapping even if decision found in session" in {
-//        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(false)
-//
-//        val result = commonRouting.completeMappingWhenAvailable(utr)
-//        status(result) shouldBe 303
-//        verify(mockMappingConnector, times(0)).updatePreSubscriptionWithArn(utr)
-//
-//        redirectLocation(result).get shouldBe routes.SubscriptionController.showSubscriptionComplete().url
-//      }
-//    }
-//  }
 
   "handleAutoMapping" should {
     "handleAutoMapping decide whether a user can see showLinkClients page needed for mapping" when {
@@ -116,49 +77,4 @@ class CommonRoutingSpec extends UnitSpec with WithFakeApplication with Resetting
       }
     }
   }
-
-//  "handlePartialSubscription" should {
-//    implicit val fakeRequest = FakeRequest()
-//    implicit val request = (mappingEligibility: Option[Boolean]) =>
-//      commonRouting.handlePartialSubscription(utr, "AA11AA", mappingEligibility)
-//
-//    "showSubscriptionComplete" when {
-//
-//      "user not eligible for mapping " in {
-//        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(false)
-//        when(mockSubscriptionService.completePartialSubscription(utr, postcode)).thenReturn(Future successful arn)
-//        mockMetrics("Count-Subscription-PartialSubscriptionCompleted")
-//
-//        val result = await(commonRouting.handlePartialSubscription(utr, "AA11AA", Some(false)))
-//
-//        status(result) shouldBe 303
-//        redirectLocation(result).get shouldBe routes.SubscriptionController.showSubscriptionComplete().url
-//        verifyMetricCalled("Count-Subscription-PartialSubscriptionCompleted")
-//      }
-//
-//      "autoMapping is off still complete partial subscription" in {
-//        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(false)
-//        when(mockSubscriptionService.completePartialSubscription(utr, postcode)).thenReturn(Future successful arn)
-//        mockMetrics("Count-Subscription-PartialSubscriptionCompleted")
-//
-//        val result = commonRouting.handlePartialSubscription(utr, "AA11AA", None)
-//
-//        status(result) shouldBe 303
-//        redirectLocation(result).get shouldBe routes.SubscriptionController.showSubscriptionComplete().url
-//        verifyMetricCalled("Count-Subscription-PartialSubscriptionCompleted")
-//      }
-//    }
-//
-//    "showLinkClients" when {
-//      "showLinkClientsis eligible and mapping is on" in {
-//        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(true)
-//        when(mockSubscriptionService.completePartialSubscription(utr, postcode)).thenReturn(Future successful arn)
-//
-//        val result = commonRouting.handlePartialSubscription(utr, "AA11AA", Some(true))
-//
-//        status(result) shouldBe 303
-//        redirectLocation(result).get shouldBe routes.SubscriptionController.showLinkClients().url
-//      }
-//    }
-//  }
 }
