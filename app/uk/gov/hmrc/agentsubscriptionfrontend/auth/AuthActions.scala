@@ -74,13 +74,6 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
               .map(Arn(_))
               .getOrElse(throw new InsufficientEnrolments("could not find the HMRC-AS-AGENT enrolment to continue")))
       }
-      .recover {
-        case _: UnsupportedAffinityGroup =>
-          mark("Count-Subscription-NonAgent")
-          Redirect(routes.StartController.showNotAgent())
-        case _: NoActiveSession =>
-          toGGLogin(if (appConfig.isDevMode) s"http://${request.host}${request.uri}" else s"${request.uri}")
-      }
 
   def withSubscribingAgent[A](body: Agent => Future[Result])(
     implicit request: Request[A],

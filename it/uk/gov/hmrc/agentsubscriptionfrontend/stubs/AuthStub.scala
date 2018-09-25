@@ -36,6 +36,14 @@ object AuthStub {
             .withStatus(401)
             .withHeader("WWW-Authenticate", "MDTP detail=\"SessionRecordNotFound\"")))
 
+  def userHasInsufficientEnrolments(): Unit =
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .willReturn(
+          aResponse()
+            .withStatus(401)
+            .withHeader("WWW-Authenticate", "MDTP detail=\"InsufficientEnrolments\"")))
+
   def userIsNotAnAgent(user: SampleUser): Seq[(String, String)] = {
     stubFor(
       post(urlEqualTo("/auth/authorise"))

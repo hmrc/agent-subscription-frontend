@@ -21,17 +21,21 @@ import javax.inject.Inject
 
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{Action, AnyContent, Request, Result}
+import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.models.ChainedSessionDetails
+import uk.gov.hmrc.agentsubscriptionfrontend.models.MappingEligibility.IsEligible
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{ChainedSessionDetails, MappingEligibility}
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.ChainedSessionDetailsRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionService, SubscriptionState}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class StartController @Inject()(
   override val messagesApi: MessagesApi,
@@ -92,11 +96,10 @@ class StartController @Inject()(
             subscriptionProcess <- subscriptionService.getSubscriptionStatus(knownFacts.utr, knownFacts.postcode)
             isPartiallySubscribed = subscriptionProcess.state == SubscriptionState.SubscribedButNotEnrolled
             continuedSubscriptionResponse <- if (isPartiallySubscribed) {
-                                              commonRouting
-                                                .handlePartialSubscription(
-                                                  knownFacts.utr,
-                                                  knownFacts.postcode,
-                                                  chainedSessionDetails.wasEligibleForMapping)
+                                              handlePartialSubscription(
+                                                knownFacts.utr,
+                                                knownFacts.postcode,
+                                                chainedSessionDetails.wasEligibleForMapping)
                                             } else {
                                               sessionStoreService
                                                 .cacheInitialDetails(chainedSessionDetails.initialDetails.getOrElse(
@@ -114,4 +117,21 @@ class StartController @Inject()(
   def showCannotCreateAccount: Action[AnyContent] = Action.async { implicit request =>
     Future.successful(Ok(html.cannot_create_account()))
   }
+
+  private def handlePartialSubscription(kfcUtr: Utr, kfcPostcode: String, eligibleForMapping: Option[Boolean])(
+    implicit request: Request[AnyContent],
+    hc: HeaderCarrier): Future[Result] =
+    MappingEligibility.apply(eligibleForMapping) match {
+      case IsEligible =>
+        Future successful Redirect(routes.SubscriptionController.showLinkClients())
+          .withSession(request.session + ("isPartiallySubscribed" -> "true"))
+      case _ => {
+        subscriptionService
+          .completePartialSubscription(kfcUtr, kfcPostcode)
+          .map { _ =>
+            mark("Count-Subscription-PartialSubscriptionCompleted")
+            Redirect(routes.SubscriptionController.showSubscriptionComplete())
+          }
+      }
+    }
 }

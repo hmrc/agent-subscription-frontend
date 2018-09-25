@@ -44,15 +44,6 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar with BeforeAndAfterEac
       bodyOf(result) shouldBe "fooArn"
     }
 
-    "redirect to login page when user not logged in" in {
-      userIsNotAuthenticated()
-
-      val result = TestController.withSubscribedAgent
-
-      status(result) shouldBe 303
-      result.header.headers(LOCATION) should include("/gg/sign-in?continue=%2F&origin=agent-subscription-frontend")
-    }
-
     "throw InsufficientEnrolments when agent not enrolled for service" in {
       givenAuthorisedFor(
         "{}",
@@ -83,5 +74,4 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar with BeforeAndAfterEac
       }
     }
   }
-
 }

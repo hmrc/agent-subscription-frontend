@@ -21,6 +21,7 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
@@ -34,10 +35,10 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, Subsc
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{Monitoring, TaxIdentifierFormatters}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.{BadRequestException, HttpException}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
@@ -114,9 +115,9 @@ class SubscriptionController @Inject()(
   private def redirectSubscriptionResponse(either: Either[SubscriptionReturnedHttpError, (Arn, String)], utr: Utr)(
     implicit request: Request[AnyContent]): Future[Result] =
     either match {
-      case Right((arn, _)) =>
+      case Right((arn, nameFromDetails)) =>
         mark("Count-Subscription-Complete")
-        commonRouting.completeMappingWhenAvailable(utr, completedPartialSub = false)
+        completeMappingWhenAvailable(utr, completedPartialSub = false)
 
       case Left(SubscriptionReturnedHttpError(CONFLICT)) =>
         mark("Count-Subscription-AlreadySubscribed-APIResponse")
@@ -206,9 +207,7 @@ class SubscriptionController @Inject()(
                                                  inititalDetails.utr,
                                                  inititalDetails.knownFactsPostcode)
                           _ = mark("Count-Subscription-PartialSubscriptionCompleted")
-                          returnResult <- commonRouting.completeMappingWhenAvailable(
-                                           inititalDetails.utr,
-                                           completedPartialSub = true)
+                          returnResult <- completeMappingWhenAvailable(inititalDetails.utr, completedPartialSub = true)
 
                         } yield returnResult
                       else
@@ -246,8 +245,19 @@ class SubscriptionController @Inject()(
         val wasEligibleForMapping = wasEligibleForMappingOpt.contains(true)
         val prettifiedArn = TaxIdentifierFormatters.prettify(arn)
         Ok(html.subscription_complete(continueUrl, isUrlToASAccount, wasEligibleForMapping, prettifiedArn))
-          .removingFromSession("arn")
       }
     }
+  }
+
+  private def completeMappingWhenAvailable(utr: Utr, completedPartialSub: Boolean = false)(
+    implicit request: Request[AnyContent],
+    hc: HeaderCarrier): Future[Result] = {
+
+    val doMappingAnswer: Boolean = request.session.get("performAutoMapping").isDefined || completedPartialSub
+    for {
+      completeMapping <- if (appConfig.autoMapAgentEnrolments && doMappingAnswer)
+                          mappingConnector.updatePreSubscriptionWithArn(utr)
+                        else Future successful ()
+    } yield Redirect(routes.SubscriptionController.showSubscriptionComplete())
   }
 }

@@ -31,6 +31,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.binders.ContinueUrl
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
+import uk.gov.hmrc.auth.core.SessionRecordNotFound
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -165,7 +166,7 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     }
     def resultOf(request: Request[AnyContent]) = await(controller.showSubscriptionComplete(request))
 
-    behave like anAgentAffinityGroupOnlyEndpoint(resultOf)
+    behave like agentRequiresAuthorisation(resultOf)
 
     behave like aPageWithFeedbackLinks(resultOf, new RequestWithSessionDetails {}.request)
 
