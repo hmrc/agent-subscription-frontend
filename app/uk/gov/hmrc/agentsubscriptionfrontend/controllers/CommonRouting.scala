@@ -38,10 +38,8 @@ class CommonRouting @Inject()(
     implicit request: Request[AnyContent],
     hc: HeaderCarrier,
     ec: ExecutionContext): Future[Result] =
-    if (appConfig.autoMapAgentEnrolments) {
       MappingEligibility.apply(eligibleForMapping) match {
-        case IsEligible => Future successful Redirect(routes.SubscriptionController.showLinkClients())
+        case IsEligible if appConfig.autoMapAgentEnrolments => Future successful Redirect(routes.SubscriptionController.showLinkClients())
         case _          => Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
       }
-    } else Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
 }
