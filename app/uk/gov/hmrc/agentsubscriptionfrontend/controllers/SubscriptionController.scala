@@ -252,7 +252,7 @@ class SubscriptionController @Inject()(
     implicit request: Request[AnyContent],
     hc: HeaderCarrier): Future[Result] = {
 
-    val doMappingAnswer: Boolean = request.session.get("performAutoMapping").isDefined || completedPartialSub
+    val doMappingAnswer: Boolean = request.session.get("performAutoMapping").contains("true") || completedPartialSub
     for {
       completeMapping <- if (appConfig.autoMapAgentEnrolments && doMappingAnswer)
                           mappingConnector.updatePreSubscriptionWithArn(utr)
