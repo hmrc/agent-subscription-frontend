@@ -197,25 +197,40 @@ class SubscriptionController @Inject()(
                   }
                 },
                 validatedLinkClients => {
-                  val isPartiallySubscribed = request.session.get("isPartiallySubscribed").isDefined
+                  val isPartiallySubscribed = request.session.get("isPartiallySubscribed").contains("true")
 
                   validatedLinkClients.autoMapping match {
                     case Yes =>
-                      if (isPartiallySubscribed)
-                        for {
-                          _ <- subscriptionService
-                                .completePartialSubscription(inititalDetails.utr, inititalDetails.knownFactsPostcode)
-                          _ = mark("Count-Subscription-PartialSubscriptionCompleted")
-                          returnResult <- completeMappingWhenAvailable(inititalDetails.utr, completedPartialSub = true)
-
-                        } yield returnResult
-                      else
-                        Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
-                          .withSession(request.session + ("performAutoMapping" -> "true"))
+                              isPartiallySubscribed match {
+                                  case false =>
+                                          Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
+                                            .withSession(request.session + ("performAutoMapping" -> "true"))
+                                  case true =>
+                                          for {
+                                            _ <- subscriptionService
+                                                  .completePartialSubscription(inititalDetails.utr, inititalDetails.knownFactsPostcode)
+                                            _ = mark("Count-Subscription-PartialSubscriptionCompleted")
+                                            returnResult <- completeMappingWhenAvailable(
+                                                            inititalDetails.utr,
+                                                            completedPartialSub = true)
+                                              } yield returnResult.withSession(request.session - "isPartiallySubscribed")
+                              }
 
                     case No =>
-                      Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
-                        .withSession(request.session - "performAutoMapping")
+                              isPartiallySubscribed match {
+                                  case false =>
+                                          Future successful Redirect(routes.SubscriptionController.showCheckAnswers())
+                                            .withSession(request.session - "performAutoMapping")
+                                  case true => {
+                                          subscriptionService
+                                            .completePartialSubscription(inititalDetails.utr, inititalDetails.knownFactsPostcode)
+                                            .map { _ =>
+                                              mark("Count-Subscription-PartialSubscriptionCompleted")
+                                              Redirect(routes.SubscriptionController.showSubscriptionComplete())
+                                              .withSession(request.session - "isPartiallySubscribed")
+                                             }
+                                  }
+                              }
                   }
                 }
               )

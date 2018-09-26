@@ -304,7 +304,7 @@ class StartControllerWithAutoMappingOn extends StartControllerISpec {
 
       status(result) shouldBe 303
       redirectLocation(result).head should include(routes.SubscriptionController.showLinkClients().url)
-      result.session.get("isPartiallySubscribed").isDefined shouldBe true
+      result.session.get("isPartiallySubscribed").contains("true") shouldBe true
     }
 
     "agent NOT Eligible for mapping, should redirect to /link-clients" in new ValidKnownFactsCached(wasEligibleForMapping = Some(false), includeInitialDetails = false) with PartiallySubscribedAgentStub {

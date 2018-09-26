@@ -25,12 +25,11 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, AuthStub, MappingStubs}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TaxIdentifierFormatters}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.binders.ContinueUrl
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
 import uk.gov.hmrc.auth.core.SessionRecordNotFound
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -656,6 +655,12 @@ class SubscriptionControllerWithAutoMappingOn extends SubscriptionControllerISpe
         sessionStoreService.currentSession.initialDetails = Some(initialDetails)
       }
 
+      class PartiallySubRequestWithSessionDetails(autoMappingFormValue: String) {
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          .withFormUrlEncodedBody("autoMapping" -> autoMappingFormValue).withSession("isPartiallySubscribed" -> "true")
+        sessionStoreService.currentSession.initialDetails = Some(initialDetails)
+      }
+
       def resultOf(request: Request[AnyContent]) = await(controller.submitLinkClients(request))
 
       behave like anAgentAffinityGroupOnlyEndpoint(resultOf)
@@ -666,11 +671,31 @@ class SubscriptionControllerWithAutoMappingOn extends SubscriptionControllerISpe
           result.session.get("performAutoMapping") shouldBe Some("true")
         }
 
+      "redirect to /complete choice is Yes PartiallySubscribed" in new PartiallySubRequestWithSessionDetails(autoMappingFormValue = "yes") {
+        AuthStub.authenticatedAgent(arn = "ARN00001")
+        AgentSubscriptionStub.partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(
+          utr = utr,
+          knownFacts = SubscriptionRequestKnownFacts("AA1 2AA")))
+        MappingStubs.givenMappingUpdateToPostSubscription(utr)
+
+        val result = resultOf(request)
+        result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showSubscriptionComplete().url
+      }
+
         "redirect to /check-answers choice is No" in new RequestWithSessionDetails(autoMappingFormValue = "no") {
           val result = resultOf(request)
           result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showCheckAnswers().url
           result.session.get("performAutoMapping") shouldBe None
         }
+
+      "redirect to /complete choice is No PartiallySubscribed" in new PartiallySubRequestWithSessionDetails(autoMappingFormValue = "no") {
+        AgentSubscriptionStub.partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(
+          utr = utr,
+          knownFacts = SubscriptionRequestKnownFacts("AA1 2AA")))
+        val result = resultOf(request)
+        result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showSubscriptionComplete().url
+        result.session.get("performAutoMapping") shouldBe None
+      }
 
       "choice is missing" should {
         "return 200 and redisplay the /link-clients page with an error message for missing choice" in {
