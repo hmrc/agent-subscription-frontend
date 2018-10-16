@@ -56,11 +56,11 @@ class SignedOutController @Inject()(
   private def prepareChainedSession(mappingEligibility: MappingEligibility)(
     implicit hc: HeaderCarrier): Future[Option[StashedChainnedSessionId]] =
     (for {
-      knownFacts     <- OptionT(sessionStoreService.fetchKnownFactsResult)
-      initialDetails <- OptionT.liftF(sessionStoreService.fetchInitialDetails)
+      knownFacts        <- OptionT(sessionStoreService.fetchKnownFactsResult)
+      initialDetailsOpt <- OptionT.liftF(sessionStoreService.fetchInitialDetails)
       id <- OptionT(
              chainedSessionRepository
-               .create(ChainedSessionDetails(knownFacts, mappingEligibility.isEligible, initialDetails))
+               .create(ChainedSessionDetails(knownFacts, mappingEligibility.isEligible, initialDetailsOpt))
                .map(id => Option(id)))
     } yield id).value
 
