@@ -16,4 +16,33 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-case class BusinessType(businessType: Option[String])
+import uk.gov.hmrc.http.BadRequestException
+
+case class BusinessType(businessType: IdentifyBusinessType)
+
+//val validBusinessTypes = Seq("sole_trader", "limited_company", "partnership", "llp")
+
+sealed trait IdentifyBusinessType {
+  val key: String = this match {
+    case IdentifyBusinessType.SoleTrader     => "sole_trader"
+    case IdentifyBusinessType.LimitedCompany => "limited_company"
+    case IdentifyBusinessType.Partnership    => "partnership"
+    case IdentifyBusinessType.Llp            => "llp"
+  }
+}
+
+object IdentifyBusinessType {
+
+  case object SoleTrader extends IdentifyBusinessType
+  case object LimitedCompany extends IdentifyBusinessType
+  case object Partnership extends IdentifyBusinessType
+  case object Llp extends IdentifyBusinessType
+
+  def apply(convertToType: String): IdentifyBusinessType = convertToType match {
+    case "sole_trader"     => IdentifyBusinessType.SoleTrader
+    case "limited_company" => IdentifyBusinessType.LimitedCompany
+    case "partnership"     => IdentifyBusinessType.Partnership
+    case "llp"             => IdentifyBusinessType.Llp
+    case _                 => throw new BadRequestException("Submitted form value did not contain valid businessType identifier")
+  }
+}

@@ -16,7 +16,7 @@
 
 import javax.inject.{Inject, Singleton}
 import com.google.inject.name.Named
-import play.api.http.Status.FORBIDDEN
+import play.api.http.Status.{FORBIDDEN, INTERNAL_SERVER_ERROR}
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results._
 import play.api.mvc.{Request, RequestHeader, Result}
@@ -47,6 +47,11 @@ class ErrorHandler @Inject()(
       Future.successful(
         Forbidden(
           standardErrorTemplate("global.error.403.title", "global.error.403.heading", "global.error.403.message")(
+            request)))
+    else if (statusCode == INTERNAL_SERVER_ERROR)
+      Future.successful(
+        BadRequest(
+          standardErrorTemplate("global.error.400.title", "global.error.400.heading", "global.error.400.message")(
             request)))
     else
       super.onClientError(request, statusCode, message)

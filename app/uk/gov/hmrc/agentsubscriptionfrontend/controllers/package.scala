@@ -26,7 +26,6 @@ import uk.gov.voa.play.form.ConditionalMappings.{mandatoryIfEqual, mandatoryIfTr
 
 package object controllers {
   object BusinessIdentificationForms {
-    val validBusinessTypes = Seq("sole_trader", "limited_company", "partnership", "llp")
 
     def knownFactsForm(businessType: String): Form[KnownFacts] =
       Form[KnownFacts](
@@ -40,10 +39,8 @@ package object controllers {
     val businessTypeForm: Form[BusinessType] =
       Form[BusinessType](
         mapping("businessType" -> optional(text).verifying(radioInputSelected("businessType.error.no-radio-selected")))(
-          BusinessType.apply)(BusinessType.unapply)
-          .verifying(
-            "error.business-type-value.invalid",
-            submittedBusinessType => validBusinessTypes.contains(submittedBusinessType.businessType.getOrElse(""))))
+          input => BusinessType(IdentifyBusinessType(input.get)))(bType => Some(Some(bType.businessType.key)))
+      )
 
     val confirmBusinessForm: Form[ConfirmBusiness] =
       Form[ConfirmBusiness](
