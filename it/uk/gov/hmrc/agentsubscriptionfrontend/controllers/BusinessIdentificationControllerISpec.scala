@@ -488,6 +488,13 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       result should containSubstrings("01234 56789")
     }
 
+    "redirect to GET /business-type when no businessType in session" in {
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+
+      redirectLocation(await(controller.showConfirmBusinessForm(request)))
+        .get shouldBe routes.BusinessIdentificationController.showBusinessTypeForm().url
+    }
+
     "show a back button which allows the user to return to the business-details page" in {
       implicit val request =
         authenticatedAs(subscribingAgentEnrolledForNonMTD).withSession("businessType" -> "sole_trader")

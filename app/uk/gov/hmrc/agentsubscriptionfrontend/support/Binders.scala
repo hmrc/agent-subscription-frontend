@@ -19,8 +19,6 @@ package uk.gov.hmrc.agentsubscriptionfrontend.support
 import play.api.mvc.QueryStringBindable
 import uk.gov.hmrc.agentsubscriptionfrontend.models.IdentifyBusinessType
 
-import scala.util.{Failure, Success, Try}
-
 object Binders {
 
   implicit def businessTypeBinder(implicit stringBinder: QueryStringBindable[String]) =
@@ -33,11 +31,13 @@ object Binders {
         stringBinder
           .bind("businessType", params)
           .map {
-            case Right(input) =>
-              Try(IdentifyBusinessType(input)) match {
-                case Success(identifier) => Right(identifier)
-                case Failure(e)          => Left(e.getMessage)
+            case Right(input) => {
+              IdentifyBusinessType(input) match {
+                case IdentifyBusinessType.Undefined =>
+                  Left("Submitted form value did not contain valid businessType identifier")
+                case anyType => Right(anyType)
               }
+            }
             case Left(noInputError) => Left(noInputError)
           }
     }

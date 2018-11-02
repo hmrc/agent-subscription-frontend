@@ -93,6 +93,10 @@ class BusinessIdentificationController @Inject()(
         .bindFromRequest()
         .fold(
           formWithErrors => {
+            if (formWithErrors.errors.exists(_.message == "error.business-type-value.invalid")) {
+              Logger.warn("Select business-type form submitted with invalid identifier")
+              throw new BadRequestException("Submitted form value did not contain valid businessType identifier")
+            }
             Future successful Ok(html.business_type(formWithErrors))
           },
           validatedBusinessType => {
@@ -103,8 +107,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def showBusinessDetailsForm(
-    businessType: IdentifyBusinessType = IdentifyBusinessType.SoleTrader): Action[AnyContent] = Action.async {
+  def showBusinessDetailsForm(businessType: IdentifyBusinessType): Action[AnyContent] = Action.async {
     implicit request =>
       withSubscribingAgent { implicit agent =>
         withMaybeContinueUrlCached {
@@ -190,6 +193,9 @@ class BusinessIdentificationController @Inject()(
 
   val showConfirmBusinessForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
+      if (request.session.get("businessType").isEmpty)
+        Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+
       withKnownFactsResult { knownFactsResult =>
         Future successful Ok(
           html.confirm_business(
@@ -241,7 +247,7 @@ class BusinessIdentificationController @Inject()(
                   request.session
                     .get("businessType")
                     .map(typeFound =>
-                      Future.successful(routes.BusinessIdentificationController.submitBusinessDetailsForm(
+                      Future.successful(routes.BusinessIdentificationController.showBusinessDetailsForm(
                         IdentifyBusinessType.apply(typeFound))))
                     .getOrElse(Future.successful(routes.BusinessIdentificationController.showBusinessTypeForm()))
                 }
