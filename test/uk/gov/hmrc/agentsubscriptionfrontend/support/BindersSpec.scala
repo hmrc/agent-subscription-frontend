@@ -8,7 +8,6 @@ class BindersSpec extends UnitSpec {
   "Binders.businessTypeBinder.bind" should {
     "successful NORMAL binding" when {
       "bind correctly" in {
-
         val soleTrader = Binders.businessTypeBinder.bind("businessType", Map("businessType" -> Seq("sole_trader")))
         soleTrader.get shouldBe Right(IdentifyBusinessType.SoleTrader)
 
@@ -23,12 +22,15 @@ class BindersSpec extends UnitSpec {
       }
 
       "successful BAD binding" when {
-        "Left when binding results in IdentifyBusinessType.Undefined => BadRequest as empty value" in {
+        "IdentifyBusinessType.Undefined due to invalid input => Left => BadRequest" in {
           val undefinedEmpty = Binders.businessTypeBinder.bind("businessType", Map("businessType" -> Seq("")))
           undefinedEmpty.get shouldBe Left("Submitted form value did not contain valid businessType identifier")
 
           val undefinedBadInput = Binders.businessTypeBinder.bind("businessType", Map("businessType" -> Seq("someInvalidType")))
           undefinedBadInput.get shouldBe Left("Submitted form value did not contain valid businessType identifier")
+
+          val undefinedNothing = Binders.businessTypeBinder.bind("businessType", Map.empty)
+          undefinedNothing shouldBe None
         }
       }
     }
