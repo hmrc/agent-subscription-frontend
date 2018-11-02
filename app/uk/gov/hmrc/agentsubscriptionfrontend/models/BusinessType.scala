@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-import uk.gov.hmrc.http.BadRequestException
-
 case class BusinessType(businessType: IdentifyBusinessType)
 
 sealed trait IdentifyBusinessType {
