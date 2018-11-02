@@ -743,7 +743,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
         val result = await(controller.submitConfirmBusinessForm(request))
 
         result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController
-          .submitBusinessDetailsForm(validBusinessTypes.head)
+          .showBusinessDetailsForm(validBusinessTypes.head)
           .url
       }
 
