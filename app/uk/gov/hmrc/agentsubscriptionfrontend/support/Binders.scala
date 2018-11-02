@@ -34,7 +34,7 @@ object Binders {
             case Right(input) => {
               IdentifyBusinessType(input) match {
                 case IdentifyBusinessType.Undefined =>
-                  Left("Submitted form value did not contain valid businessType identifier")
+                  Left("Submitted businessType value was invalid")
                 case anyType => Right(anyType)
               }
             }
