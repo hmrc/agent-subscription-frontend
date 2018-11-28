@@ -110,14 +110,15 @@ package object controllers {
 
   object AMLSForms {
 
-    val expiryDateMapping: Mapping[LocalDate] = DateTuple.mandatoryDateTuple("Date fields should not be empty")
+    // val expiryDateMapping: Mapping[LocalDate] = DateTuple.mandatoryDateTuple("Date fields should not be empty")
 
-    val amlsForm = Form[AMLSForm](
-      mapping(
-        "amlsCode"         -> nonEmptyText,
-        "membershipNumber" -> nonEmptyText,
-        "expiry"           -> expiryDateMapping
-      )(AMLSForm.apply)(AMLSForm.unapply))
+    def amlsForm(bodies: Set[String]) =
+      Form[AMLSForm](
+        mapping(
+          "amlsCode"         -> amlsCode(bodies),
+          "membershipNumber" -> membershipNumber,
+          "expiry"           -> expiryDateMapping
+        )(AMLSForm.apply)(AMLSForm.unapply))
 
   }
 }

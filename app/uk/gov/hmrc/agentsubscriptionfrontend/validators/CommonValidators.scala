@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.validators
 
-import play.api.data.Forms.{of, optional, text}
-import play.api.data.{FormError, Mapping}
+import org.joda.time.{DateTimeZone, LocalDate}
+import play.api.data.Forms.{of, optional, text, tuple}
 import play.api.data.format.Formatter
 import play.api.data.validation._
+import play.api.data.{FormError, Mapping}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters
 import uk.gov.hmrc.domain.Nino
+
+import scala.util.{Failure, Success, Try}
 
 object CommonValidators {
   private val DesPostcodeRegex = "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$"
@@ -85,6 +87,23 @@ object CommonValidators {
             noApostrophe("error.business-name.invalid"),
             desText(msgKeyRequired = "error.business-name.empty", msgKeyInvalid = "error.business-name.invalid"))
         ))
+
+  def amlsCode(bodies: Set[String]): Mapping[String] = text verifying amlsCodeConstraint(bodies)
+
+  def membershipNumber: Mapping[String] = nonEmptyTextWithMsg("error.moneyLaunderingCompliance.membershipNumber.empty")
+
+  def expiryDateMapping: Mapping[LocalDate] =
+    tuple(
+      "year"  -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.day.empty"),
+      "month" -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.month.empty"),
+      "day"   -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.year.empty")
+    ).verifying(invalidExpiryDateConstraint)
+      .verifying(pastExpiryDateConstraint)
+      .verifying(withinYearExpiryDateConstraint)
+      .transform(
+        { case (y, m, d) => new LocalDate(y.trim.toInt, m.trim.toInt, d.trim.toInt) },
+        (date: LocalDate) => (date.getYear.toString, date.getMonthOfYear.toString, date.getDayOfYear.toString)
+      )
 
   def addressLine1: Mapping[String] =
     text
@@ -228,4 +247,51 @@ object CommonValidators {
       case _                                  => Valid
     }
   }
+
+  private def amlsCodeConstraint(bodies: Set[String]): Constraint[String] = Constraint[String] { fieldValue: String =>
+    Constraints.nonEmpty(fieldValue) match {
+      case _: Invalid => Invalid(ValidationError("error.moneyLaunderingCompliance.amlscode.empty"))
+      case _ if !validateAMLSBodies(fieldValue, bodies) =>
+        Invalid(ValidationError("error.moneyLaunderingCompliance.amlscode.empty"))
+      case _ => Valid
+    }
+  }
+
+  private val invalidExpiryDateConstraint: Constraint[(String, String, String)] = Constraint[(String, String, String)] {
+    data: (String, String, String) =>
+      val (year, month, day) = data
+
+      Try {
+        require(year.length == 4, "Year must be 4 digits")
+        new LocalDate(year.toInt, month.toInt, day.toInt)
+      } match {
+        case Failure(_) => Invalid(ValidationError("error.moneyLaunderingCompliance.date.invalid"))
+        case Success(_) => Valid
+      }
+  }
+
+  private val pastExpiryDateConstraint: Constraint[(String, String, String)] = Constraint[(String, String, String)] {
+    data: (String, String, String) =>
+      val (year, month, day) = data
+
+      if (new LocalDate(year.toInt, month.toInt, day.toInt).isAfter(LocalDate.now(DateTimeZone.UTC)))
+        Valid
+      else
+        Invalid(ValidationError("error.moneyLaunderingCompliance.date.past"))
+  }
+
+  private val withinYearExpiryDateConstraint: Constraint[(String, String, String)] =
+    Constraint[(String, String, String)] { data: (String, String, String) =>
+      val (year, month, day) = data
+
+      val futureDate = LocalDate.now(DateTimeZone.UTC).plusDays(365)
+
+      if (new LocalDate(year.toInt, month.toInt, day.toInt).isBefore(futureDate))
+        Valid
+      else
+        Invalid(ValidationError("error.moneyLaunderingCompliance.date.before", futureDate.toString("d MMMM yyyy")))
+    }
+
+  private def validateAMLSBodies(amlsCode: String, bodies: Set[String]): Boolean =
+    bodies.contains(amlsCode)
 }

@@ -63,6 +63,14 @@ error.clientdetails.nino.invalid=National Insurance number must be 2 letters, 6 
 error.saAgentCode.invalid=Self Assessment agent code must only include letters and numbers
 error.saAgentCode.blank=Enter a Self Assessment agent code
 error.saAgentCode.length=Self Assessment agent code must be 6 characters, like SA1234
+error.moneyLaunderingCompliance.amlscode.empty=Select the name of your money laundering supervisory body from the list
+error.moneyLaunderingCompliance.membershipNumber.empty=Enter your membership number
+error.moneyLaunderingCompliance.day.empty=Enter a day
+error.moneyLaunderingCompliance.month.empty=Enter a month
+error.moneyLaunderingCompliance.year.empty=Enter a year
+error.moneyLaunderingCompliance.date.invalid=Enter a real date
+error.moneyLaunderingCompliance.date.past=The date your membership expires must be in the future
+error.moneyLaunderingCompliance.date.before=The date your membership expires must be before {0}
 
 ##Modifying address
 address.form.with-errors.error.summary = Please check the following:

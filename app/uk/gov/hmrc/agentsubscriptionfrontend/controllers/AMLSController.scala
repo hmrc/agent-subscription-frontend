@@ -47,13 +47,13 @@ class AMLSController @Inject()(
 
   val showMoneyLaunderingComplianceForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Future.successful(Ok(html.money_laundering_compliance(amlsForm, amlsBodies)))
+      Future.successful(Ok(html.money_laundering_compliance(amlsForm(amlsBodies.keys.toSet), amlsBodies)))
     }
   }
 
   def submitMoneyLaunderingComplianceForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      amlsForm
+      amlsForm(amlsBodies.keys.toSet)
         .bindFromRequest()
         .fold(
           formWithErrors => Future.successful(Ok(html.money_laundering_compliance(formWithErrors, amlsBodies))),
