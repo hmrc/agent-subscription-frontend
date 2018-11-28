@@ -134,6 +134,59 @@ abstract class BaseISpec
     }
   }
 
+  protected def containInputElement(expectedElementId: String, expectedInputType: String): Matcher[Result] = {
+    new Matcher[Result] {
+      override def apply(result: Result): MatchResult = {
+        val doc = Jsoup.parse(bodyOf(result))
+
+        val foundElement = doc.getElementById(expectedElementId)
+
+        val isAsExpected = Option(foundElement) match {
+          case None => false
+          case Some(elAmls) => {
+            val isExpectedTag = elAmls.tagName() == "input"
+            val isExpectedType = elAmls.attr("type") == expectedInputType
+            isExpectedTag && isExpectedType
+          }
+        }
+
+        MatchResult(
+          isAsExpected,
+          s"""Response does not contain an input element of type "$expectedInputType" with id "$expectedElementId"""",
+          s"""Response contains an input element of type "$expectedInputType" with id "$expectedElementId""""
+        )
+      }
+    }
+  }
+
+  protected def containSubmitButton(expectedMessageKey: String, expectedElementId: String, expectedTagName: String = "button", expectedType: String = "submit"): Matcher[Result] = {
+    new Matcher[Result] {
+      override def apply(result: Result): MatchResult = {
+        val doc = Jsoup.parse(bodyOf(result))
+
+        checkMessageIsDefined(expectedMessageKey)
+
+        val foundElement = doc.getElementById(expectedElementId)
+
+        val isAsExpected = Option(foundElement) match {
+          case None => false
+          case Some(elAmls) => {
+            val isExpectedTag = elAmls.tagName() == expectedTagName
+            val isExpectedType = elAmls.attr("type") == expectedType
+            val hasExpectedMsg = elAmls.text() == htmlEscapedMessage(expectedMessageKey)
+            isExpectedTag && isExpectedType && hasExpectedMsg
+          }
+        }
+
+        MatchResult(
+          isAsExpected,
+          s"""Response does not contain a submit button with id "$expectedElementId" and type "$expectedType" with content for message key "$expectedMessageKey" """,
+          s"""Response contains a submit button with id "$expectedElementId" and type "$expectedType" with content for message key "$expectedMessageKey" """
+        )
+      }
+    }
+  }
+
   protected def repeatMessage(expectedMessageKey: String, times: Int): Matcher[Result] = new Matcher[Result] {
     override def apply(result: Result): MatchResult = {
       checkIsHtml200(result)
