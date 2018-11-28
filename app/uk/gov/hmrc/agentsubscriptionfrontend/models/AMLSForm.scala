@@ -19,9 +19,12 @@ import play.api.libs.json.Json
 
 case class ExpiryDate(day: String, month: String, year: String)
 
+object ExpiryDate {
+  implicit val formatExpiryDate = Json.format[ExpiryDate]
+}
+
 case class AMLSForm(amlsCode: String, membershipNumber: String, expiry: ExpiryDate)
 
 object AMLSForm {
-  implicit val formatExpiryDate = Json.format[ExpiryDate]
   implicit val formatAMLSForm = Json.format[AMLSForm]
 }

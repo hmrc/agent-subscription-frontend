@@ -105,4 +105,22 @@ package object controllers {
             "error.link-clients-value.invalid",
             submittedLinkClients => Seq(Yes, No).contains(submittedLinkClients.autoMapping)))
   }
+
+  object AMLSForms {
+
+    val expiryDateForm = Form[ExpiryDate](
+      mapping(
+        "day"   -> nonEmptyText,
+        "month" -> nonEmptyText,
+        "year"  -> nonEmptyText
+      )(ExpiryDate.apply)(ExpiryDate.unapply)
+    )
+
+    val amlsForm = Form[AMLSForm](
+      mapping(
+        "name"             -> nonEmptyText,
+        "membershipNumber" -> nonEmptyText,
+        "expiry"           -> expiryDateForm.mapping
+      )(AMLSForm.apply)(AMLSForm.unapply))
+  }
 }

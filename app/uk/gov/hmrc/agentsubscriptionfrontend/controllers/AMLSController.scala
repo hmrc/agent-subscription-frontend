@@ -23,18 +23,13 @@ import play.api.mvc.{AnyContent, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSForm, ExpiryDate}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 
 import scala.concurrent.Future
-
-//FIXME: Move to appropriate place
-import play.api.data.Form
-import play.api.data.Forms.{mapping, _}
 
 @Singleton
 class AMLSController @Inject()(
@@ -46,22 +41,13 @@ class AMLSController @Inject()(
   override val sessionStoreService: SessionStoreService)
     extends FrontendController with I18nSupport with AuthActions with SessionDataMissing with Monitoring {
 
-  val amlsBodies: Map[String, String] = AMLSLoader.load("/amls.csv")
+  import AMLSForms._
 
-  val amlsForm = Form[AMLSForm](
-    mapping(
-      "name"             -> nonEmptyText,
-      "membershipNumber" -> nonEmptyText,
-      "expiry" -> mapping(
-        "day"   -> nonEmptyText,
-        "month" -> nonEmptyText,
-        "year"  -> nonEmptyText
-      )(ExpiryDate.apply)(ExpiryDate.unapply)
-    )(AMLSForm.apply)(AMLSForm.unapply))
+  private val amlsBodies: Map[String, String] = AMLSLoader.load("/amls.csv")
 
   val showMoneyLaunderingComplianceForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Future.successful(Ok(html.money_laundering_compliance(amlsForm, amlsBodies)))
+      Future.successful(Ok(html.money_laundering_compliance(amlsForm, expiryDateForm, amlsBodies)))
     }
   }
 

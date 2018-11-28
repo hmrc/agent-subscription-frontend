@@ -15,13 +15,13 @@
  *@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-@import uk.gov.hmrc.play.views.html.helpers.{form, input, errorSummary, dateFields}
+@import uk.gov.hmrc.play.views.html.helpers.{form, input, errorSummary, dateFields, dateFieldsFreeInline}
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSForm, ExpiryDate}
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.AMLSForm._
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers._
 
-@(amlsForm: Form[AMLSForm], amlsBodies: Map[String, String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(amlsForm: Form[AMLSForm], expiryDateForm: Form[ExpiryDate], amlsBodies: Map[String, String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(amlsForm) + Messages("moneyLaunderingCompliance.title"), bodyClasses = None) {
     @if(amlsForm.hasErrors) {
@@ -64,30 +64,11 @@
 
 
             <div class="form-group">
-                @dateFields(amlsForm("expiry"))
-                ,
-                '_label -> Messages("moneyLaunderingCompliance.expiry.day.title"),
+                @dateFieldsFreeInline(
+                expiryDateForm,
+                "datefield",
                 '_inputClass -> "form-control input--cleared input--small",
-                '_labelClass -> "heading-small soft--ends",
-                '_dataAttributes -> Html("""data-uppercase="true"""")
-                )
-            </div>
-            <div class="form-group">
-                @input(
-                amlsForm("expiry.month"),
-                '_label -> Messages("moneyLaunderingCompliance.expiry.month.title"),
-                '_inputClass -> "form-control input--cleared input--small",
-                '_labelClass -> "heading-small soft--ends",
-                '_dataAttributes -> Html("""data-uppercase="true"""")
-                )
-            </div>
-            <div class="form-group">
-                @input(
-                amlsForm("expiry.year"),
-                '_label -> Messages("moneyLaunderingCompliance.expiry.year.title"),
-                '_inputClass -> "form-control input--cleared input--small",
-                '_labelClass -> "heading-small soft--ends",
-                '_dataAttributes -> Html("""data-uppercase="true"""")
+                '_labelClass -> "heading-small soft--ends"
                 )
             </div>
 
