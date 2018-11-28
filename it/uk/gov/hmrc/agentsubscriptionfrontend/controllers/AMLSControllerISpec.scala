@@ -44,12 +44,10 @@ class AMLSControllerISpec extends BaseISpec {
 
     "ask for a money laundering supervisory body name from a list of acceptable values" in new Setup {
       val result = await(controller.showMoneyLaunderingComplianceForm(authenticatedRequest))
-      val f = bodyOf(result)
       result should containMessages("moneyLaunderingCompliance.amls.title")
 
       val doc = Jsoup.parse(bodyOf(result))
 
-      // Check form's radio inputs have correct values
       val elAmlsSelect = doc.getElementById("amls-auto-complete")
       elAmlsSelect should not be null
       elAmlsSelect.tagName() shouldBe "select"
@@ -95,6 +93,16 @@ class AMLSControllerISpec extends BaseISpec {
         expectedMessageKey = "moneyLaunderingCompliance.continue",
         expectedElementId = "continue"
       )
+    }
+
+    "contain a form that would POST to /money-laundering-compliance" in new Setup {
+      val result = await(controller.showMoneyLaunderingComplianceForm(authenticatedRequest))
+      val doc = Jsoup.parse(bodyOf(result))
+
+      val elForm = doc.select("form")
+      elForm should not be null
+      elForm.attr("action") shouldBe "/agent-subscription/money-laundering-compliance"
+      elForm.attr("method") shouldBe "POST"
     }
   }
 
