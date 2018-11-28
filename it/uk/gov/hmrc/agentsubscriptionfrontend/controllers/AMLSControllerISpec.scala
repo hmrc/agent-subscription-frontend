@@ -57,10 +57,11 @@ class AMLSControllerISpec extends BaseISpec {
       val amlsBodies = AMLSLoader.load("/amls.csv")
       amlsBodies.foreach{
         case (expectedCode, expectedName) => {
-          val elFirstChoice = elAmlsSelect.getElementById(s"amlsCode-$expectedCode")
-          elFirstChoice should not be null
-          elFirstChoice.attr("value") shouldBe expectedCode
-          elFirstChoice.text() shouldBe expectedName
+          val elChoice = elAmlsSelect.getElementById(s"amlsCode-$expectedCode")
+          elChoice should not be null
+          elChoice.tagName() shouldBe "option"
+          elChoice.attr("value") shouldBe expectedCode
+          elChoice.text() shouldBe expectedName
         }
       }
     }
@@ -97,9 +98,11 @@ class AMLSControllerISpec extends BaseISpec {
     }
   }
 
-//  "submitMoneyLaunderingComplianceForm (POST /business-type)" should {
-//    behave like anAgentAffinityGroupOnlyEndpoint(controller.submitMoneyLaunderingComplianceForm(_))
-//
-//    pending
-//  }
+  "submitMoneyLaunderingComplianceForm (POST /money-laundering-compliance)" should {
+    behave like anAgentAffinityGroupOnlyEndpoint(controller.submitMoneyLaunderingComplianceForm(_))
+
+    "todo" in new Setup {
+      pending
+    }
+  }
 }
