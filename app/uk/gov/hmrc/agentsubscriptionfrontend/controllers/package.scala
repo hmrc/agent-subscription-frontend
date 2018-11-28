@@ -23,6 +23,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters._
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 import uk.gov.voa.play.form.ConditionalMappings.{mandatoryIfEqual, mandatoryIfTrue}
+import uk.gov.hmrc.play.mappers.DateTuple
 
 package object controllers {
   object BusinessIdentificationForms {
@@ -108,19 +109,13 @@ package object controllers {
 
   object AMLSForms {
 
-    val expiryDateForm = Form[ExpiryDate](
-      mapping(
-        "day"   -> nonEmptyText,
-        "month" -> nonEmptyText,
-        "year"  -> nonEmptyText
-      )(ExpiryDate.apply)(ExpiryDate.unapply)
-    )
+    val expiryDateForm = DateTuple.mandatoryDateTuple("Date fields should not be empty")
 
     val amlsForm = Form[AMLSForm](
       mapping(
         "name"             -> nonEmptyText,
         "membershipNumber" -> nonEmptyText,
-        "expiry"           -> expiryDateForm.mapping
+        "expiry"           -> expiryDateForm
       )(AMLSForm.apply)(AMLSForm.unapply))
   }
 }

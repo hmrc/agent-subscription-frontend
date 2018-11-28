@@ -15,15 +15,11 @@
  */
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
+import org.joda.time.LocalDate
+
 import play.api.libs.json.Json
 
-case class ExpiryDate(day: String, month: String, year: String)
-
-object ExpiryDate {
-  implicit val formatExpiryDate = Json.format[ExpiryDate]
-}
-
-case class AMLSForm(amlsCode: String, membershipNumber: String, expiry: ExpiryDate)
+case class AMLSForm(amlsCode: String, membershipNumber: String, expiry: LocalDate)
 
 object AMLSForm {
   implicit val formatAMLSForm = Json.format[AMLSForm]
