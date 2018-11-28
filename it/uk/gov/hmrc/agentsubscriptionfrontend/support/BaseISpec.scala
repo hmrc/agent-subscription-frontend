@@ -3,6 +3,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.support
 import com.codahale.metrics.MetricRegistry
 import com.google.inject.AbstractModule
 import com.kenshoo.play.metrics.Metrics
+import org.jsoup.Jsoup
 import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application

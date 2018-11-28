@@ -213,6 +213,18 @@ error.no-radio-selected=You must choose an option
 invasive.error.no-radio.selected=Select yes if you have a Self Assessment agent code
 clientDetails.error.no-radio.selected=Select which details you want to enter
 
+# Money laundering compliance page
+moneyLaunderingCompliance.title=Money laundering compliance details
+moneyLaunderingCompliance.p1=You must be registered with a money laundering supervisory body before you can create an agent services account.
+moneyLaunderingCompliance.amls.title=Name of money laundering supervisory body
+moneyLaunderingCompliance.membershipNumber.title=Membership number
+moneyLaunderingCompliance.expiry.title=When does your membership expire?
+moneyLaunderingCompliance.expiry.hint=For example, 31 03 2019
+moneyLaunderingCompliance.expiry.day.title=Day
+moneyLaunderingCompliance.expiry.month.title=Month
+moneyLaunderingCompliance.expiry.year.title=Year
+moneyLaunderingCompliance.continue=Continue
+
 checkAnswers.title=Check your details before creating your account
 checkAnswers.description.p1=These are the business details we will use for your agent services account.
 checkAnswers.description.p2=Your business name will be the name shown to clients. We need your business address to check your details. We will only use your email address to contact you about your agent services account.
