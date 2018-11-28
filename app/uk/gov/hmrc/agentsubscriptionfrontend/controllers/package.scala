@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend
 
-import play.api.data.Form
+import org.joda.time.LocalDate
+import play.api.data.{Form, Mapping}
 import play.api.data.Forms.{mapping, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -109,13 +110,14 @@ package object controllers {
 
   object AMLSForms {
 
-    val expiryDateForm = DateTuple.mandatoryDateTuple("Date fields should not be empty")
+    val expiryDateMapping: Mapping[LocalDate] = DateTuple.mandatoryDateTuple("Date fields should not be empty")
 
     val amlsForm = Form[AMLSForm](
       mapping(
-        "name"             -> nonEmptyText,
+        "amlsCode"         -> nonEmptyText,
         "membershipNumber" -> nonEmptyText,
-        "expiry"           -> expiryDateForm
+        "expiry"           -> expiryDateMapping
       )(AMLSForm.apply)(AMLSForm.unapply))
+
   }
 }

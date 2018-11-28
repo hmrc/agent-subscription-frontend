@@ -47,28 +47,22 @@ class AMLSController @Inject()(
 
   val showMoneyLaunderingComplianceForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Future.successful(Ok(html.money_laundering_compliance(amlsForm, expiryDateForm, amlsBodies)))
+      Future.successful(Ok(html.money_laundering_compliance(amlsForm, amlsBodies)))
     }
   }
 
   def submitMoneyLaunderingComplianceForm: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      Future.successful(NotImplemented)
-//      businessTypeForm
-//        .bindFromRequest()
-//        .fold(
-//          formWithErrors => {
-//            if (formWithErrors.errors.exists(_.message == "error.business-type-value.invalid")) {
-//              Logger.warn("Select business-type form submitted with invalid identifier")
-//              throw new BadRequestException("Submitted form value did not contain valid businessType identifier")
-//            }
-//            Future successful Ok(html.business_type(formWithErrors))
-//          },
-//          validatedBusinessType => {
-//            Future successful Redirect(
-//              routes.BusinessIdentificationController.showBusinessDetailsForm(validatedBusinessType.businessType))
-//          }
-//        )
+    withSubscribingAgent { _ =>
+      amlsForm
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(Ok(html.money_laundering_compliance(formWithErrors, amlsBodies))),
+          validForm => {
+            println(validForm)
+            Future.successful(Ok)
+          }
+        )
     }
+
   }
 }
