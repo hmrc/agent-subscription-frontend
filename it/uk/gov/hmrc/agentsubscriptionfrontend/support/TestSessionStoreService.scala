@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{InitialDetails, KnownFactsResult}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSForm, InitialDetails, KnownFactsResult}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.play.binders.ContinueUrl
 import uk.gov.hmrc.http.HeaderCarrier
@@ -29,7 +29,8 @@ class TestSessionStoreService extends SessionStoreService(null) {
     var knownFactsResult: Option[KnownFactsResult] = None,
     var initialDetails: Option[InitialDetails] = None,
     var continueUrl: Option[ContinueUrl] = None,
-    var wasEligibleForMapping: Option[Boolean] = None)
+    var wasEligibleForMapping: Option[Boolean] = None,
+    var amlsForm: Option[AMLSForm] = None)
 
   private val sessions = collection.mutable.Map[String, Session]()
 
@@ -74,6 +75,12 @@ class TestSessionStoreService extends SessionStoreService(null) {
 
   override def cacheMappingEligible(wasEligibleForMapping: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     Future.successful(currentSession.wasEligibleForMapping = Some(wasEligibleForMapping))
+
+  override def fetchAMLSForm(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[AMLSForm]] =
+    Future.successful(currentSession.amlsForm)
+
+  override def cacheAMLSForm(amlsForm: AMLSForm)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+    Future.successful(currentSession.amlsForm = Some(amlsForm))
 
   override def remove()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     Future {

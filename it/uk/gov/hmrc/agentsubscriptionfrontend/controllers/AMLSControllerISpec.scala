@@ -16,17 +16,45 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
+import org.joda.time.{DateTimeZone, LocalDate}
 import org.jsoup.Jsoup
+import play.api.test.Helpers._
+import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSForm, BusinessAddress, InitialDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.{givenAgentIsManuallyAssured, givenAgentIsNotManuallyAssured}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
 
-class AMLSControllerISpec extends BaseISpec {
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
   lazy val controller: AMLSController = app.injector.instanceOf[AMLSController]
 
+  val utr = Utr("0123456789")
+  val businessAddress =
+    BusinessAddress(
+      "AddressLine1 A",
+      Some("AddressLine2 A"),
+      Some("AddressLine3 A"),
+      Some("AddressLine4 A"),
+      Some("AA11AA"),
+      "GB")
+
+  protected val initialDetails =
+    InitialDetails(
+      utr,
+      "AA11AA",
+      "My Agency",
+      Some("agency@example.com"),
+      businessAddress
+    )
+
   trait Setup {
-    val authenticatedRequest = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+    implicit val authenticatedRequest = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+    sessionStoreService.currentSession.initialDetails = Some(initialDetails)
+    givenAgentIsNotManuallyAssured(utr.value)
   }
 
   "showMoneyLaunderingComplianceForm (GET /money-laundering-compliance)" should {
@@ -81,9 +109,9 @@ class AMLSControllerISpec extends BaseISpec {
         "moneyLaunderingCompliance.expiry.month.title",
         "moneyLaunderingCompliance.expiry.year.title"
       )
-      result should containInputElement("expiry.day", "text")
-      result should containInputElement("expiry.month", "text")
-      result should containInputElement("expiry.year", "text")
+      result should containInputElement("expiry.day", "tel")
+      result should containInputElement("expiry.month", "tel")
+      result should containInputElement("expiry.year", "tel")
     }
 
     "contain a continue button" in new Setup {
@@ -104,13 +132,101 @@ class AMLSControllerISpec extends BaseISpec {
       elForm.attr("action") shouldBe "/agent-subscription/money-laundering-compliance"
       elForm.attr("method") shouldBe "POST"
     }
+
+    "redirect to /check-answers page if the agent is manually assured" in {
+      implicit val authenticatedRequest = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      sessionStoreService.currentSession.initialDetails = Some(initialDetails)
+      givenAgentIsManuallyAssured(utr.value)
+
+      val result = await(controller.showMoneyLaunderingComplianceForm(authenticatedRequest))
+
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
+      metricShouldExistAndBeUpdated("Count-Subscription-CleanCreds-Start")
+    }
+
+    "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in {
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+
+      val result = await(controller.showMoneyLaunderingComplianceForm(request))
+
+      resultShouldBeSessionDataMissing(result)
+    }
   }
 
   "submitMoneyLaunderingComplianceForm (POST /money-laundering-compliance)" should {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.submitMoneyLaunderingComplianceForm(_))
 
-    "todo" in new Setup {
-      pending
+    val expiryDate = LocalDate.now(DateTimeZone.UTC).plusDays(2)
+    val expiryDay = expiryDate.getDayOfMonth.toString
+    val expiryMonth = expiryDate.getMonthOfYear.toString
+    val expiryYear = expiryDate.getYear.toString
+
+    "store AMLS form in session cache after successful submission" in new Setup {
+      implicit val requst = authenticatedRequest.withFormUrlEncodedBody("amlsCode" -> "AAT",
+        "membershipNumber" -> "12345", "expiry.day" -> expiryDay, "expiry.month" -> expiryMonth,  "expiry.year" -> expiryYear)
+
+      val result = await(controller.submitMoneyLaunderingComplianceForm(requst))
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
+
+      await(sessionStoreService.fetchAMLSForm) should not be empty
+      val amlsForm = await(sessionStoreService.fetchAMLSForm).get
+
+      amlsForm shouldBe AMLSForm("AAT", "12345", expiryDate)
+    }
+
+    "show validation error when the form is submitted with empty amlsCode" in new Setup {
+      implicit val requst = authenticatedRequest.withFormUrlEncodedBody("amlsCode" -> "",
+        "membershipNumber" -> "12345", "expiry.day" -> expiryDay, "expiry.month" -> expiryMonth,  "expiry.year" -> expiryYear)
+
+      val result = await(controller.submitMoneyLaunderingComplianceForm(requst))
+      status(result) shouldBe 200
+      result should containMessages("moneyLaunderingCompliance.amls.title", "error.moneyLaunderingCompliance.amlscode.empty")
+
+      await(sessionStoreService.fetchAMLSForm) shouldBe empty
+    }
+
+    "show validation error when the form is submitted with empty membership number" in new Setup {
+      implicit val requst = authenticatedRequest.withFormUrlEncodedBody("amlsCode" -> "AAT",
+        "membershipNumber" -> "", "expiry.day" -> expiryDay, "expiry.month" -> expiryMonth,  "expiry.year" -> expiryYear)
+
+      val result = await(controller.submitMoneyLaunderingComplianceForm(requst))
+      status(result) shouldBe 200
+      result should containMessages("moneyLaunderingCompliance.membershipNumber.title", "error.moneyLaunderingCompliance.membershipNumber.empty")
+
+      await(sessionStoreService.fetchAMLSForm) shouldBe empty
+    }
+
+    "show validation error when the form is submitted with invalis expiry datge" in new Setup {
+      implicit val requst = authenticatedRequest.withFormUrlEncodedBody("amlsCode" -> "AAT",
+        "membershipNumber" -> "12345", "expiry.day" -> "123", "expiry.month" -> expiryMonth,  "expiry.year" -> expiryYear)
+
+      val result = await(controller.submitMoneyLaunderingComplianceForm(requst))
+      status(result) shouldBe 200
+      result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.date.invalid")
+
+      await(sessionStoreService.fetchAMLSForm) shouldBe empty
+    }
+
+    "redirect to /check-answers page if the agent is manually assured" in {
+      implicit val authenticatedRequest = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      sessionStoreService.currentSession.initialDetails = Some(initialDetails)
+      givenAgentIsManuallyAssured(utr.value)
+
+      val result = await(controller.submitMoneyLaunderingComplianceForm(authenticatedRequest))
+
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
+      metricShouldExistAndBeUpdated("Count-Subscription-CleanCreds-Start")
+    }
+
+    "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in {
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+
+      val result = await(controller.submitMoneyLaunderingComplianceForm(request))
+
+      resultShouldBeSessionDataMissing(result)
     }
   }
 }

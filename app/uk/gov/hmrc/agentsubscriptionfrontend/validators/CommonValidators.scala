@@ -24,6 +24,7 @@ import play.api.data.{FormError, Mapping}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.domain.Nino
 
+import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
 object CommonValidators {
@@ -92,17 +93,16 @@ object CommonValidators {
 
   def membershipNumber: Mapping[String] = nonEmptyTextWithMsg("error.moneyLaunderingCompliance.membershipNumber.empty")
 
-  def expiryDateMapping: Mapping[LocalDate] =
+  def expiryDate: Mapping[LocalDate] =
     tuple(
-      "year"  -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.day.empty"),
+      "year"  -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.year.empty"),
       "month" -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.month.empty"),
-      "day"   -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.year.empty")
-    ).verifying(invalidExpiryDateConstraint)
-      .verifying(pastExpiryDateConstraint)
-      .verifying(withinYearExpiryDateConstraint)
+      "day"   -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.day.empty")
+    ).verifying(
+        checkOneAtATime(Seq(invalidExpiryDateConstraint, pastExpiryDateConstraint, withinYearExpiryDateConstraint)))
       .transform(
         { case (y, m, d) => new LocalDate(y.trim.toInt, m.trim.toInt, d.trim.toInt) },
-        (date: LocalDate) => (date.getYear.toString, date.getMonthOfYear.toString, date.getDayOfYear.toString)
+        (date: LocalDate) => (date.getYear.toString, date.getMonthOfYear.toString, date.getDayOfMonth.toString)
       )
 
   def addressLine1: Mapping[String] =
@@ -223,6 +223,21 @@ object CommonValidators {
       }
   }
 
+  private def checkOneAtATime[A](constraints: Seq[Constraint[A]]): Constraint[A] = Constraint[A] { fieldValue: A =>
+    @tailrec
+    def loop(c: Seq[Constraint[A]]): ValidationResult =
+      c match {
+        case Nil => Valid
+        case head :: tail =>
+          head(fieldValue) match {
+            case i @ Invalid(_) => i
+            case Valid          => loop(tail)
+          }
+      }
+
+    loop(constraints)
+  }
+
   private def utrConstraint(errorMessages: UtrErrors = DefaultUtrErrors): Constraint[String] = Constraint[String] {
     fieldValue: String =>
       val formattedField = fieldValue.replace(" ", "")
@@ -252,7 +267,7 @@ object CommonValidators {
     Constraints.nonEmpty(fieldValue) match {
       case _: Invalid => Invalid(ValidationError("error.moneyLaunderingCompliance.amlscode.empty"))
       case _ if !validateAMLSBodies(fieldValue, bodies) =>
-        Invalid(ValidationError("error.moneyLaunderingCompliance.amlscode.empty"))
+        Invalid(ValidationError("error.moneyLaunderingCompliance.amlscode.invalid"))
       case _ => Valid
     }
   }
@@ -289,7 +304,7 @@ object CommonValidators {
       if (new LocalDate(year.toInt, month.toInt, day.toInt).isBefore(futureDate))
         Valid
       else
-        Invalid(ValidationError("error.moneyLaunderingCompliance.date.before", futureDate.toString("d MMMM yyyy")))
+        Invalid(ValidationError("error.moneyLaunderingCompliance.date.before"))
     }
 
   private def validateAMLSBodies(amlsCode: String, bodies: Set[String]): Boolean =

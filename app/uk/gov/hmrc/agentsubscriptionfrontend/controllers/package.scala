@@ -16,15 +16,13 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend
 
-import org.joda.time.LocalDate
-import play.api.data.{Form, Mapping}
+import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters._
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 import uk.gov.voa.play.form.ConditionalMappings.{mandatoryIfEqual, mandatoryIfTrue}
-import uk.gov.hmrc.play.mappers.DateTuple
 
 package object controllers {
   object BusinessIdentificationForms {
@@ -110,14 +108,12 @@ package object controllers {
 
   object AMLSForms {
 
-    // val expiryDateMapping: Mapping[LocalDate] = DateTuple.mandatoryDateTuple("Date fields should not be empty")
-
-    def amlsForm(bodies: Set[String]) =
+    def amlsForm(bodies: Set[String]): Form[AMLSForm] =
       Form[AMLSForm](
         mapping(
           "amlsCode"         -> amlsCode(bodies),
           "membershipNumber" -> membershipNumber,
-          "expiry"           -> expiryDateMapping
+          "expiry"           -> expiryDate
         )(AMLSForm.apply)(AMLSForm.unapply))
 
   }

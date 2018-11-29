@@ -23,10 +23,12 @@ import play.api.mvc.{AnyContent, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
@@ -35,6 +37,7 @@ import scala.concurrent.Future
 class AMLSController @Inject()(
   override val messagesApi: MessagesApi,
   override val authConnector: AuthConnector,
+  val agentAssuranceConnector: AgentAssuranceConnector,
   implicit override val appConfig: AppConfig,
   override val continueUrlActions: ContinueUrlActions,
   override val metrics: Metrics,
@@ -47,22 +50,40 @@ class AMLSController @Inject()(
 
   val showMoneyLaunderingComplianceForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Future.successful(Ok(html.money_laundering_compliance(amlsForm(amlsBodies.keys.toSet), amlsBodies)))
+      withManuallyAssuredAgent {
+        Future.successful(Ok(html.money_laundering_compliance(amlsForm(amlsBodies.keys.toSet), amlsBodies)))
+      }
     }
   }
 
   def submitMoneyLaunderingComplianceForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      amlsForm(amlsBodies.keys.toSet)
-        .bindFromRequest()
-        .fold(
-          formWithErrors => Future.successful(Ok(html.money_laundering_compliance(formWithErrors, amlsBodies))),
-          validForm => {
-            println(validForm)
-            Future.successful(Ok)
-          }
-        )
+      withManuallyAssuredAgent {
+        amlsForm(amlsBodies.keys.toSet)
+          .bindFromRequest()
+          .fold(
+            formWithErrors => Future.successful(Ok(html.money_laundering_compliance(formWithErrors, amlsBodies))),
+            validForm => {
+              sessionStoreService
+                .cacheAMLSForm(validForm)
+                .map { _ =>
+                  mark("Count-Subscription-CleanCreds-Start")
+                  Redirect(routes.SubscriptionController.showCheckAnswers())
+                }
+            }
+          )
+      }
+    }
+  }
+
+  private def withManuallyAssuredAgent(body: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] =
+    withInitialDetails { details =>
+      agentAssuranceConnector.isManuallyAssuredAgent(details.utr).flatMap { response =>
+        if (response) {
+          mark("Count-Subscription-CleanCreds-Start")
+          Future.successful(Redirect(routes.SubscriptionController.showCheckAnswers()))
+        } else body
+      }
     }
 
-  }
 }

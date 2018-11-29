@@ -15,14 +15,21 @@
  *@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-@import uk.gov.hmrc.play.views.html.helpers.{form, input, errorSummary, dateFields, dateFieldsFreeInline}
+@import uk.gov.hmrc.play.views.html.helpers.{form, input, errorSummary, dateFieldsFreeInlineLegend}
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.AMLSForm
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers._
 
 @(amlsForm: Form[AMLSForm], amlsBodies: Map[String, String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+@noJsDateFieldsError = @{
+if(amlsForm("expiry.day").hasErrors || amlsForm("expiry.month").hasErrors || amlsForm("expiry.year").hasErrors)
+"nojs-date-fields-error"
+}
+
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(amlsForm) + Messages("moneyLaunderingCompliance.title"), bodyClasses = None) {
+    <a href="@routes.BusinessIdentificationController.showConfirmBusinessForm()" class="link-back">@Messages("button.back")</a>
+
     @if(amlsForm.hasErrors) {
         @errorSummary(Messages("error.summary.heading"), amlsForm, Seq.empty, Some("money-laundering-compliance"))
     }
@@ -34,7 +41,7 @@
 
         <fieldset>
 
-            <div class="form-group" id="countryCode">
+            <div class="form-group">
                 @amls_dropdown(
                 amlsForm("amlsCode"),
                 amlsBodies.toSeq,
@@ -52,22 +59,20 @@
                 @input(
                 amlsForm("membershipNumber"),
                 '_label -> Messages("moneyLaunderingCompliance.membershipNumber.title"),
-                '_inputClass -> "form-control input--cleared input--small",
+                '_inputClass -> "form-control input--cleared",
                 '_labelClass -> "heading-small soft--ends",
                 '_dataAttributes -> Html("""data-uppercase="true"""")
                 )
             </div>
 
-            <h1 class="heading-medium">@Messages("moneyLaunderingCompliance.expiry.title")</h1>
-            <p>@Messages("moneyLaunderingCompliance.expiry.hint")</p>
-
-
-            <div class="form-group">
-                @dateFieldsFreeInline(
+            <div class="@noJsDateFieldsError">
+                @dateFieldsFreeInlineLegend(
                 amlsForm,
                 "expiry",
-                '_inputClass -> "form-control input--cleared input--small",
-                '_labelClass -> "heading-small soft--ends"
+                '_legend -> Messages("moneyLaunderingCompliance.expiry.title"),
+                '_inputHint -> Messages("moneyLaunderingCompliance.expiry.hint"),
+                '_legendSpanClass -> "form-label-bold",
+                '_legendClass -> "flush--ends"
                 )
             </div>
 
