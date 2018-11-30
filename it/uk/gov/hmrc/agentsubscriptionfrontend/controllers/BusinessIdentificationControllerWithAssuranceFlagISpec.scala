@@ -155,7 +155,7 @@ class BusinessIdentificationControllerWithAssuranceFlagISpec extends BusinessIde
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-PAYE")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-SA")
-      givenUserIsAnAgentWithAnAcceptableNumberOfClients("HMCE-VATDEC-ORG")
+      givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("HMCE-VATDEC-ORG")
       givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
@@ -168,7 +168,7 @@ class BusinessIdentificationControllerWithAssuranceFlagISpec extends BusinessIde
       verifyAgentAssuranceAuditRequestSent(
         passPayeAgentAssuranceCheck = Some(false),
         passSaAgentAssuranceCheck = Some(true),
-        passVatDecOrgAgentAssuranceCheck = Some(true))
+        passVatDecOrgAgentAssuranceCheck = Some(false))
     }
 
     "proceed to showConfirmBusiness when there in not an acceptable number of SA client, but there is enough PAYE Clients" in {
@@ -191,7 +191,7 @@ class BusinessIdentificationControllerWithAssuranceFlagISpec extends BusinessIde
       passVatDecOrgAgentAssuranceCheck = Some(false))
     }
 
-    "proceed to showConfirmBusiness when there in not an acceptable number of SA and PAYE client, but there is enough HMCE-VATDEC-ORG Clients" in {
+    "proceed to showConfirmBusiness when there in not an acceptable number of SA and PAYE client, but there is not enough HMCE-VATDEC-ORG Clients" in {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-PAYE")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-SA")
@@ -209,6 +209,26 @@ class BusinessIdentificationControllerWithAssuranceFlagISpec extends BusinessIde
         passPayeAgentAssuranceCheck = Some(true),
         passSaAgentAssuranceCheck = Some(true),
         passVatDecOrgAgentAssuranceCheck = Some(false))
+    }
+
+    "proceed to showConfirmBusiness when there is an acceptable number of HMCE-VATDEC-ORG client, but there is not enough SA and PAYE clients" in {
+      withMatchingUtrAndPostcode(validUtr, validPostcode)
+      givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-PAYE")
+      givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-SA")
+      givenUserIsAnAgentWithAnAcceptableNumberOfClients("HMCE-VATDEC-ORG")
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr.value)
+
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("utr" -> validUtr.value, "postcode" -> validPostcode)
+      val result = await(controller.submitBusinessDetailsForm(validBusinessTypes.head)(request))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showConfirmBusinessForm().url)
+      verifyAgentAssuranceAuditRequestSent(
+        passPayeAgentAssuranceCheck = Some(false),
+        passSaAgentAssuranceCheck = Some(false),
+        passVatDecOrgAgentAssuranceCheck = Some(true))
     }
 
     "redirect to /cannot-create account when agent's utr is in the R2DW list" in {
