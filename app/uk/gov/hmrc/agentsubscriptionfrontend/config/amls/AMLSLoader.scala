@@ -31,7 +31,7 @@ object AMLSLoader {
         .drop(header)
         .toSeq
         .map { line =>
-          line.split(",") match {
+          line.split(",").map(_.trim) match {
             case Array(code, bodyName) => (code, bodyName)
             case _                     => throw new AMLSLoaderException(s"Strange line in AMLS csv file")
           }
@@ -43,5 +43,5 @@ object AMLSLoader {
     }
 
   final class AMLSLoaderException(message: String)
-      extends Exception(s"Unknown error code from agent-subscription while loading AMLS Bodies: $message")
+      extends Exception(s"Unexpected error while loading AMLS Bodies: $message")
 }

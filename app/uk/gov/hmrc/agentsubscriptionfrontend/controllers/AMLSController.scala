@@ -24,6 +24,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSBody, AMLSDetails}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
@@ -64,8 +65,16 @@ class AMLSController @Inject()(
           .fold(
             formWithErrors => Future.successful(Ok(html.money_laundering_compliance(formWithErrors, amlsBodies))),
             validForm => {
+              val amlsDetails = AMLSDetails(
+                AMLSBody(
+                  validForm.amlsCode,
+                  amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))),
+                validForm.membershipNumber,
+                validForm.expiry
+              )
+
               sessionStoreService
-                .cacheAMLSForm(validForm)
+                .cacheAMLSDetails(amlsDetails)
                 .map { _ =>
                   mark("Count-Subscription-CleanCreds-Start")
                   Redirect(routes.SubscriptionController.showCheckAnswers())
