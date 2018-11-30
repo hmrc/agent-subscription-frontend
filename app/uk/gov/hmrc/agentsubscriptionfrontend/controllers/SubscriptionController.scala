@@ -68,9 +68,9 @@ class SubscriptionController @Inject()(
         Future.successful(Redirect(routes.BusinessIdentificationController.showCreateNewAccount()))
       case _ =>
         val details = for {
-          initialDetails <- sessionStoreService.fetchInitialDetails
-          amlsDetails    <- sessionStoreService.fetchAMLSDetails
-        } yield (initialDetails, amlsDetails)
+          mayBeInitialDetails <- sessionStoreService.fetchInitialDetails
+          mayBeAmlsDetails    <- sessionStoreService.fetchAMLSDetails
+        } yield (mayBeInitialDetails, mayBeAmlsDetails)
 
         details.map {
           case (Some(initialDetails), mayBeAmlsDetails) =>
