@@ -19,13 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
-case class AMLSBody(code: String, name: String)
-
-object AMLSBody {
-  implicit val format = Json.format[AMLSBody]
-}
-
-case class AMLSDetails(amlsBody: AMLSBody, membershipNumber: String, expiryDate: LocalDate)
+case class AMLSDetails(amlsBodyName: String, membershipNumber: String, expiryDate: LocalDate)
 
 object AMLSDetails {
   implicit val format = Json.format[AMLSDetails]

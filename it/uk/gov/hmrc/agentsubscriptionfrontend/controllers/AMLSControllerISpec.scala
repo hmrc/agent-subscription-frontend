@@ -173,7 +173,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       await(sessionStoreService.fetchAMLSDetails) should not be empty
       val amlsDetails = await(sessionStoreService.fetchAMLSDetails).get
 
-      amlsDetails shouldBe AMLSDetails(AMLSBody("AAT","Association of AccountingTechnicians (AAT)"), "12345", expiryDate)
+      amlsDetails shouldBe AMLSDetails("Association of AccountingTechnicians (AAT)", "12345", expiryDate)
     }
 
     "show validation error when the form is submitted with empty amlsCode" in new Setup {
