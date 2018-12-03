@@ -24,14 +24,14 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, AMLSForm}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AMLSDetails
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
+import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 
 import scala.concurrent.Future
 
@@ -53,19 +53,24 @@ class AMLSController @Inject()(
   val showMoneyLaunderingComplianceForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withManuallyAssuredAgent {
-        sessionStoreService.fetchAMLSDetails.map {
-          case Some(amlsDetails) =>
-            val form: Map[String, String] =
-              Map(
-                "amlsCode"         -> amlsBodies.find(_._2 == amlsDetails.supervisoryBody).map(_._1).getOrElse(""),
-                "membershipNumber" -> amlsDetails.membershipNumber,
-                "expiry.day"       -> amlsDetails.membershipExpiresOn.getDayOfMonth.toString,
-                "expiry.month"     -> amlsDetails.membershipExpiresOn.getMonthValue.toString,
-                "expiry.year"      -> amlsDetails.membershipExpiresOn.getYear.toString
-              )
-            Ok(html.money_laundering_compliance(amlsForm(amlsBodies.keySet).bind(form), amlsBodies))
+        for {
+          cachedAmlsDetails <- sessionStoreService.fetchAMLSDetails
+          cachedGoBackUrl   <- sessionStoreService.fetchGoBackUrl
+        } yield {
+          (cachedAmlsDetails, cachedGoBackUrl) match {
+            case (Some(amlsDetails), mayBeGoBackUrl) =>
+              val form: Map[String, String] =
+                Map(
+                  "amlsCode"         -> amlsBodies.find(_._2 == amlsDetails.supervisoryBody).map(_._1).getOrElse(""),
+                  "membershipNumber" -> amlsDetails.membershipNumber,
+                  "expiry.day"       -> amlsDetails.membershipExpiresOn.getDayOfMonth.toString,
+                  "expiry.month"     -> amlsDetails.membershipExpiresOn.getMonthValue.toString,
+                  "expiry.year"      -> amlsDetails.membershipExpiresOn.getYear.toString
+                )
+              Ok(html.money_laundering_compliance(amlsForm(amlsBodies.keySet).bind(form), amlsBodies, mayBeGoBackUrl))
 
-          case None => Ok(html.money_laundering_compliance(amlsForm(amlsBodies.keySet), amlsBodies))
+            case (None, _) => Ok(html.money_laundering_compliance(amlsForm(amlsBodies.keySet), amlsBodies))
+          }
         }
       }
     }
@@ -77,7 +82,7 @@ class AMLSController @Inject()(
         amlsForm(amlsBodies.keys.toSet)
           .bindFromRequest()
           .fold(
-            formWithErrors => Future.successful(Ok(html.money_laundering_compliance(formWithErrors, amlsBodies))),
+            formWithErrors => toFuture(Ok(html.money_laundering_compliance(formWithErrors, amlsBodies))),
             validForm => {
               val amlsDetails = AMLSDetails(
                 amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code")),

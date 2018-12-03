@@ -21,7 +21,6 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
@@ -73,19 +72,22 @@ class SubscriptionController @Inject()(
           mayBeAmlsDetails    <- sessionStoreService.fetchAMLSDetails
         } yield (mayBeInitialDetails, mayBeAmlsDetails)
 
-        details.map {
+        details.flatMap {
           case (Some(initialDetails), mayBeAmlsDetails) =>
-            mark("Count-Subscription-CleanCreds-Success")
-            Ok(
-              html.check_answers(
-                registrationName = initialDetails.name,
-                address = initialDetails.businessAddress,
-                emailAddress = initialDetails.email,
-                mayBeAmlsDetails = mayBeAmlsDetails
-              ))
+            sessionStoreService
+              .cacheGoBackUrl(routes.SubscriptionController.showCheckAnswers().url)
+              .map { _ =>
+                mark("Count-Subscription-CleanCreds-Success")
+                Ok(
+                  html.check_answers(
+                    registrationName = initialDetails.name,
+                    address = initialDetails.businessAddress,
+                    emailAddress = initialDetails.email,
+                    mayBeAmlsDetails = mayBeAmlsDetails
+                  ))
+              }
 
           case (None, _) => sessionMissingRedirect("InitialDetails")
-
         }
     }
   }
