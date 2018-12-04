@@ -18,7 +18,6 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
-
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{AnyContent, _}
@@ -32,13 +31,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionReturnedHttpError, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{Monitoring, TaxIdentifierFormatters}
+import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 @Singleton
@@ -56,6 +55,7 @@ class SubscriptionController @Inject()(
     extends FrontendController with I18nSupport with AuthActions with SessionDataSupport with Monitoring {
 
   import SubscriptionControllerForms._
+  import commonRouting.withCleanCreds
 
   private val JourneyName: String = appConfig.journeyName
   private val blacklistedPostCodes: Set[String] = appConfig.blacklistedPostcodes
@@ -93,10 +93,8 @@ class SubscriptionController @Inject()(
   }
 
   val submitCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent {
-      case hasNonEmptyEnrolments(_) =>
-        toFuture(Redirect(routes.BusinessIdentificationController.showCreateNewAccount()))
-      case _ =>
+    withSubscribingAgent { agent =>
+      withCleanCreds(agent) {
         val details = for {
           initialDetails <- sessionStoreService.fetchInitialDetails
           amlsDetails    <- sessionStoreService.fetchAMLSDetails
@@ -119,6 +117,7 @@ class SubscriptionController @Inject()(
 
           case (None, _) => toFuture(sessionMissingRedirect("InitialDetails"))
         }
+      }
     }
   }
 
