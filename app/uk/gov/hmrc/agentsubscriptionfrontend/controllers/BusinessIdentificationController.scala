@@ -278,13 +278,19 @@ class BusinessIdentificationController @Inject()(
   val showBusinessEmailForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withInitialDetails { details =>
-        val form =
-          if (details.email.nonEmpty)
-            businessEmailForm.fill(BusinessEmail(details.email.get))
-          else businessEmailForm
-
-        Ok(html.business_email(form, hasInvalidEmail(details)))
+        Ok(
+          html.business_email(
+            details.email.fold(businessEmailForm)(email => businessEmailForm.fill(BusinessEmail(email))),
+            hasInvalidEmail(details)))
       }
+    }
+  }
+
+  val changeBusinessEmail: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      sessionStoreService
+        .cacheIsChangingAnswers(true)
+        .map(_ => Redirect(routes.BusinessIdentificationController.showBusinessEmailForm().url))
     }
   }
 
@@ -295,12 +301,7 @@ class BusinessIdentificationController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors => Ok(html.business_email(formWithErrors, hasInvalidEmail(details))),
-            validForm => {
-              val updatedDetails = details.copy(email = Some(validForm.email))
-              sessionStoreService
-                .cacheInitialDetails(updatedDetails)
-                .flatMap(_ => lookupNextPage(updatedDetails).map(Redirect))
-            }
+            validForm => updateInitialDetailsAndRedirect(details.copy(email = Some(validForm.email)))
           )
       }
     }
@@ -314,6 +315,14 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
+  val changeBusinessName: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      sessionStoreService
+        .cacheIsChangingAnswers(true)
+        .map(_ => Redirect(routes.BusinessIdentificationController.showBusinessNameForm().url))
+    }
+  }
+
   val submitBusinessNameForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withInitialDetails { details =>
@@ -321,14 +330,25 @@ class BusinessIdentificationController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors => Ok(html.business_name(formWithErrors, hasInvalidBusinessName(details))),
-            validForm => {
-              val updatedDetails = details.copy(name = validForm.name)
-              sessionStoreService
-                .cacheInitialDetails(updatedDetails)
-                .flatMap(_ => lookupNextPage(updatedDetails).map(Redirect))
-            }
+            validForm => updateInitialDetailsAndRedirect(details.copy(name = validForm.name))
           )
       }
+    }
+  }
+
+  private def updateInitialDetailsAndRedirect(updatedDetails: InitialDetails)(implicit hc: HeaderCarrier) = {
+
+    val result = for {
+      _               <- sessionStoreService.cacheInitialDetails(updatedDetails)
+      changingAnswers <- sessionStoreService.fetchIsChangingAnswers
+    } yield changingAnswers
+
+    result.flatMap[Result] {
+      case Some(true) =>
+        sessionStoreService
+          .cacheIsChangingAnswers(false)
+          .map(_ => Redirect(routes.SubscriptionController.showCheckAnswers()))
+      case _ => lookupNextPage(updatedDetails).map(Redirect)
     }
   }
 
