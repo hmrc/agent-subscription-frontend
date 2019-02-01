@@ -90,7 +90,6 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         sentEvent.detail("authProviderType") shouldBe "GovernmentGateway"
 
         sentEvent.tags.contains("Authorization") shouldBe false
-        sentEvent.detail("Authorization") shouldBe "dummy bearer token"
 
         sentEvent.tags("transactionName") shouldBe "agent-assurance"
         sentEvent.tags("path") shouldBe "/path"
