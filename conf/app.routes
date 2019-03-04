@@ -7,6 +7,7 @@ GET         /return-after-gg-creds-created        uk.gov.hmrc.agentsubscriptionf
 
 GET         /business-type                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showBusinessTypeForm
 POST        /business-type                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitBusinessTypeForm
+GET         /invalid-business-type                uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showInvalidBusinessType
 GET         /business-details                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showBusinessDetailsForm(businessType: uk.gov.hmrc.agentsubscriptionfrontend.models.IdentifyBusinessType)
 POST        /business-details                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitBusinessDetailsForm(businessType: uk.gov.hmrc.agentsubscriptionfrontend.models.IdentifyBusinessType)
 GET         /no-match                             uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showNoAgencyFound
@@ -54,6 +55,7 @@ GET         /redirect-to-sos                      uk.gov.hmrc.agentsubscriptionf
 GET         /redirect-to-asaccount                uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToASAccountPage
 GET         /start-survey                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.startSurvey
 GET         /sign-out                             uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.signOutWithContinueUrl
+GET         /finish-sign-out                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.signOut
 GET         /redirect-to-businesstype             uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToBusinessTypeForm
 
 GET         /cannot-create-account                uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.showCannotCreateAccount
