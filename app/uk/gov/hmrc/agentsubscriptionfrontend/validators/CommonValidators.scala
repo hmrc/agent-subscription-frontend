@@ -94,11 +94,12 @@ object CommonValidators {
 
   def membershipNumber: Mapping[String] = nonEmptyTextWithMsg("error.moneyLaunderingCompliance.membershipNumber.empty")
 
+  import play.api.data.Forms._
   def expiryDate: Mapping[LocalDate] =
     tuple(
-      "year"  -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.year.empty"),
-      "month" -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.month.empty"),
-      "day"   -> nonEmptyTextWithMsg("error.moneyLaunderingCompliance.day.empty")
+      "year"  -> text,
+      "month" -> text,
+      "day"   -> text
     ).verifying(
         checkOneAtATime(Seq(invalidExpiryDateConstraint, pastExpiryDateConstraint, withinYearExpiryDateConstraint)))
       .transform(
