@@ -82,7 +82,10 @@ class AMLSController @Inject()(
         amlsForm(amlsBodies.keys.toSet)
           .bindFromRequest()
           .fold(
-            formWithErrors => toFuture(Ok(html.money_laundering_compliance(formWithErrors, amlsBodies))),
+            formWithErrors => {
+              println(s"form with errors ${formWithErrors.errors.map(error => error.key)}")
+              toFuture(Ok(html.money_laundering_compliance(formWithErrors, amlsBodies)))
+            },
             validForm => {
               val amlsDetails = AMLSDetails(
                 amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code")),

@@ -28,6 +28,10 @@ if(amlsForm("expiry.day").hasErrors || amlsForm("expiry.month").hasErrors || aml
 "nojs-date-fields-error"
 }
 
+    @dateForm = @{
+        amlsForm.copy(errors = amlsForm.errors.filterNot(err => err == "day" ))
+    }
+
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(amlsForm) + Messages("moneyLaunderingCompliance.title"), bodyClasses = None) {
 
 

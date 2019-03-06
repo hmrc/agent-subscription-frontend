@@ -97,9 +97,9 @@ object CommonValidators {
   import play.api.data.Forms._
   def expiryDate: Mapping[LocalDate] =
     tuple(
-      "year"  -> text,
-      "month" -> text,
-      "day"   -> text
+      "year"  -> nonEmptyText,
+      "month" -> nonEmptyText,
+      "day"   -> nonEmptyText
     ).verifying(
         checkOneAtATime(Seq(invalidExpiryDateConstraint, pastExpiryDateConstraint, withinYearExpiryDateConstraint)))
       .transform(
