@@ -214,7 +214,6 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       await(sessionStoreService.fetchAMLSDetails) shouldBe empty
     }
 
-
     "show validation error when the form is submitted with empty membership number" in new Setup {
       implicit val requst = authenticatedRequest.withFormUrlEncodedBody("amlsCode" -> "AAT",
         "membershipNumber" -> "", "expiry.day" -> expiryDay, "expiry.month" -> expiryMonth,  "expiry.year" -> expiryYear)
