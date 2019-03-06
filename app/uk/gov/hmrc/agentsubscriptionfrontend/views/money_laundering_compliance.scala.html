@@ -23,14 +23,29 @@
 
 @(amlsForm: Form[AMLSForm], amlsBodies: Map[String, String], mayBeGoBackUrl: Option[String] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@noJsDateFieldsError = @{
-if(amlsForm("expiry.day").hasErrors || amlsForm("expiry.month").hasErrors || amlsForm("expiry.year").hasErrors)
-"nojs-date-fields-error"
+@DateFieldsError = @{
+    if(amlsForm("expiry.day").hasErrors || amlsForm("expiry.month").hasErrors || amlsForm("expiry.year").hasErrors)
+        "date-fields-error"
 }
 
-    @dateForm = @{
-        amlsForm.copy(errors = amlsForm.errors.filterNot(err => err == "day" ))
+@DayFieldError = @{
+    if(amlsForm("expiry.day").hasErrors)
+        "day-field-error"
     }
+
+@MonthFieldError = @{
+    if(amlsForm("expiry.month").hasErrors)
+        "month-field-error"
+}
+
+@YearFieldError = @{
+    if(amlsForm("expiry.year").hasErrors)
+        "year-field-error"
+}
+
+@dateForm = @{
+    amlsForm.copy(errors = amlsForm.errors.filterNot(err => err == "day" ))
+}
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(amlsForm) + Messages("moneyLaunderingCompliance.title"), bodyClasses = None) {
 
@@ -61,7 +76,6 @@ if(amlsForm("expiry.day").hasErrors || amlsForm("expiry.month").hasErrors || aml
                 )
             </div>
 
-
             <div class="form-group">
                 @input(
                 amlsForm("membershipNumber"),
@@ -72,7 +86,7 @@ if(amlsForm("expiry.day").hasErrors || amlsForm("expiry.month").hasErrors || aml
                 )
             </div>
 
-            <div class="@noJsDateFieldsError">
+            <div class="@DateFieldsError @DayFieldError @MonthFieldError @YearFieldError">
                 @dateFieldsFreeInlineLegend(
                 amlsForm,
                 "expiry",
