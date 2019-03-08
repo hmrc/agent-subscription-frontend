@@ -265,7 +265,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.submitMoneyLaunderingComplianceForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.day.month.empty")
-
+      result shouldNot containMessages("error.moneyLaunderingCompliance.day.empty", "error.moneyLaunderingCompliance.month.empty")
       await(sessionStoreService.fetchAMLSDetails) shouldBe empty
     }
 
@@ -276,7 +276,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.submitMoneyLaunderingComplianceForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.day.year.empty")
-
+      result shouldNot containMessages("error.moneyLaunderingCompliance.day.empty", "error.moneyLaunderingCompliance.year.empty")
       await(sessionStoreService.fetchAMLSDetails) shouldBe empty
     }
 
@@ -287,7 +287,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.submitMoneyLaunderingComplianceForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.month.year.empty")
-
+      result shouldNot containMessages("error.moneyLaunderingCompliance.month.empty", "error.moneyLaunderingCompliance.year.empty")
       await(sessionStoreService.fetchAMLSDetails) shouldBe empty
     }
 
