@@ -24,7 +24,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
-import uk.gov.hmrc.agentsubscriptionfrontend.models.AMLSDetails
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, AMLSForm}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
@@ -33,6 +33,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
+import scala.collection.immutable.Map
 import scala.concurrent.Future
 
 @Singleton
@@ -83,8 +84,8 @@ class AMLSController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors => {
-              println(s"form with errors ${formWithErrors.errors.map(error => error.key)}")
-              toFuture(Ok(html.money_laundering_compliance(formWithErrors, amlsBodies)))
+              val form = formWithRefinedErrors(formWithErrors)
+              toFuture(Ok(html.money_laundering_compliance(form, amlsBodies)))
             },
             validForm => {
               val amlsDetails = AMLSDetails(
@@ -115,4 +116,38 @@ class AMLSController @Inject()(
       }
     }
 
+  import play.api.data.{Form, FormError}
+
+  private def formWithRefinedErrors(form: Form[AMLSForm]): Form[AMLSForm] = {
+
+    val dateFieldErrors: Seq[FormError] = form.errors.filter(dateFields)
+
+    val refinedMessage = refineErrors(dateFieldErrors).getOrElse("")
+
+    dateFieldErrors match {
+      case Nil => form
+      case _ =>
+        form.copy(errors = form.errors.map { error =>
+          if (error.key.contains("expiry")) {
+            FormError(error.key, "", error.args)
+          } else error
+        }.toList :+ FormError(key = "expiry", message = refinedMessage, args = Seq()))
+    }
+  }
+
+  private val expiry = "expiry"
+  private val dateFields =
+    (error: FormError) => error.key == s"$expiry.day" || error.key == s"$expiry.month" || error.key == s"$expiry.year"
+
+  private def refineErrors(dateFieldErrors: Seq[FormError]): Option[String] =
+    dateFieldErrors.map(_.key).map(k => "expiry.".r.replaceFirstIn(k, "")).sorted match {
+      case List("day", "month", "year") => Some("error.moneyLaunderingCompliance.date.empty")
+      case List("day", "month")         => Some("error.moneyLaunderingCompliance.day.month.empty")
+      case List("day", "year")          => Some("error.moneyLaunderingCompliance.day.year.empty")
+      case List("day")                  => Some("error.moneyLaunderingCompliance.day.empty")
+      case List("month", "year")        => Some("error.moneyLaunderingCompliance.month.year.empty")
+      case List("month")                => Some("error.moneyLaunderingCompliance.month.empty")
+      case List("year")                 => Some("error.moneyLaunderingCompliance.year.empty")
+      case _                            => None
+    }
 }

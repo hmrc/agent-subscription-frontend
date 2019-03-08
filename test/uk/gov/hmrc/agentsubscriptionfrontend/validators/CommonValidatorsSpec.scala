@@ -671,21 +671,15 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
 
     "return validation error" when {
       "day not selected" in {
-        bind(year = "2000", month = "10", day = "").left.value should contain only FormError(
-          "",
-          "error.moneyLaunderingCompliance.date.invalid")
+        bind(year = "2000", month = "10", day = "").left.value should contain only FormError("day", "day")
       }
 
       "month not selected" in {
-        bind(year = "2000", month = "", day = "10").left.value should contain only FormError(
-          "",
-          "error.moneyLaunderingCompliance.date.invalid")
+        bind(year = "2000", month = "", day = "10").left.value should contain only FormError("month", "month")
       }
 
       "year not selected" in {
-        bind(year = "", month = "08", day = "10").left.value should contain only FormError(
-          "",
-          "error.moneyLaunderingCompliance.date.invalid")
+        bind(year = "", month = "08", day = "10").left.value should contain only FormError("year", "year")
       }
 
       "invalid date" in {

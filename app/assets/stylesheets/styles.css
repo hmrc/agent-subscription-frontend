@@ -181,26 +181,18 @@
     padding: .63158em .84211em .63158em .84211em;
 }
 
-.date-fields-error .error-notification {
-    position: absolute;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    height: 1px;
-    width: 1px;
-    margin: -1px;
-    padding: 0;
-    border: 0;
-}
-
-.day-field-error .form-group-day input {
+.day-field-error .form-group-day input,
+.date-field-errors-all .form-group-day input {
     border: 4px solid #b10e1e;
 }
 
-.month-field-error .form-group-month input {
+.month-field-error .form-group-month input,
+.date-field-errors-all .form-group-month input {
     border: 4px solid #b10e1e;
 }
 
-.year-field-error .form-group-year input {
+.year-field-error .form-group-year input,
+.date-field-errors-all .form-group-year input {
     border: 4px solid #b10e1e;
 }
 
