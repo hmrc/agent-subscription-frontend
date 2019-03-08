@@ -140,20 +140,6 @@ object CommonValidators {
     else Valid
   }
 
-  private def nonEmptyDateField(field: String): Constraint[String] = Constraint[String] { (o: String) =>
-    if (o == null) Invalid(ValidationError(s"error.moneyLaunderingCompliance.$field.empty"))
-    else if (o.trim.isEmpty) Invalid(ValidationError(s"error.moneyLaunderingCompliance.$field.empty"))
-    else
-      field match {
-        case "day" | "month" =>
-          Try {
-            o.trim.toInt
-          } match {
-            case Success(i) => if (i < 32) Valid else Invalid(ValidationError(s"error.moneyLaunderingCompliance."))
-          }
-      }
-  }
-
   // Same as play.api.data.validation.Constraints.maxLength but with a chance to use a custom message instead of error.maxLength
   private def maxLength(length: Int, messageKey: String = "error.maxLength"): Constraint[String] =
     Constraint[String]("constraint.maxLength", length) { o =>

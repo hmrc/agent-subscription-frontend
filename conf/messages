@@ -72,7 +72,6 @@ error.moneyLaunderingCompliance.day.empty=The date your membership expires must 
 error.moneyLaunderingCompliance.day.month.empty=The date your membership expires must include a day and a month
 error.moneyLaunderingCompliance.day.year.empty=The date your membership expires must include a day and a year
 error.moneyLaunderingCompliance.month.year.empty=The date your membership expires must include a month and a year
-error.moneyLaunderingCompliance.dateField.empty=The date your membership expires must include a {0}{1}
 error.moneyLaunderingCompliance.month.empty=The date your membership expires must include a month
 error.moneyLaunderingCompliance.year.empty=The date your membership expires must include a year
 error.moneyLaunderingCompliance.date.invalid=Enter a real date
