@@ -189,7 +189,7 @@
 }
 
 .date-fields-error .form-group.soft--ends {
-    border-left: 5px solid #df3034;
+    border-left: 5px solid #b10e1e;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     padding: .63158em .84211em .63158em .84211em;
@@ -304,16 +304,16 @@
     pointer-events: none
 }
 
+.autocomplete__option--odd {
+    background-color: #fafafa;
+}
+
 .autocomplete__option:first-of-type {
     border-top-width: 0
 }
 
 .autocomplete__option:last-of-type {
     border-bottom-width: 0
-}
-
-.autocomplete__wrapper {
-    position: relative
 }
 
 .autocomplete__option--focused, .autocomplete__option:hover {
@@ -347,10 +347,6 @@
 
 input[type="text"].autocomplete__input {
     width: 100%
-}
-
-.autocomplete__option--odd {
-    background-color: #fafafa;
 }
 
 #hasSaAgentCodeField {
