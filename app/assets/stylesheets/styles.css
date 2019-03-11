@@ -303,6 +303,10 @@
     pointer-events: none
 }
 
+.autocomplete__option--odd {
+    background-color: #fafafa;
+}
+
 .autocomplete__option:first-of-type {
     border-top-width: 0
 }
@@ -316,10 +320,6 @@
     border-color: #005ea5;
     color: #fff;
     outline: 0
-}
-
-.autocomplete__option--odd {
-    background-color: #fafafa;
 }
 
 .autocomplete__option--no-results {
