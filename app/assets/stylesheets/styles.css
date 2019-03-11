@@ -188,8 +188,8 @@
     padding: inherit;
 }
 
-.no-js .nojs-date-fields-error .form-group.soft--ends {
-    border-left: 3px solid #df3034;
+.date-fields-error .form-group.soft--ends {
+    border-left: 5px solid #df3034;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     padding: .63158em .84211em .63158em .84211em;
@@ -345,8 +345,8 @@ input[type="text"].autocomplete__input {
     width: 100%
 }
 
-.autocomplete-wrapper {
-    width: 50%
+.autocomplete__option--odd {
+    background-color: #fafafa;
 }
 
 #hasSaAgentCodeField {
