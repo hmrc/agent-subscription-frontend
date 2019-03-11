@@ -176,10 +176,9 @@
 }
 
 .form-field--error legend .heading-large {
-    margin-top: 0px !important;
+    margin-top: 0 !important;
 }
 
-/* no js style for dates */
 .no-js .form-date .form-field--error {
     border-left: none;
     padding: inherit;
@@ -304,10 +303,6 @@
     pointer-events: none
 }
 
-.autocomplete__option--odd {
-    background-color: #fafafa;
-}
-
 .autocomplete__option:first-of-type {
     border-top-width: 0
 }
@@ -321,6 +316,10 @@
     border-color: #005ea5;
     color: #fff;
     outline: 0
+}
+
+.autocomplete__option--odd {
+    background-color: #fafafa;
 }
 
 .autocomplete__option--no-results {
@@ -347,6 +346,10 @@
 
 input[type="text"].autocomplete__input {
     width: 100%
+}
+
+.autocomplete-wrapper {
+    width: 50%;
 }
 
 #hasSaAgentCodeField {
