@@ -354,4 +354,14 @@ input[type="text"].autocomplete__input {
     border-left-width: 5px;
 }
 
+.list-bullets {
+    padding-left: 20px;
+    list-style-type: disc;
+}
 
+@media (min-width: 641px){
+
+    .error__content {
+        width: 61.666667%;
+    }
+}
