@@ -126,7 +126,8 @@ class BusinessIdentificationController @Inject()(
           },
           validUtr => {
             sessionStoreService.cacheAgentSession(AgentSession(Some(validUtr))).map { _ =>
-              Redirect(routes.BusinessIdentificationController.showPostcodeForm())
+              //temporarily redirecting to business-details page instead of required /postcode page , so QA can continue the journey
+              Redirect(routes.BusinessIdentificationController.showBusinessDetailsForm(businessType))
             }
           }
         )

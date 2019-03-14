@@ -222,7 +222,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
         val result = await(controller.submitUtrForm(IdentifyBusinessType.SoleTrader)(request))
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showPostcodeForm().url)
+        redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showBusinessDetailsForm(IdentifyBusinessType.SoleTrader).url)
       }
 
     "handle form with errors and show the same again" in {
