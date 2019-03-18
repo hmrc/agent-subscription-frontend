@@ -163,7 +163,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
           "utr.title",
           s"utr.header.${businessType.key}"
         )
-        val utrTextKey = if(validBusinessTypeIdentifier.key == "limited_company" ) {"Corporation Tax"} else {"Self Assessment"}
+        val utrTextKey = if(businessType.key == "limited_company" ) {"Corporation Tax"} else {"Self Assessment"}
 
         result should containSubstrings(Messages("utr.p1", utrTextKey))
       }
