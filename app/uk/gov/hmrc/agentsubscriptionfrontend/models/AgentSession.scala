@@ -15,6 +15,7 @@
  */
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
+
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 

@@ -23,6 +23,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AgentSubscriptionFrontendEvent
+import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub
@@ -222,7 +223,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
         val result = await(controller.submitUtrForm()(request))
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showBusinessDetailsForm().url)
+        redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showPostcodeForm().url)
       }
 
      "redirect to /business-type if businessType missing in the session" in {
@@ -244,6 +245,83 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
         "utr.title",
         s"utr.header.${BusinessType.SoleTrader.key}",
         "error.sautr.invalid"
+      )
+    }
+  }
+
+  "showPostcodePage" should {
+
+    "display the page with correct content" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader))))
+
+      val result = await(controller.showPostcodeForm()(request))
+
+      result should containMessages(
+        "postcode.title"
+      )
+    }
+
+    "redirect to /business-type if businessType is not found in session" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+
+      val result = await(controller.showPostcodeForm()(request))
+
+      status(result) shouldBe 303
+
+      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showBusinessTypeForm().url)
+    }
+  }
+
+  "submitPostcodeForm" should {
+
+    "read the form and redirect to /national-insurance-number if businessType is SoleTrader or Partnership" in {
+      List(SoleTrader, Partnership).foreach { businessType =>
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> "AA12 1JN")
+        await(sessionStoreService.cacheAgentSession(AgentSession(Some(businessType))))
+
+        val result = await(controller.submitPostcodeForm()(request))
+
+        status(result) shouldBe 303
+
+        redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNationalInsuranceNumberPage().url)
+      }
+    }
+
+    "read the form and redirect to /company-registration-number if businessType is Limited Company or Llp" in {
+      List(LimitedCompany, Llp).foreach { businessType =>
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> "AA12 1JN")
+        await(sessionStoreService.cacheAgentSession(AgentSession(Some(businessType))))
+
+        val result = await(controller.submitPostcodeForm()(request))
+
+        status(result) shouldBe 303
+
+        redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showCompanyRegNumberPage().url)
+      }
+    }
+
+    "redirect to /business-type if businessType is not found in session" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> "AA12 1JN")
+
+      val result = await(controller.submitPostcodeForm()(request))
+
+      status(result) shouldBe 303
+
+      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showBusinessTypeForm().url)
+    }
+
+    "handle for with invalid postcodes" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> "sdsds")
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader))))
+
+      val result = await(controller.submitPostcodeForm()(request))
+
+      status(result) shouldBe 200
+
+      result should containMessages(
+        "postcode.title",
+        "error.postcode.invalid"
       )
     }
   }
@@ -360,7 +438,7 @@ trait BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       val responseBody = bodyOf(result)
       responseBody should include(htmlEscapedMessage("businessDetails.title"))
       responseBody should include(htmlEscapedMessage("error.sautr.blank"))
-      responseBody should include("Enter a registered business postcode")
+      responseBody should include("Enter a valid postcode, like AA1 1AA")
       noMetricExpectedAtThisPoint()
     }
 

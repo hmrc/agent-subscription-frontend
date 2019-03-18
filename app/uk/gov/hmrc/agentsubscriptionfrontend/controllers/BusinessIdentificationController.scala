@@ -28,7 +28,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector, AgentSubscriptionConnector}
 import uk.gov.hmrc.agentsubscriptionfrontend.models
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AssuranceResults._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.Invalid
+import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Invalid, LimitedCompany, Llp, Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.ValidVariantsTaxPayerOptionForm._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.ValidationResult.FailureReason._
@@ -137,8 +137,7 @@ class BusinessIdentificationController @Inject()(
                   sessionStoreService
                     .cacheAgentSession(existingSession.copy(utr = Some(validUtr)))
                     .map { _ =>
-                      //temporarily redirecting to business-details page instead of required /postcode page , so QA can continue the journey
-                      Redirect(routes.BusinessIdentificationController.showBusinessDetailsForm())
+                      Redirect(routes.BusinessIdentificationController.showPostcodeForm())
                     }
                 case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
               }
@@ -152,12 +151,65 @@ class BusinessIdentificationController @Inject()(
   def showPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       withMaybeContinueUrlCached {
-        Ok(html.postcode(postcodeForm))
+        withValidBusinessType { _ =>
+          Ok(html.postcode(postcodeForm))
+        }
       }
     }
   }
 
-  def submitPostcodeForm(): Action[AnyContent] = ???
+  def submitPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { implicit agent =>
+      withMaybeContinueUrlCached {
+        withValidBusinessType { businessType =>
+          postcodeForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors => Ok(html.postcode(formWithErrors)),
+              validPostcode => {
+                sessionStoreService.fetchAgentSession.flatMap {
+                  case Some(existingSession) =>
+                    sessionStoreService
+                      .cacheAgentSession(existingSession.copy(postcode = Some(validPostcode)))
+                      .map { _ =>
+                        if (businessType == SoleTrader || businessType == Partnership) {
+                          Redirect(routes.BusinessIdentificationController.showNationalInsuranceNumberPage())
+                        } else if (businessType == LimitedCompany || businessType == Llp) {
+                          Redirect(routes.BusinessIdentificationController.showCompanyRegNumberPage())
+                        } else {
+                          Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+                        }
+                      }
+                  case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+                }
+              }
+            )
+        }
+      }
+    }
+  }
+
+  def showNationalInsuranceNumberPage(): Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { implicit agent =>
+      withMaybeContinueUrlCached {
+        //temporarily redirecting to business-details page until this page is implemented
+        Redirect(routes.BusinessIdentificationController.showBusinessDetailsForm())
+      }
+    }
+  }
+
+  def submitNationalInsuranceNumberPage: Action[AnyContent] = ???
+
+  def showCompanyRegNumberPage(): Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { implicit agent =>
+      withMaybeContinueUrlCached {
+        //temporarily redirecting to business-details page until this page is implemented
+        Redirect(routes.BusinessIdentificationController.showBusinessDetailsForm())
+      }
+    }
+  }
+
+  def submitCompanyRegNumberPage: Action[AnyContent] = ???
 
   def showInvalidBusinessType: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
