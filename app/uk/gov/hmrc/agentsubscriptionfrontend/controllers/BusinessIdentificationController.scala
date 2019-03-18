@@ -210,11 +210,10 @@ class BusinessIdentificationController @Inject()(
                   sessionStoreService
                     .cacheAgentSession(existingSession.copy(nino = Some(validNino)))
                     .map { _ =>
-                      Redirect(routes.BusinessIdentificationController.showDateOfBirthForm())
+                      Redirect(routes.DateOfBirthController.showDateOfBirthForm())
                     }
                 case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
               }
-
             }
           )
       }
@@ -231,10 +230,6 @@ class BusinessIdentificationController @Inject()(
   }
 
   def submitCompanyRegNumberForm: Action[AnyContent] = ???
-
-  def showDateOfBirthForm(): Action[AnyContent] = ???
-
-  def submitDateOfBirthForm(): Action[AnyContent] = ???
 
   def showInvalidBusinessType: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
