@@ -60,7 +60,6 @@ object DateFieldHelper {
                 Right(date)
               }
             }
-
           }
       }
 
