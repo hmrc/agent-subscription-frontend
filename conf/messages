@@ -149,15 +149,12 @@ nino.hint=It''s on your National Insurance card, benefit letter, payslip or P60.
 #Date of Birth page
 date-of-birth.title=What is your date of birth?
 date-of-birth.hint=For example, 31 3 1980
-date-of-birth.blank=Enter your date of birth
-date-of-birth.invalid=Enter a real date of birth
-date-of-birth.day.empty=Date of birth must include a day
+date-of-birth.empty=Enter your date of birth
+date-of-birth.invalid=Date of birth is not valid
 date-of-birth.day.invalid=Date of birth must include a valid day
 date-of-birth.day-month.empty=Date of birth must include a day and month
 date-of-birth.day-year.empty=Date of birth must include a day and year
-date-of-birth.month.empty=Date of birth must include a month
 date-of-birth.month.invalid=Date of birth must include a valid month
-date-of-birth.year.empty=Date of birth must include a year
 date-of-birth.year.invalid=Date of birth must include a valid year
 date-of-birth.month-year.empty=Date of birth must include a month and year
 date-of-birth.must.be.past=Date of birth must be in the past

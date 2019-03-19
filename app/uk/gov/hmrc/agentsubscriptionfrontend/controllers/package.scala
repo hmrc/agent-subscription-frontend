@@ -19,7 +19,6 @@ package uk.gov.hmrc.agentsubscriptionfrontend
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateFieldHelper._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters._
@@ -58,11 +57,6 @@ package object controllers {
     def ninoForm: Form[Nino] =
       Form[Nino](
         mapping("nino" -> clientDetailsNino)(input => Nino(input))(nino => Some(nino.value))
-      )
-
-    def dateOfBirthForm: Form[DateOfBirth] =
-      Form[DateOfBirth](
-        mapping("dob" -> of(dateOfBirthFormatter))(input => DateOfBirth(input))(dob => Some(dob.value))
       )
 
     val confirmBusinessForm: Form[ConfirmBusiness] =

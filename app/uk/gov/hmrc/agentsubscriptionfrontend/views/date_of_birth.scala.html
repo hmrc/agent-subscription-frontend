@@ -21,11 +21,29 @@
 
 @(dobForm: Form[DateOfBirth])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@noJsDateFieldsError = @{
-   if(dobForm("dob.day").hasErrors || dobForm("dob.month").hasErrors || dobForm("dob.year").hasErrors)
-     "nojs-date-fields-error"
-}
+    @DayFieldError = @{
+        if(dobForm("dob.day").hasErrors)
+        "day-field-error"
+    }
 
+    @MonthFieldError = @{
+        if(dobForm("dob.month").hasErrors)
+        "month-field-error"
+    }
+
+    @YearFieldError = @{
+        if(dobForm("dob.year").hasErrors)
+        "year-field-error"
+    }
+
+    @DateFieldErrorsAll = @{
+        if(dobForm("dob").hasErrors && !dobForm("dob.day").hasErrors && !dobForm("dob.month").hasErrors && !dobForm("dob.year").hasErrors)
+        "date-field-errors-all"
+    }
+
+    @dateFormWithRefinedErrors = @{
+        dobForm.copy(errors = dobForm.errors.filterNot(error => error.message == "" || !error.key.contains("dob")))
+    }
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(dobForm) + Messages("date-of-birth.title"), bodyClasses = None) {
 
@@ -40,12 +58,16 @@
 
    @form(action = routes.DateOfBirthController.submitDateOfBirthForm(), 'class -> "form js-form") {
 
-       <div class="@noJsDateFieldsError">
-        @dateFieldsFreeInlineLegend(dobForm, "dob",
-           '_legendSpanClass -> "form-label",
-           '_legendClass -> "flush--ends"
-        )
-       </div>
+    <fieldset>
+        <div class="@DayFieldError @MonthFieldError @YearFieldError @DateFieldErrorsAll">
+            @dateFieldsFreeInlineLegend(
+            dateFormWithRefinedErrors,
+            "dob",
+            '_legendSpanClass -> "form-label-bold",
+            '_legendClass -> "flush--ends"
+            )
+        </div>
+    </fieldset>
 
        <div class="form-field">
         <button class="button" type="submit" id="submit-date-of-birth">@Messages("button.continue")</button>

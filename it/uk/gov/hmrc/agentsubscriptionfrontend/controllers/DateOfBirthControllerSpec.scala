@@ -68,7 +68,40 @@ class DateOfBirthControllerSpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 200
-      result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.day.invalid")
+      result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.invalid")
+    }
+
+    "display consolidated error when month and year are empty" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("dob.day" -> "1")
+      sessionStoreService.currentSession.agentSession = Some(agentSession)
+
+      val result = await(controller.submitDateOfBirthForm()(request))
+
+      status(result) shouldBe 200
+      result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.month-year.empty")
+    }
+
+    "display consolidated error when day and year are empty" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("dob.month" -> "1")
+      sessionStoreService.currentSession.agentSession = Some(agentSession)
+
+      val result = await(controller.submitDateOfBirthForm()(request))
+
+      status(result) shouldBe 200
+      result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.day-year.empty")
+    }
+
+    "display consolidated error when day and month are empty" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("dob.year" -> "1980")
+      sessionStoreService.currentSession.agentSession = Some(agentSession)
+
+      val result = await(controller.submitDateOfBirthForm()(request))
+
+      status(result) shouldBe 200
+      result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.day-month.empty")
     }
   }
 
