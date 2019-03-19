@@ -23,9 +23,9 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.dateOfBirthForm
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
-import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
+import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.ExecutionContext
 
@@ -56,11 +56,7 @@ class DateOfBirthController @Inject()(
           validDob => {
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
-                sessionStoreService
-                  .cacheAgentSession(existingSession.copy(dateOfBirth = Some(validDob)))
-                  .map { _ =>
-                    Redirect(routes.RegisteredForVatController.showRegisteredForVatForm())
-                  }
+                updateSessionAndRedirectToNextPage(existingSession.copy(dateOfBirth = Some(validDob)))
               case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
             }
           }
