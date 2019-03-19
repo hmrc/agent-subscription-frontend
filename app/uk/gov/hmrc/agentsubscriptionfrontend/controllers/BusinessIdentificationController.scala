@@ -61,8 +61,7 @@ class BusinessIdentificationController @Inject()(
   auditService: AuditService,
   override implicit val appConfig: AppConfig,
   override implicit val ec: ExecutionContext,
-  val metrics: Metrics,
-  commonRouting: CommonRouting)
+  val metrics: Metrics)
     extends FrontendController with I18nSupport with AuthActions with SessionDataSupport with Monitoring
     with SessionBehaviour {
 
@@ -101,7 +100,7 @@ class BusinessIdentificationController @Inject()(
             if (validatedBusinessType == Invalid)
               Redirect(routes.BusinessIdentificationController.showInvalidBusinessType())
             else
-            updateSessionAndRedirectToNextPage(AgentSession(businessType = Some(validatedBusinessType)))
+              updateSessionAndRedirectToNextPage(AgentSession(businessType = Some(validatedBusinessType)))
           }
         )
     }
@@ -109,10 +108,10 @@ class BusinessIdentificationController @Inject()(
 
   def showUtrForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-        withValidBusinessType { businessType =>
-          Ok(html.utr_details(utrForm(businessType.key), businessType))
-        }
+      withValidBusinessType { businessType =>
+        Ok(html.utr_details(utrForm(businessType.key), businessType))
       }
+    }
   }
 
   def submitUtrForm(): Action[AnyContent] = Action.async { implicit request =>
@@ -139,58 +138,58 @@ class BusinessIdentificationController @Inject()(
 
   def showPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-        withValidBusinessType { _ =>
-          Ok(html.postcode(postcodeForm))
-        }
+      withValidBusinessType { _ =>
+        Ok(html.postcode(postcodeForm))
+      }
     }
   }
 
   def submitPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-        withValidBusinessType { _ =>
-          postcodeForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors => Ok(html.postcode(formWithErrors)),
-              validPostcode => {
-                sessionStoreService.fetchAgentSession.flatMap {
-                  case Some(existingSession) =>
-                    updateSessionAndRedirectToNextPage(existingSession.copy(postcode = Some(validPostcode)))
-                  case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
-                }
+      withValidBusinessType { _ =>
+        postcodeForm
+          .bindFromRequest()
+          .fold(
+            formWithErrors => Ok(html.postcode(formWithErrors)),
+            validPostcode => {
+              sessionStoreService.fetchAgentSession.flatMap {
+                case Some(existingSession) =>
+                  updateSessionAndRedirectToNextPage(existingSession.copy(postcode = Some(validPostcode)))
+                case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
               }
-            )
-        }
+            }
+          )
+      }
     }
   }
 
   def showNationalInsuranceNumberForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-        Ok(html.national_insurance_number(ninoForm))
-      }
+      Ok(html.national_insurance_number(ninoForm))
+    }
   }
 
   def submitNationalInsuranceNumberForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-        ninoForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Ok(html.national_insurance_number(formWithErrors)),
-            validNino => {
-              sessionStoreService.fetchAgentSession.flatMap {
-                case Some(existingSession) =>
-                  updateSessionAndRedirectToNextPage(existingSession.copy(nino = Some(validNino)))
-                case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
-              }
+      ninoForm
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Ok(html.national_insurance_number(formWithErrors)),
+          validNino => {
+            sessionStoreService.fetchAgentSession.flatMap {
+              case Some(existingSession) =>
+                updateSessionAndRedirectToNextPage(existingSession.copy(nino = Some(validNino)))
+              case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
             }
-          )
+          }
+        )
     }
   }
 
   def showCompanyRegNumberForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-        //temporarily redirecting to business-details page until this page is implemented
-        Redirect(routes.BusinessIdentificationController.showBusinessDetailsForm())
+      //temporarily redirecting to business-details page until this page is implemented
+      Redirect(routes.BusinessIdentificationController.showBusinessDetailsForm())
     }
   }
 

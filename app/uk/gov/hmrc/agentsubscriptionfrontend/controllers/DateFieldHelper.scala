@@ -56,9 +56,7 @@ object DateFieldHelper {
                 Left(Seq(FormError("dob", "date-of-birth.must.be.past")))
               } else if (date.isBefore(LocalDate.now().withYear(1900))) {
                 Left(Seq(FormError("dob", "date-of-birth.is.not.real")))
-              }
-
-              else {
+              } else {
                 Right(date)
               }
             }
@@ -98,12 +96,7 @@ object DateFieldHelper {
 
   private def validYear(year: String) =
     Try(year.toInt) match {
-      case Success(p) =>
-        if (p < 1900) {
-          false
-        } else {
-          true
-        }
+      case Success(p) => year.length == 4
       case Failure(_) => false
     }
 }

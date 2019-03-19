@@ -29,7 +29,8 @@ trait SessionBehaviour extends CommonRouting {
   val sessionStoreService: SessionStoreService
   implicit val ec: ExecutionContext
 
-  protected def withValidBusinessType(body: BusinessType => Future[Result])(implicit hc: HeaderCarrier): Future[Result] =
+  protected def withValidBusinessType(body: BusinessType => Future[Result])(
+    implicit hc: HeaderCarrier): Future[Result] =
     sessionStoreService.fetchAgentSession.flatMap {
       case Some(agentSession) =>
         agentSession.businessType match {
@@ -40,6 +41,7 @@ trait SessionBehaviour extends CommonRouting {
       case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
     }
 
-  protected def updateSessionAndRedirectToNextPage(updatedSession: AgentSession)(implicit hc: HeaderCarrier) =
+  protected def updateSessionAndRedirectToNextPage(updatedSession: AgentSession)(
+    implicit hc: HeaderCarrier): Future[Result] =
     sessionStoreService.cacheAgentSession(updatedSession).map(_ => Redirect(redirectToNextPage(updatedSession)))
 }
