@@ -120,6 +120,15 @@ package object controllers {
             submittedLinkClients => Seq(Yes, No).contains(submittedLinkClients.autoMapping)))
   }
 
+  object CompanyRegistrationForms {
+
+    def crnForm: Form[CompanyRegistrationNumber] =
+      Form[CompanyRegistrationNumber](
+        mapping("crn" -> crn)(input => CompanyRegistrationNumber(input))(crn => Some(crn.value))
+      )
+
+  }
+
   object AMLSForms {
 
     def amlsForm(bodies: Set[String]): Form[AMLSForm] =

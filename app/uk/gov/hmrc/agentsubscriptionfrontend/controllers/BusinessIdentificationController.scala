@@ -175,7 +175,7 @@ class BusinessIdentificationController @Inject()(
                         if (businessType == SoleTrader || businessType == Partnership) {
                           Redirect(routes.BusinessIdentificationController.showNationalInsuranceNumberForm())
                         } else if (businessType == LimitedCompany || businessType == Llp) {
-                          Redirect(routes.BusinessIdentificationController.showCompanyRegNumberForm())
+                          Redirect(routes.CompanyRegistrationController.showCompanyRegNumberForm())
                         } else {
                           Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
                         }
@@ -220,17 +220,6 @@ class BusinessIdentificationController @Inject()(
       }
     }
   }
-
-  def showCompanyRegNumberForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      withMaybeContinueUrlCached {
-        //temporarily redirecting to business-details page until this page is implemented
-        Redirect(routes.BusinessIdentificationController.showBusinessDetailsForm())
-      }
-    }
-  }
-
-  def submitCompanyRegNumberForm: Action[AnyContent] = ???
 
   def showDateOfBirthForm(): Action[AnyContent] = ???
 
