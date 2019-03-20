@@ -32,7 +32,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
       val result = await(controller.submitCompanyRegNumberForm()(request))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.RegisteredForVatController.showRegisteredForVatForm().url)
+      redirectLocation(result) shouldBe Some(routes.VatDetailsController.showRegisteredForVatForm().url)
 
       val crn = CompanyRegistrationNumber("12345678")
 
