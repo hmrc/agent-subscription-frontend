@@ -62,19 +62,28 @@ trait CommonRouting {
     agentSession.businessType match {
       case Some(SoleTrader | Partnership) => continueFromNationalInsurancePage(agentSession)
       case Some(LimitedCompany | Llp)     => continueFromCompanyRegistrationPage(agentSession)
+      case _                              => routes.BusinessIdentificationController.showBusinessTypeForm()
     }
 
   private def continueFromNationalInsurancePage(agentSession: AgentSession) =
     agentSession match {
       case _ if agentSession.nino.isEmpty        => routes.BusinessIdentificationController.showNationalInsuranceNumberForm()
       case _ if agentSession.dateOfBirth.isEmpty => routes.DateOfBirthController.showDateOfBirthForm()
-      case _ if agentSession.companyRegistrationNumber.isEmpty =>
-        routes.RegisteredForVatController.showRegisteredForVatForm()
+      case _                                     => continueFromRegisteredForVatPage(agentSession)
     }
 
   private def continueFromCompanyRegistrationPage(agentSession: AgentSession) =
     agentSession match {
       case _ if agentSession.companyRegistrationNumber.isEmpty =>
         routes.BusinessIdentificationController.showCompanyRegNumberForm()
+      case _ => continueFromRegisteredForVatPage(agentSession)
+    }
+
+  private def continueFromRegisteredForVatPage(agentSession: AgentSession) =
+    agentSession match {
+      case _ if agentSession.registeredForVat.isEmpty => routes.VatDetailsController.showRegisteredForVatForm()
+      case _ if agentSession.registeredForVat.contains(true) && agentSession.vatDetails.isEmpty =>
+        routes.VatDetailsController.showVatDeatilsForm()
+      case _ => routes.BusinessIdentificationController.showConfirmBusinessForm()
     }
 }
