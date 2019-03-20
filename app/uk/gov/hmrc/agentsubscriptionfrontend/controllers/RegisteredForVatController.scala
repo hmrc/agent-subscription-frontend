@@ -22,14 +22,13 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
-import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
-import CompanyRegistrationForms._
+import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 
 import scala.concurrent.ExecutionContext
+
 @Singleton
-class CompanyRegistrationController @Inject()(
+class RegisteredForVatController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector,
   val sessionStoreService: SessionStoreService)(
@@ -40,29 +39,9 @@ class CompanyRegistrationController @Inject()(
     extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionDataSupport
     with SessionBehaviour {
 
-  def showCompanyRegNumberForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
-      Ok(html.company_registration(crnForm))
-    }
+  def showRegisteredForVatForm: Action[AnyContent] = Action.async { implicit request =>
+    Ok("registered for vat")
   }
 
-  def submitCompanyRegNumberForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      withValidBusinessType { _ =>
-        crnForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Ok(html.company_registration(formWithErrors)),
-            validCrn => {
-              sessionStoreService.fetchAgentSession.flatMap {
-                case Some(existingSession) =>
-                  updateSessionAndRedirectToNextPage(existingSession.copy(companyRegistrationNumber = Some(validCrn)))
-                case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
-              }
-            }
-          )
-      }
-    }
-  }
-
+  def submitRegisteredForVatForm: Action[AnyContent] = ???
 }

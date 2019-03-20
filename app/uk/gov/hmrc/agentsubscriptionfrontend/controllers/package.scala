@@ -121,12 +121,10 @@ package object controllers {
   }
 
   object CompanyRegistrationForms {
-
-    def crnForm: Form[CompanyRegistrationNumber] =
+    val crnForm: Form[CompanyRegistrationNumber] =
       Form[CompanyRegistrationNumber](
         mapping("crn" -> crn)(input => CompanyRegistrationNumber(input))(crn => Some(crn.value))
       )
-
   }
 
   object AMLSForms {
@@ -173,7 +171,5 @@ package object controllers {
         case List("year")                 => Some("error.moneyLaunderingCompliance.year.empty")
         case _                            => None
       }
-
   }
-
 }

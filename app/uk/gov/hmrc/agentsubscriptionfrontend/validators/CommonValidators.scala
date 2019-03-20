@@ -45,7 +45,7 @@ object CommonValidators {
   private val UtrMaxLength = 10
   private val SaAgentCodeMaxLength = 6
   private val crnLength = 8
-  private val crnRegex = "[A-Z]{2}[0-9]{6}"
+  private val crnRegex = "[A-Z]{2}[0-9]{6}|[0-9]{8}"
 
   def saAgentCode = text verifying saAgentCodeConstraint
 
@@ -197,9 +197,9 @@ object CommonValidators {
       case i: Invalid => i
       case Valid =>
         fieldValue match {
-          case value if value.length != crnLength => Invalid(ValidationError("error.crn.length"))
-          case value if !value.matches(crnRegex)  => Invalid(ValidationError("error.crn.regex"))
-          case _                                  => Valid
+          case value if value.length != crnLength || !value.matches(crnRegex) =>
+            Invalid(ValidationError("error.crn.invalid"))
+          case _ => Valid
         }
     }
   }
@@ -244,7 +244,7 @@ object CommonValidators {
       }
   }
 
-  private def checkOneAtATime[A](constraints: Seq[Constraint[A]]): Constraint[A] = Constraint[A] { fieldValue: A =>
+  def checkOneAtATime[A](constraints: Seq[Constraint[A]]): Constraint[A] = Constraint[A] { fieldValue: A =>
     @tailrec
     def loop(c: Seq[Constraint[A]]): ValidationResult =
       c match {
