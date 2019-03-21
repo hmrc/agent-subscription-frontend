@@ -27,7 +27,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AssuranceResults._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.Invalid
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.ValidVariantsTaxPayerOptionForm._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.ValidationResult.FailureReason._
@@ -69,38 +68,6 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  val redirectToBusinessType: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
-      continueUrlActions.withMaybeContinueUrlCached {
-        Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
-      }
-    }
-  }
-
-  def showBusinessTypeForm: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      continueUrlActions.withMaybeContinueUrlCached {
-        Ok(html.business_type(businessTypeForm))
-      }
-    }
-  }
-
-  def submitBusinessTypeForm: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      businessTypeForm
-        .bindFromRequest()
-        .fold(
-          formWithErrors => Ok(html.business_type(formWithErrors)),
-          validatedBusinessType => {
-            if (validatedBusinessType == Invalid)
-              Redirect(routes.BusinessIdentificationController.showInvalidBusinessType())
-            else
-              updateSessionAndRedirectToNextPage(AgentSession(businessType = Some(validatedBusinessType)))
-          }
-        )
-    }
-  }
-
   def showUtrForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       withValidBusinessType { businessType =>
@@ -122,7 +89,7 @@ class BusinessIdentificationController @Inject()(
               sessionStoreService.fetchAgentSession.flatMap {
                 case Some(existingSession) =>
                   updateSessionAndRedirectToNextPage(existingSession.copy(utr = Some(validUtr)))
-                case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+                case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
               }
 
             }
@@ -150,7 +117,7 @@ class BusinessIdentificationController @Inject()(
               sessionStoreService.fetchAgentSession.flatMap {
                 case Some(existingSession) =>
                   updateSessionAndRedirectToNextPage(existingSession.copy(postcode = Some(validPostcode)))
-                case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+                case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
               }
             }
           )
@@ -174,7 +141,7 @@ class BusinessIdentificationController @Inject()(
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
                 updateSessionAndRedirectToNextPage(existingSession.copy(nino = Some(validNino)))
-              case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+              case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
             }
           }
         )
@@ -189,12 +156,6 @@ class BusinessIdentificationController @Inject()(
   }
 
   def submitCompanyRegNumberForm: Action[AnyContent] = ???
-
-  def showInvalidBusinessType: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      Ok(html.invalid_business_type())
-    }
-  }
 
   def showBusinessDetailsForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>

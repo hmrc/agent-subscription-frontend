@@ -41,116 +41,6 @@ class BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
   lazy val controller: BusinessIdentificationController = app.injector.instanceOf[BusinessIdentificationController]
 
-  "showBusinessTypeForm (GET /business-type)" should {
-    behave like anAgentAffinityGroupOnlyEndpoint(controller.showBusinessTypeForm(_))
-
-    behave like aPageTakingContinueUrlAndCachingInSessionStore(
-      controller.showBusinessTypeForm(_),
-      userIsAuthenticated(subscribingCleanAgentWithoutEnrolments))
-
-    "contain page titles and header content" in {
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      val result = await(controller.showBusinessTypeForm(request))
-
-      result should containMessages(
-        "businessType.title",
-        "businessType.progressive.title",
-        "businessType.progressive.content.p1")
-    }
-
-    "contain radio options for Sole Trader, Limited Company, Partnership, and LLP" in {
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      val result = await(controller.showBusinessTypeForm(request))
-      val doc = Jsoup.parse(bodyOf(result))
-
-      // Check form's radio inputs have correct values
-      doc.getElementById("businessType-sole_trader").`val`() shouldBe "sole_trader"
-      doc.getElementById("businessType-limited_company").`val`() shouldBe "limited_company"
-      doc.getElementById("businessType-partnership").`val`() shouldBe "partnership"
-      doc.getElementById("businessType-llp").`val`() shouldBe "llp"
-      doc.getElementById("businessType-invalid").`val`() shouldBe "invalid"
-    }
-
-    "contain a link to sign out" in {
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      val result = await(controller.showBusinessTypeForm(request))
-      val doc = Jsoup.parse(bodyOf(result))
-      val signOutLink = doc.getElementById("sign-out")
-      signOutLink.attr("href") shouldBe routes.SignedOutController.signOutWithContinueUrl.url
-      signOutLink.text() shouldBe htmlEscapedMessage("businessType.progressive.content.link")
-    }
-  }
-
-  "submitBusinessTypeForm (POST /business-type)" when {
-    behave like anAgentAffinityGroupOnlyEndpoint(controller.submitBusinessTypeForm(_))
-
-    validBusinessTypes.foreach { validBusinessTypeIdentifier =>
-      s"redirect to /business-details when valid businessTypeIdentifier: $validBusinessTypeIdentifier" in {
-        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          .withFormUrlEncodedBody("businessType" -> validBusinessTypeIdentifier.key)
-
-        val result = await(controller.submitBusinessTypeForm(request))
-        result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController
-          .showUtrForm()
-          .url
-      }
-    }
-
-    "choice is missing" should {
-      "return 200 and redisplay the /business-type page with an error message for missing choice" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-        val result = await(controller.submitBusinessTypeForm(request))
-        result should containMessages("businessType.error.no-radio-selected")
-      }
-    }
-
-    "redirect to /invalid-business-type page" when {
-      "businessTypeIdentifier is unidentified" in {
-        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          .withFormUrlEncodedBody("businessType" -> "unCateredBusinessTypeIdentifier")
-
-        await(controller.submitBusinessTypeForm(request)).header
-          .headers(LOCATION) shouldBe routes.BusinessIdentificationController.showInvalidBusinessType().url
-      }
-
-    "businessTypeIdentifier invalid" in {
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-        .withFormUrlEncodedBody("businessType" -> "invalid")
-
-      await(controller.submitBusinessTypeForm(request)).header
-        .headers(LOCATION) shouldBe routes.BusinessIdentificationController.showInvalidBusinessType().url
-      }
-    }
-  }
-
-  "redirectToBusinessType" should {
-    behave like anAgentAffinityGroupOnlyEndpoint(controller.redirectToBusinessType(_))
-
-    behave like aPageTakingContinueUrlAndCachingInSessionStore(
-      controller.redirectToBusinessType(_),
-      userIsAuthenticated(subscribingCleanAgentWithoutEnrolments),
-      expectedStatusCode = 303)
-
-    "redirect to /business-type" in {
-      val result = await(controller.redirectToBusinessType(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
-
-      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showBusinessTypeForm().url)
-    }
-  }
-
-  "showInvalidBusinessType" should {
-    "display invalid business type page" in {
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-
-      val result = await(controller.showInvalidBusinessType(request))
-
-      result should containMessages("invalid.businessType.title",
-        "invalid.businessType.p1", "invalid.businessType.l1",
-        "invalid.businessType.l2", "invalid.businessType.l3",
-        "invalid.businessType.l4", "invalid.businessType.button")
-    }
-  }
-
   "showUtrFormPage" should {
     validBusinessTypes.foreach { businessType =>
       s"display the page as expected when is business type is $businessType" in {
@@ -186,7 +76,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
        val result = await(controller.submitUtrForm()(request))
 
        status(result) shouldBe 303
-       redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showBusinessTypeForm().url)
+       redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
      }
 
     "handle form with errors and show the same again" in {
@@ -224,7 +114,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
       status(result) shouldBe 303
 
-      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showBusinessTypeForm().url)
+      redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
     }
   }
 
@@ -267,7 +157,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
       status(result) shouldBe 303
 
-      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showBusinessTypeForm().url)
+      redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
     }
 
     "handle for with invalid postcodes" in {
@@ -371,7 +261,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
         val result = await(controller.showBusinessDetailsForm()(request))
         status(result) shouldBe 200
 
-        containSubstrings(routes.BusinessIdentificationController.showBusinessTypeForm().url)
+        containSubstrings(routes.BusinessTypeController.showBusinessTypeForm().url)
         containMessages("back.button", "businessDetails.title", s"businessDetails.label.utr.${businessType.key}")
       }
     }
@@ -669,7 +559,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
       sessionStoreService.currentSession.agentSession = Some(AgentSession(Some(BusinessType.SoleTrader)))
 
       redirectLocation(await(controller.showConfirmBusinessForm(request)))
-        .get shouldBe routes.BusinessIdentificationController.showBusinessTypeForm().url
+        .get shouldBe routes.BusinessTypeController.showBusinessTypeForm().url
     }
 
     "show a back button which allows the user to return to the business-details page" in {
@@ -939,7 +829,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
         val result = await(controller.submitConfirmBusinessForm(request))
 
-        result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController
+        result.header.headers(LOCATION) shouldBe routes.BusinessTypeController
           .showBusinessTypeForm()
           .url
       }

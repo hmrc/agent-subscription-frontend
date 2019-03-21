@@ -65,7 +65,7 @@ class DateOfBirthController @Inject()(
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
                 updateSessionAndRedirectToNextPage(existingSession.copy(dateOfBirth = Some(validDob)))
-              case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+              case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
             }
           }
         )

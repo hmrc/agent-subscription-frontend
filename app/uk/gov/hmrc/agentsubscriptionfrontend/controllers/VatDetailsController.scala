@@ -73,7 +73,7 @@ class VatDetailsController @Inject()(
                 case Some(existingSession) =>
                   updateSessionAndRedirectToNextPage(
                     existingSession.copy(registeredForVat = Some(choice.confirm == Yes)))
-                case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+                case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
               }
             }
           )
@@ -97,7 +97,7 @@ class VatDetailsController @Inject()(
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
                 updateSessionAndRedirectToNextPage(existingSession.copy(vatDetails = Some(validForm)))
-              case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+              case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
             }
 
           }

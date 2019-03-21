@@ -113,7 +113,7 @@ class StartController @Inject()(
                                                   handleAutoMapping(chainedSessionDetails.wasEligibleForMapping))
                                             }
           } yield continuedSubscriptionResponse
-        case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+        case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
       }
     }
   }

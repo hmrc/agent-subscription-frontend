@@ -17,19 +17,21 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.businessTypeForm
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
+import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.Invalid
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
-import CompanyRegistrationForms._
 
 import scala.concurrent.ExecutionContext
-@Singleton
-class CompanyRegistrationController @Inject()(
+
+class BusinessTypeController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector,
   val sessionStoreService: SessionStoreService)(
@@ -40,28 +42,33 @@ class CompanyRegistrationController @Inject()(
     extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionDataSupport
     with SessionBehaviour {
 
-  def showCompanyRegNumberForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
-      Ok(html.company_registration(crnForm))
+  def showBusinessTypeForm: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { implicit agent =>
+      continueUrlActions.withMaybeContinueUrlCached {
+        Ok(html.business_type(businessTypeForm))
+      }
     }
   }
 
-  def submitCompanyRegNumberForm(): Action[AnyContent] = Action.async { implicit request =>
+  def submitBusinessTypeForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-      withValidBusinessType { _ =>
-        crnForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Ok(html.company_registration(formWithErrors)),
-            validCrn => {
-              sessionStoreService.fetchAgentSession.flatMap {
-                case Some(existingSession) =>
-                  updateSessionAndRedirectToNextPage(existingSession.copy(companyRegistrationNumber = Some(validCrn)))
-                case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
-              }
-            }
-          )
-      }
+      businessTypeForm
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Ok(html.business_type(formWithErrors)),
+          validatedBusinessType => {
+            if (validatedBusinessType == Invalid)
+              Redirect(routes.BusinessTypeController.showInvalidBusinessType())
+            else
+              updateSessionAndRedirectToNextPage(AgentSession(businessType = Some(validatedBusinessType)))
+          }
+        )
+    }
+  }
+
+  def showInvalidBusinessType: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { implicit agent =>
+      Ok(html.invalid_business_type())
     }
   }
 
