@@ -68,33 +68,6 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def showPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      withValidBusinessType { _ =>
-        Ok(html.postcode(postcodeForm))
-      }
-    }
-  }
-
-  def submitPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      withValidBusinessType { _ =>
-        postcodeForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Ok(html.postcode(formWithErrors)),
-            validPostcode => {
-              sessionStoreService.fetchAgentSession.flatMap {
-                case Some(existingSession) =>
-                  updateSessionAndRedirectToNextPage(existingSession.copy(postcode = Some(validPostcode)))
-                case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
-              }
-            }
-          )
-      }
-    }
-  }
-
   def showNationalInsuranceNumberForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       Ok(html.national_insurance_number(ninoForm))

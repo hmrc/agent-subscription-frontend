@@ -54,7 +54,7 @@ trait CommonRouting {
     agentSession match {
       case _ if agentSession.businessType.isEmpty => routes.BusinessTypeController.showBusinessTypeForm()
       case _ if agentSession.utr.isEmpty          => routes.UtrController.showUtrForm()
-      case _ if agentSession.postcode.isEmpty     => routes.BusinessIdentificationController.showPostcodeForm()
+      case _ if agentSession.postcode.isEmpty     => routes.PostcodeController.showPostcodeForm()
       case _ if agentSession.postcode.isDefined   => redirectAfterPostcode(agentSession)
     }
 

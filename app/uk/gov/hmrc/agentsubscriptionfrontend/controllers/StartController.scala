@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import cats.data.OptionT
 import cats.instances.future._
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
@@ -36,6 +36,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class StartController @Inject()(
   override val authConnector: AuthConnector,
   chainedSessionDetailsRepository: ChainedSessionDetailsRepository,

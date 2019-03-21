@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.{businessTypeForm, utrForm}
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.postcodeForm
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
@@ -29,7 +29,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class UtrController @Inject()(
+class PostcodeController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector,
   val sessionStoreService: SessionStoreService)(
@@ -40,38 +40,33 @@ class UtrController @Inject()(
     extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionDataSupport
     with SessionBehaviour {
 
-  def showUtrForm(): Action[AnyContent] = Action.async { implicit request =>
+  def showPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       sessionStoreService.fetchAgentSession.flatMap {
         case Some(agentSession) =>
-          (agentSession.businessType, agentSession.utr) match {
-            case (Some(businessType), Some(utr)) =>
-              Ok(html.utr_details(utrForm(businessType.key).fill(utr), businessType))
-            case (Some(businessType), None) =>
-              Ok(html.utr_details(utrForm(businessType.key), businessType))
-            case _ => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+          agentSession.postcode match {
+            case Some(postcode) =>
+              Ok(html.postcode(postcodeForm.fill(postcode)))
+            case None => Ok(html.postcode(postcodeForm))
           }
         case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
       }
     }
   }
 
-  def submitUtrForm(): Action[AnyContent] = Action.async { implicit request =>
+  def submitPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-      withValidBusinessType { businessType =>
-        utrForm(businessType.key)
+      withValidBusinessType { _ =>
+        postcodeForm
           .bindFromRequest()
           .fold(
-            formWithErrors => {
-              Ok(html.utr_details(formWithErrors, businessType))
-            },
-            validUtr => {
+            formWithErrors => Ok(html.postcode(formWithErrors)),
+            validPostcode => {
               sessionStoreService.fetchAgentSession.flatMap {
                 case Some(existingSession) =>
-                  updateSessionAndRedirectToNextPage(existingSession.copy(utr = Some(validUtr)))
+                  updateSessionAndRedirectToNextPage(existingSession.copy(postcode = Some(validPostcode)))
                 case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
               }
-
             }
           )
       }

@@ -11,8 +11,8 @@ POST        /business-type                        uk.gov.hmrc.agentsubscriptionf
 GET         /unique-taxpayer-reference            uk.gov.hmrc.agentsubscriptionfrontend.controllers.UtrController.showUtrForm()
 POST        /unique-taxpayer-reference            uk.gov.hmrc.agentsubscriptionfrontend.controllers.UtrController.submitUtrForm()
 
-GET         /postcode                             uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showPostcodeForm
-POST        /postcode                             uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitPostcodeForm
+GET         /postcode                             uk.gov.hmrc.agentsubscriptionfrontend.controllers.PostcodeController.showPostcodeForm
+POST        /postcode                             uk.gov.hmrc.agentsubscriptionfrontend.controllers.PostcodeController.submitPostcodeForm
 
 GET         /national-insurance-number            uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showNationalInsuranceNumberForm
 POST        /national-insurance-number            uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitNationalInsuranceNumberForm
