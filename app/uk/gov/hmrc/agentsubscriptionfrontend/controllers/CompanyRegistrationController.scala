@@ -26,6 +26,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 import CompanyRegistrationForms._
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController.dateOfBirthForm
 
 import scala.concurrent.ExecutionContext
 @Singleton
@@ -42,7 +43,15 @@ class CompanyRegistrationController @Inject()(
 
   def showCompanyRegNumberForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Ok(html.company_registration(crnForm))
+      sessionStoreService.fetchAgentSession.flatMap {
+        case Some(agentSession) =>
+          agentSession.companyRegistrationNumber match {
+            case Some(crn) =>
+              Ok(html.company_registration(crnForm.fill(crn)))
+            case None =>  Ok(html.company_registration(crnForm))
+          }
+        case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+      }
     }
   }
 

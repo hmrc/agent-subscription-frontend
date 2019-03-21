@@ -7,6 +7,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.{DateOfBirth, VatDetails}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class VatDetailsControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
