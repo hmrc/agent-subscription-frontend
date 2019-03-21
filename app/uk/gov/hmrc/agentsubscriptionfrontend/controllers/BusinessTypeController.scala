@@ -45,7 +45,15 @@ class BusinessTypeController @Inject()(
   def showBusinessTypeForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       continueUrlActions.withMaybeContinueUrlCached {
-        Ok(html.business_type(businessTypeForm))
+        sessionStoreService.fetchAgentSession.flatMap {
+          case Some(agentSession) =>
+            agentSession.businessType match {
+              case Some(businessType) =>
+                Ok(html.business_type(businessTypeForm.fill(businessType)))
+              case None => Ok(html.business_type(businessTypeForm))
+            }
+          case None => Ok(html.business_type(businessTypeForm))
+        }
       }
     }
   }

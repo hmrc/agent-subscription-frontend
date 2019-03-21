@@ -1,10 +1,13 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import org.jsoup.Jsoup
 import play.api.test.Helpers.LOCATION
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
+import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.validBusinessTypes
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
@@ -48,6 +51,18 @@ class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec 
       signOutLink.attr("href") shouldBe routes.SignedOutController.signOutWithContinueUrl.url
       signOutLink.text() shouldBe htmlEscapedMessage("businessType.progressive.content.link")
     }
+
+    "pre-populate the business type if one is already stored in the session" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader))))
+
+      val result = await(controller.showBusinessTypeForm()(request))
+
+      val doc = Jsoup.parse(bodyOf(result))
+      val link = doc.getElementById("businessType-sole_trader")
+      link.attr("checked") shouldBe "checked"
+    }
+
   }
 
   "submitBusinessTypeForm (POST /business-type)" when {
