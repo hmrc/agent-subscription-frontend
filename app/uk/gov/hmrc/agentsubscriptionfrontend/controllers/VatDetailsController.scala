@@ -28,6 +28,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentmtdidentifiers.model.Vrn
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.postcodeForm
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.{formWithRefinedErrors, registeredForVatForm, vatDetailsForm}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
@@ -55,8 +56,18 @@ class VatDetailsController @Inject()(
 
   def showRegisteredForVatForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      withValidBusinessType { businessType =>
-        Ok(html.registered_for_vat(registeredForVatForm, getBackLink(businessType)))
+      sessionStoreService.fetchAgentSession.flatMap {
+        case Some(agentSession) =>
+          (agentSession.businessType, agentSession.registeredForVat) match {
+            case (Some(businessType), Some(registeredForVat)) =>
+              val rfv = RegisteredForVat(RadioInputAnswer.apply(registeredForVat.toString))
+              Ok(html.registered_for_vat(registeredForVatForm.fill(rfv), getBackLink(businessType)))
+            case (Some(businessType), None) =>
+              Ok(html.registered_for_vat(registeredForVatForm, getBackLink(businessType)))
+
+            case _ => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+          }
+        case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
       }
     }
   }
@@ -72,7 +83,7 @@ class VatDetailsController @Inject()(
               sessionStoreService.fetchAgentSession.flatMap {
                 case Some(existingSession) =>
                   updateSessionAndRedirectToNextPage(
-                    existingSession.copy(registeredForVat = Some(choice.confirm == Yes)))
+                    existingSession.copy(registeredForVat = Some(choice.confirm.toString)))
                 case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
               }
             }
@@ -83,7 +94,15 @@ class VatDetailsController @Inject()(
 
   def showVatDetailsForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Ok(html.vat_details(vatDetailsForm))
+      sessionStoreService.fetchAgentSession.flatMap {
+        case Some(agentSession) =>
+          agentSession.vatDetails match {
+            case Some(vatDetails) =>
+              Ok(html.vat_details(vatDetailsForm.fill(vatDetails)))
+            case None => Ok(html.vat_details(vatDetailsForm))
+          }
+        case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+      }
     }
   }
 

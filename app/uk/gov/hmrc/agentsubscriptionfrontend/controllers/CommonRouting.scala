@@ -82,7 +82,7 @@ trait CommonRouting {
   private def continueToRegisteredForVatPage(agentSession: AgentSession) =
     agentSession match {
       case _ if agentSession.registeredForVat.isEmpty => routes.VatDetailsController.showRegisteredForVatForm()
-      case _ if agentSession.registeredForVat.contains(true) && agentSession.vatDetails.isEmpty =>
+      case _ if agentSession.registeredForVat.contains("Yes") && agentSession.vatDetails.isEmpty =>
         routes.VatDetailsController.showVatDetailsForm()
       case _ => routes.BusinessIdentificationController.showConfirmBusinessForm()
     }

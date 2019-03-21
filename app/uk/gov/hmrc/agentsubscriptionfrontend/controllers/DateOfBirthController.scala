@@ -57,7 +57,7 @@ class DateOfBirthController @Inject()(
           agentSession.dateOfBirth match {
             case Some(dob) =>
               Ok(html.date_of_birth(dateOfBirthForm.fill(dob)))
-            case None =>  Ok(html.date_of_birth(dateOfBirthForm))
+            case None => Ok(html.date_of_birth(dateOfBirthForm))
           }
         case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
       }

@@ -48,7 +48,7 @@ class CompanyRegistrationController @Inject()(
           agentSession.companyRegistrationNumber match {
             case Some(crn) =>
               Ok(html.company_registration(crnForm.fill(crn)))
-            case None =>  Ok(html.company_registration(crnForm))
+            case None => Ok(html.company_registration(crnForm))
           }
         case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
       }
