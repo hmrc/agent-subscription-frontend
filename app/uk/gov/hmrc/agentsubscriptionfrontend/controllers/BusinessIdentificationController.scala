@@ -68,36 +68,6 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def showUtrForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      withValidBusinessType { businessType =>
-        Ok(html.utr_details(utrForm(businessType.key), businessType))
-      }
-    }
-  }
-
-  def submitUtrForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      withValidBusinessType { businessType =>
-        utrForm(businessType.key)
-          .bindFromRequest()
-          .fold(
-            formWithErrors => {
-              Ok(html.utr_details(formWithErrors, businessType))
-            },
-            validUtr => {
-              sessionStoreService.fetchAgentSession.flatMap {
-                case Some(existingSession) =>
-                  updateSessionAndRedirectToNextPage(existingSession.copy(utr = Some(validUtr)))
-                case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
-              }
-
-            }
-          )
-      }
-    }
-  }
-
   def showPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       withValidBusinessType { _ =>
@@ -147,15 +117,6 @@ class BusinessIdentificationController @Inject()(
         )
     }
   }
-
-  def showCompanyRegNumberForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      //temporarily redirecting to business-details page until this page is implemented
-      Redirect(routes.BusinessIdentificationController.showBusinessDetailsForm())
-    }
-  }
-
-  def submitCompanyRegNumberForm: Action[AnyContent] = ???
 
   def showBusinessDetailsForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>

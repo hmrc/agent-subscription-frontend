@@ -24,7 +24,7 @@
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title =  error_prefix(postcodeForm) + Messages("postcode.title"), bodyClasses = None) {
 
-    <a href="@routes.BusinessIdentificationController.showUtrForm()" class="link-back">@Messages("button.back")</a>
+    <a href="@routes.UtrController.showUtrForm()" class="link-back">@Messages("button.back")</a>
 
     @if(postcodeForm.hasErrors) {
         @errorSummary(Messages("error.summary.heading"), postcodeForm, Seq.empty, Some("postcode"))

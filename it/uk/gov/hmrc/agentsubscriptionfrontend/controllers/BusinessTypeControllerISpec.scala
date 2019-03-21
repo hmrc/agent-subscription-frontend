@@ -74,9 +74,7 @@ class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec 
           .withFormUrlEncodedBody("businessType" -> validBusinessTypeIdentifier.key)
 
         val result = await(controller.submitBusinessTypeForm(request))
-        result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController
-          .showUtrForm()
-          .url
+        result.header.headers(LOCATION) shouldBe routes.UtrController.showUtrForm().url
       }
     }
 

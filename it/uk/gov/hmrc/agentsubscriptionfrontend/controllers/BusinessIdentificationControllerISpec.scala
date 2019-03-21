@@ -41,59 +41,6 @@ class BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
   lazy val controller: BusinessIdentificationController = app.injector.instanceOf[BusinessIdentificationController]
 
-  "showUtrFormPage" should {
-    validBusinessTypes.foreach { businessType =>
-      s"display the page as expected when is business type is $businessType" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-        await(sessionStoreService.cacheAgentSession(AgentSession(Some(businessType))))
-
-        val result = await(controller.showUtrForm()(request))
-
-        result should containMessages(
-          "utr.title",
-          s"utr.header.${businessType.key}"
-        )
-        val utrTextKey = if(businessType.key == "limited_company" ) {"Corporation Tax"} else {"Self Assessment"}
-
-        result should containSubstrings(Messages("utr.p1", utrTextKey))
-      }
-    }
-  }
-
-  "submitUtrFormPage" should {
-      "display the page as expected when the form is valid and redirect to /postcode page" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("utr" -> validUtr.value)
-        sessionStoreService.currentSession.agentSession = Some(AgentSession(Some(BusinessType.SoleTrader)))
-
-        val result = await(controller.submitUtrForm()(request))
-
-        status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showPostcodeForm().url)
-      }
-
-     "redirect to /business-type if businessType missing in the session" in {
-       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("utr" -> validUtr.value)
-       val result = await(controller.submitUtrForm()(request))
-
-       status(result) shouldBe 303
-       redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
-     }
-
-    "handle form with errors and show the same again" in {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("utr" -> "invalidUtr")
-      sessionStoreService.currentSession.agentSession = Some(AgentSession(Some(BusinessType.SoleTrader)))
-
-      val result = await(controller.submitUtrForm()(request))
-
-      status(result) shouldBe 200
-      result should containMessages(
-        "utr.title",
-        s"utr.header.${BusinessType.SoleTrader.key}",
-        "error.sautr.invalid"
-      )
-    }
-  }
-
   "showPostcodePage" should {
 
     "display the page with correct content" in {
