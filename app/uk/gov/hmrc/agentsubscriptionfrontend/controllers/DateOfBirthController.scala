@@ -26,6 +26,7 @@ import play.api.data.{Form, FormError, Mapping}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.ninoForm
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DateOfBirth
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
@@ -51,7 +52,15 @@ class DateOfBirthController @Inject()(
 
   def showDateOfBirthForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Ok(html.date_of_birth(dateOfBirthForm))
+      sessionStoreService.fetchAgentSession.flatMap {
+        case Some(agentSession) =>
+          agentSession.dateOfBirth match {
+            case Some(dob) =>
+              Ok(html.date_of_birth(dateOfBirthForm.fill(dob)))
+            case None =>  Ok(html.date_of_birth(dateOfBirthForm))
+          }
+        case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+      }
     }
   }
 
