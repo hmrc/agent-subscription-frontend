@@ -68,7 +68,12 @@ class BusinessTypeController @Inject()(
             if (validatedBusinessType == Invalid)
               Redirect(routes.BusinessTypeController.showInvalidBusinessType())
             else
-              updateSessionAndRedirectToNextPage(AgentSession(businessType = Some(validatedBusinessType)))
+              sessionStoreService.fetchAgentSession.flatMap {
+                case Some(existingSession) =>
+                  updateSessionAndRedirectToNextPage(existingSession.copy(businessType = Some(validatedBusinessType)))
+                case None =>
+                  updateSessionAndRedirectToNextPage(AgentSession(businessType = Some(validatedBusinessType)))
+              }
           }
         )
     }

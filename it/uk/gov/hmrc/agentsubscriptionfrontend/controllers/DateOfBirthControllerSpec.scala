@@ -81,7 +81,7 @@ class DateOfBirthControllerSpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 200
-      result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.is.not.real")
+      result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.must.be.later.than.1900")
     }
 
     "handle forms with date-of-birth fields as non-digits" in {

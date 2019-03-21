@@ -190,7 +190,7 @@ object VatDetailsController {
       Try {
         val date = LocalDate.of(year.toInt, month.toInt, day.toInt)
         if (date.isBefore(LocalDate.of(1900, 1, 1)))
-          Invalid(ValidationError("vat-details.regDate.is.not.real"))
+          Invalid(ValidationError("vat-details.regDate.must.be.later.than.1900"))
         else
           Valid
       } match {

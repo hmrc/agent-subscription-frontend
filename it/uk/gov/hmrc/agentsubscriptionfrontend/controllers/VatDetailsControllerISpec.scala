@@ -172,7 +172,7 @@ class VatDetailsControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.submitVatDetailsForm()(request))
       status(result) shouldBe 200
 
-      result should containMessages("vat-details.regDate.is.not.real")
+      result should containMessages("vat-details.regDate.must.be.later.than.1900")
 
     }
 

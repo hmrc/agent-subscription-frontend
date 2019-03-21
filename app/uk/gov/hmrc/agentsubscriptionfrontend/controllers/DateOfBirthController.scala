@@ -26,7 +26,6 @@ import play.api.data.{Form, FormError, Mapping}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.ninoForm
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DateOfBirth
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
@@ -69,7 +68,7 @@ class DateOfBirthController @Inject()(
       dateOfBirthForm
         .bindFromRequest()
         .fold(
-          formWithErrors => Ok(html.date_of_birth(DateOfBirthController.formWithRefinedErrors(formWithErrors))),
+          formWithErrors => Ok(html.date_of_birth(formWithRefinedErrors(formWithErrors))),
           validDob => {
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
@@ -106,7 +105,7 @@ object DateOfBirthController {
       Try {
         val dob = LocalDate.of(year.toInt, month.toInt, day.toInt)
         if (dob.isBefore(LocalDate.of(1900, 1, 1)))
-          Invalid(ValidationError("date-of-birth.is.not.real"))
+          Invalid(ValidationError("date-of-birth.must.be.later.than.1900"))
         else
           Valid
       } match {
