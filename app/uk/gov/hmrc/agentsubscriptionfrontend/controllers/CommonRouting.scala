@@ -67,7 +67,7 @@ trait CommonRouting {
 
   private def continueToNationalInsurancePage(agentSession: AgentSession) =
     agentSession match {
-      case _ if agentSession.nino.isEmpty        => routes.BusinessIdentificationController.showNationalInsuranceNumberForm()
+      case _ if agentSession.nino.isEmpty        => routes.NationalInsuranceController.showNationalInsuranceNumberForm()
       case _ if agentSession.dateOfBirth.isEmpty => routes.DateOfBirthController.showDateOfBirthForm()
       case _                                     => continueToRegisteredForVatPage(agentSession)
     }

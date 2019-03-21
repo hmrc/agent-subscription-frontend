@@ -33,7 +33,7 @@
     <h1 class="heading-xlarge margin-bottom-20">@Messages(s"nino.title")</h1>
     <p class="form-hint">@Messages("nino.hint")</p>
 
-    @form(action = routes.BusinessIdentificationController.submitNationalInsuranceNumberForm(), 'class -> "form js-form") {
+    @form(action = routes.NationalInsuranceController.submitNationalInsuranceNumberForm(), 'class -> "form js-form") {
 
         <div class="form-group">
             @input(

@@ -60,7 +60,7 @@ class PostcodeControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
         status(result) shouldBe 303
 
-        redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNationalInsuranceNumberForm().url)
+        redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
 
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(postcode = Some(Postcode("AA12 1JN")), nino = None))
       }

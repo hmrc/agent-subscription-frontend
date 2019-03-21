@@ -41,47 +41,6 @@ class BusinessIdentificationControllerISpec extends BaseISpec with SessionDataMi
 
   lazy val controller: BusinessIdentificationController = app.injector.instanceOf[BusinessIdentificationController]
 
-  "show /national-insurance-number form" should {
-    "display the form as expected" in {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader))))
-
-      val result = await(controller.showNationalInsuranceNumberForm()(request))
-
-      result should containMessages(
-        "nino.title",
-        "nino.hint"
-      )
-    }
-  }
-
-  "submit /national-insurance-number form" should {
-    "read the form and redirect to /date-of-birth page" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("nino" -> "AE123456C")
-        sessionStoreService.currentSession.agentSession = Some(agentSession)
-
-        val result = await(controller.submitNationalInsuranceNumberForm()(request))
-
-        status(result) shouldBe 303
-
-        redirectLocation(result) shouldBe Some(routes.DateOfBirthController.showDateOfBirthForm().url)
-    }
-
-    "handle forms with invalid nino" in {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("nino" -> "AE123456C_BLAH")
-
-      val result = await(controller.submitNationalInsuranceNumberForm()(request))
-
-      status(result) shouldBe 200
-
-      result should containMessages(
-        "nino.title",
-        "nino.hint",
-        "error.nino.invalid"
-      )
-    }
-  }
-
   "showBusinessDetailsForm" should {
     val showBusinessDetailsRequest = controller.showBusinessDetailsForm()
 

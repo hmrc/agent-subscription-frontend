@@ -68,29 +68,6 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def showNationalInsuranceNumberForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      Ok(html.national_insurance_number(ninoForm))
-    }
-  }
-
-  def submitNationalInsuranceNumberForm: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
-      ninoForm
-        .bindFromRequest()
-        .fold(
-          formWithErrors => Ok(html.national_insurance_number(formWithErrors)),
-          validNino => {
-            sessionStoreService.fetchAgentSession.flatMap {
-              case Some(existingSession) =>
-                updateSessionAndRedirectToNextPage(existingSession.copy(nino = Some(validNino)))
-              case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
-            }
-          }
-        )
-    }
-  }
-
   def showBusinessDetailsForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       continueUrlActions.withMaybeContinueUrlCached {

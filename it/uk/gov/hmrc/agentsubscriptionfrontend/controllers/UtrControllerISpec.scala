@@ -55,7 +55,7 @@ class UtrControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.submitUtrForm()(request))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showPostcodeForm().url)
+      redirectLocation(result) shouldBe Some(routes.PostcodeController.showPostcodeForm().url)
     }
 
     "redirect to /business-type if businessType missing in the session" in {
