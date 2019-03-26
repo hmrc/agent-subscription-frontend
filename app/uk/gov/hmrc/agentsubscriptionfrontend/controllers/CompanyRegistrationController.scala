@@ -73,6 +73,8 @@ class CompanyRegistrationController @Inject()(
                       else
                         Redirect(routes.BusinessIdentificationController.showNoAgencyFound())
                   }
+                case Some(existingSession) if existingSession.utr.isEmpty =>
+                  Redirect(routes.UtrController.showUtrForm())
                 case _ => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
               }
             }
