@@ -78,6 +78,20 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
       sessionStoreService.currentSession.agentSession shouldBe Some(agentSessionForLimitedCompany.copy(companyRegistrationNumber = None))
     }
 
+    "redirect to /check-agency-status page utr is not available in agent session" in {
+      val crn = CompanyRegistrationNumber("12345678")
+
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("crn" -> "12345678")
+
+      sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany.copy(utr = None))
+
+      val result = await(controller.submitCompanyRegNumberForm()(request))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
+    }
+
     "handle forms with empty field" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("crn" -> "")
