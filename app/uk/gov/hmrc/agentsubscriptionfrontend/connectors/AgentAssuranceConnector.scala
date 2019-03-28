@@ -23,14 +23,17 @@ import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Named, Singleton}
 import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AssuranceCheckCitizenDetails
 import uk.gov.hmrc.domain.{SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUrl: URL, http: HttpGet, metrics: Metrics)(
-  implicit ec: ExecutionContext)
+class AgentAssuranceConnector @Inject()(
+  @Named("agent-assurance-baseUrl") baseUrl: URL,
+  http: HttpGet with HttpPost,
+  metrics: Metrics)(implicit ec: ExecutionContext)
     extends HttpAPIMonitor {
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
@@ -88,6 +91,22 @@ class AgentAssuranceConnector @Inject()(@Named("agent-assurance-baseUrl") baseUr
             throw new IllegalStateException(
               s"unable to reach $baseUrl/$endpoint. Manually assured agents list might not have been configured")
           }
+        }
+    }
+
+  def citizenDetails(assuranceCheckCitizenDetails: AssuranceCheckCitizenDetails)(
+    implicit hc: HeaderCarrier): Future[Boolean] =
+    monitor(s"ConsumedAPI-AgentAssurance-getCitizenDetails-POST") {
+      val endpoint = s"/agent-assurance/citizen-details"
+      http
+        .POST[AssuranceCheckCitizenDetails, HttpResponse](
+          new URL(baseUrl, endpoint).toString,
+          assuranceCheckCitizenDetails)
+        .map { response =>
+          (200 until 300) contains response.status
+        }
+        .recover {
+          case e: BadRequestException => false
         }
     }
 

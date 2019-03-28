@@ -1,13 +1,16 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import java.net.URL
+import java.time.LocalDate
 
 import com.kenshoo.play.metrics.Metrics
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AssuranceCheckCitizenDetails, DateOfBirth}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, MetricTestSupport}
 import uk.gov.hmrc.domain.{Nino, SaAgentReference}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -18,7 +21,7 @@ class AgentAssuranceConnectorISpec extends BaseISpec with MetricTestSupport {
   private lazy val connector =
     new AgentAssuranceConnector(
       new URL(s"http://localhost:$wireMockPort"),
-      app.injector.instanceOf[HttpGet],
+      app.injector.instanceOf[HttpGet with HttpPost],
       app.injector.instanceOf[Metrics])
 
   "getRegistration PAYE" should {
@@ -138,6 +141,22 @@ class AgentAssuranceConnectorISpec extends BaseISpec with MetricTestSupport {
 
         await(connector.isManuallyAssuredAgent(utr))
       }
+    }
+  }
+
+  "check citizen details" should {
+    val nino = Nino("XX121212B")
+    val dob = DateOfBirth(LocalDate.now)
+    val acd = AssuranceCheckCitizenDetails(nino,dob)
+
+    "return true if nino and dob match" in {
+      givenAGoodCombinationNinoAndDobMatchCitizenDetails(nino, dob)
+      await(connector.citizenDetails(acd)) shouldBe true
+    }
+
+    "return false if nino and dob do not match" in {
+      givenABadCombinationNinoAndDobDoNotMatch(nino, dob)
+      await(connector.citizenDetails(acd)) shouldBe false
     }
   }
 

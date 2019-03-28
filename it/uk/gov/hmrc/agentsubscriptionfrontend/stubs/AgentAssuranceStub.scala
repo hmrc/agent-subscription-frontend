@@ -2,6 +2,9 @@ package uk.gov.hmrc.agentsubscriptionfrontend.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import play.libs.Json
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AssuranceCheckCitizenDetails, DateOfBirth}
+import uk.gov.hmrc.domain.Nino
 
 object AgentAssuranceStub {
   def checkForAcceptableNumberOfClientsUrl(service: String) = s"/agent-assurance/acceptableNumberOfClients/service/$service"
@@ -102,4 +105,33 @@ object AgentAssuranceStub {
         s"/agent-assurance/activeCesaRelationship/$ninoOrUtr/$valueOfNinoOrUtr/saAgentReference/$saAgentReference"))
         .willReturn(aResponse().withStatus(404)))
 
+  def givenAGoodCombinationNinoAndDobMatchCitizenDetails(
+                                                        nino: Nino,
+                                                        dob: DateOfBirth): StubMapping =
+    stubFor(
+      post(urlEqualTo(
+        s"/agent-assurance/citizen-details"
+      )).withRequestBody(equalToJson(
+        s"""
+          |{
+          |"nino": "${nino.value}",
+          |"dateOfBirth": "${dob.value}"
+          |}
+        """.stripMargin)).willReturn(aResponse().withStatus(200))
+    )
+
+  def givenABadCombinationNinoAndDobDoNotMatch(
+                                              nino: Nino,
+                                              dob: DateOfBirth): StubMapping =
+    stubFor(
+      post(urlEqualTo(
+        s"/agent-assurance/citizen-details"
+      )).withRequestBody(equalToJson(
+        s"""
+           |{
+           |"nino": "${nino.value}",
+           |"dateOfBirth": "${dob.value}"
+           |}
+        """.stripMargin)).willReturn(aResponse().withStatus(400))
+      )
 }

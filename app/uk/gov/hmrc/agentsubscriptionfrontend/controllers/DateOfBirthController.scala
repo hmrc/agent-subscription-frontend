@@ -28,19 +28,20 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DateOfBirth
-import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{AssuranceService, SessionStoreService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators.checkOneAtATime
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
 class DateOfBirthController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector,
+  val assuranceService: AssuranceService,
   val sessionStoreService: SessionStoreService)(
   implicit override val metrics: Metrics,
   override val appConfig: AppConfig,
@@ -64,7 +65,10 @@ class DateOfBirthController @Inject()(
           validDob => {
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
-                updateSessionAndRedirectToNextPage(existingSession.copy(dateOfBirth = Some(validDob)))
+                assuranceService.checkDobAndNino(validDob).flatMap {
+                  case true  => updateSessionAndRedirectToNextPage(existingSession.copy(dateOfBirth = Some(validDob)))
+                  case false => Ok(html.no_agency_found())
+                }
               case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
             }
           }
