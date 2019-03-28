@@ -32,7 +32,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.{f
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators.{checkOneAtATime, radioInputSelected}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
@@ -45,7 +45,8 @@ import scala.util.{Failure, Success, Try}
 class VatDetailsController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector,
-  val sessionStoreService: SessionStoreService)(
+  val sessionStoreService: SessionStoreService,
+  val subscriptionService: SubscriptionService)(
   implicit override val metrics: Metrics,
   override val appConfig: AppConfig,
   val ec: ExecutionContext,
@@ -55,8 +56,18 @@ class VatDetailsController @Inject()(
 
   def showRegisteredForVatForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      withValidBusinessType { businessType =>
-        Ok(html.registered_for_vat(registeredForVatForm, getBackLink(businessType)))
+      sessionStoreService.fetchAgentSession.flatMap {
+        case Some(agentSession) =>
+          (agentSession.businessType, agentSession.registeredForVat) match {
+            case (Some(businessType), Some(registeredForVat)) =>
+              val rfv = RegisteredForVat(RadioInputAnswer.apply(registeredForVat.toString))
+              Ok(html.registered_for_vat(registeredForVatForm.fill(rfv), getBackLink(businessType)))
+            case (Some(businessType), None) =>
+              Ok(html.registered_for_vat(registeredForVatForm, getBackLink(businessType)))
+
+            case _ => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+          }
+        case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
       }
     }
   }
@@ -71,9 +82,15 @@ class VatDetailsController @Inject()(
             choice => {
               sessionStoreService.fetchAgentSession.flatMap {
                 case Some(existingSession) =>
-                  updateSessionAndRedirectToNextPage(
-                    existingSession.copy(registeredForVat = Some(choice.confirm == Yes)))
-                case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+                  val nextPage = if (choice.confirm == Yes) {
+                    routes.VatDetailsController.showVatDetailsForm()
+                  } else {
+                    routes.BusinessIdentificationController.showConfirmBusinessForm()
+                  }
+
+                  updateSessionAndRedirect(existingSession.copy(registeredForVat = Some(choice.confirm.toString)))(
+                    nextPage)
+                case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
               }
             }
           )
@@ -83,7 +100,15 @@ class VatDetailsController @Inject()(
 
   def showVatDetailsForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Ok(html.vat_details(vatDetailsForm))
+      sessionStoreService.fetchAgentSession.flatMap {
+        case Some(agentSession) =>
+          agentSession.vatDetails match {
+            case Some(vatDetails) =>
+              Ok(html.vat_details(vatDetailsForm.fill(vatDetails)))
+            case None => Ok(html.vat_details(vatDetailsForm))
+          }
+        case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+      }
     }
   }
 
@@ -96,8 +121,14 @@ class VatDetailsController @Inject()(
           validForm => {
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
-                updateSessionAndRedirectToNextPage(existingSession.copy(vatDetails = Some(validForm)))
-              case None => Redirect(routes.BusinessIdentificationController.showBusinessTypeForm())
+                subscriptionService.matchVatKnownFacts(validForm.vrn, validForm.regDate).flatMap { foundMatch =>
+                  if (foundMatch)
+                    updateSessionAndRedirect(existingSession.copy(vatDetails = Some(validForm)))(
+                      routes.BusinessIdentificationController.showConfirmBusinessForm())
+                  else
+                    Redirect(routes.BusinessIdentificationController.showNoAgencyFound())
+                }
+              case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
             }
 
           }
@@ -171,7 +202,7 @@ object VatDetailsController {
       Try {
         val date = LocalDate.of(year.toInt, month.toInt, day.toInt)
         if (date.isBefore(LocalDate.of(1900, 1, 1)))
-          Invalid(ValidationError("vat-details.regDate.is.not.real"))
+          Invalid(ValidationError("vat-details.regDate.must.be.later.than.1900"))
         else
           Valid
       } match {

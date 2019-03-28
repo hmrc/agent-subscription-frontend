@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.stubs
 
+import java.time.LocalDate
+
 import com.github.tomakehurst.wiremock.client.WireMock.{request, _}
 import play.api.http.Status
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{CompletePartialSubscriptionBody, SubscriptionRequest}
+import uk.gov.hmrc.agentmtdidentifiers.model.{Utr, Vrn}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{CompanyRegistrationNumber, CompletePartialSubscriptionBody, SubscriptionRequest}
 import uk.gov.hmrc.play.encoding.UriPathEncoding.encodePathSegment
 
 object AgentSubscriptionStub {
@@ -83,6 +85,48 @@ object AgentSubscriptionStub {
     stubFor(
       get(urlEqualTo(
         s"/agent-subscription/registration/${encodePathSegment(utr.value)}/postcode/${encodePathSegment(postcode)}"))
+        .willReturn(aResponse()
+          .withStatus(Status.INTERNAL_SERVER_ERROR)))
+
+  def withMatchingCtUtrAndCrn(ctUtr: Utr, crn: CompanyRegistrationNumber): Unit =
+    stubFor(
+      get(urlEqualTo(
+        s"/agent-subscription/corporation-tax-utr/${encodePathSegment(ctUtr.value)}/crn/${encodePathSegment(crn.value)}"))
+        .willReturn(aResponse()
+          .withStatus(Status.OK)))
+
+  def withNonMatchingCtUtrAndCrn(ctUtr: Utr, crn: CompanyRegistrationNumber): Unit =
+    stubFor(
+      get(urlEqualTo(
+        s"/agent-subscription/corporation-tax-utr/${encodePathSegment(ctUtr.value)}/crn/${encodePathSegment(crn.value)}"))
+        .willReturn(aResponse()
+          .withStatus(Status.NOT_FOUND)))
+
+  def withErrorForCtUtrAndCrn(ctUtr: Utr, crn: CompanyRegistrationNumber): Unit =
+    stubFor(
+      get(urlEqualTo(
+        s"/agent-subscription/corporation-tax-utr/${encodePathSegment(ctUtr.value)}/crn/${encodePathSegment(crn.value)}"))
+        .willReturn(aResponse()
+          .withStatus(Status.INTERNAL_SERVER_ERROR)))
+
+  def withMatchingVrnAndDateOfReg(vrn: Vrn, dateOfReg: LocalDate): Unit =
+    stubFor(
+      get(urlEqualTo(
+        s"/agent-subscription/vat-known-facts/vrn/${encodePathSegment(vrn.value)}/dateOfRegistration/${encodePathSegment(dateOfReg.toString)}"))
+        .willReturn(aResponse()
+          .withStatus(Status.OK)))
+
+  def withNonMatchingVrnAndDateOfReg(vrn: Vrn, dateOfReg: LocalDate): Unit =
+    stubFor(
+      get(urlEqualTo(
+        s"/agent-subscription/vat-known-facts/vrn/${encodePathSegment(vrn.value)}/dateOfRegistration/${encodePathSegment(dateOfReg.toString)}"))
+        .willReturn(aResponse()
+          .withStatus(Status.NOT_FOUND)))
+
+  def withErrorForVrnAndDateOfReg(vrn: Vrn, dateOfReg: LocalDate): Unit =
+    stubFor(
+      get(urlEqualTo(
+        s"/agent-subscription/vat-known-facts/vrn/${encodePathSegment(vrn.value)}/dateOfRegistration/${encodePathSegment(dateOfReg.toString)}"))
         .willReturn(aResponse()
           .withStatus(Status.INTERNAL_SERVER_ERROR)))
 
