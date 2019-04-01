@@ -24,6 +24,7 @@ import play.api.http.Status
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -114,18 +115,10 @@ class SubscriptionService @Inject()(
       case None => SubscriptionProcess(SubscriptionState.NoRegistrationFound, None)
     }
 
-  def checkDobAndNino(dob: DateOfBirth)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] =
-    for {
-      maybeAgentSession <- sessionStoreService.fetchAgentSession
-      resultF <- maybeAgentSession match {
-                  case Some(agentSession) => {
-                    agentSession.nino.fold(Future.successful(false))(nin =>
-                      agentSubscriptionConnector.matchCitizenDetails(CitizenDetailsRequest(nin, dob)))
-                  }
-                  case None =>
-                    Future.successful(false)
-                }
-    } yield resultF
+  def checkDobAndNino(nino: Nino, dateOfBirth: DateOfBirth)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext): Future[Boolean] =
+    agentSubscriptionConnector.matchCitizenDetails(CitizenDetailsRequest(nino, dateOfBirth))
 
   def matchCorporationTaxUtrWithCrn(utr: Utr, crn: CompanyRegistrationNumber)(
     implicit hc: HeaderCarrier,

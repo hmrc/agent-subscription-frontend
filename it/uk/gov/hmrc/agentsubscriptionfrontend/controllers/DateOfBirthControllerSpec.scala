@@ -74,7 +74,19 @@ class DateOfBirthControllerSpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNoAgencyFound().url)
+      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNoMatchFound().url)
+    }
+
+    "Redirect to enter nino page when the nino is not found in the session" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
+
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader), nino = None)))
+
+      val result = await(controller.submitDateOfBirthForm()(request))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
     }
 
     "handle forms with date-of-birth in future" in {

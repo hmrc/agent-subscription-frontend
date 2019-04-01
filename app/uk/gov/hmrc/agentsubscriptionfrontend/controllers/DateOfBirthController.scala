@@ -74,12 +74,16 @@ class DateOfBirthController @Inject()(
           validDob => {
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
-                subscriptionService.checkDobAndNino(validDob).flatMap {
-                  case true => {
-                    updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(
-                      routes.VatDetailsController.showRegisteredForVatForm())
-                  }
-                  case false => Redirect(routes.BusinessIdentificationController.showNoAgencyFound())
+                existingSession.nino match {
+                  case Some(nino) =>
+                    subscriptionService.checkDobAndNino(nino, validDob).flatMap {
+                      case true => {
+                        updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(
+                          routes.VatDetailsController.showRegisteredForVatForm())
+                      }
+                      case false => Redirect(routes.BusinessIdentificationController.showNoMatchFound())
+                    }
+                  case None => Redirect(routes.NationalInsuranceController.showNationalInsuranceNumberForm())
                 }
               case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
             }
