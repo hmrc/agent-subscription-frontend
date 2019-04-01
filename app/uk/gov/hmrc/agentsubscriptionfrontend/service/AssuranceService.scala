@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
@@ -27,7 +27,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.agentsubscriptionfrontend.util._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -130,18 +129,4 @@ class AssuranceService @Inject()(
 
         relationshipExists
     }
-
-  def checkDobAndNino(dob: DateOfBirth)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] =
-    for {
-      maybeAgentSession <- sessionStoreService.fetchAgentSession
-      resultF <- maybeAgentSession match {
-                  case Some(agentSession) => {
-                    agentSession.nino.fold(Future.successful(false))(nin =>
-                      assuranceConnector.citizenDetails(AssuranceCheckCitizenDetails(nin, dob)))
-                  }
-                  case None =>
-                    Future.successful(false)
-                }
-    } yield resultF
-
 }

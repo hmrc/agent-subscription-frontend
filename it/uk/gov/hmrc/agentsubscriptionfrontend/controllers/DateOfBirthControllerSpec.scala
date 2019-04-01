@@ -8,7 +8,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, DateOfBirth}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub
 import uk.gov.hmrc.domain.Nino
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -52,7 +52,7 @@ class DateOfBirthControllerSpec extends BaseISpec with SessionDataMissingSpec {
     "read the dob as expected and save it to the session" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
-      givenAGoodCombinationNinoAndDobMatchCitizenDetails(Nino("AE123456C"), DateOfBirth(LocalDate.parse("1950-01-01")))
+      AgentSubscriptionStub.givenAGoodCombinationNinoAndDobMatchCitizenDetails(Nino("AE123456C"), DateOfBirth(LocalDate.parse("1950-01-01")))
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
       val result = await(controller.submitDateOfBirthForm()(request))
@@ -68,13 +68,13 @@ class DateOfBirthControllerSpec extends BaseISpec with SessionDataMissingSpec {
     "show the error page when the nino and date of birth details have not matched in citizen details" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
-      givenABadCombinationNinoAndDobDoNotMatch(Nino("AE123456C"), DateOfBirth(LocalDate.parse("1950-01-01")))
+      AgentSubscriptionStub.givenABadCombinationNinoAndDobDoNotMatch(Nino("AE123456C"), DateOfBirth(LocalDate.parse("1950-01-01")))
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
       val result = await(controller.submitDateOfBirthForm()(request))
 
-      status(result) shouldBe 200
-      result should containMessages("noAgencyFound.title", "noAgencyFound.p1", "noAgencyFound.p2")
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNoAgencyFound().url)
     }
 
     "handle forms with date-of-birth in future" in {

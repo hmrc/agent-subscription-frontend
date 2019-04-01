@@ -28,7 +28,7 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DateOfBirth
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{AssuranceService, SessionStoreService}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{AssuranceService, SessionStoreService, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators.checkOneAtATime
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
@@ -42,7 +42,8 @@ class DateOfBirthController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector,
   val assuranceService: AssuranceService,
-  val sessionStoreService: SessionStoreService)(
+  val sessionStoreService: SessionStoreService,
+  val subscriptionService: SubscriptionService)(
   implicit override val metrics: Metrics,
   override val appConfig: AppConfig,
   val ec: ExecutionContext,
@@ -73,12 +74,12 @@ class DateOfBirthController @Inject()(
           validDob => {
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
-                assuranceService.checkDobAndNino(validDob).flatMap {
+                subscriptionService.checkDobAndNino(validDob).flatMap {
                   case true => {
                     updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(
                       routes.VatDetailsController.showRegisteredForVatForm())
                   }
-                  case false => Ok(html.no_agency_found())
+                  case false => Redirect(routes.BusinessIdentificationController.showNoAgencyFound())
                 }
               case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
             }

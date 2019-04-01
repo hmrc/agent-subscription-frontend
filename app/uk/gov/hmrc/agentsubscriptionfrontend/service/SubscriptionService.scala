@@ -38,7 +38,9 @@ object SubscriptionState extends Enumeration {
 case class SubscriptionProcess(state: SubscriptionState.Value, details: Option[Registration])
 
 @Singleton
-class SubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector) {
+class SubscriptionService @Inject()(
+  agentSubscriptionConnector: AgentSubscriptionConnector,
+  sessionStoreService: SessionStoreService) {
 
   import SubscriptionDetails._
 
@@ -111,6 +113,19 @@ class SubscriptionService @Inject()(agentSubscriptionConnector: AgentSubscriptio
 
       case None => SubscriptionProcess(SubscriptionState.NoRegistrationFound, None)
     }
+
+  def checkDobAndNino(dob: DateOfBirth)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] =
+    for {
+      maybeAgentSession <- sessionStoreService.fetchAgentSession
+      resultF <- maybeAgentSession match {
+                  case Some(agentSession) => {
+                    agentSession.nino.fold(Future.successful(false))(nin =>
+                      agentSubscriptionConnector.matchCitizenDetails(CitizenDetailsRequest(nin, dob)))
+                  }
+                  case None =>
+                    Future.successful(false)
+                }
+    } yield resultF
 
   def matchCorporationTaxUtrWithCrn(utr: Utr, crn: CompanyRegistrationNumber)(
     implicit hc: HeaderCarrier,

@@ -19,9 +19,9 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Nino
 
-case class AssuranceCheckCitizenDetails(nino: Nino, dateOfBirth: DateOfBirth)
+case class CitizenDetailsRequest(nino: Nino, dateOfBirth: DateOfBirth)
 
-object AssuranceCheckCitizenDetails {
+object CitizenDetailsRequest {
 
-  implicit val format: OFormat[AssuranceCheckCitizenDetails] = Json.format[AssuranceCheckCitizenDetails]
+  implicit val format: OFormat[CitizenDetailsRequest] = Json.format[CitizenDetailsRequest]
 }
