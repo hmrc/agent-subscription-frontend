@@ -28,6 +28,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.ExecutionContext
+
 @Singleton
 class CompanyRegistrationController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
@@ -68,10 +69,10 @@ class CompanyRegistrationController @Inject()(
                   subscriptionService.matchCorporationTaxUtrWithCrn(existingSession.utr.get, validCrn).flatMap {
                     foundMatch =>
                       if (foundMatch)
-                        updateSessionAndRedirectToNextPage(
-                          existingSession.copy(companyRegistrationNumber = Some(validCrn)))
+                        updateSessionAndRedirect(existingSession.copy(companyRegistrationNumber = Some(validCrn)))(
+                          routes.VatDetailsController.showRegisteredForVatForm())
                       else
-                        Redirect(routes.BusinessIdentificationController.showNoAgencyFound())
+                        Redirect(routes.BusinessIdentificationController.showNoMatchFound())
                   }
                 case Some(existingSession) if existingSession.utr.isEmpty =>
                   Redirect(routes.UtrController.showUtrForm())

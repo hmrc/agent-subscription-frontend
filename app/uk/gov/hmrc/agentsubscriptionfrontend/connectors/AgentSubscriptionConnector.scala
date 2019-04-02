@@ -17,16 +17,17 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import java.net.URL
+import java.time.LocalDate
 
-import javax.inject.{Inject, Named, Singleton}
-import play.api.libs.json.JsValue
-import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{CompanyRegistrationNumber, CompletePartialSubscriptionBody, Registration, SubscriptionRequest}
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.encoding.UriPathEncoding.encodePathSegment
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
+import javax.inject.{Inject, Named, Singleton}
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
+import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr, Vrn}
+import uk.gov.hmrc.agentsubscriptionfrontend.models._
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.encoding.UriPathEncoding.encodePathSegment
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -59,6 +60,21 @@ class AgentSubscriptionConnector @Inject()(
         }
     }
 
+  def matchVatKnownFacts(vrn: Vrn, vatRegistrationDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] =
+    monitor(s"ConsumedAPI-Agent-Subscription-matchVatKnownFacts-GET") {
+      val url = new URL(
+        baseUrl,
+        s"/agent-subscription/vat-known-facts/vrn/${encodePathSegment(vrn.value)}/dateOfRegistration/${encodePathSegment(vatRegistrationDate.toString)}"
+      )
+
+      http
+        .GET[HttpResponse](url.toString)
+        .map(_.status == 200)
+        .recover {
+          case _: NotFoundException => false
+        }
+    }
+
   def subscribeAgencyToMtd(subscriptionRequest: SubscriptionRequest)(implicit hc: HeaderCarrier): Future[Arn] =
     monitor(s"ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST") {
       http.POST[SubscriptionRequest, JsValue](subscriptionUrl.toString, subscriptionRequest) map { js =>
@@ -71,6 +87,18 @@ class AgentSubscriptionConnector @Inject()(
       http.PUT[CompletePartialSubscriptionBody, JsValue](subscriptionUrl.toString, details).map { js =>
         (js \ "arn").as[Arn]
       }
+    }
+
+  def matchCitizenDetails(citizenDetailsRequest: CitizenDetailsRequest)(implicit hc: HeaderCarrier): Future[Boolean] =
+    monitor(s"ConsumedAPI-Agent-Subscription-getCitizenDetails-POST") {
+      val endpoint = s"/agent-subscription/citizen-details"
+      http
+        .POST[CitizenDetailsRequest, HttpResponse](new URL(baseUrl, endpoint).toString, citizenDetailsRequest)
+        .map(_.status == 200)
+        .recover {
+          case e: BadRequestException => false
+          case f: NotFoundException   => false
+        }
     }
 
   private val subscriptionUrl = new URL(baseUrl, s"/agent-subscription/subscription")

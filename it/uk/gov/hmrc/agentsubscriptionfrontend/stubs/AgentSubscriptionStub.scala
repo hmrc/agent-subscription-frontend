@@ -16,10 +16,14 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.stubs
 
+import java.time.LocalDate
+
 import com.github.tomakehurst.wiremock.client.WireMock.{request, _}
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{CompanyRegistrationNumber, CompletePartialSubscriptionBody, SubscriptionRequest}
+import uk.gov.hmrc.agentmtdidentifiers.model.{Utr, Vrn}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{CompanyRegistrationNumber, CompletePartialSubscriptionBody, DateOfBirth, SubscriptionRequest}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.encoding.UriPathEncoding.encodePathSegment
 
 object AgentSubscriptionStub {
@@ -107,6 +111,27 @@ object AgentSubscriptionStub {
         .willReturn(aResponse()
           .withStatus(Status.INTERNAL_SERVER_ERROR)))
 
+  def withMatchingVrnAndDateOfReg(vrn: Vrn, dateOfReg: LocalDate): Unit =
+    stubFor(
+      get(urlEqualTo(
+        s"/agent-subscription/vat-known-facts/vrn/${encodePathSegment(vrn.value)}/dateOfRegistration/${encodePathSegment(dateOfReg.toString)}"))
+        .willReturn(aResponse()
+          .withStatus(Status.OK)))
+
+  def withNonMatchingVrnAndDateOfReg(vrn: Vrn, dateOfReg: LocalDate): Unit =
+    stubFor(
+      get(urlEqualTo(
+        s"/agent-subscription/vat-known-facts/vrn/${encodePathSegment(vrn.value)}/dateOfRegistration/${encodePathSegment(dateOfReg.toString)}"))
+        .willReturn(aResponse()
+          .withStatus(Status.NOT_FOUND)))
+
+  def withErrorForVrnAndDateOfReg(vrn: Vrn, dateOfReg: LocalDate): Unit =
+    stubFor(
+      get(urlEqualTo(
+        s"/agent-subscription/vat-known-facts/vrn/${encodePathSegment(vrn.value)}/dateOfRegistration/${encodePathSegment(dateOfReg.toString)}"))
+        .willReturn(aResponse()
+          .withStatus(Status.INTERNAL_SERVER_ERROR)))
+
   def partialSubscriptionWillSucceed(request: CompletePartialSubscriptionBody, arn: String = "ARN00001"): Unit =
     stubFor(
       partialSubscriptionFixRequestFor(request)
@@ -161,6 +186,54 @@ object AgentSubscriptionStub {
       subscriptionRequestFor(utr, request)
         .willReturn(aResponse()
           .withStatus(500)))
+
+  def givenAGoodCombinationNinoAndDobMatchCitizenDetails(
+                                                          nino: Nino,
+                                                          dob: DateOfBirth): StubMapping =
+    stubFor(
+      post(urlEqualTo(
+        s"/agent-subscription/citizen-details"
+      )).withRequestBody(equalToJson(
+        s"""
+           |{
+           |"nino": "${nino.value}",
+           |"dateOfBirth": "${dob.value}"
+           |}
+        """.stripMargin)).willReturn(aResponse().withStatus(200))
+    )
+
+  def givenABadCombinationNinoAndDobDoNotMatch(
+                                                nino: Nino,
+                                                dob: DateOfBirth): StubMapping =
+    stubFor(
+      post(urlEqualTo(
+        s"/agent-subscription/citizen-details"
+      )).withRequestBody(equalToJson(
+        s"""
+           |{
+           |"nino": "${nino.value}",
+           |"dateOfBirth": "${dob.value}"
+           |}
+        """.stripMargin)).willReturn(aResponse().withStatus(400))
+    )
+
+  def givenANetworkProblemWithSubscriptionCitizenDetails(
+                                                          nino: Nino,
+                                                          dob: DateOfBirth): StubMapping =
+    stubFor(
+      post(urlEqualTo(
+        s"/agent-subscription/citizen-details"
+      )).withRequestBody(equalToJson(
+        s"""
+           |{
+           |"nino": "${nino.value}",
+           |"dateOfBirth": "${dob.value}"
+           |}
+        """.stripMargin)).willReturn(aResponse().withStatus(500))
+    )
+
+
+
 
   private def subscriptionRequestFor(utr: Utr, request: SubscriptionRequest) = {
     val agency = request.agency
