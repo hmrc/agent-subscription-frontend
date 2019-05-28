@@ -469,3 +469,7 @@ input[type="text"].autocomplete__input {
     padding: 0;
     border: 0;
 }
+
+.form-hint #amls-form-hint{
+    margin-bottom: 15px;
+}
