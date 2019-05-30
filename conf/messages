@@ -259,14 +259,12 @@ subscriptionComplete.title=Agent services account created
 subscriptionComplete.h1=Agent services account created
 subscriptionComplete.accountName=You created an account for
 subscriptionComplete.h2=What you can do next
-subscriptionComplete.h3=Help us improve this service
 subscriptionComplete.p1=Make a note of your account reference number <strong class="bold">{0}</strong>. You will need this if you are not able to access your agent services account.
-subscriptionComplete.p2=You can:
-subscriptionComplete.p3=What did you think of this service?
-subscriptionComplete.p4= (takes 30 seconds)
-subscriptionComplete.bullet-list.1=go to your agent services account
-subscriptionComplete.bullet-list.2=check which services you use your agent services account for
-subscriptionComplete.bullet-list.3=print or save this page
+subscriptionComplete.p2=We have sent an email to {0} confirming these details.
+subscriptionComplete.p3=<a href="{0}">Check the guidance</a> to find out how to:
+subscriptionComplete.bullet-list.1=sign in to your agent services account
+subscriptionComplete.bullet-list.2=use new HMRC services on behalf of your clients
+subscriptionComplete.button=Go to your agent services account
 
 subscriptionComplete.button.continueToASAccount=Go to your agent services account
 subscriptionComplete.button.continueJourney=Continue

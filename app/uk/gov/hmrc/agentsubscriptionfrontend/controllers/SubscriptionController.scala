@@ -256,8 +256,10 @@ class SubscriptionController @Inject()(
       withValidSession { (_, existingSession) =>
         existingSession.registration match {
           case Some(registration) => {
-            val taxPayerName = registration.taxpayerName.getOrElse(
-              throw new RuntimeException("tax payer name is missing from registration"))
+            val agencyName = registration.taxpayerName.getOrElse(
+              throw new RuntimeException("agency name is missing from registration"))
+            val agencyEmail = registration.emailAddress.getOrElse(
+              throw new RuntimeException("agency email is missing from registration"))
             for {
               continueUrlOpt           <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
               wasEligibleForMappingOpt <- sessionStoreService.fetchMappingEligible.recover(recoverSessionStoreWithNone)
@@ -273,11 +275,12 @@ class SubscriptionController @Inject()(
                   isUrlToASAccount,
                   wasEligibleForMapping,
                   prettifiedArn,
-                  taxPayerName))
+                  agencyName,
+                  agencyEmail))
             }
           }
           case _ => {
-            Logger.info("no registration record found in agent session")
+            Logger.info("no registration details found in agent session")
             Redirect(routes.BusinessIdentificationController.showNoMatchFound())
           }
         }

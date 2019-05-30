@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 
-@(continueUrl: String, isUrlToASAccount: Boolean, wasEligibleForMapping: Boolean, arn: String, taxPayerName: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(continueUrl: String, isUrlToASAccount: Boolean, wasEligibleForMapping: Boolean, arn: String, agencyName: String, agencyEmail: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = Messages("subscriptionComplete.title"), bodyClasses = None) {
 
@@ -25,33 +25,26 @@
         <div class="govuk-panel__body">
             <p class="margin-bottom-0">@Messages("subscriptionComplete.accountName")
             <br>
-            <strong class="bold">@taxPayerName</strong>
+            <strong class="bold">@agencyName</strong>
             </p>
         </div>
     </div>
 
     <p>@Html(Messages("subscriptionComplete.p1", s"$arn"))</p>
 
+    <p>@Html(Messages("subscriptionComplete.p2", s"$agencyEmail"))</p>
+
     <h2 class="heading-medium">@Messages("subscriptionComplete.h2")</h2>
 
-    <p>@Messages("subscriptionComplete.p2")</p>
+    <p>@Html(Messages("subscriptionComplete.p3", "https://www.gov.uk/guidance/get-an-hmrc-agent-services-account"))</p>
 
-    <ul class="list-bullet list">
-        <li>
-            @Html(s"<a href=$continueUrl>")@Messages("subscriptionComplete.bullet-list.1")@Html("</a>")
-        </li>
-        <li>
-            @Html(s"<a href='https://www.gov.uk/government/collections/hmrc-online-services-for-agents#agent-services-account'>")@Messages("subscriptionComplete.bullet-list.2")@Html("</a>")
-        </li>
-        <li>
-            @Html(s"<a href='' onclick=window.print()>")@Messages("subscriptionComplete.bullet-list.3")@Html("</a>")
-        </li>
+
+    <ul class="list list-bullet">
+        <li>@Messages("subscriptionComplete.bullet-list.1")</li>
+        <li>@Messages("subscriptionComplete.bullet-list.2")</li>
     </ul>
 
-
-    <h2 class="heading-medium">@Messages("subscriptionComplete.h3")</h2>
-
-    <p>@Html(s"<a href=${appConfig.betaFeedbackUrl}>")@Messages("subscriptionComplete.p3")@Html("</a>") @Messages("subscriptionComplete.p4")</p>
-
-
+    @defining(if(isUrlToASAccount) "continueToASAccount" else "continueJourney") { continueMsg =>
+        <a href="@continueUrl" class="button" id="continue" role="button">@Messages(s"subscriptionComplete.button.$continueMsg")</a>
+    }
 }

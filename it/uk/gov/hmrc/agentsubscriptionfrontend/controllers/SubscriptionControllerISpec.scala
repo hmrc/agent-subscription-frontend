@@ -163,13 +163,11 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         "subscriptionComplete.accountName",
         "subscriptionComplete.h2",
         "subscriptionComplete.bullet-list.1",
-        "subscriptionComplete.bullet-list.2",
-        "subscriptionComplete.bullet-list.3",
-        "subscriptionComplete.p2",
-        "subscriptionComplete.p3",
-        "subscriptionComplete.p4"
+        "subscriptionComplete.bullet-list.2"
       )
       bodyOf(result) should include(hasMessage("subscriptionComplete.p1", "AARN-000-0001"))
+      bodyOf(result) should include(hasMessage("subscriptionComplete.p2", "test@gmail.com"))
+      bodyOf(result) should include(hasMessage("subscriptionComplete.p3", "https://www.gov.uk/guidance/get-an-hmrc-agent-services-account"))
     }
   }
 
