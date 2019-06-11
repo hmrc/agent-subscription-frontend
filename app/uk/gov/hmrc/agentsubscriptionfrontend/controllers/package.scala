@@ -147,6 +147,12 @@ package object controllers {
           "expiry"           -> expiryDate
         )(AMLSForm.apply)(AMLSForm.unapply))
 
+    val amlsAppliedForYesNoForm: Form[RadioConfirm] = Form(
+      mapping(
+        "amlsAppliedFor" -> optional(boolean).verifying(radioInputSelected("error.amlsAppliedFor.empty"))
+      )(RadioConfirm.apply)(RadioConfirm.unapply)
+    )
+
     import play.api.data.{Form, FormError}
 
     def formWithRefinedErrors(form: Form[AMLSForm]): Form[AMLSForm] = {

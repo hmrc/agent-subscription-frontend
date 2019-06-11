@@ -305,6 +305,13 @@ error.no-radio-selected=You must choose an option
 invasive.error.no-radio.selected=Select yes if you have a Self Assessment agent code
 clientDetails.error.no-radio.selected=Select which details you want to enter
 
+# Money laundering have you applied?
+
+amlsAppliedFor.title=Have you applied to register with a money laundering supervisory body?
+amlsAppliedFor.form.yes=Yes
+amlsAppliedFor.form.no=No
+
+
 # Money laundering compliance page
 moneyLaunderingCompliance.title=Money laundering compliance details
 moneyLaunderingCompliance.p1=You must be registered with a money laundering supervisory body before you can create an agent services account.

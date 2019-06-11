@@ -30,7 +30,8 @@ case class AgentSession(
   registeredForVat: Option[String] = None,
   vatDetails: Option[VatDetails] = None,
   registration: Option[Registration] = None,
-  amlsDetails: Option[AMLSDetails] = None)
+  amlsDetails: Option[AMLSDetails] = None,
+  amlsAppliedYesNo: Option[YesNo] = None)
 
 object AgentSession {
   implicit val format: Format[AgentSession] = Json.format[AgentSession]

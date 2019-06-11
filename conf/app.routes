@@ -39,6 +39,13 @@ POST        /confirm-business                     uk.gov.hmrc.agentsubscriptionf
 
 GET         /already-subscribed                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showAlreadySubscribed
 
+GET         /check-money-laundering-application   uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAppliedForAmlsForm
+POST        /check-money-laundering-application   uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAppliedForAmlsForm
+
+GET         /money-laundering-compliance-incomplete uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.moneyLaunderingComplianceIncomplete
+
+GET         /money-laundering-application-details uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsApplicationDetails
+
 GET         /money-laundering-compliance          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showMoneyLaunderingComplianceForm
 POST        /money-laundering-compliance          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitMoneyLaunderingComplianceForm
 

@@ -23,10 +23,12 @@ import play.api.mvc.{AnyContent, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, AgentSession}
+
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, AgentSession, Yes, YesNo}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls_applied_for
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -90,9 +92,9 @@ class AMLSController @Inject()(
               },
               validForm => {
                 val amlsDetails = AMLSDetails(
-                  amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code")),
-                  validForm.membershipNumber,
-                  validForm.expiry
+                  supervisoryBody = amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code")),
+                  membershipNumber = validForm.membershipNumber,
+                  membershipExpiresOn = validForm.expiry
                 )
 
                 sessionStoreService
@@ -105,6 +107,55 @@ class AMLSController @Inject()(
         }
       }
     }
+  }
+
+  val showAppliedForAmlsForm: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      withValidSession { (_, existingSession) =>
+        withManuallyAssuredAgent(existingSession) {
+          val form = amlsAppliedForYesNoForm
+          sessionStoreService.fetchGoBackUrl.map { maybeGobackUrl =>
+            Ok(
+              amls_applied_for(
+                existingSession.amlsAppliedYesNo.fold(form)(x => form.fill(YesNo.toRadioConfirm(x))),
+                maybeGobackUrl)
+            )
+          }
+        }
+      }
+    }
+  }
+
+  def submitAppliedForAmlsForm: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      withValidSession { (_, existingSession) =>
+        withManuallyAssuredAgent(existingSession) {
+
+          sessionStoreService.fetchGoBackUrl.flatMap { maybeGobackUrl =>
+            amlsAppliedForYesNoForm.bindFromRequest.fold(
+              formWithErrors => Ok(amls_applied_for(formWithErrors)),
+              validForm => {
+                val newValue = YesNo(validForm)
+                val redirectTo =
+                  if (Yes == newValue) routes.AMLSController.showAmlsApplicationDetails().url
+                  else routes.AMLSController.moneyLaunderingComplianceIncomplete().url
+                sessionStoreService
+                  .cacheAgentSession(existingSession.copy(amlsAppliedYesNo = Some(newValue)))
+                  .map(_ => Redirect(redirectTo))
+              }
+            )
+          }
+        }
+      }
+    }
+  }
+
+  val moneyLaunderingComplianceIncomplete = Action.async { implicit request =>
+    Ok("TODO - amls incomplete")
+  }
+
+  val showAmlsApplicationDetails: Action[AnyContent] = Action.async { implicit request =>
+    Ok("TODO - amls application details")
   }
 
   private def withManuallyAssuredAgent(agentSession: AgentSession)(body: => Future[Result])(
