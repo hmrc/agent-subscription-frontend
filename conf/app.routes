@@ -47,6 +47,8 @@ POST        /money-laundering-compliance          uk.gov.hmrc.agentsubscriptionf
 
 GET         /check-money-laundering-application   uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showCheckAmlsApplicationForm
 
+GET         /money-laundering-compliance-incomplete uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsNotAppliedPage
+
 GET         /create-new-account                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showCreateNewAccount
 
 # GET /check-agency-status is deprecated, please use GET /business-type instead

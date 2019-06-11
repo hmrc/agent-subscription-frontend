@@ -357,4 +357,22 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       resultShouldBeSessionDataMissing(result)
     }
   }
+
+  "GET /money-laundering-compliance-incomplete" should {
+
+    "display page with correct content" in new Setup {
+
+      val result = await(controller.showAmlsNotAppliedPage(authenticatedRequest))
+
+      result should containMessages(
+        "amls-not-applied.title",
+        "amls-not-applied.p1",
+        "amls-not-applied.finish"
+      )
+
+      result should containSubstrings("To find details of supervisory bodies, see",
+        "anti-money laundering registration (opens in a new window or tab)."
+      )
+    }
+  }
 }

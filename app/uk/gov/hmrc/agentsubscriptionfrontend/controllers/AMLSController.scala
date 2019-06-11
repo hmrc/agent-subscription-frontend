@@ -153,6 +153,12 @@ class AMLSController @Inject()(
     }
   }
 
+  def showAmlsNotAppliedPage: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Ok(html.amls.amls_not_applied())
+    }
+  }
+
   private def withManuallyAssuredAgent(agentSession: AgentSession)(body: => Future[Result])(
     implicit hc: HeaderCarrier): Future[Result] =
     agentSession.utr match {
