@@ -316,7 +316,7 @@ amls-not-applied.p1=You must be registered with a money laundering supervisory b
 amls-not-applied.p2=To find details of supervisory bodies, see <a href="https://www.gov.uk/anti-money-laundering-registration">anti-money laundering registration (opens in a new window or tab).</a>
 amls-not-applied.finish=Finish and sign out
 
-# Money laundering have you applied?
+# AMLS applied for
 
 amlsAppliedFor.title=Have you applied to register with a money laundering supervisory body?
 

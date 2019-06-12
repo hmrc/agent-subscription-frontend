@@ -55,7 +55,8 @@ class AMLSController @Inject()(
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
-          Ok(html.amls.check_amls(checkAmlsForm))
+          existingSession.checkAmls.fold(Ok(html.amls.check_amls(checkAmlsForm)))(amls =>
+            Ok(html.amls.check_amls(checkAmlsForm.bind(Map("registeredAmls" -> amls.toString)))))
         }
       }
     }
@@ -75,7 +76,6 @@ class AMLSController @Inject()(
                     Redirect(routes.AMLSController.showAmlsDetailsForm())
                   case No => Redirect(routes.AMLSController.showCheckAmlsAlreadyAppliedForm())
                 }
-
                 sessionStoreService
                   .cacheAgentSession(existingSession.copy(checkAmls = RadioInputAnswer.unapply(validForm)))
                   .map(_ => nextPage)
@@ -90,7 +90,8 @@ class AMLSController @Inject()(
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
-          Ok(amls_applied_for(appliedForAmlsForm))
+          existingSession.amlsAppliedFor.fold(Ok(amls_applied_for(appliedForAmlsForm)))(amls =>
+            Ok(amls_applied_for(appliedForAmlsForm.bind(Map("amlsAppliedFor" -> amls.toString)))))
         }
       }
     }

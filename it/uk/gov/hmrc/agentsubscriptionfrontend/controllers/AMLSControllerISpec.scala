@@ -81,7 +81,20 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result) shouldBe Some(routes.AMLSController.showCheckAmlsAlreadyAppliedForm().url)
     }
 
-    "handle form with errors" in new Setup {
+    "handle form with errors - user does not make a choice and tries to continue" in new Setup {
+      val result = await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "")))
+
+      status(result) shouldBe 200
+
+      result should containMessages(
+        "check-amls.title",
+        "button.yes",
+        "button.no",
+        "error.check-amls-value.invalid"
+      )
+    }
+
+    "handle form with errors - user manipulates the value and tries to continue" in new Setup {
       val result = await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "blah")))
 
       status(result) shouldBe 200
@@ -127,16 +140,29 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result) shouldBe Some(routes.AMLSController.showAmlsNotAppliedPage().url)
     }
 
-    "handle form with errors" in new Setup {
-      val result = await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "blah")))
+    "handle form with errors - user does not make a choice and tries to continue" in new Setup {
+      val result = await(controller.submitCheckAmlsAlreadyAppliedForm(authenticatedRequest.withFormUrlEncodedBody("amlsAppliedFor" -> "")))
 
       status(result) shouldBe 200
 
       result should containMessages(
-        "check-amls.title",
+        "amlsAppliedFor.title",
         "button.yes",
         "button.no",
-        "error.check-amls-value.invalid"
+        "error.check-amlsAppliedFor-value.invalid"
+      )
+    }
+
+    "handle form with errors - user manipulates the value and tries to continue" in new Setup {
+      val result = await(controller.submitCheckAmlsAlreadyAppliedForm(authenticatedRequest.withFormUrlEncodedBody("amlsAppliedFor" -> "blah")))
+
+      status(result) shouldBe 200
+
+      result should containMessages(
+        "amlsAppliedFor.title",
+        "button.yes",
+        "button.no",
+        "error.check-amlsAppliedFor-value.invalid"
       )
     }
   }

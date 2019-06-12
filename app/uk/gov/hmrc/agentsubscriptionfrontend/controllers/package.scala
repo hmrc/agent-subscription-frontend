@@ -18,6 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend
 
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
+import play.api.i18n.Messages
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{BusinessDetails, RadioInputAnswer, _}
@@ -137,9 +138,14 @@ package object controllers {
 
     def checkAmlsForm: Form[RadioInputAnswer] =
       Form[RadioInputAnswer](
-        mapping("registeredAmls" -> nonEmptyText
-          .verifying("error.check-amls-value.invalid", value => value == "yes" || value == "no"))(
-          RadioInputAnswer.apply)(RadioInputAnswer.unapply))
+        mapping("registeredAmls" -> optional(text)
+          .verifying("error.check-amls-value.invalid", a => a.isDefined && (a.get == "yes" || a.get == "no")))(a =>
+          RadioInputAnswer.apply(a.getOrElse("")))(a => Some(RadioInputAnswer.unapply(a))))
+
+    def appliedForAmlsForm: Form[RadioInputAnswer] =
+      Form[RadioInputAnswer](mapping("amlsAppliedFor" -> optional(text)
+        .verifying("error.check-amlsAppliedFor-value.invalid", a => a.isDefined && (a.get == "yes" || a.get == "no")))(
+        a => RadioInputAnswer.apply(a.getOrElse("")))(a => Some(RadioInputAnswer.unapply(a))))
 
     def amlsForm(bodies: Set[String]): Form[AMLSForm] =
       Form[AMLSForm](
@@ -148,12 +154,6 @@ package object controllers {
           "membershipNumber" -> membershipNumber,
           "expiry"           -> expiryDate
         )(AMLSForm.apply)(AMLSForm.unapply))
-
-    def appliedForAmlsForm: Form[RadioInputAnswer] =
-      Form[RadioInputAnswer](
-        mapping("amlsAppliedFor" -> text
-          .verifying("error.check-amlsAppliedFor-value.invalid", value => value == "yes" || value == "no"))(
-          RadioInputAnswer.apply)(RadioInputAnswer.unapply))
 
     import play.api.data.{Form, FormError}
 
