@@ -23,12 +23,12 @@ import play.api.mvc.{AnyContent, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
-
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, AgentSession, Yes, YesNo}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, AgentSession, RadioInputAnswer}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls_applied_for
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls.amls_applied_for
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -51,7 +51,84 @@ class AMLSController @Inject()(
 
   private val amlsBodies: Map[String, String] = AMLSLoader.load("/amls.csv")
 
-  val showMoneyLaunderingComplianceForm: Action[AnyContent] = Action.async { implicit request =>
+  def showCheckAmlsPage: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      withValidSession { (_, existingSession) =>
+        withManuallyAssuredAgent(existingSession) {
+          Ok(html.amls.check_amls(checkAmlsForm))
+        }
+      }
+    }
+  }
+
+  def submitCheckAmls: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      withValidSession { (_, existingSession) =>
+        withManuallyAssuredAgent(existingSession) {
+          checkAmlsForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors => Ok(html.amls.check_amls(formWithErrors)),
+              validForm => {
+                val nextPage = validForm match {
+                  case Yes =>
+                    Redirect(routes.AMLSController.showAmlsDetailsForm())
+                  case No => Redirect(routes.AMLSController.showCheckAmlsAlreadyAppliedForm())
+                }
+
+                sessionStoreService
+                  .cacheAgentSession(existingSession.copy(checkAmls = RadioInputAnswer.unapply(validForm)))
+                  .map(_ => nextPage)
+              }
+            )
+        }
+      }
+    }
+  }
+
+  def showCheckAmlsAlreadyAppliedForm: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      withValidSession { (_, existingSession) =>
+        withManuallyAssuredAgent(existingSession) {
+          Ok(amls_applied_for(appliedForAmlsForm))
+        }
+      }
+    }
+  }
+
+  def submitCheckAmlsAlreadyAppliedForm: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      withValidSession { (_, existingSession) =>
+        withManuallyAssuredAgent(existingSession) {
+          appliedForAmlsForm.bindFromRequest.fold(
+            formWithErrors => Ok(amls_applied_for(formWithErrors)),
+            validForm => {
+              val nextPage = validForm match {
+                case Yes => Redirect(routes.AMLSController.showAmlsApplicationDetails())
+                case No  => Redirect(routes.AMLSController.showAmlsNotAppliedPage())
+              }
+
+              sessionStoreService
+                .cacheAgentSession(existingSession.copy(amlsAppliedFor = RadioInputAnswer.unapply(validForm)))
+                .map(_ => nextPage)
+            }
+          )
+        }
+      }
+    }
+  }
+
+  val showAmlsApplicationDetails: Action[AnyContent] = Action.async { implicit request =>
+    Ok("TODO - amls application details")
+  }
+
+  def showAmlsNotAppliedPage: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Ok(html.amls.amls_not_applied())
+    }
+  }
+
+  val showAmlsDetailsForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
@@ -69,9 +146,9 @@ class AMLSController @Inject()(
                     "expiry.month"     -> amlsDetails.membershipExpiresOn.getMonthValue.toString,
                     "expiry.year"      -> amlsDetails.membershipExpiresOn.getYear.toString
                   )
-                Ok(html.money_laundering_compliance(amlsForm(amlsBodies.keySet).bind(form), amlsBodies, mayBeGoBackUrl))
+                Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet).bind(form), amlsBodies, mayBeGoBackUrl))
 
-              case (None, _) => Ok(html.money_laundering_compliance(amlsForm(amlsBodies.keySet), amlsBodies))
+              case (None, _) => Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet), amlsBodies))
             }
           }
         }
@@ -79,7 +156,7 @@ class AMLSController @Inject()(
     }
   }
 
-  def submitMoneyLaunderingComplianceForm: Action[AnyContent] = Action.async { implicit request =>
+  def submitAmlsDetailsForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
@@ -88,13 +165,13 @@ class AMLSController @Inject()(
             .fold(
               formWithErrors => {
                 val form = AMLSForms.formWithRefinedErrors(formWithErrors)
-                Ok(html.money_laundering_compliance(form, amlsBodies))
+                Ok(html.amls.amls_details(form, amlsBodies))
               },
               validForm => {
                 val amlsDetails = AMLSDetails(
-                  supervisoryBody = amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code")),
-                  membershipNumber = validForm.membershipNumber,
-                  membershipExpiresOn = validForm.expiry
+                  amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code")),
+                  validForm.membershipNumber,
+                  validForm.expiry
                 )
 
                 sessionStoreService
@@ -107,55 +184,6 @@ class AMLSController @Inject()(
         }
       }
     }
-  }
-
-  val showAppliedForAmlsForm: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
-      withValidSession { (_, existingSession) =>
-        withManuallyAssuredAgent(existingSession) {
-          val form = amlsAppliedForYesNoForm
-          sessionStoreService.fetchGoBackUrl.map { maybeGobackUrl =>
-            Ok(
-              amls_applied_for(
-                existingSession.amlsAppliedYesNo.fold(form)(x => form.fill(YesNo.toRadioConfirm(x))),
-                maybeGobackUrl)
-            )
-          }
-        }
-      }
-    }
-  }
-
-  def submitAppliedForAmlsForm: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
-      withValidSession { (_, existingSession) =>
-        withManuallyAssuredAgent(existingSession) {
-
-          sessionStoreService.fetchGoBackUrl.flatMap { maybeGobackUrl =>
-            amlsAppliedForYesNoForm.bindFromRequest.fold(
-              formWithErrors => Ok(amls_applied_for(formWithErrors)),
-              validForm => {
-                val newValue = YesNo(validForm)
-                val redirectTo =
-                  if (Yes == newValue) routes.AMLSController.showAmlsApplicationDetails().url
-                  else routes.AMLSController.moneyLaunderingComplianceIncomplete().url
-                sessionStoreService
-                  .cacheAgentSession(existingSession.copy(amlsAppliedYesNo = Some(newValue)))
-                  .map(_ => Redirect(redirectTo))
-              }
-            )
-          }
-        }
-      }
-    }
-  }
-
-  val moneyLaunderingComplianceIncomplete = Action.async { implicit request =>
-    Ok("TODO - amls incomplete")
-  }
-
-  val showAmlsApplicationDetails: Action[AnyContent] = Action.async { implicit request =>
-    Ok("TODO - amls application details")
   }
 
   private def withManuallyAssuredAgent(agentSession: AgentSession)(body: => Future[Result])(

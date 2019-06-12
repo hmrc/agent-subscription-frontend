@@ -18,17 +18,13 @@ package uk.gov.hmrc.agentsubscriptionfrontend
 
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
-import play.api.data.validation.{Invalid, Valid, ValidationError}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{BusinessDetails, _}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{BusinessDetails, RadioInputAnswer, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters.normalizeUtr
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.voa.play.form.ConditionalMappings.{mandatoryIfEqual, mandatoryIfTrue}
-
-import scala.util.{Success, Try}
 
 package object controllers {
   object BusinessIdentificationForms {
@@ -139,6 +135,12 @@ package object controllers {
 
   object AMLSForms {
 
+    def checkAmlsForm: Form[RadioInputAnswer] =
+      Form[RadioInputAnswer](
+        mapping("registeredAmls" -> nonEmptyText
+          .verifying("error.check-amls-value.invalid", value => value == "yes" || value == "no"))(
+          RadioInputAnswer.apply)(RadioInputAnswer.unapply))
+
     def amlsForm(bodies: Set[String]): Form[AMLSForm] =
       Form[AMLSForm](
         mapping(
@@ -147,11 +149,11 @@ package object controllers {
           "expiry"           -> expiryDate
         )(AMLSForm.apply)(AMLSForm.unapply))
 
-    val amlsAppliedForYesNoForm: Form[RadioConfirm] = Form(
-      mapping(
-        "amlsAppliedFor" -> optional(boolean).verifying(radioInputSelected("error.amlsAppliedFor.empty"))
-      )(RadioConfirm.apply)(RadioConfirm.unapply)
-    )
+    def appliedForAmlsForm: Form[RadioInputAnswer] =
+      Form[RadioInputAnswer](
+        mapping("amlsAppliedFor" -> text
+          .verifying("error.check-amlsAppliedFor-value.invalid", value => value == "yes" || value == "no"))(
+          RadioInputAnswer.apply)(RadioInputAnswer.unapply))
 
     import play.api.data.{Form, FormError}
 
