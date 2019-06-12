@@ -27,8 +27,9 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, AgentSession, RadioInputAnswer}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
+
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls.amls_applied_for
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -55,8 +56,8 @@ class AMLSController @Inject()(
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
-          existingSession.checkAmls.fold(Ok(html.amls.check_amls(checkAmlsForm)))(amls =>
-            Ok(html.amls.check_amls(checkAmlsForm.bind(Map("registeredAmls" -> amls.toString)))))
+          existingSession.amlsAppliedFor.fold(Ok(check_amls(checkAmlsForm)))(amls =>
+            Ok(check_amls(checkAmlsForm.bind(Map("registeredAmls" -> amls.toString)))))
         }
       }
     }
