@@ -119,10 +119,6 @@ class AMLSController @Inject()(
     }
   }
 
-  val showAmlsApplicationDetails: Action[AnyContent] = Action.async { implicit request =>
-    Ok("TODO - amls application details")
-  }
-
   val showAmlsDetailsForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
