@@ -347,7 +347,7 @@ object CommonValidators {
     Constraint[(String, String, String)] { data: (String, String, String) =>
       val (year, month, day) = data
 
-      val sixMonthsEarlier = LocalDate.now().minusMonths(6)
+      val sixMonthsEarlier = LocalDate.now().minusMonths(6).minusDays(1)
 
       if (LocalDate.of(year.toInt, month.toInt, day.toInt).isAfter(sixMonthsEarlier))
         Valid
