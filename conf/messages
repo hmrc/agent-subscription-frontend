@@ -152,6 +152,7 @@ task-list.3.check=You can check your answers once you have completed the other s
 task-list.4.number=4.
 task-list.4.header=Copy across your existing client relationships
 task-list.4.copy=Copy across your existing Self Assessment and VAT clients to your new account.
+task-list.completed=COMPLETED
 
 #Check business type
 businessType.title=What type of business are you?

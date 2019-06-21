@@ -41,8 +41,8 @@ class TaskListController @Inject()(
     withSubscribingAgent { implicit agent =>
       continueUrlActions.withMaybeContinueUrlCached {
         sessionStoreService.fetchAgentSession.map {
-          case Some(_) => Ok(html.task_list())
-          case None    => Ok(html.task_list())
+          case Some(session) => Ok(html.task_list(session.identifyBusinessTaskComplete))
+          case None          => Ok(html.task_list(false))
         }
       }
     }

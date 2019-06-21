@@ -17,10 +17,9 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.play.views.html.helpers._
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SignedOutController
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(identifyBusinessTaskComplete: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = Messages("task-list.header"), bodyClasses = None) {
 
@@ -34,8 +33,12 @@
     <span class="app-task-list__section-number">@Messages("task-list.1.number")</span>@Messages("task-list.1.header")
    </h2>
     <ul class="app-task-list__items">
-     <li class="app-task-list__item"><a href="#">@Messages("task-list.1.identify-business")</a></li>
-     <li class="app-task-list__item">@Messages("task-list.1.amls")</li>
+     <li class="app-task-list__item"><a href=@routes.BusinessTypeController.showBusinessTypeForm()>@Messages("task-list.1.identify-business")</a>
+     @if(identifyBusinessTaskComplete){<strong class="govuk-tag app-task-list__task-completed">@Messages("task-list.completed")</strong>}
+     </li>
+     <li class="app-task-list__item">@if(identifyBusinessTaskComplete){
+       <a href=@routes.AMLSController.showCheckAmlsPage()>@Messages("task-list.1.amls")</a>
+     }else{@Messages("task-list.1.amls")}</li>
     </ul>
    </li>
    <li>

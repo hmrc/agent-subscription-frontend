@@ -104,6 +104,30 @@
     padding-top: 10px;
     padding-bottom: 10px;
 }
+.app-task-list__task-completed {
+    float: right;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.govuk-tag {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 700;
+    display: inline-block;
+    padding: 4px 8px;
+    padding-bottom: 1px;
+    outline: 2px solid transparent;
+    outline-offset: -2px;
+    color: #ffffff;
+    background-color: #005ea5;
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 16px;
+    line-height: 1.25;
+}
 
 @media (min-width: 48.0625em) {
     .app-check-your-answers__contents {
