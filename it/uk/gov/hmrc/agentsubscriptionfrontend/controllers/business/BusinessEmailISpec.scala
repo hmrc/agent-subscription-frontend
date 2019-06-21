@@ -63,7 +63,7 @@ class BusinessEmailISpec extends BaseISpec {
   "submitBusinessEmailForm" should {
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.submitBusinessEmailForm(request))
 
-    "update business email after submission" in {
+    "update business email after submission, redirect to AMLS when there is a continue url" in {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("email" -> "newagent@example.com")
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(registration)))

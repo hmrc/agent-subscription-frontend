@@ -29,8 +29,7 @@ import scala.concurrent.ExecutionContext
 class TaskListController @Inject()(
   override val authConnector: AuthConnector,
   continueUrlActions: ContinueUrlActions,
-  val sessionStoreService: SessionStoreService,
-  subscriptionService: SubscriptionService)(
+  val sessionStoreService: SessionStoreService)(
   implicit override implicit val appConfig: AppConfig,
   metrics: Metrics,
   override val messagesApi: MessagesApi,
@@ -42,7 +41,7 @@ class TaskListController @Inject()(
       continueUrlActions.withMaybeContinueUrlCached {
         sessionStoreService.fetchAgentSession.map {
           case Some(session) => Ok(html.task_list(session.identifyBusinessTaskComplete))
-          case None          => Ok(html.task_list(false))
+          case None          => Ok(html.task_list(identifyBusinessTaskComplete = false))
         }
       }
     }

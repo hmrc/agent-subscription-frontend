@@ -61,7 +61,7 @@ class BusinessNameISpec extends BaseISpec {
   "submitBusinessNameForm" should {
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.submitBusinessNameForm(request))
 
-    "update business name after submission" in {
+    "update business name after submission, redirect to AMLS when there is a continue url" in {
       implicit val request =
         authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("name" -> "new Agent name")
       sessionStoreService.currentSession.agentSession =

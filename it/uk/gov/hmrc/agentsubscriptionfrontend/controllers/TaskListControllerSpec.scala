@@ -1,6 +1,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
-import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
+import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
 
 class TaskListControllerSpec extends BaseISpec {
@@ -23,6 +24,15 @@ class TaskListControllerSpec extends BaseISpec {
         "task-list.2.header",
         "task-list.3.header",
         "task-list.4.header")
+    }
+    "contain CONTINUE tag when a task has been completed" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      sessionStoreService.currentSession.agentSession = Some(AgentSession(identifyBusinessTaskComplete = true))
+
+      val result = await(controller.showTaskList(request))
+      result should containMessages(
+        "task-list.header",
+        "task-list.completed")
     }
   }
 }
