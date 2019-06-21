@@ -1,18 +1,13 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
 
-class TaskListControllerSpec extends BaseISpec {
+class TaskListControllerISpec extends BaseISpec {
   lazy val controller: TaskListController = app.injector.instanceOf[TaskListController]
 
   "showTaskList (GET /task-list)" should {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.showTaskList(_))
-
-    behave like aPageTakingContinueUrlAndCachingInSessionStore(
-      controller.showTaskList(_),
-      userIsAuthenticated(subscribingCleanAgentWithoutEnrolments))
 
     "contain page titles and header content" in {
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)

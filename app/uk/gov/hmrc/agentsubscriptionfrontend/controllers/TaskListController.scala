@@ -38,10 +38,10 @@ class TaskListController @Inject()(
 
   def showTaskList: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-        sessionStoreService.fetchAgentSession.map {
-          case Some(session) => Ok(html.task_list(session.identifyBusinessTaskComplete))
-          case None          => Ok(html.task_list(identifyBusinessTaskComplete = false))
-        }
+      sessionStoreService.fetchAgentSession.map {
+        case Some(session) => Ok(html.task_list(session.identifyBusinessTaskComplete))
+        case None          => Ok(html.task_list(identifyBusinessTaskComplete = false))
       }
+    }
   }
 }
