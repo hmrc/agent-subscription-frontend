@@ -41,8 +41,8 @@ class TaskListController @Inject()(
       continueUrlActions.withMaybeContinueUrl { continueUrlOpt =>
         sessionStoreService.fetchAgentSession.map {
           case _ if continueUrlOpt.isDefined => Redirect(routes.StartController.start())
-          case Some(session)                 => Ok(html.task_list(session.businessTaskComplete))
-          case None                          => Ok(html.task_list(identifyBusinessTaskComplete = false))
+          case Some(session)                 => Ok(html.task_list(session.businessTaskComplete, session.amlsTaskComplete))
+          case None                          => Ok(html.task_list(businessTaskComplete = false, amlsTaskComplete = false))
         }
       }
     }
