@@ -38,9 +38,12 @@ class TaskListController @Inject()(
 
   def showTaskList: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-      sessionStoreService.fetchAgentSession.map {
-        case Some(session) => Ok(html.task_list(session.businessTaskComplete))
-        case None          => Ok(html.task_list(identifyBusinessTaskComplete = false))
+      continueUrlActions.withMaybeContinueUrl { continueUrlOpt =>
+        sessionStoreService.fetchAgentSession.map {
+          case _ if continueUrlOpt.isDefined => Redirect(routes.StartController.start())
+          case Some(session)                 => Ok(html.task_list(session.businessTaskComplete))
+          case None                          => Ok(html.task_list(identifyBusinessTaskComplete = false))
+        }
       }
     }
   }
