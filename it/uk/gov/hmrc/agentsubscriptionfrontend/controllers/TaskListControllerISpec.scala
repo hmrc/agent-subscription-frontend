@@ -22,7 +22,7 @@ class TaskListControllerISpec extends BaseISpec {
     }
     "contain CONTINUE tag when a task has been completed" in {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      sessionStoreService.currentSession.agentSession = Some(AgentSession(identifyBusinessTaskComplete = true))
+      sessionStoreService.currentSession.agentSession = Some(AgentSession(businessTaskComplete = true))
 
       val result = await(controller.showTaskList(request))
       result should containMessages(

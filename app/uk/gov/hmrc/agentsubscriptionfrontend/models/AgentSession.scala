@@ -33,7 +33,7 @@ case class AgentSession(
   checkAmls: Option[String] = None,
   amlsAppliedFor: Option[String] = None,
   amlsDetails: Option[AMLSDetails] = None,
-  identifyBusinessTaskComplete: Boolean = false,
+  businessTaskComplete: Boolean = false,
   amlsTaskComplete: Boolean = false)
 
 object AgentSession {

@@ -20,9 +20,9 @@ import javax.inject.Inject
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionService}
-import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
+import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.ExecutionContext
 
@@ -39,7 +39,7 @@ class TaskListController @Inject()(
   def showTaskList: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       sessionStoreService.fetchAgentSession.map {
-        case Some(session) => Ok(html.task_list(session.identifyBusinessTaskComplete))
+        case Some(session) => Ok(html.task_list(session.businessTaskComplete))
         case None          => Ok(html.task_list(identifyBusinessTaskComplete = false))
       }
     }

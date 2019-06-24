@@ -163,7 +163,7 @@ class BusinessIdentificationController @Inject()(
         routes.AMLSController.showCheckAmlsPage()
       case _ =>
         sessionStoreService
-          .cacheAgentSession(existingSession.copy(identifyBusinessTaskComplete = true))
+          .cacheAgentSession(existingSession.copy(businessTaskComplete = true))
           .flatMap(_ => routes.TaskListController.showTaskList())
     }
 
