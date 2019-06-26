@@ -169,10 +169,10 @@ class BusinessIdentificationController @Inject()(
           _ <- if (isMAA)
                 sessionStoreService.cacheAgentSession(
                   existingSession.copy(
-                    taskListFlags = TaskListFlags(businessTaskComplete = true, amlsTaskComplete = true)))
+                    taskListFlags = existingSession.taskListFlags.copy(businessTaskComplete = true, amlsTaskComplete = true)))
               else
                 sessionStoreService.cacheAgentSession(
-                  existingSession.copy(taskListFlags = TaskListFlags(businessTaskComplete = true)))
+                  existingSession.copy(taskListFlags = existingSession.taskListFlags.copy(businessTaskComplete = true)))
           result <- routes.TaskListController.showTaskList()
         } yield result
     }

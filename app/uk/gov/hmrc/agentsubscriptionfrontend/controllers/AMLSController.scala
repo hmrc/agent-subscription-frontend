@@ -177,7 +177,7 @@ class AMLSController @Inject()(
 
                 sessionStoreService
                   .cacheAgentSession(existingSession
-                    .copy(amlsDetails = Some(amlsDetails), taskListFlags = TaskListFlags(amlsTaskComplete = true)))
+                    .copy(amlsDetails = Some(amlsDetails), taskListFlags = existingSession.taskListFlags.copy(amlsTaskComplete = true)))
                   .flatMap { _ =>
                     sessionStoreService.fetchContinueUrl.map {
                       case Some(_) => Redirect(routes.SubscriptionController.showCheckAnswers())
