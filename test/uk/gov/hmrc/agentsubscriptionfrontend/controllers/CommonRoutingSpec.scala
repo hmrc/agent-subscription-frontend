@@ -38,41 +38,41 @@ class CommonRoutingSpec extends UnitSpec with WithFakeApplication with Resetting
   private implicit val hc = HeaderCarrier()
   private implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
-  "handleAutoMapping" should {
-    "handleAutoMapping decide whether a user can see showLinkClients page needed for mapping" when {
-      implicit def request = FakeRequest()
-
-      "autoMapping is ON and they ARE ELIGIBLE for mapping SHOW linkClients page " in {
-        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(true)
-
-        val result = await(commonRouting.handleAutoMapping(eligibleForMapping = Some(true)))
-        redirectLocation(result).get shouldBe routes.SubscriptionController.showLinkClients().url
-      }
-
-      "autoMapping is ON and they are NOT ELIGIBLE for mapping hence why was NOT OFFERED the decision to add decision to session" in {
-        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(true)
-
-        val result = await(commonRouting.handleAutoMapping(eligibleForMapping = Some(false)))
-        redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
-      }
-
-      "autoMapping is ON and chainedSessionDetails did NOT CACHE wasEligibleForMapping" in {
-        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(true)
-
-        val result = commonRouting.handleAutoMapping(eligibleForMapping = None)
-        status(result) shouldBe 303
-
-        redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
-      }
-
-      "autoMapping is OFF" in {
-        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(false)
-
-        val result = commonRouting.handleAutoMapping(None)
-        status(result) shouldBe 303
-
-        redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
-      }
-    }
-  }
+//  "handleAutoMapping" should {
+//    "handleAutoMapping decide whether a user can see showLinkClients page needed for mapping" when {
+//      implicit def request = FakeRequest()
+//
+//      "autoMapping is ON and they ARE ELIGIBLE for mapping SHOW linkClients page " in {
+//        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(true)
+//
+//        val result = await(commonRouting.handleAutoMapping(eligibleForMapping = Some(true)))
+//        redirectLocation(result).get shouldBe routes.SubscriptionController.showLinkClients().url
+//      }
+//
+//      "autoMapping is ON and they are NOT ELIGIBLE for mapping hence why was NOT OFFERED the decision to add decision to session" in {
+//        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(true)
+//
+//        val result = await(commonRouting.handleAutoMapping(eligibleForMapping = Some(false)))
+//        redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
+//      }
+//
+//      "autoMapping is ON and chainedSessionDetails did NOT CACHE wasEligibleForMapping" in {
+//        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(true)
+//
+//        val result = commonRouting.handleAutoMapping(eligibleForMapping = None)
+//        status(result) shouldBe 303
+//
+//        redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
+//      }
+//
+//      "autoMapping is OFF" in {
+//        when(mockAppConfig.autoMapAgentEnrolments).thenReturn(false)
+//
+//        val result = commonRouting.handleAutoMapping(None)
+//        status(result) shouldBe 303
+//
+//        redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
+//      }
+//    }
+//  }
 }
