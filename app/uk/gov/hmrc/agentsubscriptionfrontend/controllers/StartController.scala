@@ -79,9 +79,9 @@ class StartController @Inject()(
                   chainedSessionDetails.wasEligibleForMapping)
               }
 
-            case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+            case None => Redirect(routes.TaskListController.showTaskList())
           }
-        case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+        case None => Redirect(routes.TaskListController.showTaskList())
       }
     }
   }
