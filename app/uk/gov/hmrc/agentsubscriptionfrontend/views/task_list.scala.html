@@ -77,7 +77,7 @@
                         <strong class="govuk-tag app-task-list__task-completed">@Messages("task-list.completed")</strong>
                     }
                 } else {
-                    @Messages("task-list.2.check")
+                    @Messages("task-list.3.check")
                 }
                 </li>
             </ul>
@@ -88,12 +88,12 @@
             </h2>
             <ul class="app-task-list__items">
                 <li class="app-task-list__item">@if(taskListFlags.checkAnswersComplete) {
-                    <a href="#">@Messages("task-list.3.copy")</a>
+                    <a href="#">@Messages("task-list.4.copy")</a>
                     @if(taskListFlags.copyComplete) {
                         <strong class="govuk-tag app-task-list__task-completed">@Messages("task-list.completed")</strong>
                     }
                 } else {
-                    @Messages("task-list.2.copy")
+                    @Messages("task-list.4.copy")
                 }
                 </li>
             </ul>

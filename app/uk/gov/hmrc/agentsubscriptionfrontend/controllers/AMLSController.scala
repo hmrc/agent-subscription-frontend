@@ -176,8 +176,11 @@ class AMLSController @Inject()(
                   Right(RegisteredDetails(validForm.membershipNumber, validForm.expiry)))
 
                 sessionStoreService
-                  .cacheAgentSession(existingSession
-                    .copy(amlsDetails = Some(amlsDetails), taskListFlags = existingSession.taskListFlags.copy(amlsTaskComplete = true)))
+                  .cacheAgentSession(
+                    existingSession
+                      .copy(
+                        amlsDetails = Some(amlsDetails),
+                        taskListFlags = existingSession.taskListFlags.copy(amlsTaskComplete = true)))
                   .flatMap { _ =>
                     sessionStoreService.fetchContinueUrl.map {
                       case Some(_) => Redirect(routes.SubscriptionController.showCheckAnswers())
