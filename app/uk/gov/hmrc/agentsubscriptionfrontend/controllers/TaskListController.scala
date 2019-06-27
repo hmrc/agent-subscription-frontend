@@ -46,7 +46,7 @@ class TaskListController @Inject()(
           case Some(session) => Ok(html.task_list(session.taskListFlags))
           case None          => Ok(html.task_list(TaskListFlags()))
         },
-        Future successful Redirect(routes.BusinessTypeController.showBusinessTypeForm()),
+        Future successful Redirect(routes.BusinessTypeController.showBusinessTypeForm())
       )
     }
   }
