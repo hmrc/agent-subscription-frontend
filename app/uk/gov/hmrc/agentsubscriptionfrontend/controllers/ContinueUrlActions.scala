@@ -70,7 +70,7 @@ class ContinueUrlActions @Inject()(whiteListService: HostnameWhiteListService, s
         sessionStoreService.cacheContinueUrl(url).flatMap(_ => block)
     }
 
-  def withMaybeContinueUrlCached[A](continueUrlblock: => Future[Result], noContinueUrlBlock: => Future[Result])(
+  def withMaybeContinueUrlCached[A](noContinueUrlBlock: => Future[Result], continueUrlblock: => Future[Result])(
     implicit hc: HeaderCarrier,
     request: Request[A]): Future[Result] =
     withMaybeContinueUrl {

@@ -42,11 +42,11 @@ class TaskListController @Inject()(
   def showTaskList: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       continueUrlActions.withMaybeContinueUrlCached(
-        Future successful Redirect(routes.BusinessTypeController.showBusinessTypeForm()),
         sessionStoreService.fetchAgentSession.map {
           case Some(session) => Ok(html.task_list(session.taskListFlags))
           case None          => Ok(html.task_list(TaskListFlags()))
-        }
+        },
+        Future successful Redirect(routes.BusinessTypeController.showBusinessTypeForm()),
       )
     }
   }
