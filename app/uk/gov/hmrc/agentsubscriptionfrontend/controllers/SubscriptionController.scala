@@ -49,7 +49,8 @@ class SubscriptionController @Inject()(
   override val appConfig: AppConfig,
   override val metrics: Metrics,
   override val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
+    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
+    with SessionBehaviour {
 
   import SubscriptionControllerForms._
 
@@ -93,7 +94,7 @@ class SubscriptionController @Inject()(
             case (Some(utr), Some(postcode), Some(registration), Some(amlsDetails)) =>
               subscriptionService
                 .subscribe(utr, postcode, registration, amlsDetails)
-                .flatMap(redirectSubscriptionResponse(_, utr))
+                .flatMap(redirectSubscriptionResponse(_, utr, existingSession))
 
             case _ =>
               Logger(getClass).warn(s"Missing data in session, redirecting back to /business-type")
@@ -115,12 +116,23 @@ class SubscriptionController @Inject()(
     }
   }
 
-  private def redirectSubscriptionResponse(either: Either[SubscriptionReturnedHttpError, (Arn, String)], utr: Utr)(
-    implicit request: Request[AnyContent]): Future[Result] =
+  private def redirectSubscriptionResponse(
+    either: Either[SubscriptionReturnedHttpError, (Arn, String)],
+    utr: Utr,
+    existingSession: AgentSession)(implicit request: Request[AnyContent]): Future[Result] =
     either match {
       case Right((arn, nameFromDetails)) =>
         mark("Count-Subscription-Complete")
-        completeMappingWhenAvailable(utr, completedPartialSub = false)
+        sessionStoreService
+          .cacheAgentSession(
+            existingSession
+              .copy(taskListFlags = existingSession.taskListFlags.copy(checkAnswersComplete = true)))
+          .flatMap { _ =>
+            sessionStoreService.fetchContinueUrl.flatMap {
+              case Some(_) => completeMappingWhenAvailable(utr)
+              case None    => Future successful Redirect(routes.TaskListController.showTaskList())
+            }
+          }
 
       case Left(SubscriptionReturnedHttpError(CONFLICT)) =>
         mark("Count-Subscription-AlreadySubscribed-APIResponse")

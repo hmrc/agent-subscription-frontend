@@ -46,7 +46,8 @@ class AMLSController @Inject()(
   override val appConfig: AppConfig,
   override val metrics: Metrics,
   override val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
+    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
+    with SessionBehaviour {
 
   import AMLSForms._
 

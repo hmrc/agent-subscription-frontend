@@ -37,14 +37,15 @@ import scala.concurrent.{ExecutionContext, Future}
 class SignedOutController @Inject()(
   chainedSessionRepository: ChainedSessionDetailsRepository,
   mappingService: MappingService,
-  val sessionStoreService: SessionStoreService,
+  override val sessionStoreService: SessionStoreService,
   continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector)(
   implicit messagesApi: MessagesApi,
   override val appConfig: AppConfig,
   override val metrics: Metrics,
   override val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
+    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
+    with SessionBehaviour {
 
   def redirectToSos = Action.async { implicit request =>
     for {

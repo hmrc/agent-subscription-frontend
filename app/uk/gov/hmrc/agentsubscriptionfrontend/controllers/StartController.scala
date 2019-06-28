@@ -39,13 +39,14 @@ class StartController @Inject()(
   override val authConnector: AuthConnector,
   chainedSessionDetailsRepository: ChainedSessionDetailsRepository,
   continueUrlActions: ContinueUrlActions,
-  val sessionStoreService: SessionStoreService,
+  override val sessionStoreService: SessionStoreService,
   subscriptionService: SubscriptionService)(
   implicit override implicit val appConfig: AppConfig,
   metrics: Metrics,
   override val messagesApi: MessagesApi,
   val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
+    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
+    with SessionBehaviour {
 
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
 
@@ -137,8 +138,9 @@ class StartController @Inject()(
             })
         case _ =>
           sessionStoreService
-            .cacheAgentSession(existingSession
-              .copy(taskListFlags = existingSession.taskListFlags.copy(createTaskComplete = true, copyComplete = true)))
+            .cacheAgentSession(
+              existingSession
+                .copy(taskListFlags = existingSession.taskListFlags.copy(createTaskComplete = true)))
             .flatMap(_ =>
               sessionStoreService.fetchContinueUrl.flatMap {
                 case Some(_) => toFuture(Redirect(routes.SubscriptionController.showCheckAnswers()))

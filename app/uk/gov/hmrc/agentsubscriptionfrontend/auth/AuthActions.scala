@@ -22,6 +22,7 @@ import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.agentmtdidentifiers.model.Arn
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ContinueUrlActions, routes}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
@@ -29,6 +30,8 @@ import uk.gov.hmrc.auth.core.retrieve.Retrievals.{allEnrolments, authorisedEnrol
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
+import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, TaskListFlags}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,6 +61,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
 
   def continueUrlActions: ContinueUrlActions
   def appConfig: AppConfig
+  def sessionStoreService: SessionStoreService
 
   def env = appConfig.environment
   def config = appConfig.configuration
@@ -93,6 +97,33 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
               case None =>
                 mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
                 Redirect(appConfig.agentServicesAccountUrl)
+            }
+          } else {
+            body(new Agent(enrolments.enrolments, creds))
+          }
+      }
+      .recover {
+        handleException
+      }
+
+  def withSubscribingOrSubscribedAgent[A](body: Agent => Future[Result])(taskListSubscribedBody: AgentSession => Future[Result])(
+    implicit request: Request[A],
+    hc: HeaderCarrier,
+    ec: ExecutionContext): Future[Result] =
+    authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
+      .retrieve(allEnrolments and credentials) {
+        case enrolments ~ creds =>
+          if (isEnrolledForHmrcAsAgent(enrolments)) {
+            continueUrlActions.extractContinueUrl.flatMap {
+              case Some(continueUrl) =>
+                mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
+                Future successful Redirect(continueUrl.url)
+              case None =>
+                mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
+                sessionStoreService.fetchAgentSession.flatMap {
+                  case Some(session) if session.taskListFlags.checkAnswersComplete => taskListSubscribedBody(session)
+                  case None                                                        => Future successful Redirect(appConfig.agentServicesAccountUrl)
+                }
             }
           } else {
             body(new Agent(enrolments.enrolments, creds))

@@ -40,7 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class PostcodeController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector,
-  val sessionStoreService: SessionStoreService,
+  override val sessionStoreService: SessionStoreService,
   subscriptionService: SubscriptionService,
   assuranceService: AssuranceService,
   auditService: AuditService)(
@@ -48,7 +48,8 @@ class PostcodeController @Inject()(
   override val appConfig: AppConfig,
   val ec: ExecutionContext,
   override val messagesApi: MessagesApi)
-    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
+    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
+    with SessionBehaviour {
 
   def showPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>

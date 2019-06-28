@@ -9,8 +9,11 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContinueUrlActions
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, TaskListFlags}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForHMRCASAGENT, subscribingCleanAgentWithoutEnrolments}
 import uk.gov.hmrc.auth.core.{AuthConnector, InsufficientEnrolments}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 
@@ -18,12 +21,15 @@ import scala.concurrent.Future
 
 class AuthActionsSpec extends BaseISpec with MockitoSugar with BeforeAndAfterEach {
 
+  val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
+
   object TestController extends AuthActions {
 
     implicit val hc = HeaderCarrier()
     implicit val request = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
     import scala.concurrent.ExecutionContext.Implicits.global
 
+    override def sessionStoreService: SessionStoreService = app.injector.instanceOf[SessionStoreService]
     override def authConnector: AuthConnector = app.injector.instanceOf[AuthConnector]
     override def appConfig: AppConfig = app.injector.instanceOf[AppConfig]
     override def continueUrlActions: ContinueUrlActions = app.injector.instanceOf[ContinueUrlActions]
@@ -31,6 +37,9 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar with BeforeAndAfterEac
 
     def withSubscribedAgent[A]: Result =
       await(super.withSubscribedAgent { arn => Future.successful(Ok(arn.value)) })
+
+    def withSubscribingOrSubscribedAgent[A]: Result = await(TestController.withSubscribingOrSubscribedAgent(
+      _ => Future successful Ok("unsubscribed"))(_ => Future successful Ok("task")))
 
   }
 
@@ -80,6 +89,31 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar with BeforeAndAfterEac
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/agent-subscription/finish-sign-out")
+    }
+  }
+
+  "withSubscribingOrSubscribedAgent" should {
+    "call body with a valid unsubscribed agent" in {
+      authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      val result = TestController.withSubscribingOrSubscribedAgent
+
+      status(result) shouldBe 200
+      bodyOf(result) shouldBe "unsubscribed"
+    }
+    "redirect to agent services account when agent is subscribed and has no session" in {
+      authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+      val result = TestController.withSubscribingOrSubscribedAgent
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(appConfig.agentServicesAccountUrl)
+    }
+    "return the taskListSubscribed result when there is a check answers complete true flag in the session" in {
+      authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
+      sessionStoreService.cacheAgentSession(AgentSession(taskListFlags = TaskListFlags(checkAnswersComplete = true)))
+      val result = TestController.withSubscribingOrSubscribedAgent
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(appConfig.agentServicesAccountUrl)
     }
   }
 }
