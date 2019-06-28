@@ -68,16 +68,24 @@ class SubscriptionController @Inject()(
               sessionStoreService
                 .cacheGoBackUrl(routes.SubscriptionController.showCheckAnswers().url)
                 .map { _ =>
-                  Ok(
-                    html.check_answers(
-                      registrationName = registration.taxpayerName.getOrElse(""),
-                      address = registration.address,
-                      emailAddress = registration.emailAddress,
-                      amlsDetails = amlsDetails
-                    ))
+                  Ok(html.check_answers(
+                    registrationName = registration.taxpayerName.getOrElse(""),
+                    address = registration.address,
+                    emailAddress = registration.emailAddress,
+                    amlsDetails = Some(amlsDetails)
+                  ))
                 }
 
             case (None, _) => Redirect(routes.BusinessDetailsController.showBusinessDetailsForm())
+
+            case (Some(registration), None) if existingSession.taskListFlags.isMAA =>
+              Ok(
+                html.check_answers(
+                  registrationName = registration.taxpayerName.getOrElse(""),
+                  address = registration.address,
+                  emailAddress = registration.emailAddress,
+                  amlsDetails = None
+                ))
 
             case (_, None) => Redirect(routes.AMLSController.showCheckAmlsPage())
           }

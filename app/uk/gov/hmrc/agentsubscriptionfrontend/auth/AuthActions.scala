@@ -106,7 +106,8 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
         handleException
       }
 
-  def withSubscribingOrSubscribedAgent[A](body: Agent => Future[Result])(taskListSubscribedBody: AgentSession => Future[Result])(
+  def withSubscribingOrSubscribedAgent[A](body: Agent => Future[Result])(
+    taskListSubscribedBody: AgentSession => Future[Result])(
     implicit request: Request[A],
     hc: HeaderCarrier,
     ec: ExecutionContext): Future[Result] =

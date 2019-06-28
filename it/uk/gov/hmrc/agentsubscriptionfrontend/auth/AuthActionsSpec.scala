@@ -39,7 +39,10 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar with BeforeAndAfterEac
       await(super.withSubscribedAgent { arn => Future.successful(Ok(arn.value)) })
 
     def withSubscribingOrSubscribedAgent[A]: Result = await(TestController.withSubscribingOrSubscribedAgent(
-      _ => Future successful Ok("unsubscribed"))(_ => Future successful Ok("task")))
+      _ => Future successful Ok("unsubscribed"))(_ => Future successful Ok("taskListSubscribed")))
+
+    def storeCheckAnswersComplete =
+      sessionStoreService.cacheAgentSession(AgentSession(taskListFlags = TaskListFlags(checkAnswersComplete = true)))
 
   }
 
@@ -109,11 +112,11 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar with BeforeAndAfterEac
     }
     "return the taskListSubscribed result when there is a check answers complete true flag in the session" in {
       authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
-      sessionStoreService.cacheAgentSession(AgentSession(taskListFlags = TaskListFlags(checkAnswersComplete = true)))
+      TestController.storeCheckAnswersComplete
       val result = TestController.withSubscribingOrSubscribedAgent
 
-      status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(appConfig.agentServicesAccountUrl)
+      status(result) shouldBe 200
+      bodyOf(result) shouldBe "taskListSubscribed"
     }
   }
 }
