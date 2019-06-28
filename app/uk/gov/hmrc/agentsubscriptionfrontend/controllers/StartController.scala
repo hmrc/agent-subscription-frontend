@@ -39,14 +39,13 @@ class StartController @Inject()(
   override val authConnector: AuthConnector,
   chainedSessionDetailsRepository: ChainedSessionDetailsRepository,
   continueUrlActions: ContinueUrlActions,
-  override val sessionStoreService: SessionStoreService,
+  val sessionStoreService: SessionStoreService,
   subscriptionService: SubscriptionService)(
   implicit override implicit val appConfig: AppConfig,
   metrics: Metrics,
   override val messagesApi: MessagesApi,
   val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
-    with SessionBehaviour {
+    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
 
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
 

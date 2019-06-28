@@ -43,14 +43,13 @@ class DateOfBirthController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector,
   val assuranceService: AssuranceService,
-  override val sessionStoreService: SessionStoreService,
+  val sessionStoreService: SessionStoreService,
   val subscriptionService: SubscriptionService)(
   implicit override val metrics: Metrics,
   override val appConfig: AppConfig,
   val ec: ExecutionContext,
   override val messagesApi: MessagesApi)
-    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
-    with SessionBehaviour {
+    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
 
   def showDateOfBirthForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>

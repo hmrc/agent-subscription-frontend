@@ -22,7 +22,7 @@ import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.agentmtdidentifiers.model.Arn
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ContinueUrlActions, routes}
-import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
@@ -30,8 +30,6 @@ import uk.gov.hmrc.auth.core.retrieve.Retrievals.{allEnrolments, authorisedEnrol
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
-import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, TaskListFlags}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -61,7 +59,6 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
 
   def continueUrlActions: ContinueUrlActions
   def appConfig: AppConfig
-  def sessionStoreService: SessionStoreService
 
   def env = appConfig.environment
   def config = appConfig.configuration
@@ -106,8 +103,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
         handleException
       }
 
-  def withSubscribingOrSubscribedAgent[A](body: Agent => Future[Result])(
-    taskListSubscribedBody: AgentSession => Future[Result])(
+  def withSubscribingOrSubscribedAgent[A](unsubscribedBody: Agent => Future[Result])(subscribedBody: Future[Result])(
     implicit request: Request[A],
     hc: HeaderCarrier,
     ec: ExecutionContext): Future[Result] =
@@ -121,13 +117,10 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
                 Future successful Redirect(continueUrl.url)
               case None =>
                 mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
-                sessionStoreService.fetchAgentSession.flatMap {
-                  case Some(session) if session.taskListFlags.checkAnswersComplete => taskListSubscribedBody(session)
-                  case None                                                        => Future successful Redirect(appConfig.agentServicesAccountUrl)
-                }
+                subscribedBody
             }
           } else {
-            body(new Agent(enrolments.enrolments, creds))
+            unsubscribedBody(new Agent(enrolments.enrolments, creds))
           }
       }
       .recover {

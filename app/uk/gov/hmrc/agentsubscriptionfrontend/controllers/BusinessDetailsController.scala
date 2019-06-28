@@ -39,7 +39,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class BusinessDetailsController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector,
-  override val sessionStoreService: SessionStoreService,
+  val sessionStoreService: SessionStoreService,
   val subscriptionService: SubscriptionService,
   val assuranceService: AssuranceService,
   val auditService: AuditService)(
@@ -47,8 +47,7 @@ class BusinessDetailsController @Inject()(
   override val appConfig: AppConfig,
   val ec: ExecutionContext,
   override val messagesApi: MessagesApi)
-    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
-    with SessionBehaviour {
+    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
 
   def showBusinessDetailsForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>

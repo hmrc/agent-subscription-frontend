@@ -40,14 +40,13 @@ import scala.concurrent.{ExecutionContext, Future}
 class AssuranceChecksController @Inject()(
   assuranceService: AssuranceService,
   override val authConnector: AuthConnector,
-  override val sessionStoreService: SessionStoreService,
+  val sessionStoreService: SessionStoreService,
   continueUrlActions: ContinueUrlActions)(
   implicit messagesApi: MessagesApi,
   override val appConfig: AppConfig,
   override val metrics: Metrics,
   override val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
-    with SessionBehaviour {
+    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
 
   def invasiveCheckStart: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>

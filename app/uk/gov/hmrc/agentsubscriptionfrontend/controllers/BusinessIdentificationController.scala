@@ -47,7 +47,7 @@ class BusinessIdentificationController @Inject()(
   override val authConnector: AuthConnector,
   agentAssuranceConnector: AgentAssuranceConnector,
   val subscriptionService: SubscriptionService,
-  override val sessionStoreService: SessionStoreService,
+  val sessionStoreService: SessionStoreService,
   continueUrlActions: ContinueUrlActions,
   val businessDetailsValidator: BusinessDetailsValidator,
   auditService: AuditService)(
@@ -55,8 +55,7 @@ class BusinessIdentificationController @Inject()(
   override val appConfig: AppConfig,
   override val metrics: Metrics,
   override val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
-    with SessionBehaviour {
+    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
 
   import BusinessIdentificationForms._
 

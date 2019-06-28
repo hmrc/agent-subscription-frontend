@@ -33,14 +33,13 @@ import scala.concurrent.ExecutionContext
 class CompanyRegistrationController @Inject()(
   override val continueUrlActions: ContinueUrlActions,
   override val authConnector: AuthConnector,
-  override val sessionStoreService: SessionStoreService,
+  val sessionStoreService: SessionStoreService,
   val subscriptionService: SubscriptionService)(
   implicit override val metrics: Metrics,
   override val appConfig: AppConfig,
   val ec: ExecutionContext,
   override val messagesApi: MessagesApi)
-    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
-    with SessionBehaviour {
+    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
 
   def showCompanyRegNumberForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>

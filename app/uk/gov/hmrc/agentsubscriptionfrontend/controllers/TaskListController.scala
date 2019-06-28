@@ -32,13 +32,12 @@ class TaskListController @Inject()(
   override val authConnector: AuthConnector,
   agentAssuranceConnector: AgentAssuranceConnector,
   continueUrlActions: ContinueUrlActions,
-  override val sessionStoreService: SessionStoreService)(
+  val sessionStoreService: SessionStoreService)(
   implicit override implicit val appConfig: AppConfig,
   metrics: Metrics,
   override val messagesApi: MessagesApi,
   val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
-    with SessionBehaviour {
+    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
 
   def showTaskList: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingOrSubscribedAgent { implicit agent =>
@@ -49,6 +48,10 @@ class TaskListController @Inject()(
         },
         Future successful Redirect(routes.BusinessTypeController.showBusinessTypeForm())
       )
-    }(session => Future successful Ok(html.task_list(session.taskListFlags)))
+    }(sessionStoreService.fetchAgentSession.flatMap {
+      case Some(session) if session.taskListFlags.checkAnswersComplete =>
+        Future successful Ok(html.task_list(session.taskListFlags))
+      case None => Future successful Redirect(appConfig.agentServicesAccountUrl)
+    })
   }
 }

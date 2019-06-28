@@ -41,7 +41,7 @@ import scala.util.control.NonFatal
 class SubscriptionController @Inject()(
   override val authConnector: AuthConnector,
   subscriptionService: SubscriptionService,
-  override val sessionStoreService: SessionStoreService,
+  val sessionStoreService: SessionStoreService,
   addressLookUpConnector: AddressLookupFrontendConnector,
   mappingConnector: MappingConnector,
   continueUrlActions: ContinueUrlActions)(
@@ -49,8 +49,7 @@ class SubscriptionController @Inject()(
   override val appConfig: AppConfig,
   override val metrics: Metrics,
   override val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(sessionStoreService, authConnector, continueUrlActions, appConfig)
-    with SessionBehaviour {
+    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig) with SessionBehaviour {
 
   import SubscriptionControllerForms._
 
