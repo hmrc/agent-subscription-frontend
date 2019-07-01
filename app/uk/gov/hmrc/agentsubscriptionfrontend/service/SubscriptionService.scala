@@ -100,13 +100,15 @@ class SubscriptionService @Inject()(
     ec: ExecutionContext): Future[SubscriptionProcess] =
     agentSubscriptionConnector.getRegistration(utr, postcode.value).map {
 
-      case Some(reg) if reg.isSubscribedToAgentServices =>
-        SubscriptionProcess(SubscriptionState.SubscribedAndEnrolled, Some(reg))
+//      case Some(reg) if reg.isSubscribedToAgentServices =>
+//        SubscriptionProcess(SubscriptionState.SubscribedAndEnrolled, Some(reg))
 
-      case Some(Registration(None, _, _, _, _)) =>
-        throw new IllegalStateException(s"The agency with UTR ${utr.value} has a missing organisation/individual name.")
+//      case Some(Registration(None, _, _, _, _)) =>
+//        throw new IllegalStateException(s"The agency with UTR ${utr.value} has a missing organisation/individual name.")
 
-      case Some(reg) if !reg.isSubscribedToAgentServices && reg.isSubscribedToETMP =>
+      case Some(reg)
+          //if !reg.isSubscribedToAgentServices && reg.isSubscribedToETMP
+          =>
         SubscriptionProcess(SubscriptionState.SubscribedButNotEnrolled, Some(reg))
 
       case Some(reg) if !reg.isSubscribedToAgentServices && !reg.isSubscribedToETMP =>
