@@ -28,7 +28,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, AuthStub, MappingStubs}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, AuthStub}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
@@ -37,11 +37,9 @@ import uk.gov.hmrc.http.BadRequestException
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec with ScalaFutures {
-  protected def featureFlagAutoMapping: Boolean
 
   override protected def appBuilder: GuiceApplicationBuilder =
     super.appBuilder
-      .configure("features.auto-map-agent-enrolments" -> featureFlagAutoMapping)
 
   protected val utr = Utr("2000000000")
   protected val knownFactsPostcode = "AA1 2AA"
@@ -128,7 +126,6 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         val agentSession = AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), postcode = Some(Postcode("AA1 2AA")), registration = Some(registration.copy(isSubscribedToAgentServices = true)), amlsDetails = Some(amlsSDetails))
 
         sessionStoreService.currentSession.agentSession = Some(agentSession)
-        sessionStoreService.currentSession.wasEligibleForMapping = Some(false)
 
         val result = await(controller.submitCheckAnswers(request))
 
@@ -189,7 +186,6 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         givenAddressLookupInit("agents-subscr", "/api/dummy/callback")
 
         implicit val request = subscriptionDetailsRequest()
-        sessionStoreService.currentSession.wasEligibleForMapping = Some(false)
         sessionStoreService.currentSession.agentSession = agentSession
 
         val result = await(controller.showBusinessAddressForm(request))
@@ -220,7 +216,6 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         givenAddressLookupInit("agents-subscr", "/api/dummy/callback")
 
         implicit val request = subscriptionDetailsRequest()
-        sessionStoreService.currentSession.wasEligibleForMapping = Some(false)
         sessionStoreService.currentSession.agentSession = agentSession
 
         val result = await(controller.showBusinessAddressForm(request))
@@ -284,7 +279,6 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       givenAddressLookupInit("agents-subscr", "/api/dummy/callback")
 
       implicit val fakeRequest1 = subscriptionDetailsRequest()
-      sessionStoreService.currentSession(hc(fakeRequest1)).wasEligibleForMapping = Some(false)
       sessionStoreService.currentSession.agentSession = agentSession
 
       val user1Result1 = await(controller.showBusinessAddressForm(fakeRequest1))
@@ -295,7 +289,6 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       AgentSubscriptionStub.subscriptionWillSucceed(utr, request2, "ARN00002")
 
       val fakeRequest2 = subscriptionDetailsRequest2()
-      sessionStoreService.currentSession(hc(fakeRequest2)).wasEligibleForMapping = Some(false)
       sessionStoreService.currentSession(hc(fakeRequest2)).agentSession = agentSession
 
       val user2Result1 = await(controller.showBusinessAddressForm(fakeRequest2))
@@ -518,8 +511,7 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         .withRequestBody(containing(subscriptionRequest.agency.address.countryCode)))
 }
 
-class SubscriptionControllerWithAutoMappingOn extends SubscriptionControllerISpec {
-  override protected def featureFlagAutoMapping: Boolean = true
+class SubscriptionControllerTests extends SubscriptionControllerISpec {
 
   "submitCheckAnswers" should {
     "send subscription request and redirect to subscription complete" when {
@@ -528,7 +520,6 @@ class SubscriptionControllerWithAutoMappingOn extends SubscriptionControllerISpe
 
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
         sessionStoreService.currentSession.agentSession = agentSession
-        sessionStoreService.currentSession.wasEligibleForMapping = Some(false)
 
         val result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
@@ -538,7 +529,7 @@ class SubscriptionControllerWithAutoMappingOn extends SubscriptionControllerISpe
         metricShouldExistAndBeUpdated("Count-Subscription-Complete")
       }
 
-      "all fields are supplied and was eligible for mapping" in {
+      "all fields are supplied" in {
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
 
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
@@ -565,151 +556,6 @@ class SubscriptionControllerWithAutoMappingOn extends SubscriptionControllerISpe
         verifySubscriptionRequestSent(subscriptionRequestWithNoEdit())
         metricShouldExistAndBeUpdated("Count-Subscription-Complete")
       }
-    }
-
-    "showLinkClients (GET /link-clients)" should {
-      trait RequestAndResult {
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-        sessionStoreService.currentSession.agentSession = agentSession
-        val result = await(controller.showLinkClients(request))
-        val doc = Jsoup.parse(bodyOf(result))
-      }
-
-      behave like anAgentAffinityGroupOnlyEndpoint(controller.showLinkClients(_))
-
-      "contain page titles and content" in new RequestAndResult {
-        result should containMessages(
-          "linkClients.title",
-          "linkClients.p1",
-          "linkClients.p2",
-          "linkClients.expand.button",
-          "linkClients.expand.p1",
-          "linkClients.expand.p2",
-          "linkClients.expand.p3",
-          "linkClients.expand.bullet1",
-          "linkClients.expand.bullet2",
-          "linkClients.expand.p4",
-          "linkClients.legend",
-          "linkClients.option.yes",
-          "linkClients.option.no"
-        )
-      }
-
-      "contain radio options for Yes and No" in new RequestAndResult {
-        // Check form's radio inputs have correct values
-        doc.getElementById("autoMapping-yes").`val`() shouldBe "yes"
-        doc.getElementById("autoMapping-no").`val`() shouldBe "no"
-      }
-
-      "form should POST to /link-clients" in new RequestAndResult {
-        val form = doc.select("form").first()
-        form.attr("method") shouldBe "POST"
-        form.attr("action") shouldBe routes.SubscriptionController.submitLinkClients().url
-      }
-
-      "contain a continue button to submit form" in new RequestAndResult {
-        val continueBtn = doc.getElementById("continue")
-        continueBtn.hasClass("button") shouldBe true
-        continueBtn.attr("type") shouldBe "submit"
-        continueBtn.text() shouldBe htmlEscapedMessage("button.continue")
-      }
-    }
-
-    "submitLinkClients (POST /link-clients)" when {
-      class RequestWithSessionDetails(autoMappingFormValue: String) {
-        implicit val request = authenticatedAs(subscribing2ndCleanAgentWithoutEnrolments)
-          .withFormUrlEncodedBody("autoMapping" -> autoMappingFormValue)
-        sessionStoreService.currentSession.agentSession = agentSession
-      }
-
-      class PartiallySubRequestWithSessionDetails(autoMappingFormValue: String) {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          .withFormUrlEncodedBody("autoMapping" -> autoMappingFormValue)
-          .withSession("isPartiallySubscribed" -> "true")
-        sessionStoreService.currentSession.agentSession = agentSession
-      }
-
-      def resultOf(request: Request[AnyContent]) = await(controller.submitLinkClients(request))
-
-      behave like anAgentAffinityGroupOnlyEndpoint(resultOf)
-
-      "redirect to /check-answers choice is Yes" in new RequestWithSessionDetails(autoMappingFormValue = "yes") {
-        val result = resultOf(request)
-        result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showCheckAnswers().url
-        result.session.get("performAutoMapping") shouldBe Some("true")
-      }
-
-      "redirect to /complete choice is Yes PartiallySubscribed" in new PartiallySubRequestWithSessionDetails(autoMappingFormValue = "yes") {
-        AuthStub.authenticatedAgent(arn = "ARN00001")
-        AgentSubscriptionStub.partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(utr = utr, knownFacts = SubscriptionRequestKnownFacts("AA1 2AA")))
-        MappingStubs.givenMappingUpdateToPostSubscription(utr)
-
-        val result = resultOf(request)
-        result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showSubscriptionComplete().url
-      }
-
-      "redirect to /check-answers choice is No" in new RequestWithSessionDetails(autoMappingFormValue = "no") {
-        val result = resultOf(request)
-        result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showCheckAnswers().url
-        result.session.get("performAutoMapping") shouldBe None
-      }
-
-      "redirect to /complete choice is No PartiallySubscribed" in new PartiallySubRequestWithSessionDetails(autoMappingFormValue = "no") {
-        AgentSubscriptionStub.partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(utr = utr, knownFacts = SubscriptionRequestKnownFacts("AA1 2AA")))
-        val result = resultOf(request)
-        result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showSubscriptionComplete().url
-        result.session.get("performAutoMapping") shouldBe None
-      }
-
-      "choice is missing" should {
-        "return 200 and redisplay the /link-clients page with an error message for missing choice" in {
-          implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-          sessionStoreService.currentSession.agentSession = agentSession
-
-          resultOf(request) should containMessages("linkClients.title", "linkClients.error.no-radio-selected")
-        }
-      }
-
-      "form value is invalid" should {
-        "result in a BadRequest" in new RequestWithSessionDetails(autoMappingFormValue = "somethingInvalid") {
-          a[BadRequestException] shouldBe thrownBy(resultOf(request))
-        }
-      }
-    }
-  }
-}
-
-class SubscriptionControllerWithAutoMappingOff extends SubscriptionControllerISpec {
-  override protected def featureFlagAutoMapping: Boolean = false
-
-  "submitCheckAnswers" should {
-    "send subscription request and redirect to subscription complete when all fields are supplied and was not eligible for mapping" in {
-      AgentSubscriptionStub.subscriptionWillSucceed(utr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
-
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-      sessionStoreService.currentSession.agentSession = agentSession
-      sessionStoreService.currentSession.wasEligibleForMapping = None
-
-      val result = await(controller.submitCheckAnswers(request))
-      status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.SubscriptionController.showSubscriptionComplete().url)
-
-      verifySubscriptionRequestSent(subscriptionRequestWithNoEdit())
-      metricShouldExistAndBeUpdated("Count-Subscription-Complete")
-    }
-  }
-
-  "showLinkClients (GET /link-clients)" should {
-    "500 internal server error" in {
-      val result = await(controller.showLinkClients(FakeRequest()))
-      status(result) shouldBe 500
-    }
-  }
-
-  "submitLinkClients (POST /link-clients)" should {
-    "500 internal server error" in {
-      val result = await(controller.submitLinkClients(FakeRequest()))
-      status(result) shouldBe 500
     }
   }
 }

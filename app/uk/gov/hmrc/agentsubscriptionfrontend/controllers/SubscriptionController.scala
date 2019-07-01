@@ -23,7 +23,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{AnyContent, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AddressLookupFrontendConnector, MappingConnector}
+import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AddressLookupFrontendConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -43,7 +43,6 @@ class SubscriptionController @Inject()(
   subscriptionService: SubscriptionService,
   override val sessionStoreService: SessionStoreService,
   addressLookUpConnector: AddressLookupFrontendConnector,
-  mappingConnector: MappingConnector,
   continueUrlActions: ContinueUrlActions)(
   implicit messagesApi: MessagesApi,
   override val appConfig: AppConfig,
@@ -183,67 +182,11 @@ class SubscriptionController @Inject()(
   }
 
   val showLinkClients: Action[AnyContent] = Action.async { implicit request =>
-    appConfig.autoMapAgentEnrolments match {
-      case true =>
-        withSubscribingAgent { _ =>
-          withValidSession { (_, _) =>
-            toFuture(Ok(html.link_clients(linkClientsForm)))
-          }
-        }
-      case false => toFuture(InternalServerError)
-    }
+    toFuture(InternalServerError)
   }
 
   val submitLinkClients: Action[AnyContent] = Action.async { implicit request =>
-    appConfig.autoMapAgentEnrolments match {
-      case true =>
-        withSubscribingAgent { _ =>
-          withValidSession { (_, existingSession) =>
-            (existingSession.utr, existingSession.postcode) match {
-              case (Some(utr), Some(postcode)) =>
-                linkClientsForm
-                  .bindFromRequest()
-                  .fold(
-                    formWithErrors => Ok(html.link_clients(formWithErrors)),
-                    validatedLinkClients => {
-                      val isPartiallySubscribed = request.session.get("isPartiallySubscribed").contains("true")
-
-                      validatedLinkClients.autoMapping match {
-                        case Yes =>
-                          if (isPartiallySubscribed) {
-                            for {
-                              _ <- subscriptionService.completePartialSubscription(utr, postcode)
-                              _ = mark("Count-Subscription-PartialSubscriptionCompleted")
-                              returnResult <- completeMappingWhenAvailable(utr, completedPartialSub = true)
-                            } yield returnResult.withSession(request.session - "isPartiallySubscribed")
-                          } else {
-                            toFuture(Redirect(routes.SubscriptionController.showCheckAnswers())
-                              .withSession(request.session + ("performAutoMapping" -> "true")))
-                          }
-
-                        case No =>
-                          if (isPartiallySubscribed) {
-                            subscriptionService
-                              .completePartialSubscription(utr, postcode)
-                              .map { _ =>
-                                mark("Count-Subscription-PartialSubscriptionCompleted")
-                                Redirect(routes.SubscriptionController.showSubscriptionComplete())
-                                  .withSession(request.session - "isPartiallySubscribed")
-                              }
-                          } else {
-                            toFuture(Redirect(routes.SubscriptionController.showCheckAnswers())
-                              .withSession(request.session - "performAutoMapping"))
-                          }
-                      }
-                    }
-                  )
-              case _ => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
-            }
-          }
-        }
-
-      case false => toFuture(InternalServerError)
-    }
+    toFuture(InternalServerError)
   }
 
   val showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>
@@ -281,18 +224,6 @@ class SubscriptionController @Inject()(
 
   private def completeMappingWhenAvailable(utr: Utr, completedPartialSub: Boolean = false)(
     implicit request: Request[AnyContent],
-    hc: HeaderCarrier): Future[Result] = {
-
-    val doMappingAnswer: Boolean = request.session.get("performAutoMapping").contains("true") || completedPartialSub
-
-    for {
-      _ <- {
-        if (appConfig.autoMapAgentEnrolments && doMappingAnswer)
-          mappingConnector.updatePreSubscriptionWithArn(utr)
-        else {
-          toFuture(())
-        }
-      }
-    } yield Redirect(routes.SubscriptionController.showSubscriptionComplete())
-  }
+    hc: HeaderCarrier): Future[Result] =
+    Redirect(routes.SubscriptionController.showSubscriptionComplete())
 }
