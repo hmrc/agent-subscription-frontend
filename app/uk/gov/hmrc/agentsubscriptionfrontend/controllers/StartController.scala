@@ -18,6 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
@@ -91,7 +92,7 @@ class StartController @Inject()(
             if (subscriptionProcess.state == SubscriptionState.SubscribedButNotEnrolled) {
               handlePartialSubscription(utr, postcode.value)
             } else {
-              handleAutoMapping()
+              updateTaskListAndContinue
             }
           }
         case _ =>
@@ -99,24 +100,24 @@ class StartController @Inject()(
             .cacheAgentSession(agentSession.copy(taskListFlags = TaskListFlags()))
             .flatMap(_ => toFuture(Redirect(routes.TaskListController.showTaskList())))
       }
-
     }
 
   def showCannotCreateAccount: Action[AnyContent] = Action { implicit request =>
     Ok(html.cannot_create_account())
   }
 
-  private def handleAutoMapping()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+  private def updateTaskListAndContinue(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     withValidSession { (_, existingSession) =>
       sessionStoreService
         .cacheAgentSession(
           existingSession
-            .copy(taskListFlags = existingSession.taskListFlags.copy(createTaskComplete = true, copyComplete = true)))
+            .copy(taskListFlags = existingSession.taskListFlags.copy(createTaskComplete = true)))
         .flatMap(_ =>
           sessionStoreService.fetchContinueUrl.flatMap {
             case Some(_) => toFuture(Redirect(routes.SubscriptionController.showCheckAnswers()))
             case None    => toFuture(Redirect(routes.TaskListController.showTaskList()))
         })
+
     }
 
   private def handlePartialSubscription(kfcUtr: Utr, kfcPostcode: String)(
@@ -127,7 +128,5 @@ class StartController @Inject()(
       .map { _ =>
         mark("Count-Subscription-PartialSubscriptionCompleted")
         Redirect(routes.SubscriptionController.showSubscriptionComplete())
-
       }
-
 }
