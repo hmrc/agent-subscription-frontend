@@ -287,7 +287,8 @@ class SubscriptionController @Inject()(
               val continueUrl =
                 if (existingSession.taskListFlags.createTaskComplete) routes.TaskListController.showTaskList().url
                 else continueUrlOpt.map(_.url).getOrElse(appConfig.agentServicesAccountUrl)
-              val isUrlToASAccount = if(existingSession.taskListFlags.createTaskComplete) false else continueUrlOpt.isEmpty
+              val isUrlToASAccount =
+                if (existingSession.taskListFlags.createTaskComplete) false else continueUrlOpt.isEmpty
               Ok(html.subscription_complete(continueUrl, isUrlToASAccount, arn.value, agencyName, agencyEmail))
             }
           }
