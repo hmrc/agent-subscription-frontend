@@ -273,15 +273,17 @@ class SubscriptionController @Inject()(
               throw new RuntimeException("agency email is missing from registration"))
             for {
               continueUrlOpt <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
-              _              <- if (!existingSession.taskListFlags.createTaskComplete) sessionStoreService.remove()
+              _ <- if (existingSession.taskListFlags.createTaskComplete) {
+                    sessionStoreService
+                      .cacheAgentSession(
+                        existingSession.copy(
+                          taskListFlags = existingSession.taskListFlags.copy(checkAnswersComplete = true)))
+                  } else sessionStoreService.remove()
             } yield {
               continueUrlOpt match {
                 case Some(continueUrl) =>
                   Ok(html.subscription_complete(continueUrl.url, false, arn.value, agencyName, agencyEmail))
                 case None =>
-                  sessionStoreService.cacheAgentSession(
-                    existingSession.copy(
-                      taskListFlags = existingSession.taskListFlags.copy(checkAnswersComplete = true)))
                   Ok(
                     html.subscription_complete(
                       routes.TaskListController.showTaskList().url,
