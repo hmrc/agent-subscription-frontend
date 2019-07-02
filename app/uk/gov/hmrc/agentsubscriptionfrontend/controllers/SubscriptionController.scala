@@ -276,8 +276,12 @@ class SubscriptionController @Inject()(
               _              <- if (!existingSession.taskListFlags.createTaskComplete) sessionStoreService.remove()
             } yield {
               continueUrlOpt match {
-                case Some(url) => Ok(html.subscription_complete(url.url, false, arn.value, agencyName, agencyEmail))
+                case Some(continueUrl) =>
+                  Ok(html.subscription_complete(continueUrl.url, false, arn.value, agencyName, agencyEmail))
                 case None =>
+                  sessionStoreService.cacheAgentSession(
+                    existingSession.copy(
+                      taskListFlags = existingSession.taskListFlags.copy(checkAnswersComplete = true)))
                   Ok(
                     html.subscription_complete(
                       routes.TaskListController.showTaskList().url,
