@@ -196,9 +196,16 @@ class BusinessIdentificationController @Inject()(
       subscriptionProcess <- subscriptionService.getSubscriptionStatus(utr, postcode)
       result <- if (subscriptionProcess.state == SubscriptionState.SubscribedButNotEnrolled) {
                  hasCleanCreds(agent)(
-                   cacheBusinessAndAMLSTasksComplete(existingSession).map(_ => routes.TaskListController.showTaskList())
+                   cachePartialSubscription(existingSession, cleanCreds = false).map(_ =>
+                     routes.TaskListController.showTaskList())
                  )(
-                   cacheBusinessAndAMLSTasksComplete(existingSession).flatMap(
+                   sessionStoreService
+                     .cacheAgentSession(
+                       existingSession.copy(
+                         taskListFlags = existingSession.taskListFlags.copy(
+                           businessTaskComplete = true,
+                           amlsTaskComplete = true,
+                           createTaskComplete = true))).flatMap(
                      _ =>
                        subscriptionService
                          .completePartialSubscription(utr, postcode)
@@ -211,11 +218,13 @@ class BusinessIdentificationController @Inject()(
     } yield result
   }
 
-  def cacheBusinessAndAMLSTasksComplete(existingSession: AgentSession)(implicit hc: HeaderCarrier) =
+  def cachePartialSubscription(existingSession: AgentSession, cleanCreds: Boolean)(implicit hc: HeaderCarrier) =
     sessionStoreService
       .cacheAgentSession(
         existingSession.copy(
-          taskListFlags = existingSession.taskListFlags.copy(businessTaskComplete = true, amlsTaskComplete = true)))
+          taskListFlags = existingSession.taskListFlags.copy(
+            businessTaskComplete = true,
+            amlsTaskComplete = true)))
 
   val showBusinessEmailForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
