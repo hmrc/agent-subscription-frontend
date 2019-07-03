@@ -172,9 +172,8 @@ class BusinessIdentificationController @Inject()(
         checkPartaillySubscribed(agent, existingSession)(for {
           isMAA <- agentAssuranceConnector.isManuallyAssuredAgent(existingSession.utr.get)
           _ <- if (isMAA)
-                sessionStoreService.cacheAgentSession(
-                  existingSession.copy(taskListFlags = existingSession.taskListFlags
-                    .copy(businessTaskComplete = true, amlsTaskComplete = true, createTaskComplete = true, isMAA = true)))
+                sessionStoreService.cacheAgentSession(existingSession.copy(taskListFlags = existingSession.taskListFlags
+                  .copy(businessTaskComplete = true, amlsTaskComplete = true, createTaskComplete = true, isMAA = true)))
               else
                 sessionStoreService.cacheAgentSession(
                   existingSession.copy(taskListFlags = existingSession.taskListFlags.copy(businessTaskComplete = true)))
@@ -212,12 +211,11 @@ class BusinessIdentificationController @Inject()(
     } yield result
   }
 
-  def cachePartialSubscription(existingSession: AgentSession, cleanCreds: Boolean)(implicit hc: HeaderCarrier) = {
+  def cachePartialSubscription(existingSession: AgentSession, cleanCreds: Boolean)(implicit hc: HeaderCarrier) =
     sessionStoreService
-    .cacheAgentSession(
-      existingSession.copy(
-        taskListFlags = existingSession.taskListFlags.copy(businessTaskComplete = true, amlsTaskComplete = true, createTaskComplete = cleanCreds)))
-  }
+      .cacheAgentSession(
+        existingSession.copy(taskListFlags = existingSession.taskListFlags
+          .copy(businessTaskComplete = true, amlsTaskComplete = true, createTaskComplete = cleanCreds)))
 
   val showBusinessEmailForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
