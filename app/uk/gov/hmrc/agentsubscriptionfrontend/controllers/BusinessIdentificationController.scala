@@ -174,7 +174,7 @@ class BusinessIdentificationController @Inject()(
           _ <- if (isMAA)
                 sessionStoreService.cacheAgentSession(
                   existingSession.copy(taskListFlags = existingSession.taskListFlags
-                    .copy(businessTaskComplete = true, amlsTaskComplete = true, isMAA = true)))
+                    .copy(businessTaskComplete = true, amlsTaskComplete = true, createTaskComplete = true, isMAA = true)))
               else
                 sessionStoreService.cacheAgentSession(
                   existingSession.copy(taskListFlags = existingSession.taskListFlags.copy(businessTaskComplete = true)))
@@ -199,13 +199,7 @@ class BusinessIdentificationController @Inject()(
                    cachePartialSubscription(existingSession, cleanCreds = false).map(_ =>
                      routes.TaskListController.showTaskList())
                  )(
-                   sessionStoreService
-                     .cacheAgentSession(
-                       existingSession.copy(
-                         taskListFlags = existingSession.taskListFlags.copy(
-                           businessTaskComplete = true,
-                           amlsTaskComplete = true,
-                           createTaskComplete = true))).flatMap(
+                   cachePartialSubscription(existingSession, cleanCreds = true).flatMap(
                      _ =>
                        subscriptionService
                          .completePartialSubscription(utr, postcode)
@@ -218,13 +212,12 @@ class BusinessIdentificationController @Inject()(
     } yield result
   }
 
-  def cachePartialSubscription(existingSession: AgentSession, cleanCreds: Boolean)(implicit hc: HeaderCarrier) =
+  def cachePartialSubscription(existingSession: AgentSession, cleanCreds: Boolean)(implicit hc: HeaderCarrier) = {
     sessionStoreService
-      .cacheAgentSession(
-        existingSession.copy(
-          taskListFlags = existingSession.taskListFlags.copy(
-            businessTaskComplete = true,
-            amlsTaskComplete = true)))
+    .cacheAgentSession(
+      existingSession.copy(
+        taskListFlags = existingSession.taskListFlags.copy(businessTaskComplete = true, amlsTaskComplete = true, createTaskComplete = cleanCreds)))
+  }
 
   val showBusinessEmailForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
