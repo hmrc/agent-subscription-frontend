@@ -18,7 +18,6 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
@@ -90,7 +89,7 @@ class StartController @Inject()(
         case (Some(utr), Some(postcode)) =>
           subscriptionService.getSubscriptionStatus(utr, postcode).flatMap { subscriptionProcess =>
             if (subscriptionProcess.state == SubscriptionState.SubscribedButNotEnrolled) {
-              handlePartialSubscription(utr, postcode.value)
+              handlePartialSubscription(utr, postcode.value, agentSession)
             } else {
               updateTaskListAndContinue
             }
@@ -120,13 +119,26 @@ class StartController @Inject()(
 
     }
 
-  private def handlePartialSubscription(kfcUtr: Utr, kfcPostcode: String)(
+  private def handlePartialSubscription(kfcUtr: Utr, kfcPostcode: String, agentSession: AgentSession)(
     implicit request: Request[_],
     hc: HeaderCarrier): Future[Result] =
-    subscriptionService
-      .completePartialSubscription(kfcUtr, Postcode(kfcPostcode))
-      .map { _ =>
-        mark("Count-Subscription-PartialSubscriptionCompleted")
-        Redirect(routes.SubscriptionController.showSubscriptionComplete())
-      }
+    sessionStoreService.fetchContinueUrl.flatMap {
+      case Some(continueUrl) =>
+        subscriptionService
+          .completePartialSubscription(kfcUtr, Postcode(kfcPostcode))
+          .map { _ =>
+            mark("Count-Subscription-PartialSubscriptionCompleted")
+            Redirect(routes.SubscriptionController.showSubscriptionComplete())
+          }
+      case None =>
+        subscriptionService
+          .completePartialSubscription(kfcUtr, Postcode(kfcPostcode))
+          .flatMap { _ =>
+            mark("Count-Subscription-PartialSubscriptionCompleted")
+            sessionStoreService
+              .cacheAgentSession(
+                agentSession.copy(taskListFlags = agentSession.taskListFlags.copy(createTaskComplete = true)))
+              .map(_ => Redirect(routes.SubscriptionController.showSubscriptionComplete()))
+          }
+    }
 }
