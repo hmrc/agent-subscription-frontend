@@ -135,7 +135,7 @@ class SubscriptionController @Inject()(
               .copy(taskListFlags = existingSession.taskListFlags.copy(checkAnswersComplete = true)))
           .flatMap { _ =>
             sessionStoreService.fetchContinueUrl.flatMap {
-              case Some(_) => completeMappingWhenAvailable(utr)
+              case Some(_) => Redirect(routes.SubscriptionController.showSubscriptionComplete())
               case None    => Future successful Redirect(routes.SubscriptionController.showSubscriptionComplete())
             }
           }
@@ -200,14 +200,6 @@ class SubscriptionController @Inject()(
     }
   }
 
-  val showLinkClients: Action[AnyContent] = Action.async { implicit request =>
-    toFuture(InternalServerError)
-  }
-
-  val submitLinkClients: Action[AnyContent] = Action.async { implicit request =>
-    toFuture(InternalServerError)
-  }
-
   val showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>
     def recoverSessionStoreWithNone[T]: PartialFunction[Throwable, Option[T]] = {
       case NonFatal(ex) =>
@@ -260,9 +252,4 @@ class SubscriptionController @Inject()(
       }
     }
   }
-
-  private def completeMappingWhenAvailable(utr: Utr, completedPartialSub: Boolean = false)(
-    implicit request: Request[AnyContent],
-    hc: HeaderCarrier): Future[Result] =
-    Redirect(routes.SubscriptionController.showSubscriptionComplete())
 }
