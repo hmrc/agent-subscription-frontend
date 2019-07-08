@@ -144,13 +144,13 @@ task-list.1.header=Enter your business details
 task-list.1.identify-business=Identify your business
 task-list.1.amls=Enter your money laundering compliance details
 task-list.2.number=2.
-task-list.2.header=Create your new user ID
-task-list.2.create=Create your user ID for your agent services account
+task-list.2.header=Copy across your existing client relationships
+task-list.2.copy=Copy across VAT and Self Assessment clients to your new account
 task-list.3.number=3.
-task-list.3.header=Check your answers and create your account
+task-list.3.header=Create your new user ID
+task-list.3.create=Create your user ID for your agent services account
+task-list.4.header=Check your answers and create your account
 task-list.4.number=4.
-task-list.4.header=Copy across your existing client relationships
-task-list.4.copy=Copy across your existing Self Assessment and VAT clients to your new agent services account.
 task-list.completed=COMPLETED
 
 #Check business type

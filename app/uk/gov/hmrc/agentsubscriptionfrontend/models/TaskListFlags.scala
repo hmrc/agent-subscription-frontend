@@ -20,9 +20,10 @@ import play.api.libs.json.Json
 case class TaskListFlags(
   businessTaskComplete: Boolean = false,
   amlsTaskComplete: Boolean = false,
-  isMAA: Boolean = false,
+  copyTaskComplete: Boolean = false,
   createTaskComplete: Boolean = false,
-  checkAnswersComplete: Boolean = false)
+  checkAnswersComplete: Boolean = false,
+  isMAA: Boolean = false)
 
 object TaskListFlags {
   implicit val formats = Json.format[TaskListFlags]

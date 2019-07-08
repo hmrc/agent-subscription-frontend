@@ -42,7 +42,7 @@
                     }
                 </li>
                 <li class="app-task-list__item">@if(taskListFlags.businessTaskComplete) {
-                  @if(taskListFlags.isMAA | taskListFlags.checkAnswersComplete){ @Messages("task-list.1.amls")
+                  @if(taskListFlags.isMAA){ @Messages("task-list.1.amls")
                   }else {<a href=@routes.AMLSController.showCheckAmlsPage()>@Messages("task-list.1.amls")</a>}
                     @if(taskListFlags.amlsTaskComplete) {
                         <strong class="govuk-tag app-task-list__task-completed">@Messages("task-list.completed")</strong>
@@ -55,11 +55,27 @@
         </li>
         <li>
             <h2>
-                <span class="app-task-list__section-number">@Messages("task-list.2.number")</span>@Messages("task-list.2.header")
+                <span class="app-task-list__section-number">@Messages("task-list.2.number")</span>@Messages("task-list.4.header")
             </h2>
             <ul class="app-task-list__items">
-                <li class="app-task-list__item">@if(taskListFlags.amlsTaskComplete) {
-                  @if(taskListFlags.checkAnswersComplete | taskListFlags.isMAA){ @Messages("task-list.2.create")
+                <li class="app-task-list__item">@if(taskListFlags.businessTaskComplete) {
+                    <a href=@appConfig.agentMappingFrontendStartUrl>@Messages("task-list.4.copy")</a>
+                    @if(taskListFlags.copyTaskComplete) {
+                        <strong class="govuk-tag app-task-list__task-completed">@Messages("task-list.completed")</strong>
+                    }
+                } else {
+                    @Messages("task-list.4.copy")
+                }
+                </li>
+            </ul>
+        </li>
+        <li>
+            <h2>
+                <span class="app-task-list__section-number">@Messages("task-list.3.number")</span>@Messages("task-list.2.header")
+            </h2>
+            <ul class="app-task-list__items">
+                <li class="app-task-list__item">@if(taskListFlags.copyTaskComplete) {
+                  @if(taskListFlags.isMAA){ @Messages("task-list.2.create")
                   }else{<a href=@routes.BusinessIdentificationController.showCreateNewAccount()>@Messages("task-list.2.create")</a>}
                     @if(taskListFlags.createTaskComplete) {
                         <strong class="govuk-tag app-task-list__task-completed">@Messages("task-list.completed")</strong>
@@ -72,30 +88,13 @@
         </li>
         <li>
             <h2>
-                <span class="app-task-list__section-number">@Messages("task-list.3.number")</span>@Messages("task-list.3.header")
+                <span class="app-task-list__section-number">@Messages("task-list.4.number")</span>@Messages("task-list.3.header")
             </h2>
             <ul class="app-task-list__items">
                 <li class="app-task-list__item">@if(taskListFlags.createTaskComplete) {
-                    @if(taskListFlags.checkAnswersComplete){ @Messages("task-list.3.header")
-                    }else{<a href=@routes.SubscriptionController.showCheckAnswers()>@Messages("task-list.3.header")</a>}
-                    @if(taskListFlags.checkAnswersComplete) {
-                        <strong class="govuk-tag app-task-list__task-completed">@Messages("task-list.completed")</strong>
-                    }
-                } else {
+                    <a href=@routes.SubscriptionController.showCheckAnswers()>@Messages("task-list.3.header")</a>
+                }else{
                     @Messages("task-list.3.header")
-                }
-                </li>
-            </ul>
-        </li>
-        <li>
-            <h2>
-                <span class="app-task-list__section-number">@Messages("task-list.4.number")</span>@Messages("task-list.4.header")
-            </h2>
-            <ul class="app-task-list__items">
-                <li class="app-task-list__item">@if(taskListFlags.checkAnswersComplete) {
-                    <a href=@appConfig.agentMappingFrontendStartUrl>@Messages("task-list.4.copy")</a>
-                } else {
-                    @Messages("task-list.4.copy")
                 }
                 </li>
             </ul>
