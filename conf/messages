@@ -150,6 +150,7 @@ task-list.3.number=3.
 task-list.3.header=Create your new user ID
 task-list.3.create=Create your user ID for your agent services account
 task-list.4.header=Check your answers and create your account
+task-list.4.check=Check your answers and send details
 task-list.4.number=4.
 task-list.completed=COMPLETED
 

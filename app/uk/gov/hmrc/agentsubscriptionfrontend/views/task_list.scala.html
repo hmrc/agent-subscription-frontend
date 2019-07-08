@@ -55,46 +55,46 @@
         </li>
         <li>
             <h2>
-                <span class="app-task-list__section-number">@Messages("task-list.2.number")</span>@Messages("task-list.4.header")
+                <span class="app-task-list__section-number">@Messages("task-list.2.number")</span>@Messages("task-list.2.header")
             </h2>
             <ul class="app-task-list__items">
-                <li class="app-task-list__item">@if(taskListFlags.businessTaskComplete) {
-                    <a href=@appConfig.agentMappingFrontendStartUrl>@Messages("task-list.4.copy")</a>
+                <li class="app-task-list__item">@if(taskListFlags.amlsTaskComplete) {
+                    <a href=@appConfig.agentMappingFrontendStartUrl>@Messages("task-list.2.copy")</a>
                     @if(taskListFlags.copyTaskComplete) {
                         <strong class="govuk-tag app-task-list__task-completed">@Messages("task-list.completed")</strong>
                     }
                 } else {
-                    @Messages("task-list.4.copy")
+                    @Messages("task-list.2.copy")
                 }
                 </li>
             </ul>
         </li>
         <li>
             <h2>
-                <span class="app-task-list__section-number">@Messages("task-list.3.number")</span>@Messages("task-list.2.header")
+                <span class="app-task-list__section-number">@Messages("task-list.3.number")</span>@Messages("task-list.3.header")
             </h2>
             <ul class="app-task-list__items">
                 <li class="app-task-list__item">@if(taskListFlags.copyTaskComplete) {
-                  @if(taskListFlags.isMAA){ @Messages("task-list.2.create")
-                  }else{<a href=@routes.BusinessIdentificationController.showCreateNewAccount()>@Messages("task-list.2.create")</a>}
+                  @if(taskListFlags.isMAA){ @Messages("task-list.3.create")
+                  }else{<a href=@routes.BusinessIdentificationController.showCreateNewAccount()>@Messages("task-list.3.create")</a>}
                     @if(taskListFlags.createTaskComplete) {
                         <strong class="govuk-tag app-task-list__task-completed">@Messages("task-list.completed")</strong>
                     }
                 } else {
-                    @Messages("task-list.2.create")
+                    @Messages("task-list.3.create")
                 }
                 </li>
             </ul>
         </li>
         <li>
             <h2>
-                <span class="app-task-list__section-number">@Messages("task-list.4.number")</span>@Messages("task-list.3.header")
+                <span class="app-task-list__section-number">@Messages("task-list.4.number")</span>@Messages("task-list.4.header")
             </h2>
             <ul class="app-task-list__items">
-                <li class="app-task-list__item">@if(taskListFlags.createTaskComplete) {
-                    <a href=@routes.SubscriptionController.showCheckAnswers()>@Messages("task-list.3.header")</a>
+                <li class="app-task-list__item">@if(taskListFlags.copyTaskComplete && taskListFlags.createTaskComplete) {
+                    <a href=@routes.SubscriptionController.showCheckAnswers()>@Messages("task-list.4.check")</a>
                 }else{
-                    @Messages("task-list.3.header")
+                    @Messages("task-list.4.check")
                 }
                 </li>
             </ul>
