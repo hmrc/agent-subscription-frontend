@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models
 import play.api.libs.json.Json
 
 case class TaskListFlags(
-  businessTaskComplete: Boolean = false,
+  businessTaskComplete: Boolean = false, // TODO remove?
   amlsTaskComplete: Boolean = false,
   isMAA: Boolean = false,
   createTaskComplete: Boolean = false,

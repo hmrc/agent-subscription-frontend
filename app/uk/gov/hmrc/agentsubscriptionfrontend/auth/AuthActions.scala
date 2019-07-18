@@ -136,7 +136,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
                 Future successful Redirect(continueUrl.url)
               case None =>
                 mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
-                subscribedBody // why not redirect to dashboard here?
+                subscribedBody // user still needs to do mapping
             }
           } else {
             // check what we should do when InternalId not available!

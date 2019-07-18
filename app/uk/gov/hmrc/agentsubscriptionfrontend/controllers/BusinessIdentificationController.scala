@@ -163,20 +163,7 @@ class BusinessIdentificationController @Inject()(
       case Failure(responses) if responses.contains(InvalidEmail) =>
         routes.BusinessIdentificationController.showBusinessEmailForm()
       case _ =>
-        checkPartaillySubscribed(agent, existingSession)(
-          checkMAAgent(agentAssuranceConnector, existingSession).flatMap(_ => routes.TaskListController.showTaskList()))
-    }
-
-  private def checkMAAgent(agentAssuranceConnector: AgentAssuranceConnector, existingSession: AgentSession)(
-    implicit hc: HeaderCarrier) =
-    agentAssuranceConnector.isManuallyAssuredAgent(existingSession.utr.get).flatMap {
-      case true =>
-        sessionStoreService.cacheAgentSession(
-          existingSession.copy(taskListFlags = existingSession.taskListFlags
-            .copy(businessTaskComplete = true, amlsTaskComplete = true, createTaskComplete = true, isMAA = true)))
-      case false =>
-        sessionStoreService.cacheAgentSession(
-          existingSession.copy(taskListFlags = existingSession.taskListFlags.copy(businessTaskComplete = true)))
+        checkPartaillySubscribed(agent, existingSession)(notPartiallySubscribedBody = routes.TaskListController.showTaskList())
     }
 
   def hasCleanCreds(agent: Agent)(uncleanCredsBody: => Future[Call])(cleanCredsBody: => Future[Call]) =
@@ -186,7 +173,7 @@ class BusinessIdentificationController @Inject()(
     }
 
   def checkPartaillySubscribed(agent: Agent, existingSession: AgentSession)(
-    notPartiallySubscribedBody: => Future[Call])(implicit hc: HeaderCarrier) = {
+    notPartiallySubscribedBody: => Future[Call])(implicit hc: HeaderCarrier): Future[Call] = {
     val utr = existingSession.utr.getOrElse(Utr(""))
     val postcode = existingSession.postcode.getOrElse(Postcode(""))
     for {
