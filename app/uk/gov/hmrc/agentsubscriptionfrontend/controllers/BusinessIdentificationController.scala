@@ -41,7 +41,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.validators.BusinessDetailsValidator
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -142,11 +141,8 @@ class BusinessIdentificationController @Inject()(
                   if (existingSession.registration.exists(_.isSubscribedToAgentServices)) {
                     mark("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
                     Redirect(routes.BusinessIdentificationController.showAlreadySubscribed())
-                  } else {
-                    sessionStoreService.fetchContinueUrl.flatMap { continueUrl =>
-                      validatedBusinessDetailsAndRedirect(existingSession, agent).map(Redirect)
-                    }
-                  }
+                  } else validatedBusinessDetailsAndRedirect(existingSession, agent).map(Redirect)
+
                 case No =>
                   //Redirect(routes.UtrController.showUtrForm())
                   Redirect(routes.BusinessDetailsController.showBusinessDetailsForm())
@@ -316,10 +312,8 @@ class BusinessIdentificationController @Inject()(
         sessionStoreService
           .cacheIsChangingAnswers(false)
           .map(_ => Redirect(routes.SubscriptionController.showCheckAnswers()))
-      case _ =>
-        sessionStoreService.fetchContinueUrl.flatMap { continueUrl =>
-          validatedBusinessDetailsAndRedirect(updatedSession, agent).map(Redirect)
-        }
+
+      case _ => validatedBusinessDetailsAndRedirect(updatedSession, agent).map(Redirect)
     }
   }
 
