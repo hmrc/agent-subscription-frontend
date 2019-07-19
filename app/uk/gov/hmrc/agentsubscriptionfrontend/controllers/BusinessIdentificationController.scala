@@ -164,7 +164,10 @@ class BusinessIdentificationController @Inject()(
         routes.BusinessIdentificationController.showBusinessEmailForm()
       case _ =>
         checkPartaillySubscribed(agent, existingSession)(
-          notPartiallySubscribedBody = routes.TaskListController.showTaskList())
+          subscriptionJourneyService
+            .saveJourneyRecord(existingSession, agent.authProviderId)
+            .map(_ => routes.TaskListController.showTaskList()))
+
     }
 
   def hasCleanCreds(agent: Agent)(uncleanCredsBody: => Future[Call])(cleanCredsBody: => Future[Call]) =
