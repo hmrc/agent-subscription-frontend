@@ -21,7 +21,6 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
-import uk.gov.hmrc.agentsubscriptionfrontend.models.TaskListFlags
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService, TaskListService}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -45,15 +44,9 @@ class TaskListController @Inject()(
   def showTaskList: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingOrSubscribedAgent { agent =>
       agent.subscriptionJourneyRecord match {
-        case Some(record)  => taskListService.getTaskListFlags(record).map(flags => Ok(html.task_list(flags)))
-        case None          => Future successful InternalServerError("No journey record found for task list")
-      }
-    }
-    {
-      // TODO - do we will need to handle this case?  If so, we'll need access to the record...
-      sessionStoreService.fetchAgentSession.flatMap {
-        case Some(session) if session.taskListFlags.businessTaskComplete => Future successful Ok(html.task_list(session.taskListFlags))
-        case _ => Future successful Redirect(appConfig.agentServicesAccountUrl)
+        case Some(record) => taskListService.getTaskListFlags(record).map(flags => Ok(html.task_list(flags)))
+        case None =>
+          Future successful InternalServerError("No journey record found for task list") // TODO redirect to business id setup instead?
       }
     }
 
