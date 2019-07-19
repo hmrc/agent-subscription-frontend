@@ -25,8 +25,9 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.{givenAgentIsManuallyAssured, givenAgentIsNotManuallyAssured}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingCleanAgentWithoutEnrolments, subscribingAgentEnrolledForNonMTD}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.givenNoSubscriptionJourneyRecordExists
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestSetupNoJourneyRecord}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
 import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -49,12 +50,14 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
     implicit val authenticatedRequest = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
     sessionStoreService.currentSession.agentSession = Some(AgentSession(businessType = Some(SoleTrader), utr = Some(utr)))
     givenAgentIsNotManuallyAssured(utr.value)
+    givenNoSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"))
   }
 
   trait SetupUnclean {
     implicit val authenticatedRequest = authenticatedAs(subscribingAgentEnrolledForNonMTD)
     sessionStoreService.currentSession.agentSession = Some(AgentSession(businessType = Some(SoleTrader), utr = Some(utr)))
     givenAgentIsNotManuallyAssured(utr.value)
+    givenNoSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"))
   }
 
 
@@ -252,7 +255,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       elForm.attr("method") shouldBe "POST"
     }
 
-    "redirect to /check-answers page if the agent is manually assured" in {
+    "redirect to /check-answers page if the agent is manually assured" in new TestSetupNoJourneyRecord {
       implicit val authenticatedRequest = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.agentSession = Some(AgentSession(businessType = Some(SoleTrader), utr = Some(utr)))
       givenAgentIsManuallyAssured(utr.value)
@@ -263,7 +266,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
     }
 
-    "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in {
+    "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in new TestSetupNoJourneyRecord {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       val result = await(controller.showAmlsDetailsForm(request))
@@ -296,7 +299,21 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
     val expiryMonth = expiryDate.getMonthValue.toString
     val expiryYear = expiryDate.getYear.toString
 
-    "store AMLS form in session cache after successful submission, and redirect to task list" in new Setup {
+    "store AMLS form in session cache after successful submission, and redirect to check answers when there is a continue url" in new Setup {
+      implicit val request = authenticatedRequest.withFormUrlEncodedBody("amlsCode" -> "AAT",
+        "membershipNumber" -> "12345", "expiry.day" -> expiryDay, "expiry.month" -> expiryMonth,  "expiry.year" -> expiryYear)
+      sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/continue/url"))
+
+      val result = await(controller.submitAmlsDetailsForm(request))
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
+
+      val amlsDetails = await(sessionStoreService.fetchAgentSession).get.amlsDetails.get
+
+      amlsDetails shouldBe AMLSDetails("Association of AccountingTechnicians (AAT)", Right(RegisteredDetails("12345", expiryDate)))
+    }
+
+    "store AMLS form in session cache after successful submission, and redirect to task list when there is no continue url" in new Setup {
       implicit val request = authenticatedRequest.withFormUrlEncodedBody("amlsCode" -> "AAT",
         "membershipNumber" -> "12345", "expiry.day" -> expiryDay, "expiry.month" -> expiryMonth,  "expiry.year" -> expiryYear)
 
@@ -433,7 +450,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       await(sessionStoreService.fetchAgentSession).get.amlsDetails shouldBe empty
     }
 
-    "redirect to /check-answers page if the agent is manually assured" in {
+    "redirect to /check-answers page if the agent is manually assured" in new TestSetupNoJourneyRecord {
       implicit val authenticatedRequest = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.agentSession = Some(AgentSession(businessType = Some(SoleTrader), utr = Some(utr)))
       givenAgentIsManuallyAssured(utr.value)
@@ -444,7 +461,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
     }
 
-    "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in {
+    "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in new TestSetupNoJourneyRecord {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       val result = await(controller.submitAmlsDetailsForm(request))
@@ -494,7 +511,21 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
     val month = appliedOnDate.getMonthValue.toString
     val year = appliedOnDate.getYear.toString
 
-    "store AMLS pending details in session cache after successful submission, redirect to task list" in new Setup {
+    "store AMLS pending details in session cache after successful submission, redirect to check answeres when there is a continue url" in new Setup {
+      implicit val requst = authenticatedRequest.withFormUrlEncodedBody("amlsCode" -> "AAT",
+        "appliedOn.day" -> day, "appliedOn.month" -> month,  "appliedOn.year" -> year)
+      sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/continue/url"))
+
+      val result = await(controller.submitAmlsApplicationDatePage(requst))
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
+
+      val amlsDetails = await(sessionStoreService.fetchAgentSession).get.amlsDetails.get
+
+      amlsDetails shouldBe AMLSDetails("Association of AccountingTechnicians (AAT)", Left(PendingDetails(appliedOnDate)))
+    }
+
+    "store AMLS pending details in session cache after successful submission, redirect to task list when there is no continue url" in new Setup {
       implicit val requst = authenticatedRequest.withFormUrlEncodedBody("amlsCode" -> "AAT",
         "appliedOn.day" -> day, "appliedOn.month" -> month,  "appliedOn.year" -> year)
 
@@ -584,7 +615,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       await(sessionStoreService.fetchAgentSession).get.amlsDetails shouldBe empty
     }
 
-    "redirect to /check-answers page if the agent is manually assured" in {
+    "redirect to /check-answers page if the agent is manually assured" in new TestSetupNoJourneyRecord {
       implicit val authenticatedRequest = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.agentSession = Some(AgentSession(businessType = Some(SoleTrader), utr = Some(utr)))
       givenAgentIsManuallyAssured(utr.value)
@@ -595,7 +626,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
     }
 
-    "redirect to the /business-type page if there is no business type in session because the user has returned to a bookmark" in {
+    "redirect to the /business-type page if there is no business type in session because the user has returned to a bookmark" in new TestSetupNoJourneyRecord {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       val result = await(controller.submitAmlsApplicationDatePage(request))

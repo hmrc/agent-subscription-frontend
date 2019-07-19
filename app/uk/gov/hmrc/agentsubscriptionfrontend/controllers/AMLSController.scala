@@ -56,7 +56,7 @@ class AMLSController @Inject()(
   private val amlsBodies: Map[String, String] = AMLSLoader.load("/amls.csv")
 
   def showCheckAmlsPage: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
+    withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
           existingSession.checkAmls.fold(
@@ -179,7 +179,10 @@ class AMLSController @Inject()(
                   Right(RegisteredDetails(validForm.membershipNumber, validForm.expiry)))
                 updateSession(existingSession, amlsDetails, agent)
                   .flatMap { _ =>
-                    Redirect(routes.TaskListController.showTaskList())
+                    sessionStoreService.fetchContinueUrl.map {
+                      case Some(_) => Redirect(routes.SubscriptionController.showCheckAnswers())
+                      case None    => Redirect(routes.TaskListController.showTaskList())
+                    }
                   }
               }
             )
@@ -249,7 +252,10 @@ class AMLSController @Inject()(
 
                 updateSession(existingSession, amlsDetails, agent)
                   .flatMap { _ =>
-                    Redirect(routes.TaskListController.showTaskList())
+                    sessionStoreService.fetchContinueUrl.map {
+                      case Some(_) => Redirect(routes.SubscriptionController.showCheckAnswers())
+                      case None    => Redirect(routes.TaskListController.showTaskList())
+                    }
                   }
               }
             )

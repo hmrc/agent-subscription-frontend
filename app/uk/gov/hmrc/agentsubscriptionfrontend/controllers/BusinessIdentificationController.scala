@@ -41,6 +41,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.validators.BusinessDetailsValidator
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -141,8 +142,11 @@ class BusinessIdentificationController @Inject()(
                   if (existingSession.registration.exists(_.isSubscribedToAgentServices)) {
                     mark("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
                     Redirect(routes.BusinessIdentificationController.showAlreadySubscribed())
-                  } else validatedBusinessDetailsAndRedirect(existingSession, agent).map(Redirect)
-
+                  } else {
+                    sessionStoreService.fetchContinueUrl.flatMap { continueUrl =>
+                      validatedBusinessDetailsAndRedirect(existingSession, agent).map(Redirect)
+                    }
+                  }
                 case No =>
                   //Redirect(routes.UtrController.showUtrForm())
                   Redirect(routes.BusinessDetailsController.showBusinessDetailsForm())
@@ -163,7 +167,24 @@ class BusinessIdentificationController @Inject()(
       case Failure(responses) if responses.contains(InvalidEmail) =>
         routes.BusinessIdentificationController.showBusinessEmailForm()
       case _ =>
-        checkPartaillySubscribed(agent, existingSession)(notPartiallySubscribedBody = routes.TaskListController.showTaskList())
+        checkPartaillySubscribed(agent, existingSession)(
+          checkMAAgent(agentAssuranceConnector, existingSession).flatMap(
+            _ =>
+              subscriptionJourneyService
+                .saveJourneyRecord(existingSession, agent.authProviderId)
+                .map(_ => routes.TaskListController.showTaskList())))
+    }
+
+  private def checkMAAgent(agentAssuranceConnector: AgentAssuranceConnector, existingSession: AgentSession)(
+    implicit hc: HeaderCarrier) =
+    agentAssuranceConnector.isManuallyAssuredAgent(existingSession.utr.get).flatMap {
+      case true =>
+        sessionStoreService.cacheAgentSession(
+          existingSession.copy(taskListFlags = existingSession.taskListFlags
+            .copy(businessTaskComplete = true, amlsTaskComplete = true, createTaskComplete = true, isMAA = true)))
+      case false =>
+        sessionStoreService.cacheAgentSession(
+          existingSession.copy(taskListFlags = existingSession.taskListFlags.copy(businessTaskComplete = true)))
     }
 
   def hasCleanCreds(agent: Agent)(uncleanCredsBody: => Future[Call])(cleanCredsBody: => Future[Call]) =
@@ -173,7 +194,7 @@ class BusinessIdentificationController @Inject()(
     }
 
   def checkPartaillySubscribed(agent: Agent, existingSession: AgentSession)(
-    notPartiallySubscribedBody: => Future[Call])(implicit hc: HeaderCarrier): Future[Call] = {
+    notPartiallySubscribedBody: => Future[Call])(implicit hc: HeaderCarrier) = {
     val utr = existingSession.utr.getOrElse(Utr(""))
     val postcode = existingSession.postcode.getOrElse(Postcode(""))
     for {
@@ -299,8 +320,10 @@ class BusinessIdentificationController @Inject()(
         sessionStoreService
           .cacheIsChangingAnswers(false)
           .map(_ => Redirect(routes.SubscriptionController.showCheckAnswers()))
-
-      case _ => validatedBusinessDetailsAndRedirect(updatedSession, agent).map(Redirect)
+      case _ =>
+        sessionStoreService.fetchContinueUrl.flatMap { continueUrl =>
+          validatedBusinessDetailsAndRedirect(updatedSession, agent).map(Redirect)
+        }
     }
   }
 
