@@ -27,6 +27,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
@@ -59,15 +60,21 @@ class AMLSController @Inject()(
     withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
-          existingSession.checkAmls.fold(Ok(check_amls(checkAmlsForm)))(amls =>
-            Ok(check_amls(checkAmlsForm.bind(Map("registeredAmls" -> amls.toString)))))
+          subscriptionJourneyService.getMandatoryJourneyRecord(agent.authProviderId).map { record =>
+            record.amlsData match {
+              case Some(amlsData) =>
+                Ok(check_amls(
+                  checkAmlsForm.bind(Map("registeredAmls" -> RadioInputAnswer(amlsData.amlsRegistered).toString))))
+              case None => Ok(check_amls(checkAmlsForm))
+            }
+          }
         }
       }
     }
   }
 
   def submitCheckAmls: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
+    withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
           checkAmlsForm
@@ -75,14 +82,32 @@ class AMLSController @Inject()(
             .fold(
               formWithErrors => Ok(html.amls.check_amls(formWithErrors)),
               validForm => {
-                val nextPage = validForm match {
+                val nextPage: Result = validForm match {
                   case Yes =>
                     Redirect(routes.AMLSController.showAmlsDetailsForm())
                   case No => Redirect(routes.AMLSController.showCheckAmlsAlreadyAppliedForm())
                 }
-                sessionStoreService
-                  .cacheAgentSession(existingSession.copy(checkAmls = RadioInputAnswer.unapply(validForm)))
-                  .map(_ => nextPage)
+                for {
+                  record <- subscriptionJourneyService.getJourneyRecord(agent.authProviderId)
+                  updatedRecord <- record match {
+                                    case Some(r) =>
+                                      val newAmlsData: Option[AmlsData] = r.amlsData match {
+                                        case Some(d) =>
+                                          Some(d.copy(amlsRegistered = RadioInputAnswer.toBoolean(validForm)))
+                                        case None =>
+                                          Some(
+                                            AmlsData(
+                                              amlsRegistered = RadioInputAnswer.toBoolean(validForm),
+                                              amlsAppliedFor = None,
+                                              supervisoryBody = None,
+                                              details = None))
+                                      }
+                                      r.copy(amlsData = newAmlsData)
+                                    case None => throw new Exception("")
+                                  }
+                  _    <- subscriptionJourneyService.saveJourneyRecord(updatedRecord)
+                  page <- nextPage
+                } yield page
               }
             )
         }

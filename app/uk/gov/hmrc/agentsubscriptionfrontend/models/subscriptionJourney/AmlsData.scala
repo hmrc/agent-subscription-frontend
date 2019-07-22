@@ -50,9 +50,10 @@ object PendingDetails {
 }
 
 case class AmlsData(
-  amlsAppliedFor: Boolean,
-  supervisoryBody: String,
-  details: Either[PendingDetails, RegisteredDetails])
+  amlsRegistered: Boolean,
+  amlsAppliedFor: Option[Boolean],
+  supervisoryBody: Option[String],
+  details: Option[Either[PendingDetails, RegisteredDetails]])
 
 object AmlsData {
 
@@ -61,8 +62,9 @@ object AmlsData {
   implicit val format: Format[AmlsData] = new Format[AmlsData] {
     override def reads(json: JsValue): JsResult[AmlsData] = {
 
-      val amlsAppliedFor = (json \ "amlsAppliedFor").as[Boolean]
-      val supervisoryBody = (json \ "supervisoryBody").as[String]
+      val amlsRegistered = (json \ "amlsRegistered").as[Boolean]
+      val amlsAppliedFor = (json \ "amlsAppliedFor").asOpt[Boolean]
+      val supervisoryBody = (json \ "supervisoryBody").asOpt[String]
       val mayBeMembershipNumber = (json \ "membershipNumber").asOpt[String]
 
       mayBeMembershipNumber match {
@@ -70,19 +72,24 @@ object AmlsData {
         case Some(membershipNumber) =>
           val membershipExpiresOn = LocalDate.parse((json \ "membershipExpiresOn").as[String], formatter)
           JsSuccess(
-            AmlsData(amlsAppliedFor, supervisoryBody, Right(RegisteredDetails(membershipNumber, membershipExpiresOn))))
+            AmlsData(
+              amlsRegistered,
+              amlsAppliedFor,
+              supervisoryBody,
+              Some(Right(RegisteredDetails(membershipNumber, membershipExpiresOn)))))
 
         case None =>
           val appliedOn = LocalDate.parse((json \ "appliedOn").as[String], formatter)
-          JsSuccess(AmlsData(amlsAppliedFor, supervisoryBody, Left(PendingDetails(appliedOn))))
+          JsSuccess(AmlsData(amlsRegistered, amlsAppliedFor, supervisoryBody, Some(Left(PendingDetails(appliedOn)))))
       }
     }
 
     override def writes(amlsDetails: AmlsData): JsValue = {
 
       val detailsJson = amlsDetails.details match {
-        case Right(registeredDetails) => Json.toJson(registeredDetails)
-        case Left(pendingDetails)     => Json.toJson(pendingDetails)
+        case Some(Right(registeredDetails)) => Json.toJson(registeredDetails)
+        case Some(Left(pendingDetails))     => Json.toJson(pendingDetails)
+        case None                              => throw new Exception("")
       }
 
       Json
