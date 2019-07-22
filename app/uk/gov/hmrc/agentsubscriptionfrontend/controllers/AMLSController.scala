@@ -33,7 +33,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 
 import scala.collection.immutable.Map
 import scala.concurrent.{ExecutionContext, Future}
@@ -63,8 +63,7 @@ class AMLSController @Inject()(
           subscriptionJourneyService.getMandatoryJourneyRecord(agent.authProviderId).map { record =>
             record.amlsData match {
               case Some(amlsData) =>
-                Ok(check_amls(
-                  checkAmlsForm.bind(Map("registeredAmls" -> RadioInputAnswer(amlsData.amlsRegistered).toString))))
+                Ok(check_amls(checkAmlsForm.bind(Map("registeredAmls" -> RadioInputAnswer(amlsData.amlsRegistered)))))
               case None => Ok(check_amls(checkAmlsForm))
             }
           }
@@ -87,33 +86,40 @@ class AMLSController @Inject()(
                     Redirect(routes.AMLSController.showAmlsDetailsForm())
                   case No => Redirect(routes.AMLSController.showCheckAmlsAlreadyAppliedForm())
                 }
-                for {
-                  record <- subscriptionJourneyService.getJourneyRecord(agent.authProviderId)
-                  updatedRecord <- record match {
-                                    case Some(r) =>
-                                      val newAmlsData: Option[AmlsData] = r.amlsData match {
-                                        case Some(d) =>
-                                          Some(d.copy(amlsRegistered = RadioInputAnswer.toBoolean(validForm)))
-                                        case None =>
-                                          Some(
-                                            AmlsData(
-                                              amlsRegistered = RadioInputAnswer.toBoolean(validForm),
-                                              amlsAppliedFor = None,
-                                              supervisoryBody = None,
-                                              details = None))
-                                      }
-                                      r.copy(amlsData = newAmlsData)
-                                    case None => throw new Exception("")
-                                  }
-                  _    <- subscriptionJourneyService.saveJourneyRecord(updatedRecord)
-                  page <- nextPage
-                } yield page
+                updateJourneyRecord(
+                  agent, {
+                    case Some(d) =>
+                      Some(d.copy(amlsRegistered = RadioInputAnswer.toBoolean(validForm)))
+                    case None =>
+                      Some(
+                        AmlsData(
+                          amlsRegistered = RadioInputAnswer.toBoolean(validForm),
+                          amlsAppliedFor = None,
+                          pendingDetails = None,
+                          registeredDetails = None))
+                  },
+                  nextPage
+                )
               }
             )
         }
       }
     }
   }
+
+  def updateJourneyRecord(agent: Agent, translateAmls: Option[AmlsData] => Option[AmlsData], nextPage: Result)(
+    implicit hc: HeaderCarrier): Future[Result] =
+    for {
+      record <- subscriptionJourneyService.getJourneyRecord(agent.authProviderId)
+      updatedRecord <- record match {
+                        case Some(r) =>
+                          val newAmlsData: Option[AmlsData] = translateAmls(r.amlsData)
+                          r.copy(amlsData = newAmlsData)
+                        case None => throw new NotFoundException("subscription journey record expected but not found")
+                      }
+      _        <- subscriptionJourneyService.saveJourneyRecord(updatedRecord)
+      gotoPage <- nextPage
+    } yield gotoPage
 
   def showCheckAmlsAlreadyAppliedForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>

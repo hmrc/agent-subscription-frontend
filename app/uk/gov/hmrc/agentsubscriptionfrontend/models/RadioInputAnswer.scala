@@ -29,9 +29,9 @@ object RadioInputAnswer {
     case _     => throw new BadRequestException("Strange form input value")
   }
 
-  def apply(bool: Boolean): RadioInputAnswer = bool match {
-    case true  => Yes
-    case false => No
+  def apply(bool: Boolean): String = bool match {
+    case true  => "yes"
+    case false => "no"
   }
 
   def unapply(answer: RadioInputAnswer): Option[String] =

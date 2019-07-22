@@ -62,8 +62,8 @@ class TaskListControllerISpec extends BaseISpec {
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
           .copy(amlsData = Some(
             AmlsData(amlsRegistered = false, amlsAppliedFor = Some(false),
-              "supervisory body",
-              Right(RegisteredDetails("123", LocalDate.now().plusDays(10)))))
+              None,
+              Some(RegisteredDetails("supervisory body", "123", LocalDate.now().plusDays(10)))))
           )
       )
 
@@ -83,8 +83,8 @@ class TaskListControllerISpec extends BaseISpec {
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
           .copy(amlsData = Some(
             AmlsData(amlsRegistered = false, amlsAppliedFor = Some(false),
-              "supervisory body",
-              Right(RegisteredDetails("123", LocalDate.now().plusDays(10)))))
+              None,
+              Some(RegisteredDetails("supervisory body", "123", LocalDate.now().plusDays(10)))))
           )
       )
 

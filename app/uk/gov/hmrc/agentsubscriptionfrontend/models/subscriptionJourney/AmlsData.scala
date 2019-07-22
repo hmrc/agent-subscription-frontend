@@ -37,7 +37,7 @@ import java.time.format.DateTimeFormatter
 
 import play.api.libs.json._
 
-case class RegisteredDetails(membershipNumber: String, membershipExpiresOn: LocalDate)
+case class RegisteredDetails(supervisoryBody: String, membershipNumber: String, membershipExpiresOn: LocalDate)
 
 object RegisteredDetails {
   implicit val format: OFormat[RegisteredDetails] = Json.format[RegisteredDetails]
@@ -52,49 +52,16 @@ object PendingDetails {
 case class AmlsData(
   amlsRegistered: Boolean,
   amlsAppliedFor: Option[Boolean],
-  supervisoryBody: Option[String],
-  details: Option[Either[PendingDetails, RegisteredDetails]])
+  pendingDetails: Option[PendingDetails],
+  registeredDetails: Option[RegisteredDetails])
 
 object AmlsData {
 
-  val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-  implicit val format: Format[AmlsData] = new Format[AmlsData] {
-    override def reads(json: JsValue): JsResult[AmlsData] = {
-
-      val amlsRegistered = (json \ "amlsRegistered").as[Boolean]
-      val amlsAppliedFor = (json \ "amlsAppliedFor").asOpt[Boolean]
-      val supervisoryBody = (json \ "supervisoryBody").asOpt[String]
-      val mayBeMembershipNumber = (json \ "membershipNumber").asOpt[String]
-
-      mayBeMembershipNumber match {
-
-        case Some(membershipNumber) =>
-          val membershipExpiresOn = LocalDate.parse((json \ "membershipExpiresOn").as[String], formatter)
-          JsSuccess(
-            AmlsData(
-              amlsRegistered,
-              amlsAppliedFor,
-              supervisoryBody,
-              Some(Right(RegisteredDetails(membershipNumber, membershipExpiresOn)))))
-
-        case None =>
-          val appliedOn = LocalDate.parse((json \ "appliedOn").as[String], formatter)
-          JsSuccess(AmlsData(amlsRegistered, amlsAppliedFor, supervisoryBody, Some(Left(PendingDetails(appliedOn)))))
-      }
-    }
-
-    override def writes(amlsDetails: AmlsData): JsValue = {
-
-      val detailsJson = amlsDetails.details match {
-        case Some(Right(registeredDetails)) => Json.toJson(registeredDetails)
-        case Some(Left(pendingDetails))     => Json.toJson(pendingDetails)
-        case None                              => throw new Exception("")
-      }
-
-      Json
-        .obj("supervisoryBody" -> amlsDetails.supervisoryBody, "amlsAppliedFor" -> amlsDetails.amlsAppliedFor)
-        .deepMerge(detailsJson.as[JsObject])
-    }
+  implicit val localDateFormat = new Format[LocalDate] {
+    override def reads(json: JsValue): JsResult[LocalDate] =
+      json.validate[String].map(LocalDate.parse)
+    override def writes(o: LocalDate): JsValue = Json.toJson(o.toString)
   }
+
+  implicit val format: Format[AmlsData] = Json.format[AmlsData]
 }
