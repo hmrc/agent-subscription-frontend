@@ -19,16 +19,18 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import java.time.LocalDate
 
 import org.jsoup.Jsoup
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.{givenAgentIsManuallyAssured, givenAgentIsNotManuallyAssured}
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.givenNoSubscriptionJourneyRecordExists
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestSetupNoJourneyRecord}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.{givenNoSubscriptionJourneyRecordExists, givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
-import uk.gov.hmrc.play.binders.ContinueUrl
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData, TestSetupNoJourneyRecord}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -46,18 +48,21 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       Some("AA11AA"),
       "GB")
 
+  private val id = AuthProviderId("12345-credId")
+  private val record = TestData.minimalSubscriptionJourneyRecord(id)
+
   trait Setup {
-    implicit val authenticatedRequest = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+    implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
     sessionStoreService.currentSession.agentSession = Some(AgentSession(businessType = Some(SoleTrader), utr = Some(utr)))
     givenAgentIsNotManuallyAssured(utr.value)
-    givenNoSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"))
+    givenNoSubscriptionJourneyRecordExists(id)
   }
 
   trait SetupUnclean {
-    implicit val authenticatedRequest = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+    implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
     sessionStoreService.currentSession.agentSession = Some(AgentSession(businessType = Some(SoleTrader), utr = Some(utr)))
     givenAgentIsNotManuallyAssured(utr.value)
-    givenNoSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"))
+    givenNoSubscriptionJourneyRecordExists(id)
   }
 
 
@@ -65,7 +70,12 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
   "GET /check-money-laundering-compliance" should {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.showCheckAmlsPage(_))
 
+
     "contain page with expected content" in new Setup {
+
+      givenSubscriptionJourneyRecordExists(id,
+        TestData.minimalSubscriptionJourneyRecord(id))
+
       val result = await(controller.showCheckAmlsPage(authenticatedRequest))
 
       result should containMessages(
@@ -74,12 +84,24 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
         "button.no"
       )
     }
+
+    "throw exception when no journey record found" in new Setup {
+      intercept[RuntimeException] {
+        await(controller.showCheckAmlsPage(authenticatedRequest))
+      }.getMessage should be("Expected Journey Record missing")
+
+    }
+
   }
 
   "POST /check-money-laundering-compliance" should {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.submitCheckAmls(_))
 
     "redirect to /money-laundering-compliance when user selects yes" in new Setup {
+
+      givenSubscriptionJourneyRecordExists(id, record)
+      givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.registeredUserNoDataEntered)))
+
       val result = await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "yes")))
 
       status(result) shouldBe 303
@@ -87,6 +109,10 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
 
     "redirect to /check-money-laundering-application when user selects no" in new Setup {
+
+      givenSubscriptionJourneyRecordExists(id, record)
+      givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.nonRegisteredUserNoDataEntered)))
+
       val result = await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "no")))
 
       status(result) shouldBe 303

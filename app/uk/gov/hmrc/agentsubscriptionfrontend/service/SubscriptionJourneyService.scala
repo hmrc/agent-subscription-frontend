@@ -41,7 +41,7 @@ class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubs
     } yield
       record match {
         case Some(r) => r
-        case None    => throw new Exception("")
+        case None    => throw new RuntimeException("Journey record expected")
       }
 
   def saveJourneyRecord(subscriptionJourneyRecord: SubscriptionJourneyRecord)(

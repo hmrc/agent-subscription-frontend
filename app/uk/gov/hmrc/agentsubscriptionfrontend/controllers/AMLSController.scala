@@ -27,7 +27,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, SubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
@@ -60,7 +60,7 @@ class AMLSController @Inject()(
     withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
-          subscriptionJourneyService.getMandatoryJourneyRecord(agent.authProviderId).map { record =>
+          agent.getMandatorySubscriptionRecord.map { record =>
             record.amlsData match {
               case Some(amlsData) =>
                 Ok(check_amls(checkAmlsForm.bind(Map("registeredAmls" -> RadioInputAnswer(amlsData.amlsRegistered)))))
@@ -107,13 +107,13 @@ class AMLSController @Inject()(
     }
   }
 
-  def updateJourneyRecord(agent: Agent, translateAmls: Option[AmlsData] => Option[AmlsData], nextPage: Result)(
+  def updateJourneyRecord(agent: Agent, transformAmls: Option[AmlsData] => Option[AmlsData], nextPage: Result)(
     implicit hc: HeaderCarrier): Future[Result] =
     for {
       record <- subscriptionJourneyService.getJourneyRecord(agent.authProviderId)
       updatedRecord <- record match {
                         case Some(r) =>
-                          val newAmlsData: Option[AmlsData] = translateAmls(r.amlsData)
+                          val newAmlsData: Option[AmlsData] = transformAmls(r.amlsData)
                           r.copy(amlsData = newAmlsData)
                         case None => throw new NotFoundException("subscription journey record expected but not found")
                       }
@@ -153,39 +153,64 @@ class AMLSController @Inject()(
     }
   }
 
-  val showAmlsDetailsForm: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
+  def showAmlsDetailsForm: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
-          for {
-            cachedAmlsDetails <- existingSession.map(_.amlsDetails)
-            cachedGoBackUrl   <- sessionStoreService.fetchGoBackUrl
-          } yield {
-            (cachedAmlsDetails, cachedGoBackUrl) match {
-              case (Some(amlsDetails), mayBeGoBackUrl) =>
-                amlsDetails.details match {
-                  case Right(registeredDetails) =>
-                    val form: Map[String, String] = Map(
-                      "amlsCode"         -> amlsBodies.find(_._2 == amlsDetails.supervisoryBody).map(_._1).getOrElse(""),
-                      "membershipNumber" -> registeredDetails.membershipNumber,
-                      "expiry.day"       -> registeredDetails.membershipExpiresOn.getDayOfMonth.toString,
-                      "expiry.month"     -> registeredDetails.membershipExpiresOn.getMonthValue.toString,
-                      "expiry.year"      -> registeredDetails.membershipExpiresOn.getYear.toString
-                    )
+          agent.getMandatorySubscriptionRecord.map { record: SubscriptionJourneyRecord =>
+            record.amlsData.fold(
+              throw new RuntimeException("No AMLS data found in record")
+            ) { data =>
+              data.registeredDetails match {
+                case Some(details) =>
+                  val form: Map[String, String] = Map(
+                    "amlsCode"         -> amlsBodies.find(_._2 == details.supervisoryBody).map(_._1).getOrElse(""),
+                    "membershipNumber" -> details.membershipNumber,
+                    "expiry.day"       -> details.membershipExpiresOn.getDayOfMonth.toString,
+                    "expiry.month"     -> details.membershipExpiresOn.getMonthValue.toString,
+                    "expiry.year"      -> details.membershipExpiresOn.getYear.toString
+                  )
+                  Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet).bind(form), amlsBodies))
 
-                    Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet).bind(form), amlsBodies, mayBeGoBackUrl))
+                case None => Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet), amlsBodies))
+              }
 
-                  case Left(_) =>
-                    Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet), amlsBodies, mayBeGoBackUrl))
-                }
-
-              case (None, _) => Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet), amlsBodies))
             }
           }
         }
       }
     }
   }
+
+//          for {
+//            cachedAmlsDetails <- existingSession.map(_.amlsDetails)
+//            cachedGoBackUrl   <- sessionStoreService.fetchGoBackUrl
+//          } yield {
+//            (cachedAmlsDetails, cachedGoBackUrl) match {
+//              case (Some(amlsDetails), mayBeGoBackUrl) =>
+//                amlsDetails.details match {
+//                  case Right(registeredDetails) =>
+//                    val form: Map[String, String] = Map(
+//                      "amlsCode"         -> amlsBodies.find(_._2 == amlsDetails.supervisoryBody).map(_._1).getOrElse(""),
+//                      "membershipNumber" -> registeredDetails.membershipNumber,
+//                      "expiry.day"       -> registeredDetails.membershipExpiresOn.getDayOfMonth.toString,
+//                      "expiry.month"     -> registeredDetails.membershipExpiresOn.getMonthValue.toString,
+//                      "expiry.year"      -> registeredDetails.membershipExpiresOn.getYear.toString
+//                    )
+//
+//                    Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet).bind(form), amlsBodies, mayBeGoBackUrl))
+//
+//                  case Left(_) =>
+//                    Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet), amlsBodies, mayBeGoBackUrl))
+//                }
+//
+//              case (None, _) => Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet), amlsBodies))
+//            }
+//          }
+//        }
+//      }
+//    }
+//  }
 
   def submitAmlsDetailsForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
