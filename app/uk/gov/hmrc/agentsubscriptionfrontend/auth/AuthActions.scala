@@ -23,7 +23,7 @@ import uk.gov.hmrc.agentmtdidentifiers.model.Arn
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{ContinueUrlActions, routes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AuthProviderId
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, SubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SubscriptionJourneyService
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
@@ -48,6 +48,9 @@ class Agent(
 
   def getMandatorySubscriptionRecord: SubscriptionJourneyRecord =
     subscriptionJourneyRecord.getOrElse(throw new RuntimeException("Expected Journey Record missing"))
+
+  def getMandatoryAmlsData: AmlsData =
+    getMandatorySubscriptionRecord.amlsData.getOrElse(throw new RuntimeException("No AMLS data found in record"))
 
 }
 

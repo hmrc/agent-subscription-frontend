@@ -10,7 +10,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData, TestS
 import TestData._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, RegisteredDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, RegDetails}
 
 class TaskListControllerISpec extends BaseISpec {
   lazy val controller: TaskListController = app.injector.instanceOf[TaskListController]
@@ -63,7 +63,7 @@ class TaskListControllerISpec extends BaseISpec {
           .copy(amlsData = Some(
             AmlsData(amlsRegistered = false, amlsAppliedFor = Some(false),
               None,
-              Some(RegisteredDetails("supervisory body", "123", LocalDate.now().plusDays(10)))))
+              Some(RegDetails("supervisory body", "123", LocalDate.now().plusDays(10)))))
           )
       )
 
@@ -84,7 +84,7 @@ class TaskListControllerISpec extends BaseISpec {
           .copy(amlsData = Some(
             AmlsData(amlsRegistered = false, amlsAppliedFor = Some(false),
               None,
-              Some(RegisteredDetails("supervisory body", "123", LocalDate.now().plusDays(10)))))
+              Some(RegDetails("supervisory body", "123", LocalDate.now().plusDays(10)))))
           )
       )
 

@@ -37,10 +37,10 @@ import java.time.format.DateTimeFormatter
 
 import play.api.libs.json._
 
-case class RegisteredDetails(supervisoryBody: String, membershipNumber: String, membershipExpiresOn: LocalDate)
+case class RegDetails(supervisoryBody: String, membershipNumber: String, membershipExpiresOn: LocalDate)
 
-object RegisteredDetails {
-  implicit val format: OFormat[RegisteredDetails] = Json.format[RegisteredDetails]
+object RegDetails {
+  implicit val format: OFormat[RegDetails] = Json.format[RegDetails]
 }
 
 case class PendingDetails(appliedOn: LocalDate)
@@ -53,7 +53,7 @@ case class AmlsData(
   amlsRegistered: Boolean,
   amlsAppliedFor: Option[Boolean],
   pendingDetails: Option[PendingDetails],
-  registeredDetails: Option[RegisteredDetails])
+  registeredDetails: Option[RegDetails])
 
 object AmlsData {
 

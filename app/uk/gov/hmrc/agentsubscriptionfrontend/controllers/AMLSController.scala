@@ -27,7 +27,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, SubscriptionJourneyRecord}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, RegDetails, SubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
@@ -86,54 +86,43 @@ class AMLSController @Inject()(
                     Redirect(routes.AMLSController.showAmlsDetailsForm())
                   case No => Redirect(routes.AMLSController.showCheckAmlsAlreadyAppliedForm())
                 }
-                updateJourneyRecord(
-                  agent, {
-                    case Some(d) =>
-                      Some(d.copy(amlsRegistered = RadioInputAnswer.toBoolean(validForm)))
-                    case None =>
-                      Some(
-                        AmlsData(
-                          amlsRegistered = RadioInputAnswer.toBoolean(validForm),
-                          amlsAppliedFor = None,
-                          pendingDetails = None,
-                          registeredDetails = None))
-                  },
-                  nextPage
+                updateAmlsJourneyRecord(
+                  agent,
+                  d => Some(d.copy(amlsRegistered = RadioInputAnswer.toBoolean(validForm))),
+                  nextPage,
+                  Some(
+                    AmlsData(
+                      amlsRegistered = RadioInputAnswer.toBoolean(validForm),
+                      amlsAppliedFor = None,
+                      pendingDetails = None,
+                      registeredDetails = None))
                 )
               }
             )
         }
+
       }
     }
   }
 
-  def updateJourneyRecord(agent: Agent, transformAmls: Option[AmlsData] => Option[AmlsData], nextPage: Result)(
-    implicit hc: HeaderCarrier): Future[Result] =
-    for {
-      record <- subscriptionJourneyService.getJourneyRecord(agent.authProviderId)
-      updatedRecord <- record match {
-                        case Some(r) =>
-                          val newAmlsData: Option[AmlsData] = transformAmls(r.amlsData)
-                          r.copy(amlsData = newAmlsData)
-                        case None => throw new NotFoundException("subscription journey record expected but not found")
-                      }
-      _        <- subscriptionJourneyService.saveJourneyRecord(updatedRecord)
-      gotoPage <- nextPage
-    } yield gotoPage
-
   def showCheckAmlsAlreadyAppliedForm: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
+    withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
-          existingSession.amlsAppliedFor.fold(Ok(amls_applied_for(appliedForAmlsForm)))(amls =>
-            Ok(amls_applied_for(appliedForAmlsForm.bind(Map("amlsAppliedFor" -> amls.toString)))))
+          agent.getMandatoryAmlsData.map { data =>
+            data.amlsAppliedFor match {
+              case Some(appliedFor) =>
+                Ok(amls_applied_for(appliedForAmlsForm.bind(Map("amlsAppliedFor" -> RadioInputAnswer(appliedFor)))))
+              case None => Ok(amls_applied_for(appliedForAmlsForm))
+            }
+          }
         }
       }
     }
   }
 
   def submitCheckAmlsAlreadyAppliedForm: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
+    withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
           appliedForAmlsForm.bindFromRequest.fold(
@@ -143,9 +132,10 @@ class AMLSController @Inject()(
                 case Yes => Redirect(routes.AMLSController.showAmlsApplicationDatePage())
                 case No  => Redirect(routes.AMLSController.showAmlsNotAppliedPage())
               }
-              sessionStoreService
-                .cacheAgentSession(existingSession.copy(amlsAppliedFor = RadioInputAnswer.unapply(validForm)))
-                .map(_ => nextPage)
+              updateAmlsJourneyRecord(
+                agent,
+                d => Some(d.copy(amlsAppliedFor = Some(RadioInputAnswer.toBoolean(validForm)))),
+                nextPage)
             }
           )
         }
@@ -157,60 +147,27 @@ class AMLSController @Inject()(
     withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
-          agent.getMandatorySubscriptionRecord.map { record: SubscriptionJourneyRecord =>
-            record.amlsData.fold(
-              throw new RuntimeException("No AMLS data found in record")
-            ) { data =>
-              data.registeredDetails match {
-                case Some(details) =>
-                  val form: Map[String, String] = Map(
-                    "amlsCode"         -> amlsBodies.find(_._2 == details.supervisoryBody).map(_._1).getOrElse(""),
-                    "membershipNumber" -> details.membershipNumber,
-                    "expiry.day"       -> details.membershipExpiresOn.getDayOfMonth.toString,
-                    "expiry.month"     -> details.membershipExpiresOn.getMonthValue.toString,
-                    "expiry.year"      -> details.membershipExpiresOn.getYear.toString
-                  )
-                  Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet).bind(form), amlsBodies))
+          for {
+            record          <- agent.getMandatoryAmlsData
+            cachedGoBackUrl <- sessionStoreService.fetchGoBackUrl
+          } yield
+            record.registeredDetails match {
+              case Some(details) =>
+                val form: Map[String, String] = Map(
+                  "amlsCode"         -> amlsBodies.find(_._2 == details.supervisoryBody).map(_._1).getOrElse(""),
+                  "membershipNumber" -> details.membershipNumber,
+                  "expiry.day"       -> details.membershipExpiresOn.getDayOfMonth.toString,
+                  "expiry.month"     -> details.membershipExpiresOn.getMonthValue.toString,
+                  "expiry.year"      -> details.membershipExpiresOn.getYear.toString
+                )
+                Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet).bind(form), amlsBodies, cachedGoBackUrl))
 
-                case None => Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet), amlsBodies))
-              }
-
+              case None => Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet), amlsBodies, cachedGoBackUrl))
             }
-          }
         }
       }
     }
   }
-
-//          for {
-//            cachedAmlsDetails <- existingSession.map(_.amlsDetails)
-//            cachedGoBackUrl   <- sessionStoreService.fetchGoBackUrl
-//          } yield {
-//            (cachedAmlsDetails, cachedGoBackUrl) match {
-//              case (Some(amlsDetails), mayBeGoBackUrl) =>
-//                amlsDetails.details match {
-//                  case Right(registeredDetails) =>
-//                    val form: Map[String, String] = Map(
-//                      "amlsCode"         -> amlsBodies.find(_._2 == amlsDetails.supervisoryBody).map(_._1).getOrElse(""),
-//                      "membershipNumber" -> registeredDetails.membershipNumber,
-//                      "expiry.day"       -> registeredDetails.membershipExpiresOn.getDayOfMonth.toString,
-//                      "expiry.month"     -> registeredDetails.membershipExpiresOn.getMonthValue.toString,
-//                      "expiry.year"      -> registeredDetails.membershipExpiresOn.getYear.toString
-//                    )
-//
-//                    Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet).bind(form), amlsBodies, mayBeGoBackUrl))
-//
-//                  case Left(_) =>
-//                    Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet), amlsBodies, mayBeGoBackUrl))
-//                }
-//
-//              case (None, _) => Ok(html.amls.amls_details(amlsForm(amlsBodies.keySet), amlsBodies))
-//            }
-//          }
-//        }
-//      }
-//    }
-//  }
 
   def submitAmlsDetailsForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
@@ -224,13 +181,14 @@ class AMLSController @Inject()(
                 Ok(html.amls.amls_details(form, amlsBodies))
               },
               validForm => {
-                val amlsDetails = AMLSDetails(
-                  amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code")),
-                  Right(RegisteredDetails(validForm.membershipNumber, validForm.expiry)))
-                updateSession(existingSession, amlsDetails, agent)
-                  .flatMap { _ =>
-                    Redirect(routes.TaskListController.showTaskList())
-                  }
+                val supervisoryBody = amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))
+                updateAmlsJourneyRecord(
+                  agent,
+                  d =>
+                    Some(d.copy(registeredDetails =
+                      Some(RegDetails(supervisoryBody, validForm.membershipNumber, validForm.expiry)))),
+                  Redirect(routes.TaskListController.showTaskList())
+                )
               }
             )
         }
@@ -341,4 +299,26 @@ class AMLSController @Inject()(
     }
     sessionStoreService.cacheAgentSession(newSession)
   }
+
+  def updateAmlsJourneyRecord(
+    agent: Agent,
+    transformAmls: AmlsData => Option[AmlsData],
+    nextPage: Result,
+    maybeNewAmlsData: Option[AmlsData] = None)(implicit hc: HeaderCarrier): Future[Result] =
+    for {
+      record <- subscriptionJourneyService.getJourneyRecord(agent.authProviderId)
+      updatedRecord <- record match {
+                        case Some(r) =>
+                          val newAmlsData: Option[AmlsData] = r.amlsData match {
+                            case Some(d) => transformAmls(d)
+                            case None =>
+                              if (maybeNewAmlsData.isDefined) maybeNewAmlsData
+                              else throw new RuntimeException("No AMLS data found in record")
+                          }
+                          r.copy(amlsData = newAmlsData)
+                        case None => throw new RuntimeException("subscription journey record expected but not found")
+                      }
+      _        <- subscriptionJourneyService.saveJourneyRecord(updatedRecord)
+      gotoPage <- nextPage
+    } yield gotoPage
 }
