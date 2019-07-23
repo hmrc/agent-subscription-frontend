@@ -21,7 +21,6 @@ import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{AnyContent, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
-import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
@@ -86,17 +85,22 @@ class AMLSController @Inject()(
                     Redirect(routes.AMLSController.showAmlsDetailsForm())
                   case No => Redirect(routes.AMLSController.showCheckAmlsAlreadyAppliedForm())
                 }
+                val cleanAmlsData = AmlsData(
+                  amlsRegistered = RadioInputAnswer.toBoolean(validForm),
+                  amlsAppliedFor = None,
+                  supervisoryBody = None,
+                  pendingDetails = None,
+                  registeredDetails = None)
+
                 updateAmlsJourneyRecord(
-                  agent,
-                  d => Some(d.copy(amlsRegistered = RadioInputAnswer.toBoolean(validForm))),
+                  agent, { d =>
+                    {
+                      if (d.amlsRegistered == RadioInputAnswer.toBoolean(validForm)) Some(d)
+                      else Some(cleanAmlsData)
+                    }
+                  },
                   nextPage,
-                  maybeCreateNewAmlsData = Some(
-                    AmlsData(
-                      amlsRegistered = RadioInputAnswer.toBoolean(validForm),
-                      amlsAppliedFor = None,
-                      supervisoryBody = None,
-                      pendingDetails = None,
-                      registeredDetails = None))
+                  maybeCreateNewAmlsData = Some(cleanAmlsData)
                 )
               }
             )
@@ -285,41 +289,22 @@ class AMLSController @Inject()(
       //Redirect(routes.UtrController.showUtrForm())
     }
 
-  def updateSession(existingSession: AgentSession, amlsDetails: AMLSDetails, agent: Agent)(
-    implicit hc: HeaderCarrier) = {
-    val newSession = agent match {
-      case hasNonEmptyEnrolments(_) =>
-        existingSession
-          .copy(
-            amlsDetails = Some(amlsDetails),
-            taskListFlags = existingSession.taskListFlags.copy(amlsTaskComplete = true))
-      case _ =>
-        existingSession
-          .copy(
-            amlsDetails = Some(amlsDetails),
-            taskListFlags = existingSession.taskListFlags.copy(amlsTaskComplete = true, createTaskComplete = true))
-    }
-    sessionStoreService.cacheAgentSession(newSession)
-  }
-
-  def updateAmlsJourneyRecord(
+  private def updateAmlsJourneyRecord(
     agent: Agent,
     updateExistingAmlsData: AmlsData => Option[AmlsData],
     nextPage: Result,
     maybeCreateNewAmlsData: Option[AmlsData] = None)(implicit hc: HeaderCarrier): Future[Result] =
     for {
-      record <- subscriptionJourneyService.getJourneyRecord(agent.authProviderId)
-      updatedRecord <- record match {
-                        case Some(r) =>
-                          val newAmlsData: Option[AmlsData] = r.amlsData match {
-                            case Some(d) => updateExistingAmlsData(d)
-                            case None =>
-                              if (maybeCreateNewAmlsData.isDefined) maybeCreateNewAmlsData
-                              else throw new RuntimeException("No AMLS data found in record")
-                          }
-                          r.copy(amlsData = newAmlsData)
-                        case None => throw new RuntimeException("subscription journey record expected but not found")
-                      }
+      record <- agent.getMandatorySubscriptionRecord
+      updatedRecord <- {
+        val newAmlsData: Option[AmlsData] = record.amlsData match {
+          case Some(d) => updateExistingAmlsData(d)
+          case None =>
+            if (maybeCreateNewAmlsData.isDefined) maybeCreateNewAmlsData
+            else throw new RuntimeException("No AMLS data found in record")
+        }
+        record.copy(amlsData = newAmlsData)
+      }
       _        <- subscriptionJourneyService.saveJourneyRecord(updatedRecord)
       gotoPage <- nextPage
     } yield gotoPage

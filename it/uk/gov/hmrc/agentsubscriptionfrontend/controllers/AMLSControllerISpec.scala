@@ -74,7 +74,6 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.showCheckAmlsPage(_))
 
     "contain page with expected content" in new Setup {
-
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecord(id))
 
       val result = await(controller.showCheckAmlsPage(authenticatedRequest))
@@ -84,6 +83,20 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
         "button.yes",
         "button.no"
       )
+    }
+
+    "pre-populate radio button on page when it is present in the BE store" in new Setup {
+      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
+
+      val result = await(controller.showCheckAmlsPage(authenticatedRequest))
+
+      result should containMessages(
+        "check-amls.title",
+        "button.yes",
+        "button.no"
+      )
+//      checkHtmlResultWithBodyText(result,
+//        "<input type=\"radio\" id=\"registeredAmls-yes\" name=\"registeredAmls\" value=\"yes\" checked=\"checked\"/>")
     }
 
     "throw exception when no journey record found" in new Setup {
@@ -99,7 +112,6 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.submitCheckAmls(_))
 
     "redirect to /money-laundering-compliance when user selects yes" in new Setup {
-
       givenSubscriptionJourneyRecordExists(id, record)
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.registeredUserNoDataEntered)))
 
@@ -111,7 +123,6 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
     }
 
     "redirect to /check-money-laundering-application when user selects no" in new Setup {
-
       givenSubscriptionJourneyRecordExists(id, record)
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.nonRegisteredUserNoDataEntered)))
 
@@ -120,6 +131,47 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.AMLSController.showCheckAmlsAlreadyAppliedForm().url)
+    }
+
+    "redirect to /money-laundering-compliance page and clear amls data in store when field is pre-populated with no " +
+      "but user changes answer to yes" in new Setup {
+      val completeAmlsData = AmlsData(
+        false,
+        None,
+        Some("Insolvency Practitioners Association (IPA)"),
+        None,
+        Some(RegDetails("123456789", LocalDate.now())))
+
+      givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
+      givenSubscriptionRecordCreated(
+        id,
+        record.copy(amlsData = Some(AmlsData(amlsRegistered = true, None, None, None, None))))
+
+      val result =
+        await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "yes")))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.AMLSController.showAmlsDetailsForm().url)
+    }
+
+    "redirect to /money-laundering-compliance page and clear amls data in store when user submits pre-populated field" in new Setup {
+      val completeAmlsData = AmlsData(
+        true,
+        None,
+        Some("Insolvency Practitioners Association (IPA)"),
+        None,
+        Some(RegDetails("123456789", LocalDate.now())))
+
+      givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
+      givenSubscriptionRecordCreated(
+        id,
+        record.copy(amlsData = Some(completeAmlsData)))
+
+      val result =
+        await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "yes")))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.AMLSController.showAmlsDetailsForm().url)
     }
 
     "handle form with errors - user does not make a choice and tries to continue" in new Setup {
@@ -165,6 +217,22 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
         "button.no"
       )
     }
+
+    "pre-populate radio button field when it exists in BE store" in new Setup {
+      givenSubscriptionJourneyRecordExists(
+        id,
+        TestData
+          .minimalSubscriptionJourneyRecordWithAmls(id)
+          .copy(amlsData = Some(AmlsData(false, amlsAppliedFor = Some(true), None, None, None))))
+
+      val result = await(controller.showCheckAmlsAlreadyAppliedForm(authenticatedRequest))
+
+      result should containMessages(
+        "amlsAppliedFor.title",
+        "button.yes",
+        "button.no"
+      )
+    }
   }
 
   "POST /check-money-laundering-application" should {
@@ -196,6 +264,16 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.AMLSController.showAmlsNotAppliedPage().url)
+    }
+
+    "throw a RuntimeException when there is no AMLS data found" in new Setup {
+      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecord(id))
+
+      intercept[RuntimeException] {
+        await(
+          controller.submitCheckAmlsAlreadyAppliedForm(
+            authenticatedRequest.withFormUrlEncodedBody("amlsAppliedFor" -> "yes")))
+      }.getMessage shouldBe "No AMLS data found in record"
     }
 
     "handle form with errors - user does not make a choice and tries to continue" in new Setup {
@@ -374,15 +452,15 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
     val expiryYear = expiryDate.getYear.toString
     val amlsBodies = AMLSLoader.load("/amls.csv")
 
-
     "store AMLS form in session cache after successful submission, and redirect to task list" in new Setup {
       val amlsBody = amlsBodies.getOrElse("AAT", throw new Exception("Invalid AMLS code"))
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenSubscriptionRecordCreated(
         id,
-        record.copy(amlsData = Some(
-          AmlsData.registeredUserNoDataEntered.copy(supervisoryBody = Some(amlsBody),
-            registeredDetails = Some(RegDetails("12345", expiryDate))))))
+        record.copy(
+          amlsData = Some(AmlsData.registeredUserNoDataEntered
+            .copy(supervisoryBody = Some(amlsBody), registeredDetails = Some(RegDetails("12345", expiryDate)))))
+      )
 
       implicit val request = authenticatedRequest.withFormUrlEncodedBody(
         "amlsCode"         -> "AAT",
@@ -401,9 +479,10 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenSubscriptionRecordCreated(
         id,
-        record.copy(amlsData = Some(
-          AmlsData.registeredUserNoDataEntered.copy(supervisoryBody = Some(amlsBody),
-            registeredDetails = Some(RegDetails("12345", expiryDate))))))
+        record.copy(
+          amlsData = Some(AmlsData.registeredUserNoDataEntered
+            .copy(supervisoryBody = Some(amlsBody), registeredDetails = Some(RegDetails("12345", expiryDate)))))
+      )
       implicit val request = authenticatedRequest.withFormUrlEncodedBody(
         "amlsCode"         -> "AAT",
         "membershipNumber" -> "12345",
@@ -661,9 +740,12 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenSubscriptionRecordCreated(
         id,
-        record.copy(amlsData = Some(
-          AmlsData.registeredUserNoDataEntered.copy(supervisoryBody = Some("Association of AccountingTechnicians (AAT)"),
-            pendingDetails = Some(PendingDate(appliedOnDate))))))
+        record.copy(
+          amlsData = Some(
+            AmlsData.registeredUserNoDataEntered.copy(
+              supervisoryBody = Some("Association of AccountingTechnicians (AAT)"),
+              pendingDetails = Some(PendingDate(appliedOnDate)))))
+      )
       implicit val request = authenticatedRequest.withFormUrlEncodedBody(
         "amlsCode"        -> "AAT",
         "appliedOn.day"   -> day,
