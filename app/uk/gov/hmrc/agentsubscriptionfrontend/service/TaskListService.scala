@@ -44,13 +44,12 @@ class TaskListService @Inject()(agentAssuranceConnector: AgentAssuranceConnector
   private def isMaaAgent(utr: Utr)(implicit hc: HeaderCarrier): Future[Boolean] =
     agentAssuranceConnector.isManuallyAssuredAgent(utr)
 
-  private def isAmlsTaskComplete(subscriptionJourneyRecord: SubscriptionJourneyRecord): Boolean = {
+  private def isAmlsTaskComplete(subscriptionJourneyRecord: SubscriptionJourneyRecord): Boolean =
     subscriptionJourneyRecord.amlsData.fold(false) {
-      case AmlsData(true, _, Some(_), _, Some(_)) => true  // registered (with details)
+      case AmlsData(true, _, Some(_), _, Some(_))           => true // registered (with details)
       case AmlsData(false, Some(true), Some(_), Some(_), _) => true // not registered, but applied for (with details)
-      case _ => false
+      case _                                                => false
     }
-  }
 
   private def isCreateTaskComplete(subscriptionJourneyRecord: SubscriptionJourneyRecord): Boolean =
     subscriptionJourneyRecord.cleanCredsInternalId.fold(false)(_ => true)
