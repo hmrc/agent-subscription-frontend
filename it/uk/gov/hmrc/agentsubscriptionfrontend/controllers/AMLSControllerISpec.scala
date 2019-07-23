@@ -71,12 +71,12 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
   }
 
   "GET /check-money-laundering-compliance" should {
-    behave like anAgentAffinityGroupOnlyEndpoint(controller.showCheckAmlsPage(_))
+    behave like anAgentAffinityGroupOnlyEndpoint(controller.showAmlsRegisteredPage(_))
 
     "contain page with expected content" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecord(id))
 
-      val result = await(controller.showCheckAmlsPage(authenticatedRequest))
+      val result = await(controller.showAmlsRegisteredPage(authenticatedRequest))
 
       result should containMessages(
         "check-amls.title",
@@ -88,7 +88,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
     "pre-populate radio button on page when it is present in the BE store" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
 
-      val result = await(controller.showCheckAmlsPage(authenticatedRequest))
+      val result = await(controller.showAmlsRegisteredPage(authenticatedRequest))
 
       result should containMessages(
         "check-amls.title",
@@ -101,7 +101,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "throw exception when no journey record found" in new Setup {
       intercept[RuntimeException] {
-        await(controller.showCheckAmlsPage(authenticatedRequest))
+        await(controller.showAmlsRegisteredPage(authenticatedRequest))
       }.getMessage should be("Expected Journey Record missing")
 
     }
@@ -109,14 +109,14 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
   }
 
   "POST /check-money-laundering-compliance" should {
-    behave like anAgentAffinityGroupOnlyEndpoint(controller.submitCheckAmls(_))
+    behave like anAgentAffinityGroupOnlyEndpoint(controller.submitAmlsRegistered(_))
 
     "redirect to /money-laundering-compliance when user selects yes" in new Setup {
       givenSubscriptionJourneyRecordExists(id, record)
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.registeredUserNoDataEntered)))
 
       val result =
-        await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "yes")))
+        await(controller.submitAmlsRegistered(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "yes")))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.AMLSController.showAmlsDetailsForm().url)
@@ -127,7 +127,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.nonRegisteredUserNoDataEntered)))
 
       val result =
-        await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "no")))
+        await(controller.submitAmlsRegistered(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "no")))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.AMLSController.showCheckAmlsAlreadyAppliedForm().url)
@@ -148,7 +148,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
         record.copy(amlsData = Some(AmlsData(amlsRegistered = true, None, None, None, None))))
 
       val result =
-        await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "yes")))
+        await(controller.submitAmlsRegistered(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "yes")))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.AMLSController.showAmlsDetailsForm().url)
@@ -168,7 +168,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
         record.copy(amlsData = Some(completeAmlsData)))
 
       val result =
-        await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "yes")))
+        await(controller.submitAmlsRegistered(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "yes")))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.AMLSController.showAmlsDetailsForm().url)
@@ -176,7 +176,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "handle form with errors - user does not make a choice and tries to continue" in new Setup {
       val result =
-        await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "")))
+        await(controller.submitAmlsRegistered(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "")))
 
       status(result) shouldBe 200
 
@@ -190,7 +190,7 @@ class AMLSControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "handle form with errors - user manipulates the value and tries to continue" in new Setup {
       val result =
-        await(controller.submitCheckAmls(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "blah")))
+        await(controller.submitAmlsRegistered(authenticatedRequest.withFormUrlEncodedBody("registeredAmls" -> "blah")))
 
       status(result) shouldBe 200
 

@@ -55,7 +55,7 @@ class AMLSController @Inject()(
 
   private val amlsBodies: Map[String, String] = AMLSLoader.load("/amls.csv")
 
-  def showCheckAmlsPage: Action[AnyContent] = Action.async { implicit request =>
+  def showAmlsRegisteredPage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
@@ -71,7 +71,7 @@ class AMLSController @Inject()(
     }
   }
 
-  def submitCheckAmls: Action[AnyContent] = Action.async { implicit request =>
+  def submitAmlsRegistered: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         withManuallyAssuredAgent(existingSession) {
@@ -93,9 +93,9 @@ class AMLSController @Inject()(
                   registeredDetails = None)
 
                 updateAmlsJourneyRecord(
-                  agent, { d =>
+                  agent, { amlsData =>
                     {
-                      if (d.amlsRegistered == RadioInputAnswer.toBoolean(validForm)) Some(d)
+                      if (amlsData.amlsRegistered == RadioInputAnswer.toBoolean(validForm)) Some(amlsData)
                       else Some(cleanAmlsData)
                     }
                   },
@@ -139,7 +139,7 @@ class AMLSController @Inject()(
               }
               updateAmlsJourneyRecord(
                 agent,
-                d => Some(d.copy(amlsAppliedFor = Some(RadioInputAnswer.toBoolean(validForm)))),
+                amlsData => Some(amlsData.copy(amlsAppliedFor = Some(RadioInputAnswer.toBoolean(validForm)))),
                 nextPage)
             }
           )
@@ -190,9 +190,9 @@ class AMLSController @Inject()(
                   amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))
                 updateAmlsJourneyRecord(
                   agent,
-                  d =>
+                  amlsData =>
                     Some(
-                      d.copy(
+                      amlsData.copy(
                         supervisoryBody = Some(supervisoryBodyData),
                         registeredDetails = Some(RegDetails(validForm.membershipNumber, validForm.expiry)))),
                   Redirect(routes.TaskListController.showTaskList())
@@ -258,9 +258,9 @@ class AMLSController @Inject()(
 
                 updateAmlsJourneyRecord(
                   agent,
-                  d =>
+                  amlsData =>
                     Some(
-                      d.copy(
+                      amlsData.copy(
                         supervisoryBody = Some(supervisoryBodyData),
                         pendingDetails = Some(PendingDate(validForm.appliedOn)))),
                   Redirect(routes.TaskListController.showTaskList())
@@ -298,7 +298,7 @@ class AMLSController @Inject()(
       record <- agent.getMandatorySubscriptionRecord
       updatedRecord <- {
         val newAmlsData: Option[AmlsData] = record.amlsData match {
-          case Some(d) => updateExistingAmlsData(d)
+          case Some(amlsData) => updateExistingAmlsData(amlsData)
           case None =>
             if (maybeCreateNewAmlsData.isDefined) maybeCreateNewAmlsData
             else throw new RuntimeException("No AMLS data found in record")
