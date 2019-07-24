@@ -145,44 +145,38 @@ trait StartControllerISpec extends BaseISpec {
     givenSubscriptionRecordCreated(record.authProviderId, record.copy(continueId = Some(continueId.value)))
   }
 
-  trait SetupSubscribed {
-    implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(
-      subscribingAgentEnrolledForNonMTD)
-    givenSubscriptionJourneyRecordExists(id, record)
-  }
-
   "returnAfterGGCredsCreated" should {
 
     import FixturesForReturnAfterGGCredsCreated._
 
     "given a valid subscription journey record" when {
 
-      "agent is unsubscribed redirect to the /task-list page" in new SetupUnsubscribed {
-
+      "redirect to the /task-list page and update journey record with new clean creds id" in new SetupUnsubscribed {
         implicit val request = FakeRequest()
 
         val result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
 
         status(result) shouldBe 303
         redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
-
       }
 
-      "agent is already fully subscribed redirect to the /task-list page" in new SetupSubscribed {
-
+      "redirect to the /task-list page when there is no continueId" in {
+        implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(
+          subscribingAgentEnrolledForNonMTD)
+        givenNoSubscriptionJourneyRecordExists(id)
         implicit val request = FakeRequest()
-        val result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
+
+        val result = await(controller.returnAfterGGCredsCreated()(request))
 
         status(result) shouldBe 303
-        redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
-
+        redirectLocation(result) shouldBe Some(routes.TaskListController.showTaskList().url)
       }
-
     }
 
+    // TODO: move partial subscription test when decision made on where to complete partial subscription
     "redirect to correct page if given a valid StashedChainedSessionDetails ID and agent is partially subscribed (subscribed in ETMP but not enrolled)" when {
 
-      "agent was not eligible for mapping, should redirect to /subscription-complete" in new ValidKnownFactsCached(
+      "agent was not eligible for mapping, should redirect to /subscription-complete" ignore new ValidKnownFactsCached(
         wasEligibleForMapping = Some(false),
         includeInitialDetails = false) with PartiallySubscribedAgentStub {
         AgentSubscriptionStub.partialSubscriptionWillSucceed(
@@ -197,7 +191,7 @@ trait StartControllerISpec extends BaseISpec {
       }
     }
 
-    "throw Upstream4xxResponse if agent-subscription returns 403 when completing partial subscription" in new ValidKnownFactsCached(
+    "throw Upstream4xxResponse if agent-subscription returns 403 when completing partial subscription" ignore new ValidKnownFactsCached(
       includeInitialDetails = false) with PartiallySubscribedAgentStub {
       AgentSubscriptionStub
         .partialSubscriptionWillReturnStatus(CompletePartialSubscriptionBody(utr = validUtr, knownFacts = SubscriptionRequestKnownFacts(testPostcode)), 403)
@@ -205,7 +199,7 @@ trait StartControllerISpec extends BaseISpec {
       an[Upstream4xxResponse] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
     }
 
-    "throw Upstream4xxResponse if agent-subscription returns 409 when completing partial subscription" in new ValidKnownFactsCached(
+    "throw Upstream4xxResponse if agent-subscription returns 409 when completing partial subscription" ignore new ValidKnownFactsCached(
       includeInitialDetails = false) with PartiallySubscribedAgentStub {
       AgentSubscriptionStub
         .partialSubscriptionWillReturnStatus(CompletePartialSubscriptionBody(utr = validUtr, knownFacts = SubscriptionRequestKnownFacts(testPostcode)), 409)
@@ -213,50 +207,12 @@ trait StartControllerISpec extends BaseISpec {
       an[Upstream4xxResponse] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
     }
 
-    "throw Upstream5xxResponse, 500 when executing partialSubscriptionFix" in new ValidKnownFactsCached(includeInitialDetails = false)
+    "throw Upstream5xxResponse, 500 when executing partialSubscriptionFix" ignore new ValidKnownFactsCached(includeInitialDetails = false)
     with PartiallySubscribedAgentStub {
       AgentSubscriptionStub
         .partialSubscriptionWillReturnStatus(CompletePartialSubscriptionBody(utr = validUtr, knownFacts = SubscriptionRequestKnownFacts(testPostcode)), 500)
 
       an[Upstream5xxResponse] shouldBe thrownBy(await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(FakeRequest())))
-    }
-
-    "redirect to the /task-list if given an invalid ChainedSessionDetails ID" in new ValidKnownFactsCached {
-      val invalidId = s"A$persistedId"
-
-      val result = await(controller.returnAfterGGCredsCreated(id = Some(invalidId))(FakeRequest()))
-
-      status(result) shouldBe 303
-      redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
-    }
-
-    "redirect to /task-list if there is no valid ChainedSessionDetails ID" in {
-      val result = await(controller.returnAfterGGCredsCreated(id = None)(FakeRequest()))
-
-      status(result) shouldBe 303
-      redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
-    }
-
-    "delete the persisted ChainedSessionDetails if given a valid ChainedSessionDetails ID" in new ValidKnownFactsCached with UnsubscribedAgentStub {
-      val id = persistedId
-      val result = await(controller.returnAfterGGCredsCreated(id = Some(id))(FakeRequest()))
-      status(result) shouldBe 303
-      await(repo.findChainedSessionDetails(id)) shouldBe None
-    }
-
-    "place the known facts back in the session store, if given a valid ChainedSessionDetails ID" in new ValidKnownFactsCached with UnsubscribedAgentStub {
-      implicit val request = FakeRequest()
-
-      await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(request))
-    }
-
-    "place a provided continue URL in session store, if given a valid ChainedSessionDetails ID" in new ValidKnownFactsCached with UnsubscribedAgentStub {
-      val continueUrl = ContinueUrl("/test-continue-url")
-      implicit val request = FakeRequest(GET, s"?id=$persistedId&continue=${continueUrl.encodedUrl}")
-
-      await(controller.returnAfterGGCredsCreated()(request))
-
-      sessionStoreService.currentSession.continueUrl shouldBe Some(continueUrl)
     }
   }
 }
@@ -266,7 +222,7 @@ class StartControllerTests extends StartControllerISpec {
   "returnAfterGGCredsCreated" should {
     import FixturesForReturnAfterGGCredsCreated.{PartiallySubscribedAgentStub, ValidKnownFactsCached}
 
-    "agent NOT Eligible for mapping, should redirect to /link-clients" in new ValidKnownFactsCached(
+    "agent NOT Eligible for mapping, should redirect to /link-clients" ignore new ValidKnownFactsCached(
       wasEligibleForMapping = Some(false),
       includeInitialDetails = false) with PartiallySubscribedAgentStub {
       AgentSubscriptionStub.partialSubscriptionWillSucceed(

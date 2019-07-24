@@ -81,7 +81,7 @@ class StartController @Inject()(
             for {
               record <- subscriptionJourneyService.getMandatoryJourneyRecord(ContinueId(continueId))
               _ <- subscriptionJourneyService.saveJourneyRecord(
-                    record.copy(cleanCredsInternalId = Some(agent.authProviderId)))
+                    record.copy(cleanCredsAuthProviderId = Some(agent.authProviderId)))
             } yield Redirect(routes.TaskListController.showTaskList())
 
           case None => Future.successful(Redirect(routes.TaskListController.showTaskList()))

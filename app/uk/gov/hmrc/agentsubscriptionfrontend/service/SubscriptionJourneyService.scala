@@ -19,6 +19,8 @@ package uk.gov.hmrc.agentsubscriptionfrontend.service
 import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent._
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AuthProviderId, ContinueId}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, SubscriptionJourneyRecord}
@@ -57,9 +59,13 @@ class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubs
     implicit hc: HeaderCarrier): Future[Unit] =
     agentSubscriptionConnector.createOrUpdate(subscriptionJourneyRecord)
 
-  def createJourneyRecord(agentSession: AgentSession, authProviderId: AuthProviderId)(
-    implicit hc: HeaderCarrier): Future[Unit] = {
-    val sjr = SubscriptionJourneyRecord.fromAgentSession(agentSession, authProviderId)
+  def createJourneyRecord(agentSession: AgentSession, agent: Agent)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val cleanCredsAuthProviderIdOpt = agent match {
+      case hasNonEmptyEnrolments(_) => None
+      case _                        => Some(agent.authProviderId)
+    }
+    val sjr =
+      SubscriptionJourneyRecord.fromAgentSession(agentSession, agent.authProviderId, cleanCredsAuthProviderIdOpt)
     saveJourneyRecord(sjr)
   }
 }
