@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney
 
 import java.time.LocalDateTime
+import java.util.UUID
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, OFormat}
@@ -57,7 +58,7 @@ object SubscriptionJourneyRecord {
   def fromAgentSession(agentSession: AgentSession, authProviderId: AuthProviderId): SubscriptionJourneyRecord =
     SubscriptionJourneyRecord(
       authProviderId = authProviderId,
-      continueId = None,
+      continueId = Some(UUID.randomUUID().toString.replace("-", "")),
       businessDetails = BusinessDetails(
         businessType =
           agentSession.businessType.getOrElse(throw new RuntimeException("no business type found in agent session")),

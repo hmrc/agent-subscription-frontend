@@ -4,15 +4,17 @@ import java.time.LocalDate
 
 import org.jsoup.Jsoup
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.ChainedSessionDetailsRepository
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.StashedChainedSessionDetails.StashedChainnedSessionId
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, AuthStub}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpec
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.individual
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{individual, subscribingAgentEnrolledForNonMTD}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData}
 import uk.gov.hmrc.http.{Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.binders.ContinueUrl
 
@@ -23,6 +25,10 @@ trait StartControllerISpec extends BaseISpec {
   protected lazy val controller: StartController = app.injector.instanceOf[StartController]
   protected lazy val configuredGovernmentGatewayUrl = "http://configured-government-gateway.gov.uk/"
   protected lazy val repo = app.injector.instanceOf[ChainedSessionDetailsRepository]
+
+  private val id = AuthProviderId("12345-credId")
+  private val continueId = ContinueId("foobar")
+  private val record = TestData.minimalSubscriptionJourneyRecord(id)
 
   override protected def appBuilder: GuiceApplicationBuilder =
     super.appBuilder
@@ -131,40 +137,47 @@ trait StartControllerISpec extends BaseISpec {
     behave like aPageWithFeedbackLinks(request => controller.showNotAgent(request), authenticatedAs(individual))
   }
 
+  trait SetupUnsubscribed {
+    implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(
+      subscribingAgentEnrolledForNonMTD)
+    givenNoSubscriptionJourneyRecordExists(id)
+    givenSubscriptionJourneyRecordExists(continueId, record.copy(continueId = Some(continueId.value)))
+    givenSubscriptionRecordCreated(record.authProviderId, record.copy(continueId = Some(continueId.value)))
+  }
+
+  trait SetupSubscribed {
+    implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(
+      subscribingAgentEnrolledForNonMTD)
+    givenSubscriptionJourneyRecordExists(id, record)
+  }
+
   "returnAfterGGCredsCreated" should {
+
     import FixturesForReturnAfterGGCredsCreated._
-    "given a valid StashedChainedSessionDetails ID" when {
 
-      "agent is unsubscribed redirect to the /task-list page" in new ValidKnownFactsCached with UnsubscribedAgentStub {
+    "given a valid subscription journey record" when {
+
+      "agent is unsubscribed redirect to the /task-list page" in new SetupUnsubscribed {
+
         implicit val request = FakeRequest()
-        sessionStoreService.currentSession.agentSession = Some(agentSession)
 
-        val result = await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(request))
-
-        status(result) shouldBe 303
-        redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
-        sessionStoreService.currentSession.agentSession.get.taskListFlags.createTaskComplete shouldBe true
-      }
-
-      "agent is already fully subscribed redirect to the /task-list page" in new ValidKnownFactsCached with SubscribedAgentStub {
-        implicit val request = FakeRequest()
-        val result = await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(request))
-
-        status(result) shouldBe 303
-        redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
-        sessionStoreService.currentSession.agentSession.get.taskListFlags.createTaskComplete shouldBe true
-      }
-      "agent is already fully subscribed and has no utr redirect to the /task-list page with task list flags off" in {
-        val persistedId = await(repo.create(ChainedSessionDetails(agentSession.copy(utr = None))))
-        implicit val request = FakeRequest()
-        sessionStoreService.currentSession.agentSession = Some(agentSession.copy(utr = None))
-
-        val result = await(controller.returnAfterGGCredsCreated(id = Some(persistedId))(request))
+        val result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
 
         status(result) shouldBe 303
         redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
 
       }
+
+      "agent is already fully subscribed redirect to the /task-list page" in new SetupSubscribed {
+
+        implicit val request = FakeRequest()
+        val result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
+
+        status(result) shouldBe 303
+        redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
+
+      }
+
     }
 
     "redirect to correct page if given a valid StashedChainedSessionDetails ID and agent is partially subscribed (subscribed in ETMP but not enrolled)" when {
@@ -249,10 +262,9 @@ trait StartControllerISpec extends BaseISpec {
 }
 
 class StartControllerTests extends StartControllerISpec {
-  import FixturesForReturnAfterGGCredsCreated._
 
   "returnAfterGGCredsCreated" should {
-    import FixturesForReturnAfterGGCredsCreated.{PartiallySubscribedAgentStub, UnsubscribedAgentStub, ValidKnownFactsCached}
+    import FixturesForReturnAfterGGCredsCreated.{PartiallySubscribedAgentStub, ValidKnownFactsCached}
 
     "agent NOT Eligible for mapping, should redirect to /link-clients" in new ValidKnownFactsCached(
       wasEligibleForMapping = Some(false),

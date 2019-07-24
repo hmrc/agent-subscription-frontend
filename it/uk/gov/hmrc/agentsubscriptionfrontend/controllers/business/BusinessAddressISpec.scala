@@ -76,6 +76,7 @@ class BusinessAddressISpec extends BaseISpec {
 
       val sjr = SubscriptionJourneyRecord.fromAgentSession(agentSession, authId)
       val newSjr = sjr.copy(
+        continueId = None, // can't match this, because it is randomly generated
         businessDetails = sjr.businessDetails.copy(
           registration = Some(testRegistration.copy(
             address = new BusinessAddress(
