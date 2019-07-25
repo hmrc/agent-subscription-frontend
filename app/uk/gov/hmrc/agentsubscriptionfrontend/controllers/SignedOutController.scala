@@ -30,6 +30,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, Subsc
 import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps.addParamsToUrl
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -97,4 +98,5 @@ class SignedOutController @Inject()(
   def redirectToBusinessTypeForm: Action[AnyContent] = Action { implicit request =>
     Redirect(routes.BusinessTypeController.showBusinessTypeForm()).withNewSession
   }
+
 }
