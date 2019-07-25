@@ -1,16 +1,16 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AuthProviderId, TaskListFlags}
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.givenSubscriptionJourneyRecordExists
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForHMRCASAGENT, subscribingAgentEnrolledForNonMTD}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData, TestSetupNoJourneyRecord}
-import TestData._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, RegisteredDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AuthProviderId
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, RegDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.givenSubscriptionJourneyRecordExists
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForHMRCASAGENT, subscribingAgentEnrolledForNonMTD}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData}
 
 class TaskListControllerISpec extends BaseISpec {
   lazy val controller: TaskListController = app.injector.instanceOf[TaskListController]
@@ -61,9 +61,9 @@ class TaskListControllerISpec extends BaseISpec {
       givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"),
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
           .copy(amlsData = Some(
-            AmlsData(amlsAppliedFor = false,
-              "supervisory body",
-              Right(RegisteredDetails("123", LocalDate.now().plusDays(10)))))
+            AmlsData(amlsRegistered = true, amlsAppliedFor = Some(false),
+              Some("supervisory body"), None,
+              Some(RegDetails("123", LocalDate.now().plusDays(10)))))
           )
       )
 
@@ -82,9 +82,9 @@ class TaskListControllerISpec extends BaseISpec {
       givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"),
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
           .copy(amlsData = Some(
-            AmlsData(amlsAppliedFor = false,
-              "supervisory body",
-              Right(RegisteredDetails("123", LocalDate.now().plusDays(10)))))
+            AmlsData(amlsRegistered = true, amlsAppliedFor = Some(false),
+              Some("supervisory body"), None,
+              Some(RegDetails("123", LocalDate.now().plusDays(10)))))
           )
       )
 
@@ -114,16 +114,42 @@ class TaskListControllerISpec extends BaseISpec {
       "<a href=/agent-subscription/create-new-account>Create your user ID for your agent services account</a>")
     }
 
-    "contain a url to the mapping journey when user has completed all other tasks" ignore {
+    "contain a url to the mapping journey when user has completed all other tasks" in {
+      givenAgentIsNotManuallyAssured(validUtr.value)
+      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"),
+        TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId")).copy(subscriptionCreated = true))
 
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-
-      // TODO implement final checked your answers task flag
 
       val result = await(controller.showTaskList(request))
       status(result) shouldBe 200
 
       checkHtmlResultWithBodyText(result, appConfig.agentMappingFrontendStartUrl)
     }
+  }
+
+  "savedProgress (GET /saved-progress)" should {
+  "contain page title and content" in {
+
+    implicit val request = FakeRequest()
+    val result = await(controller.savedProgress(backLink = None)(request))
+
+    status(result) shouldBe 200
+
+    result should containMessages(
+      "saved-progress.title",
+      "saved-progress.p1",
+      "saved-progress.p2",
+      "saved-progress.link",
+      "saved-progress.continue"
+    )
+
+    result should containSubstrings("To complete this form later, go to the",
+      "guidance page about creating an agent services account (open in a new window or tab)",
+    "on GOV.UK and sign in to this service again.")
+
+    result should containLink("saved-progress.continue",routes.TaskListController.showTaskList().url)
+    result should containLink("saved-progress.finish", routes.SignedOutController.signOut().url)
+  }
   }
 }
