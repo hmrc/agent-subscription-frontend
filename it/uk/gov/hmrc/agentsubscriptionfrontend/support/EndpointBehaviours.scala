@@ -7,7 +7,7 @@ import org.scalatest.Assertion
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{TestSetupWithCompleteJourneyRecord, routes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.individual
@@ -51,21 +51,21 @@ trait EndpointBehaviours {
 
   protected def aPageWithFeedbackLinks(action: PlayRequest, request: => Request[AnyContent] = FakeRequest("GET", "url")): Unit = {
 
-    "have a 'get help with this page' link" in new TestSetupNoJourneyRecord{
+    "have a 'get help with this page' link" in new TestSetupWithCompleteJourneyRecord {
       await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(hc(request), global))
       val result = await(action(request))
 
       bodyOf(result) should include("Get help with this page.")
     }
 
-    "have a beta feedback banner" in new TestSetupNoJourneyRecord{
+    "have a beta feedback banner" in new TestSetupWithCompleteJourneyRecord {
       await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(hc(request), global))
       val result = await(action(request))
 
       bodyOf(result) should include("This is a new service")
     }
 
-    "have a beta feedback link" in new TestSetupNoJourneyRecord{
+    "have a beta feedback link" in new TestSetupWithCompleteJourneyRecord {
       await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(hc(request), global))
       val result = await(action(request))
 
