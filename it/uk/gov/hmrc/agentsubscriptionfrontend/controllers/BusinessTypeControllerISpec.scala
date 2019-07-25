@@ -1,6 +1,6 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import org.jsoup.Jsoup
-import play.api.test.Helpers.{redirectLocation, _}
+import play.api.test.Helpers.{LOCATION, defaultAwaitTimeout, redirectLocation}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AuthProviderId}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
@@ -15,19 +15,30 @@ class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
   lazy val controller: BusinessTypeController = app.injector.instanceOf[BusinessTypeController]
 
+
+  "redirectToBusinessTypeForm" should {
+    "redirect to the business type form page" in {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val result = await(controller.redirectToBusinessTypeForm(request))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
+    }
+  }
+
   "showBusinessTypeForm (GET /business-type)" should {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.showBusinessTypeForm(_))
 
-    behave like aPageTakingContinueUrlAndCachingInSessionStore(
-      controller.showBusinessTypeForm(_),
-      userIsAuthenticated(subscribingCleanAgentWithoutEnrolments))
+          behave like aPageTakingContinueUrlAndCachingInSessionStore(
+            controller.showBusinessTypeForm(_),
+            userIsAuthenticated(subscribingCleanAgentWithoutEnrolments))
 
-    "contain page titles and header content" in new TestSetupNoJourneyRecord {
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      val result = await(controller.showBusinessTypeForm(request))
+          "contain page titles and header content" in new TestSetupNoJourneyRecord {
+            val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+            val result = await(controller.showBusinessTypeForm(request))
 
-      result should containMessages(
-        "businessType.title",
+            result should containMessages(
+              "businessType.title",
         "businessType.progressive.title",
         "businessType.progressive.content.p1")
     }
