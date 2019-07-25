@@ -25,13 +25,12 @@ import play.api.mvc.{AnyContent, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, RegDetails}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.givenNoSubscriptionJourneyRecordExists
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, AuthStub}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestSetupNoJourneyRecord}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestSetupNoJourneyRecord, TestSetupWithCompleteJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.play.binders.ContinueUrl
@@ -67,7 +66,7 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       noMetricExpectedAtThisPoint()
     }
 
-    "show subscription answers page if user has not already subscribed and has clean creds and also cache the goBack url" in new TestSetupNoJourneyRecord {
+    "show subscription answers page if user has not already subscribed and has clean creds and also cache the goBack url" in new TestSetupWithCompleteJourneyRecord {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.agentSession = agentSession
 
@@ -164,7 +163,7 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
   "showSubscriptionComplete" should {
     trait RequestWithSessionDetails {
       val arn = "AARN0000001"
-      AuthStub.authenticatedAgent(arn)
+      AuthStub.authenticatedAgent(arn, "foo")
       implicit val request = FakeRequest()
       sessionStoreService.currentSession.agentSession = agentSession
 

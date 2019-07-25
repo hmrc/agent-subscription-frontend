@@ -197,9 +197,8 @@ class SubscriptionController @Inject()(
         None
     }
 
-    withSubscribedAgent { arn =>
-      withValidSession { (_, existingSession) =>
-        existingSession.registration match {
+    withSubscribedAgent { (arn, sjr) =>
+        sjr.businessDetails.registration match {
           case Some(registration) => {
             val agencyName = registration.taxpayerName.getOrElse(
               throw new RuntimeException("agency name is missing from registration"))
@@ -207,12 +206,6 @@ class SubscriptionController @Inject()(
               throw new RuntimeException("agency email is missing from registration"))
             for {
               continueUrlOpt <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
-              _ <- if (existingSession.taskListFlags.createTaskComplete) {
-                    sessionStoreService
-                      .cacheAgentSession(
-                        existingSession.copy(
-                          taskListFlags = existingSession.taskListFlags.copy(checkAnswersComplete = true)))
-                  } else sessionStoreService.remove()
             } yield {
               continueUrlOpt match {
                 case Some(continueUrl) =>
@@ -238,7 +231,6 @@ class SubscriptionController @Inject()(
             Logger.warn("no registration details found in agent session")
             Redirect(routes.BusinessIdentificationController.showNoMatchFound())
         }
-      }
     }
   }
 }
