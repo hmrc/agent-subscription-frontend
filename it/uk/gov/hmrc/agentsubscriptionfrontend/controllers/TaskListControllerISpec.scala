@@ -114,16 +114,42 @@ class TaskListControllerISpec extends BaseISpec {
       "<a href=/agent-subscription/create-new-account>Create your user ID for your agent services account</a>")
     }
 
-    "contain a url to the mapping journey when user has completed all other tasks" ignore {
+    "contain a url to the mapping journey when user has completed all other tasks" in {
+      givenAgentIsNotManuallyAssured(validUtr.value)
+      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"),
+        TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId")).copy(subscriptionCreated = true))
 
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-
-      // TODO implement final checked your answers task flag
 
       val result = await(controller.showTaskList(request))
       status(result) shouldBe 200
 
       checkHtmlResultWithBodyText(result, appConfig.agentMappingFrontendStartUrl)
     }
+  }
+
+  "savedProgress (GET /saved-progress)" should {
+  "contain page title and content" in {
+
+    implicit val request = FakeRequest()
+    val result = await(controller.savedProgress(backLink = None)(request))
+
+    status(result) shouldBe 200
+
+    result should containMessages(
+      "saved-progress.title",
+      "saved-progress.p1",
+      "saved-progress.p2",
+      "saved-progress.link",
+      "saved-progress.continue"
+    )
+
+    result should containSubstrings("To complete this form later, go to the",
+      "guidance page about creating an agent services account (open in a new window or tab)",
+    "on GOV.UK and sign in to this service again.")
+
+    result should containLink("saved-progress.continue",routes.TaskListController.showTaskList().url)
+    result should containLink("saved-progress.finish", routes.SignedOutController.signOut().url)
+  }
   }
 }
