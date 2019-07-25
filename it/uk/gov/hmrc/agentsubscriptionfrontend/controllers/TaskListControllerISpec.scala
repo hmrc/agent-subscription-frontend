@@ -128,7 +128,7 @@ class TaskListControllerISpec extends BaseISpec {
     }
   }
 
-  "savedProgress (GET /saved-progress)" should {
+  "savedProgress (GET /progress-saved)" should {
   "contain page title and content" in {
 
     implicit val request = FakeRequest()
