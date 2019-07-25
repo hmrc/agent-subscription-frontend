@@ -7,11 +7,10 @@ import org.scalatest.Assertion
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{TestSetupWithCompleteJourneyRecord, routes}
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.individual
-import uk.gov.hmrc.auth.core.{InsufficientEnrolments, SessionRecordNotFound}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.binders.ContinueUrl
 

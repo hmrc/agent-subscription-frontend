@@ -77,8 +77,7 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       noMetricExpectedAtThisPoint()
     }
 
-    "show subscription answers page if user has not already subscribed and has clean creds and also cache the goBack url" in
-      new TestSetupWithCompleteJourneyRecord {
+    "show subscription answers page if user has not already subscribed and has clean creds and also cache the goBack url" in new TestSetupWithCompleteJourneyRecord {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       val result = await(controller.showCheckAnswers(request))
@@ -151,6 +150,7 @@ trait SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     trait AuthRequest {
       val arn = "AARN0000001"
       AuthStub.authenticatedAgent(arn, "12345-credId")
+
       implicit val request = FakeRequest()
     }
     def resultOf(request: Request[AnyContent]) = await(controller.showSubscriptionComplete(request))
