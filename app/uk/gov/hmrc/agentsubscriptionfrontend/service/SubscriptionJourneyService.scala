@@ -57,7 +57,10 @@ class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubs
 
   def saveJourneyRecord(subscriptionJourneyRecord: SubscriptionJourneyRecord)(
     implicit hc: HeaderCarrier): Future[Unit] =
-    agentSubscriptionConnector.createOrUpdate(subscriptionJourneyRecord)
+    agentSubscriptionConnector.createOrUpdateJourney(subscriptionJourneyRecord)
+
+  def deleteJourneyRecord(authProviderId: AuthProviderId)(implicit hc: HeaderCarrier): Future[Unit] =
+    agentSubscriptionConnector.deleteJourney(authProviderId)
 
   def createJourneyRecord(agentSession: AgentSession, agent: Agent)(implicit hc: HeaderCarrier): Future[Unit] = {
     val cleanCredsAuthProviderIdOpt = agent match {
