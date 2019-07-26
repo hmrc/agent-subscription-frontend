@@ -34,6 +34,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpException
 import uk.gov.hmrc.play.binders.ContinueUrl
 
+import scala.None
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -195,20 +196,6 @@ class SubscriptionController @Inject()(
 
   def showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>
 
-    def makeResult(arn: Arn,
-                   agencyName: String,
-                   agencyEmail: String,
-                   maybeContinueUrl: Option[ContinueUrl]):  Result = {
-
-        maybeContinueUrl match {
-          case Some(continueUrl) =>
-            Ok(html.subscription_complete(continueUrl.url, isUrlToASAccount = false, arn.value, agencyName, agencyEmail))
-          case None =>
-            Ok(html.subscription_complete(routes.TaskListController.showTaskList().url,
-              isUrlToASAccount = false, arn.value, agencyName, agencyEmail))
-        }
-    }
-
     def recoverSessionStoreWithNone[T]: PartialFunction[Throwable, Option[T]] = {
       case NonFatal(ex) =>
         Logger(getClass).warn("Session store service failure", ex)
@@ -224,14 +211,18 @@ class SubscriptionController @Inject()(
               throw new RuntimeException("agency email is missing from registration"))
 
             sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
-              .map(maybeContinueUrl => {
-                if (maybeContinueUrl.isDefined) {  // Once mapping is part of task list, always delete here
-                  subscriptionJourneyService.deleteJourneyRecord(sjr.authProviderId)
+              .flatMap {
+                  case Some(continueUrl) =>
+                    for {
+                      _ <- subscriptionJourneyService.deleteJourneyRecord(sjr.authProviderId)
+                      result <- Ok(html.subscription_complete(continueUrl.url, arn.value, agencyName, agencyEmail))
+                    } yield result
+
+                  case None =>
+                    Ok(html.subscription_complete(routes.TaskListController.showTaskList().url, arn.value, agencyName, agencyEmail))
                 }
-                makeResult(arn, agencyName, agencyEmail, maybeContinueUrl)
-              }
-              )
-          case _ =>
+
+          case None =>
             Logger.warn("no registration details found in agent session")
             Redirect(routes.BusinessIdentificationController.showNoMatchFound())
         }

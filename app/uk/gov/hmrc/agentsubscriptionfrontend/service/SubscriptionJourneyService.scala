@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.service
 import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent._
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
@@ -27,6 +28,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsDat
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 @Singleton
 class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector)(
@@ -60,7 +62,9 @@ class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubs
     agentSubscriptionConnector.createOrUpdateJourney(subscriptionJourneyRecord)
 
   def deleteJourneyRecord(authProviderId: AuthProviderId)(implicit hc: HeaderCarrier): Future[Unit] =
-    agentSubscriptionConnector.deleteJourney(authProviderId)
+    agentSubscriptionConnector.deleteJourney(authProviderId).recover {
+      case NonFatal(ex) => Logger(getClass).warn("Failed to delete journey record", ex)
+    }
 
   def createJourneyRecord(agentSession: AgentSession, agent: Agent)(implicit hc: HeaderCarrier): Future[Unit] = {
     val cleanCredsAuthProviderIdOpt = agent match {
