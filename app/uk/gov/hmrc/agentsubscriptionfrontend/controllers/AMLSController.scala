@@ -190,7 +190,7 @@ class AMLSController @Inject()(
                       amlsData.copy(
                         supervisoryBody = Some(supervisoryBodyData),
                         registeredDetails = Some(RegDetails(validForm.membershipNumber, validForm.expiry)))),
-                  if (isChanging.get) Redirect(routes.SubscriptionController.showCheckAnswers())
+                  if (isChanging.getOrElse(false)) Redirect(routes.SubscriptionController.showCheckAnswers())
                   else Redirect(routes.TaskListController.showTaskList())
                 )
               }
@@ -257,7 +257,7 @@ class AMLSController @Inject()(
                       amlsData.copy(
                         supervisoryBody = Some(supervisoryBodyData),
                         pendingDetails = Some(PendingDate(validForm.appliedOn)))),
-                  if (isChanging.get) Redirect(routes.SubscriptionController.showCheckAnswers())
+                  if (isChanging.getOrElse(false)) Redirect(routes.SubscriptionController.showCheckAnswers())
                   else Redirect(routes.TaskListController.showTaskList())
                 )
               }
