@@ -28,7 +28,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.{givenAgentIsManuallyAssured, givenAgentIsNotManuallyAssured}
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.{givenNoSubscriptionJourneyRecordExists, givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenNoSubscriptionJourneyRecordExists, givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData, TestSetupNoJourneyRecord}
@@ -390,7 +390,7 @@ class AMLSControllerISpec extends BaseISpec {
       redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
     }
 
-    "pre-populate amls form if they are coming from /check_answers and also go to /check_answers page when user clicks on 'Go Back' link" in new Setup {
+    "pre-populate amls form if they are coming from /check_answers and also go to /check-money-laundering-compliance page when user clicks on 'Go Back' link" in new Setup {
       def minimalSubscriptionJourneyRecordWithAmls(authProviderId: AuthProviderId) =
         SubscriptionJourneyRecord(
           authProviderId,
@@ -411,7 +411,7 @@ class AMLSControllerISpec extends BaseISpec {
       val result = await(controller.showAmlsDetailsForm(authenticatedRequest))
 
       contentAsString(result) should (include(
-        """<a href="/agent-subscription/check-answers" class="link-back">Back</a>""")
+        """<a href="/agent-subscription/check-money-laundering-compliance" class="link-back">Back</a>""")
         and include("""selected="selected">Insolvency Practitioners Association (IPA)</option>""")
         and include("""value="123456789"""")
         and include(s"""value="${LocalDate.now().getYear.toString}""""))
