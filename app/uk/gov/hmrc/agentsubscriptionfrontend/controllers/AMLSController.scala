@@ -186,9 +186,7 @@ class AMLSController @Inject()(
               validForm => {
                 val supervisoryBodyData =
                   amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))
-                val continue =
-                  if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
-                  else routes.TaskListController.showTaskList()
+                val continue = toTaskListOrCheckYourAnswers(isChanging)
                 updateAmlsJourneyRecord(
                   agent,
                   amlsData =>
@@ -256,10 +254,7 @@ class AMLSController @Inject()(
                 val supervisoryBodyData =
                   amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))
 
-                val continue =
-                  if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
-                  else routes.TaskListController.showTaskList()
-
+                val continue = toTaskListOrCheckYourAnswers(isChanging)
                 updateAmlsJourneyRecord(
                   agent,
                   amlsData =>
@@ -288,6 +283,10 @@ class AMLSController @Inject()(
     }
     call
   }
+
+  private def toTaskListOrCheckYourAnswers(isChanging: Option[Boolean]) =
+    if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
+    else routes.TaskListController.showTaskList()
 
   private def withManuallyAssuredAgent(agent: Agent)(body: => Future[Result])(
     implicit hc: HeaderCarrier): Future[Result] = {
