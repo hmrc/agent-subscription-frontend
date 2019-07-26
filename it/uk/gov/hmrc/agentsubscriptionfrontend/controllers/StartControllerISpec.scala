@@ -38,7 +38,7 @@ trait StartControllerISpec extends BaseISpec {
     val amlsSDetails = AMLSDetails("supervisory", Right(RegisteredDetails("123456789", LocalDate.now())))
 
     val agentSession =
-      AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), postcode = Some(Postcode(testPostcode)), registration = Some(testRegistration), amlsDetails = Some(amlsSDetails))
+      AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), postcode = Some(Postcode(testPostcode)), registration = Some(testRegistration) )
 
     class ValidKnownFactsCached(val wasEligibleForMapping: Option[Boolean] = Some(false), includeInitialDetails: Boolean = true) {
       def persistedId: StashedChainnedSessionId = await(repo.create(ChainedSessionDetails(agentSession)))
