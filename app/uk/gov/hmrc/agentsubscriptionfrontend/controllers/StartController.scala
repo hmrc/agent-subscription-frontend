@@ -22,9 +22,8 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, ContinueId, Postcode, TaskListFlags}
-import uk.gov.hmrc.agentsubscriptionfrontend.repository.ChainedSessionDetailsRepository
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService, SubscriptionService, SubscriptionState}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, ContinueId, Postcode}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -35,7 +34,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class StartController @Inject()(
   override val authConnector: AuthConnector,
-  chainedSessionDetailsRepository: ChainedSessionDetailsRepository,
   continueUrlActions: ContinueUrlActions,
   val sessionStoreService: SessionStoreService,
   subscriptionService: SubscriptionService,
