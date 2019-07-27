@@ -278,7 +278,11 @@ class AMLSController @Inject()(
   }
 
   private def continueOrStop(next: Call, previous: Call)(implicit request: Request[AnyContent]): Call = {
-    val call = request.body.asFormUrlEncoded.get("continue").headOption match {
+
+    val submitAction = request.body.asFormUrlEncoded
+      .fold(Seq.empty: Seq[String])(someMap => someMap.getOrElse("continue", Seq.empty))
+
+    val call = submitAction.headOption match {
       case Some("continue") => next
       case Some("save")     => routes.TaskListController.savedProgress(Some(previous.url))
       case _ => {

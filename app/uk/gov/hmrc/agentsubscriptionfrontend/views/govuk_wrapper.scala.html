@@ -98,8 +98,9 @@
 }
 
 @mainContentHeader = {
-    @if(contentHeader.isDefined) {
-        @uiLayouts.main_content_header(contentHeader = contentHeader.get)
+    @contentHeader match {
+      case Some(header) => { @uiLayouts.main_content_header(contentHeader = header) }
+      case None => { }
     }
 }
 

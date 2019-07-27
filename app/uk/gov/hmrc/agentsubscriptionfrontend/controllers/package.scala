@@ -103,11 +103,7 @@ package object controllers {
         "variant" -> optional(text).verifying(radioInputSelected("clientDetails.error.no-radio.selected")),
         "utr"     -> mandatoryIfEqual("variant", "utr", clientDetailsUtr),
         "nino"    -> mandatoryIfEqual("variant", "nino", clientDetailsNino)
-      )(RadioInvasiveTaxPayerOption.apply)(RadioInvasiveTaxPayerOption.unapply).verifying(
-        "error.radio-variant.invalid",
-        submittedTaxPayerOption =>
-          ValidVariantsTaxPayerOptionForm.values.exists(_.toString == submittedTaxPayerOption.variant.getOrElse(""))
-      ))
+      )(RadioInvasiveTaxPayerOption.apply)(RadioInvasiveTaxPayerOption.unapply))
 
     val invasiveCheckStartSaAgentCode: Form[RadioInvasiveStartSaAgentCode] = Form[RadioInvasiveStartSaAgentCode](
       mapping(
