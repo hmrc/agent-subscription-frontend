@@ -40,7 +40,7 @@ lazy val wartRemoverSettings = {
       //Wart.LeakingSealed,
       Wart.MutableDataStructures,
       Wart.Null,
-      Wart.OptionPartial,
+      //Wart.OptionPartial,
       Wart.Recursion,
       Wart.Return,
       //Wart.TraversableOps,
