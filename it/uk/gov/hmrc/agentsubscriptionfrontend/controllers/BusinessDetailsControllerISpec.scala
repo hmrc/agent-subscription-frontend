@@ -20,9 +20,7 @@ class BusinessDetailsControllerISpec extends BaseISpec {
       val result = await(controller.showBusinessDetailsForm(request))
 
       status(result) shouldBe 200
-      checkHtmlResultWithBodyText(
-        result,
-        "Enter your business details",
+      checkHtmlResultWithBodyText(result, "Enter your business details",
         "Your Self Assessment Unique Taxpayer Reference (UTR)",
         "Registered business postcode")
     }
@@ -141,18 +139,5 @@ class BusinessDetailsControllerISpec extends BaseISpec {
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNoMatchFound().url)
     }
-
-//    "redirect to cannot create account when user is on the R2DW list" in new TestSetupNoJourneyRecord {
-//      givenRefusalToDealWithUtrIsForbidden(utr.value)
-//      withMatchingUtrAndPostcode(utr, validPostcode)
-//      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-//      sessionStoreService.currentSession.agentSession = Some(AgentSession(Some(SoleTrader)))
-//
-//      val result = await(controller.submitBusinessDetails(
-//        request.withFormUrlEncodedBody("utr" -> utr.value, "postcode" -> validPostcode)))
-//      status(result) shouldBe 303
-//      redirectLocation(result) shouldBe Some(routes.StartController.showCannotCreateAccount().url)
-//    }
-
   }
 }
