@@ -98,9 +98,8 @@
 }
 
 @mainContentHeader = {
-    @contentHeader match {
-      case Some(header) => { @uiLayouts.main_content_header(contentHeader = header) }
-      case None => { }
+    @contentHeader.map { header =>
+      @uiLayouts.main_content_header(contentHeader = header)
     }
 }
 
