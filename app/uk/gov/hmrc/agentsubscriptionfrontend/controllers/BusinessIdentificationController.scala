@@ -184,14 +184,17 @@ class BusinessIdentificationController @Inject()(
       subscriptionProcess <- subscriptionService.getSubscriptionStatus(utr, postcode)
       result <- if (subscriptionProcess.state == SubscribedButNotEnrolled) {
                  hasCleanCreds(agent) {
-                   Future.successful(routes.TaskListController.showTaskList())
+                   subscriptionJourneyService
+                     .createJourneyRecord(existingSession, agent)
+                     .map(_ => routes.TaskListController.showTaskList())
                  } {
+                   subscriptionJourneyService.createJourneyRecord(existingSession, agent).flatMap{ _ =>
                    subscriptionService
                      .completePartialSubscription(utr, postcode)
                      .map { _ =>
                        mark("Count-Subscription-PartialSubscriptionCompleted")
                        routes.SubscriptionController.showSubscriptionComplete()
-                     }
+                     }}
                  }
                } else notPartiallySubscribedBody
     } yield result
