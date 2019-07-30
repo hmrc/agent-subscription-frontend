@@ -35,9 +35,9 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney
 import java.time.LocalDate
 
 import play.api.libs.json._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, PendingDetails, RegisteredDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, PendingDetails, RegisteredDetails}
 
-case class AmlsData(amlsRegistered: Boolean, amlsAppliedFor: Option[Boolean], amlsDetails: Option[AMLSDetails])
+case class AmlsData(amlsRegistered: Boolean, amlsAppliedFor: Option[Boolean], amlsDetails: Option[AmlsDetails])
 
 object AmlsData {
 

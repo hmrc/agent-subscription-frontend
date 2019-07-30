@@ -197,7 +197,7 @@ class AMLSController @Inject()(
                   agent,
                   amlsData =>
                     Some(
-                      amlsData.copy(amlsDetails = Some(AMLSDetails(
+                      amlsData.copy(amlsDetails = Some(AmlsDetails(
                         supervisoryBodyData,
                         Right(RegisteredDetails(validForm.membershipNumber, validForm.expiry))))))
                 ).map(
@@ -264,7 +264,7 @@ class AMLSController @Inject()(
                   agent,
                   amlsData =>
                     Some(amlsData.copy(
-                      amlsDetails = Some(AMLSDetails(supervisoryBodyData, Left(PendingDetails(validForm.appliedOn))))))
+                      amlsDetails = Some(AmlsDetails(supervisoryBodyData, Left(PendingDetails(validForm.appliedOn))))))
                 ).map(
                   _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsApplicationDatePage()))
                 )

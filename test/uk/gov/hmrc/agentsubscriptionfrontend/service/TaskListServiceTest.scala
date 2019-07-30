@@ -23,7 +23,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, AuthProviderId, BusinessType, PendingDetails, Postcode, RegisteredDetails, TaskListFlags}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, AuthProviderId, BusinessType, PendingDetails, Postcode, RegisteredDetails, TaskListFlags}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -71,7 +71,7 @@ class TaskListServiceTest extends UnitSpec with MockitoSugar {
           AmlsData(
             amlsRegistered = true,
             None,
-            Some(AMLSDetails("HMRC", Right(RegisteredDetails("mem", LocalDate.now()))))))
+            Some(AmlsDetails("HMRC", Right(RegisteredDetails("mem", LocalDate.now()))))))
       val flags = await(taskListService.getTaskListFlags(minimalRecord.copy(amlsData = data)))
       flags should be(TaskListFlags(amlsTaskComplete = true))
     }
@@ -94,7 +94,7 @@ class TaskListServiceTest extends UnitSpec with MockitoSugar {
           AmlsData(
             amlsRegistered = false,
             Some(true),
-            Some(AMLSDetails("HMRC", Left(PendingDetails(LocalDate.now()))))))
+            Some(AmlsDetails("HMRC", Left(PendingDetails(LocalDate.now()))))))
       val flags = await(taskListService.getTaskListFlags(minimalRecord.copy(amlsData = data)))
       flags should be(TaskListFlags(amlsTaskComplete = true))
     }

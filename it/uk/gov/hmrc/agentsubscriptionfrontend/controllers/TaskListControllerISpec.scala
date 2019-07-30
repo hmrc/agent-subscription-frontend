@@ -4,7 +4,7 @@ import java.time.LocalDate
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, AuthProviderId, RegisteredDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, AuthProviderId, RegisteredDetails}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.givenSubscriptionJourneyRecordExists
@@ -69,7 +69,7 @@ class TaskListControllerISpec extends BaseISpec {
             amlsRegistered = true,
             amlsAppliedFor = Some(false),
             amlsDetails =
-              Some(AMLSDetails("supervisory body", Right(RegisteredDetails("123", LocalDate.now().plusDays(10)))))
+              Some(AmlsDetails("supervisory body", Right(RegisteredDetails("123", LocalDate.now().plusDays(10)))))
           )))
       )
 
@@ -93,7 +93,7 @@ class TaskListControllerISpec extends BaseISpec {
                 amlsRegistered = true,
                 amlsAppliedFor = Some(false),
                 amlsDetails =
-                  Some(AMLSDetails("supervisory body", Right(RegisteredDetails("123", LocalDate.now().plusDays(10)))))
+                  Some(AmlsDetails("supervisory body", Right(RegisteredDetails("123", LocalDate.now().plusDays(10)))))
               )))
       )
 
