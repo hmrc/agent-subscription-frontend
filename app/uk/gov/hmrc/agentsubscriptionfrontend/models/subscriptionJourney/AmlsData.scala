@@ -37,29 +37,12 @@ import java.time.LocalDate
 import play.api.libs.json._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSDetails, PendingDetails, RegisteredDetails}
 
-case class RegDetails(membershipNumber: String, membershipExpiresOn: LocalDate)
-
-object RegDetails {
-  implicit val format: OFormat[RegDetails] = Json.format[RegDetails]
-}
-
-case class PendingDate(appliedOn: LocalDate)
-
-object PendingDate {
-  implicit val format: OFormat[PendingDate] = Json.format[PendingDate]
-}
-
-case class AmlsData(
-  amlsRegistered: Boolean,
-  amlsAppliedFor: Option[Boolean],
-  supervisoryBody: Option[String],
-  pendingDetails: Option[PendingDate],
-  registeredDetails: Option[RegDetails])
+case class AmlsData(amlsRegistered: Boolean, amlsAppliedFor: Option[Boolean], amlsDetails: Option[AMLSDetails])
 
 object AmlsData {
 
-  val registeredUserNoDataEntered = AmlsData(amlsRegistered = true, None, None, None, None)
-  val nonRegisteredUserNoDataEntered = AmlsData(amlsRegistered = false, None, None, None, None)
+  val registeredUserNoDataEntered = AmlsData(amlsRegistered = true, None, None)
+  val nonRegisteredUserNoDataEntered = AmlsData(amlsRegistered = false, None, None)
 
   implicit val localDateFormat: Format[LocalDate] = new Format[LocalDate] {
     override def reads(json: JsValue): JsResult[LocalDate] =
@@ -68,17 +51,4 @@ object AmlsData {
   }
 
   implicit val format: Format[AmlsData] = Json.format[AmlsData]
-
-  //TODO: convert backend to use AmlsData instead of AmlsDetails
-  def amlsDataToDetails(amlsData: Option[AmlsData]): Option[AMLSDetails] =
-    amlsData match {
-      case Some(AmlsData(_, _, Some(supervisoryBody), Some(pendingDetails), None)) =>
-        Some(AMLSDetails(supervisoryBody, Left(PendingDetails(pendingDetails.appliedOn))))
-      case Some(AmlsData(_, _, Some(supervisoryBody), None, Some(registeredDetails))) =>
-        Some(
-          AMLSDetails(
-            supervisoryBody,
-            Right(RegisteredDetails(registeredDetails.membershipNumber, registeredDetails.membershipExpiresOn))))
-      case _ => None
-    }
 }

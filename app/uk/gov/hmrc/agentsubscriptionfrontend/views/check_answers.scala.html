@@ -22,6 +22,8 @@
 @import java.time.format.DateTimeFormatter
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
+@import uk.gov.hmrc.agentsubscriptionfrontend.models.PendingDetails
+@import uk.gov.hmrc.agentsubscriptionfrontend.models.RegisteredDetails
 @(registrationName: String, address: BusinessAddress, emailAddress: Option[String], amlsData: Option[AmlsData])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template(appConfig, title = Messages("checkAnswers.title"), bodyClasses = None) {
@@ -81,18 +83,22 @@
                 @if(amlsData.isDefined) {
                 <div class="app-check-your-answers__contents">
                     <dt class="app-check-your-answers__question">
-                        @{(amlsData.get.pendingDetails, amlsData.get.registeredDetails) match {
-                        case (Some(pendingDetails), None) => Messages("checkAnswers.amlsDetails.pending.label")
-                        case (None, Some(regDetails)) => Messages("checkAnswers.amlsDetails.label")
+                        @{(amlsData.get.amlsDetails) match {
+                        case (Some(amlsDetails)) => amlsDetails.details match {
+                            case Left(PendingDetails(appliedOn)) => ("checkAnswers.amlsDetails.pending.label")
+                            case Right(RegisteredDetails(membershipNumber, membershipExpiresOn)) =>  Messages("checkAnswers.amlsDetails.label")
+                        }
                         case _ => throw new Exception("AMLS details incomplete")
                     }}
                     </dt>
                     <dd class="app-check-your-answers__answer" id="amls">
-                        @{(amlsData.get.pendingDetails, amlsData.get.registeredDetails) match {
-                        case (Some(pendingDetails), None) =>
-                            amlsData.get.pendingDetails.get.appliedOn.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
-                        case (None, Some(regDetails)) =>
-                            Html(amlsData.get.supervisoryBody + "<br/>" + amlsData.get.registeredDetails.get.membershipNumber + "<br/>" + amlsData.get.registeredDetails.get.membershipExpiresOn.format(DateTimeFormatter.ofPattern("dd MM yyyy")))
+                        @{(amlsData.get.amlsDetails) match {
+                        case (Some(amlsDetails)) => amlsDetails.details match {
+                            case Left(PendingDetails(appliedOn)) =>
+                                appliedOn.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
+                            case Right(RegisteredDetails(membershipNumber, membershipExpiresOn)) =>
+                                Html(amlsDetails.supervisoryBody + "<br/>" + membershipNumber + "<br/>" + membershipExpiresOn.format(DateTimeFormatter.ofPattern("dd MM yyyy")))
+                        }
                         case _ => throw new Exception("AMLS details incomplete")
                     }}
                     </dd>
