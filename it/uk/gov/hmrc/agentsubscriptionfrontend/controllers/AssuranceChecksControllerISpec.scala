@@ -5,7 +5,7 @@ import play.api.i18n.Messages.Implicits.applicationMessages
 import play.api.test.Helpers.{redirectLocation, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType, Postcode}
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.{givenAUserDoesNotHaveRelationshipInCesa, givenNinoAGoodCombinationAndUserHasRelationshipInCesa, givenUtrAGoodCombinationAndUserHasRelationshipInCesa}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestSetupNoJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingCleanAgentWithoutEnrolments
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{testRegistration, validUtr, _}
@@ -15,7 +15,18 @@ class AssuranceChecksControllerISpec extends BaseISpec {
 
   lazy val controller: AssuranceChecksController = app.injector.instanceOf[AssuranceChecksController]
 
-  "post invasive check" should {
+  "GET /enter-agent-code" should {
+    "display the invasive check start page" in new TestSetupNoJourneyRecord {
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      sessionStoreService.currentSession.agentSession = Some(agentSession)
+      val result = await(controller.invasiveCheckStart(request))
+      status(result) shouldBe 200
+      checkHtmlResultWithBodyText(result, "Do you have a Self Assessment agent code?",
+      "We need this information so that we can check your identity.")
+    }
+  }
+
+  "POST /enter-agent-code" should {
     "return 200 and redisplay the invasiveSaAgentCodePost page with an error message for missing radio choice" in new TestSetupNoJourneyRecord {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.agentSession = Some(agentSession)
@@ -101,6 +112,17 @@ class AssuranceChecksControllerISpec extends BaseISpec {
         result should repeatMessage("error.saAgentCode.blank", 2)
         noMetricExpectedAtThisPoint()
       }
+    }
+  }
+
+  "GET /client-details" should {
+    "display the client details page" in new TestSetupNoJourneyRecord {
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      sessionStoreService.currentSession.agentSession = Some(agentSession)
+      val result = await(controller.showClientDetailsForm(request))
+      status(result) shouldBe 200
+      checkHtmlResultWithBodyText(result, "Client details",
+        "We need to identify one of your current clients, so we can confirm who you are.")
     }
   }
 

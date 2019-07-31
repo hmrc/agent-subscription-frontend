@@ -151,6 +151,14 @@ object CommonValidators {
         Invalid(ValidationError(message))
     }
 
+  def radioInputStringSelected(message: String = "error.no-radio-selected"): Constraint[String] =
+    Constraint[String] { fieldValue: String =>
+      if (fieldValue.nonEmpty)
+        Valid
+      else
+        Invalid(ValidationError(message))
+    }
+
   def nonEmptyTextWithMsg(errorMessageKey: String): Mapping[String] =
     text verifying nonEmptyWithMessage(errorMessageKey)
 
