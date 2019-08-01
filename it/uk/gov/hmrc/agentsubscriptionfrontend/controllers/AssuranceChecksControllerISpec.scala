@@ -264,22 +264,6 @@ class AssuranceChecksControllerISpec extends BaseISpec {
     }
 
     "redirect to /cannot-create account page" when {
-      "submitting invalid Utr which fails Modulus11Check" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-        sessionStoreService.currentSession.agentSession =
-          Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
-
-        val result = await(
-          controller.submitClientDetailsForm(
-            request
-              .withFormUrlEncodedBody(("variant", "utr"), ("utr", "4000000019"))
-              .withSession("saAgentReferenceToCheck" -> "SA6012")))
-
-        status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.StartController.showCannotCreateAccount().url)
-
-        metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Could-Not-Provide-Tax-Payer-Identifier")
-      }
 
       "submitting valid utr with no relationship" in new TestSetupNoJourneyRecord {
         givenAUserDoesNotHaveRelationshipInCesa("utr", "40000     00  009", "SA6012")

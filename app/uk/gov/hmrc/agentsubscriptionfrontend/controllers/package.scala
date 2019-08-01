@@ -123,9 +123,9 @@ package object controllers {
           .transform[String](_.getOrElse(""), s => Some(s))
           .verifying(radioInputStringSelected("clientDetails.error.no-radio.selected")),
         "utr" -> mandatoryIfEqual("variant", "utr", clientDetailsUtr)
-          .transform[String](u => u.getOrElse(""), s => Some(s)),
+          .transform[String](u => u.getOrElse("").replace(" ", "").toUpperCase(), s => Some(s)),
         "nino" -> mandatoryIfEqual("variant", "nino", clientDetailsNino)
-          .transform[String](n => n.getOrElse(""), s => Some(s))
+          .transform[String](n => n.getOrElse("").replace(" ", "").toUpperCase(), s => Some(s))
       )(RadioInvasiveTaxPayerOption.apply)(RadioInvasiveTaxPayerOption.unapply))
 
     val invasiveCheckStartSaAgentCodeForm: Form[RadioInvasiveStartSaAgentCode] = Form[RadioInvasiveStartSaAgentCode](
