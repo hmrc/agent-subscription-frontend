@@ -163,11 +163,13 @@ class BusinessIdentificationController @Inject()(
       case Failure(responses) if responses.contains(InvalidEmail) =>
         routes.BusinessIdentificationController.showBusinessEmailForm()
       case _ =>
-        checkPartaillySubscribed(agent, existingSession)(
-          subscriptionJourneyService
-            .createJourneyRecord(existingSession, agent)
-            .map(_ => routes.TaskListController.showTaskList()))
+        def createRecordAndRedirectToTasklist(): Future[Call] = subscriptionJourneyService
+          .createJourneyRecord(existingSession, agent)
+          .map(_ => routes.TaskListController.showTaskList())
 
+        checkPartiallySubscribed(agent, existingSession)(
+          whenNotPartiallySubscribed = createRecordAndRedirectToTasklist
+        )
     }
 
   def hasCleanCreds(agent: Agent)(uncleanCredsBody: => Future[Call])(cleanCredsBody: => Future[Call]): Future[Call] =
@@ -176,8 +178,10 @@ class BusinessIdentificationController @Inject()(
       case _                        => cleanCredsBody
     }
 
-  def checkPartaillySubscribed(agent: Agent, existingSession: AgentSession)(
-    notPartiallySubscribedBody: => Future[Call])(implicit hc: HeaderCarrier): Future[Call] = {
+  private def checkPartiallySubscribed(agent: Agent, existingSession: AgentSession)
+                                      (whenNotPartiallySubscribed: () => Future[Call])
+                                      (implicit hc: HeaderCarrier): Future[Call] = {
+
     val utr = existingSession.utr.getOrElse(Utr(""))
     val postcode = existingSession.postcode.getOrElse(Postcode(""))
     for {
@@ -193,7 +197,7 @@ class BusinessIdentificationController @Inject()(
                        routes.SubscriptionController.showSubscriptionComplete()
                      }
                  }
-               } else notPartiallySubscribedBody
+               } else whenNotPartiallySubscribed()
     } yield result
   }
 
