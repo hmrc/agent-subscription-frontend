@@ -34,7 +34,7 @@ class TaskListService @Inject()(agentAssuranceConnector: AgentAssuranceConnector
     for {
       maa <- agentAssuranceConnector.isManuallyAssuredAgent(subscriptionJourneyRecord.businessDetails.utr)
     } yield {
-      if (subscriptionJourneyRecord.cleanCredsAuthProviderId.contains(subscriptionJourneyRecord.authProviderId)) {
+      if (isCleanCredsAgent(subscriptionJourneyRecord)) {
         val amlsTask = AmlsTask(maa, subscriptionJourneyRecord.amlsData)
         val checkAnswersTask = CheckAnswersTask(amlsTask)
         List(amlsTask, checkAnswersTask)
@@ -50,4 +50,7 @@ class TaskListService @Inject()(agentAssuranceConnector: AgentAssuranceConnector
         List(amlsTask, mappingTask, createIDTask, checkAnswersTask)
       }
     }
+
+  def isCleanCredsAgent(subscriptionJourneyRecord: SubscriptionJourneyRecord) =
+    subscriptionJourneyRecord.cleanCredsAuthProviderId.contains(subscriptionJourneyRecord.authProviderId)
 }
