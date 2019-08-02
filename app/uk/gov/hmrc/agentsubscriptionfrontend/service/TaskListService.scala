@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -25,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TaskListService @Inject()(agentAssuranceConnector: AgentAssuranceConnector) {
+class TaskListService @Inject()(agentAssuranceConnector: AgentAssuranceConnector, appConfig: AppConfig) {
 
   def createTasks(subscriptionJourneyRecord: SubscriptionJourneyRecord)(
     implicit hc: HeaderCarrier,
@@ -42,7 +43,8 @@ class TaskListService @Inject()(agentAssuranceConnector: AgentAssuranceConnector
         val mappingTask = MappingTask(
           subscriptionJourneyRecord.cleanCredsAuthProviderId,
           subscriptionJourneyRecord.mappingComplete,
-          amlsTask)
+          amlsTask,
+          appConfig)
         val createIDTask = CreateIDTask(subscriptionJourneyRecord.cleanCredsAuthProviderId, mappingTask)
         val checkAnswersTask = CheckAnswersTask(createIDTask)
         List(amlsTask, mappingTask, createIDTask, checkAnswersTask)

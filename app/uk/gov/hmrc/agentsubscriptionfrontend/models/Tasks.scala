@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-import play.api.mvc.Call
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 
@@ -24,7 +24,7 @@ sealed trait Task {
   val taskKey: String
   val showLink: Boolean
   val isComplete: Boolean
-  val link: Call
+  val link: String
 }
 
 final case class AmlsTask(isMaa: Boolean, amlsData: Option[AmlsData]) extends Task {
@@ -36,30 +36,31 @@ final case class AmlsTask(isMaa: Boolean, amlsData: Option[AmlsData]) extends Ta
       case AmlsData(false, Some(true), Some(_)) => true // not registered, but applied for (with details)
       case _                                    => false
     }
-  override val link: Call = routes.AMLSController.showAmlsRegisteredPage()
+  override val link: String = routes.AMLSController.showAmlsRegisteredPage().url
 }
 
 final case class MappingTask(
   cleanCredsAuthProviderId: Option[AuthProviderId],
   mappingComplete: Boolean,
-  previousTask: Task)
+  previousTask: Task,
+  appConfig: AppConfig)
     extends Task {
   override val taskKey: String = "mappingTask"
   override val showLink: Boolean = previousTask.isComplete
   override val isComplete: Boolean = mappingComplete && previousTask.isComplete
-  override val link: Call = routes.SubscriptionController.beginMapping()
+  override val link: String = appConfig.agentMappingFrontendStartUrl
 }
 
 final case class CreateIDTask(cleanCredsAuthProviderId: Option[AuthProviderId], previousTask: Task) extends Task {
   override val taskKey: String = "createIDTask"
   override val showLink: Boolean = previousTask.isComplete
   override val isComplete: Boolean = cleanCredsAuthProviderId.isDefined && previousTask.isComplete
-  override val link: Call = routes.BusinessIdentificationController.showCreateNewAccount()
+  override val link: String = routes.BusinessIdentificationController.showCreateNewAccount().url
 }
 
 final case class CheckAnswersTask(previousTask: Task) extends Task {
   override val taskKey: String = "checkAnswersTask"
   override val showLink: Boolean = previousTask.isComplete
   override val isComplete: Boolean = false
-  override val link: Call = routes.SubscriptionController.showCheckAnswers()
+  override val link: String = routes.SubscriptionController.showCheckAnswers().url
 }

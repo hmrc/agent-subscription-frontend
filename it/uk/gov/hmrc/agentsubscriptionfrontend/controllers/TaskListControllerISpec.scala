@@ -85,7 +85,7 @@ class TaskListControllerISpec extends BaseISpec {
 
       checkHtmlResultWithBodyText(
         result,
-        "<a href=\"/agent-subscription/check-money-laundering-compliance\">Enter your money laundering compliance details</a>")
+        "<a href=/agent-subscription/check-money-laundering-compliance>Enter your money laundering compliance details</a>")
     }
 
     "contain a url to the mapping journey when user has completed amls" in {
@@ -101,7 +101,7 @@ class TaskListControllerISpec extends BaseISpec {
       val result = await(controller.showTaskList(request))
       status(result) shouldBe 200
 
-      checkHtmlResultWithBodyText(result, "/agent-subscription/begin-mapping")
+      checkHtmlResultWithBodyText(result, "/agent-mapping/task-list/start")
     }
 
     "redirect to business type if there is no record for this agents auth provider id" in {

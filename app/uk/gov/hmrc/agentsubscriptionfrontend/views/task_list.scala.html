@@ -26,7 +26,7 @@
     <strong class="govuk-tag app-task-list__task-completed">@Messages("task-list.completed")</strong>
 }
 
-@listItem(number: Int, taskKey: String, showLink: Boolean, isComplete: Boolean, link: Call) = {
+@listItem(number: Int, taskKey: String, showLink: Boolean, isComplete: Boolean, link: String) = {
     <li>
         <h2>
             <span class="app-task-list__section-number">@Messages(s"task-list.$number.number")</span>@Messages(s"task-list.$taskKey.header")
@@ -34,7 +34,7 @@
         <ul class="app-task-list__items">
             <li class="app-task-list__item">
                 @if(showLink) {
-                    <a href="@link">@Messages(s"task-list.$taskKey")</a>
+                    <a href=@link>@Messages(s"task-list.$taskKey")</a>
                 } else {
                     @Messages(s"task-list.$taskKey")
                 }

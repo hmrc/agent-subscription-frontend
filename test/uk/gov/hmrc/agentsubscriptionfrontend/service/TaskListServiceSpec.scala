@@ -22,6 +22,7 @@ import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -37,6 +38,8 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
 
   private val stubAssuranceConnector = mock[AgentAssuranceConnector]
 
+  private val stubAppConfig = mock[AppConfig]
+
   private def givenNotManuallyAssured: OngoingStubbing[Future[Boolean]] =
     when(stubAssuranceConnector.isManuallyAssuredAgent(Utr("12345")))
       .thenReturn(Future.successful(false))
@@ -45,7 +48,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
     when(stubAssuranceConnector.isManuallyAssuredAgent(Utr("12345")))
       .thenReturn(Future.successful(true))
 
-  private val taskListService = new TaskListService(stubAssuranceConnector)
+  private val taskListService = new TaskListService(stubAssuranceConnector, stubAppConfig)
 
   val minimalUncleanCredsRecord = SubscriptionJourneyRecord(
     AuthProviderId("cred-1234"),
