@@ -38,9 +38,6 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar {
     def withSubscribedAgent[A]: Result =
       await(super.withSubscribedAgent { (arn, sjr) => Future.successful(Ok(arn.value)) })
 
-    def withSubscribingOrSubscribedAgent[A]: Result = await(TestController.withSubscribingOrSubscribedAgent(
-      _ => Future successful Ok("task list")))
-
   }
 
   "withSubscribedAgent" should {
@@ -99,27 +96,6 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar {
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/agent-subscription/finish-sign-out")
-    }
-  }
-
-  "withSubscribingOrSubscribedAgent" should {
-    "call body with a valid unsubscribed agent" in new TestSetupNoJourneyRecord {
-      authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-      val result = TestController.withSubscribingOrSubscribedAgent
-
-      status(result) shouldBe 200
-      bodyOf(result) shouldBe "task list"
-    }
-    "return the taskListSubscribed result when there is a check answers complete true flag in the session" in {
-
-      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"),
-        TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId")))
-
-      authenticatedAs(subscribingAgentEnrolledForHMRCASAGENT)
-      val result = TestController.withSubscribingOrSubscribedAgent
-
-      status(result) shouldBe 200
-      bodyOf(result) shouldBe "task list"
     }
   }
 }
