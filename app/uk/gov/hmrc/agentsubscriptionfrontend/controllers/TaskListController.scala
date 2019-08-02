@@ -44,7 +44,7 @@ class TaskListController @Inject()(
   def showTaskList: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       agent.subscriptionJourneyRecord match {
-        case Some(record) => taskListService.createTaskList(record).map(tasks => (Ok(html.task_list(tasks))))
+        case Some(record) => taskListService.createTasks(record).map(tasks => (Ok(html.task_list(tasks))))
         case None         => Future.successful(Redirect(routes.BusinessTypeController.showBusinessTypeForm()))
       }
     }

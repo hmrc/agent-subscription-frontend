@@ -27,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TaskListService @Inject()(agentAssuranceConnector: AgentAssuranceConnector) {
 
-  def createTaskList(subscriptionJourneyRecord: SubscriptionJourneyRecord)(
+  def createTasks(subscriptionJourneyRecord: SubscriptionJourneyRecord)(
     implicit hc: HeaderCarrier,
     ec: ExecutionContext): Future[List[Task]] =
     for {
