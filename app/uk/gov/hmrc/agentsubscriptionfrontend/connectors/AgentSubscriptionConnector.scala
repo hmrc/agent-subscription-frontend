@@ -79,20 +79,6 @@ class AgentSubscriptionConnector @Inject()(
         .map(handleUpdateJourneyResponse(_, path))
     }
 
-  /**
-    * Replace a journey record, wholesale.  In general, you should use [[createOrUpdateJourney]] instead
-    * Only use this if you want to update the primary key on the record
-    */
-  def updateJourney(originalId: AuthProviderId, journeyRecord: SubscriptionJourneyRecord)(
-    implicit hc: HeaderCarrier): Future[Unit] =
-    monitor("ConsumedAPI-Agent-Subscription-update-POST") {
-      val path =
-        s"/agent-subscription/subscription/journey/primaryId/${encodePathSegment(originalId.id)}"
-      http
-        .PUT[SubscriptionJourneyRecord, HttpResponse](new URL(baseUrl, path).toString, journeyRecord)
-        .map(handleUpdateJourneyResponse(_, path))
-    }
-
   def deleteJourney(authProviderId: AuthProviderId)(implicit hc: HeaderCarrier): Future[Unit] =
     monitor("ConsumedAPI-Agent-Subscription-delete-DELETE") {
       val path = s"/agent-subscription/subscription/journey/primaryId/${encodePathSegment(authProviderId.id)}"

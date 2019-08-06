@@ -63,40 +63,16 @@ class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubs
     implicit hc: HeaderCarrier): Future[Unit] =
     agentSubscriptionConnector.createOrUpdateJourney(subscriptionJourneyRecord)
 
-  def replaceJourneyRecord(originalId: AuthProviderId, subscriptionJourneyRecord: SubscriptionJourneyRecord)(
-    implicit hc: HeaderCarrier): Future[Unit] =
-    agentSubscriptionConnector.updateJourney(originalId, subscriptionJourneyRecord)
-
   def deleteJourneyRecord(authProviderId: AuthProviderId)(implicit hc: HeaderCarrier): Future[Unit] =
     agentSubscriptionConnector.deleteJourney(authProviderId).recover {
       case NonFatal(ex) => Logger(getClass).warn("Failed to delete journey record", ex)
     }
 
   def createJourneyRecord(agentSession: AgentSession, agent: Agent)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val maybeCleanCredsUser = agent match {
-      case hasNonEmptyEnrolments(_) => None
-      case _                        => Some(agent.authProviderId)
-    }
-    val utr = agentSession.utr.getOrElse(throw new RuntimeException("no utr found in agent session"))
-    agentSubscriptionConnector.getJourneyByUtr(utr).flatMap {
-      case Some(record) =>
-        // matching record found by UTR - update it with replaced authProviderId so user can continue
-        // ASSUMES that we have not already found a matching record by current auth id
-        val originalAuthId = record.authProviderId
-        val updatedSjr = record.copy(
-          authProviderId = agent.authProviderId,
-          cleanCredsAuthProviderId = maybeCleanCredsUser match {
-            case Some(_) => maybeCleanCredsUser // clean incoming creds, replace
-            case None    => record.cleanCredsAuthProviderId // dirty incoming creds, leave original
-          }
-        )
-        replaceJourneyRecord(originalAuthId, updatedSjr)
-      case None =>
-        // make brand new record
-        val newSjr =
-          SubscriptionJourneyRecord.fromAgentSession(agentSession, agent.authProviderId, maybeCleanCredsUser)
-        saveJourneyRecord(newSjr)
-    }
-
+    val sjr =
+      SubscriptionJourneyRecord
+        .fromAgentSession(agentSession, agent.authProviderId, agent.maybeCleanCredsAuthProviderId)
+    saveJourneyRecord(sjr)
   }
+
 }
