@@ -62,7 +62,7 @@ class SubscriptionController @Inject()(
 
   def showCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
-      withCleanCredsOrSignIn(agent) {
+      agent.withCleanCredsOrSignIn {
         val sjr = agent.getMandatorySubscriptionRecord
         agentAssuranceConnector.isManuallyAssuredAgent(sjr.businessDetails.utr).flatMap { isMAAgent =>
           sessionStoreService.cacheIsChangingAnswers(changing = false).flatMap { _ =>
@@ -103,7 +103,7 @@ class SubscriptionController @Inject()(
 
   def submitCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
-      withCleanCredsOrSignIn(agent) {
+      agent.withCleanCredsOrSignIn {
         val sjr = agent.getMandatorySubscriptionRecord
         (sjr.businessDetails.utr, sjr.businessDetails.postcode, sjr.businessDetails.registration, sjr.amlsData) match {
           case (utr, postcode, Some(registration), amlsData) =>
