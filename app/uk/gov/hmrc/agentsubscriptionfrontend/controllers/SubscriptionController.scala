@@ -120,15 +120,12 @@ class SubscriptionController @Inject()(
         val sjr = agent.getMandatorySubscriptionRecord
         (sjr.businessDetails.utr, sjr.businessDetails.postcode, sjr.businessDetails.registration, sjr.amlsData) match {
           case (utr, postcode, Some(registration), amlsData) =>
-            subscriptionService.handlePartiallySubscribedAndRedirect(agent, sjr.businessDetails.utr, sjr.businessDetails.postcode)(
-              whenNotPartiallySubscribed = {
                     for {
                     _ <- updateSessionBeforeSubscribing(registration)
                     subscriptionResponse <- subscriptionService
                       .subscribe(utr, postcode, registration, amlsData)
                     result <- redirectSubscriptionResponse(subscriptionResponse, agent)
                     }yield result
-              })
 
           case _ =>
             Logger(getClass).warn(s"Missing data in session, redirecting back to /business-type")
