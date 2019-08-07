@@ -94,7 +94,7 @@ class PostcodeController @Inject()(
         for {
           _ <- sessionStoreService.cacheAgentSession(
                 agentSession.copy(postcode = Some(postcode), registration = Some(reg)))
-          result <- withCleanCreds(agent) {
+          result <- withCleanCredsOrCreateNewAccount(agent) {
                      subscriptionService
                        .completePartialSubscription(utr, postcode)
                        .map { _ =>

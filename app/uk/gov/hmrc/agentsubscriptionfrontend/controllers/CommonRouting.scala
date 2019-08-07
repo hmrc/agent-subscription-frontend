@@ -29,10 +29,18 @@ trait CommonRouting {
 
   val appConfig: AppConfig
 
-  private[controllers] def withCleanCreds(agent: Agent)(f: => Future[Result]): Future[Result] =
+  private[controllers] def withCleanCredsOrCreateNewAccount(agent: Agent)(
+    cleanCredsBody: => Future[Result]): Future[Result] =
     agent match {
       case hasNonEmptyEnrolments(_) =>
         toFuture(Redirect(routes.BusinessIdentificationController.showCreateNewAccount()))
-      case _ => f
+      case _ => cleanCredsBody
+    }
+
+  private[controllers] def withCleanCredsOrSignIn(agent: Agent)(cleanCredsBody: => Future[Result]): Future[Result] =
+    agent match {
+      case hasNonEmptyEnrolments(_) =>
+        toFuture(Redirect(routes.SubscriptionController.showSignInWithNewID()))
+      case _ => cleanCredsBody
     }
 }
