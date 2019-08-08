@@ -663,3 +663,63 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         .withRequestBody(containing(subscriptionRequest.agency.address.countryCode)))
 }
 
+class SubscriptionControllerTests extends SubscriptionControllerISpec {
+
+  "submitCheckAnswers" should {
+    "send subscription request and redirect to subscription complete when there is a continue url" when {
+      "all fields are supplied" in new TestSetupWithCompleteJourneyRecordAndCreate {
+        AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
+
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/some/url"))
+
+        val result = await(controller.submitCheckAnswers(request))
+        status(result) shouldBe 303
+        redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
+
+        verifySubscriptionRequestSent(subscriptionRequestWithNoEdit())
+        metricShouldExistAndBeUpdated("Count-Subscription-Complete")
+      }
+
+      "some fields are supplied" in new TestSetupWithCompleteJourneyRecordAndCreate {
+        AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
+
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/some/url"))
+
+        val result = await(controller.submitCheckAnswers(request))
+        status(result) shouldBe 303
+        redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
+
+        verifySubscriptionRequestSent(subscriptionRequestWithNoEdit())
+        metricShouldExistAndBeUpdated("Count-Subscription-Complete")
+      }
+
+      "amlsDetails are passed in" in new TestSetupWithCompleteJourneyRecordAndCreate {
+        val amlsDetails = Some(AmlsDetails("supervisory", Right(RegisteredDetails("123", LocalDate.now()))))
+        AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
+
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/some/url"))
+        val result = await(controller.submitCheckAnswers(request))
+        status(result) shouldBe 303
+        redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
+
+        verifySubscriptionRequestSent(subscriptionRequestWithNoEdit())
+        metricShouldExistAndBeUpdated("Count-Subscription-Complete")
+      }
+    }
+  }
+
+  "GET /sign-in-with-new-user-id" should {
+    "show the sign in with new user id error page" in new TestSetupNoJourneyRecord {
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+
+      val result = await(controller.showSignInWithNewID(request))
+
+      status(result) shouldBe 200
+      checkHtmlResultWithBodyText(result, "Sign in with your new user ID",
+        "You have not finished creating your agent services account.")
+    }
+  }
+}
