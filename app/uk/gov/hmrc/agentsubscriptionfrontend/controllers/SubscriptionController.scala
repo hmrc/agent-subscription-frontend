@@ -101,6 +101,7 @@ class SubscriptionController @Inject()(
     }
   }
 
+  //helper function to copy record details to session before the record is deleted allowing them to be displayed on subscription complete page
   private def updateSessionBeforeSubscribing(registration: Registration)(implicit hc: HeaderCarrier) = {
     val agencyName = registration.taxpayerName
     val agencyEmail = registration.emailAddress
