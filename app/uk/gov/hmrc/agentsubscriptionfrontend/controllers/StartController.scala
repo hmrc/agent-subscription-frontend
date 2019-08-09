@@ -92,12 +92,9 @@ class StartController @Inject()(
     withSubscribingAgent { agent =>
       val sjr = agent.getMandatorySubscriptionRecord
       continueUrlActions.withMaybeContinueUrlCached {
-        sjr.authProviderId flatMap { authProviderId =>
-          for {
-            record <- subscriptionJourneyService.getMandatoryJourneyRecord(authProviderId)
-            _      <- subscriptionJourneyService.saveJourneyRecord(record.copy(mappingComplete = true))
-          } yield Redirect(routes.TaskListController.showTaskList())
-        }
+        subscriptionJourneyService
+          .saveJourneyRecord(sjr.copy(mappingComplete = true))
+          .map(_ => Redirect(routes.TaskListController.showTaskList()))
       }
     }
   }
