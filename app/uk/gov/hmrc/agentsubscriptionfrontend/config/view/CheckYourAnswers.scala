@@ -42,6 +42,7 @@ object CheckYourAnswers {
     amlsData: Option[AmlsData],
     isManuallyAssured: Boolean,
     userMappings: List[UserMapping],
+    continueId: Option[String],
     appConfig: AppConfig)(implicit messages: Messages): CheckYourAnswers =
     CheckYourAnswers(
       businessNameRow = makeBusinessNameRow(registrationName),
@@ -56,7 +57,11 @@ object CheckYourAnswers {
             AnswerRow(
               question = Messages("checkAnswers.userMapping.label"),
               answerLines = List(userMappings.map(_.count).sum.toString),
-              changeLink = Some(Call("GET", url = appConfig.agentMappingFrontendStartUrl)),
+              changeLink = Some(
+                Call(
+                  "GET",
+                  url = appConfig.agentMappingFrontendStartUrl(
+                    continueId.getOrElse(throw new RuntimeException("no continueId found in record"))))),
               buttonText = Some(Messages("checkAnswers.addMore.button"))
             )),
       maybeMappingGGIdsRow =
