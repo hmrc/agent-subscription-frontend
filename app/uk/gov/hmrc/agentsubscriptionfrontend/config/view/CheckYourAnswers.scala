@@ -56,8 +56,8 @@ object CheckYourAnswers {
             AnswerRow(
               question = Messages("checkAnswers.userMapping.label"),
               answerLines = List(userMappings.map(_.count).sum.toString),
-              changeLink = Call("GET", url = appConfig.agentMappingFrontendStartUrl),
-              buttonText = Messages("checkAnswers.addMore.button")
+              changeLink = Some(Call("GET", url = appConfig.agentMappingFrontendStartUrl)),
+              buttonText = Some(Messages("checkAnswers.addMore.button"))
             )),
       maybeMappingGGIdsRow =
         if (userMappings.isEmpty)
@@ -67,8 +67,8 @@ object CheckYourAnswers {
             AnswerRow(
               question = Messages("checkAnswers.ggId.label"),
               answerLines = userMappings.map(u => Messages("checkAnswers.ggId.xs", u.ggTag)),
-              changeLink = routes.TaskListController.showTaskList(),
-              buttonText = ""
+              changeLink = None,
+              buttonText = None
             ))
     )
 
@@ -77,8 +77,8 @@ object CheckYourAnswers {
       AnswerRow(
         question = amlsQuestion(data),
         answerLines = amlsAnswer(data),
-        changeLink = routes.AMLSController.changeAmlsDetails(),
-        buttonText = defaultButtonText
+        changeLink = Some(routes.AMLSController.changeAmlsDetails()),
+        buttonText = Some(defaultButtonText)
       )
     }
 
@@ -115,8 +115,8 @@ object CheckYourAnswers {
     AnswerRow(
       question = Messages("checkAnswers.businessEmailAddress.label"),
       answerLines = List(emailAddress).flatten,
-      changeLink = routes.BusinessIdentificationController.changeBusinessEmail(),
-      buttonText = defaultButtonText
+      changeLink = Some(routes.BusinessIdentificationController.changeBusinessEmail()),
+      buttonText = Some(defaultButtonText)
     )
 
   private def makeBusinessAddressRow(address: BusinessAddress)(implicit messages: Messages) =
@@ -128,18 +128,18 @@ object CheckYourAnswers {
         address.addressLine3,
         address.addressLine4,
         address.postalCode).flatten,
-      changeLink = routes.SubscriptionController.showBusinessAddressForm(),
-      buttonText = defaultButtonText
+      changeLink = Some(routes.SubscriptionController.showBusinessAddressForm()),
+      buttonText = Some(defaultButtonText)
     )
 
   private def makeBusinessNameRow(registrationName: String)(implicit messages: Messages) =
     AnswerRow(
       question = Messages("checkAnswers.businessName.label"),
       answerLines = List(registrationName),
-      changeLink = routes.BusinessIdentificationController.changeBusinessName(),
-      buttonText = defaultButtonText
+      changeLink = Some(routes.BusinessIdentificationController.changeBusinessName()),
+      buttonText = Some(defaultButtonText)
     )
 
 }
 
-case class AnswerRow(question: String, answerLines: List[String], changeLink: Call, buttonText: String)
+case class AnswerRow(question: String, answerLines: List[String], changeLink: Option[Call], buttonText: Option[String])
