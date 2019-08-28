@@ -47,7 +47,7 @@ class SignedOutController @Inject()(
         agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
         continueId = agent.getMandatorySubscriptionRecord.continueId
       } yield {
-        redirectToCreateCreds(agentSubContinueUrlOpt, continueId)
+        redirectToCreateCleanCreds(agentSubContinueUrlOpt, continueId)
       }
     }
   }
@@ -57,12 +57,12 @@ class SignedOutController @Inject()(
       for {
         agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
       } yield {
-        redirectToCreateCreds(agentSubContinueUrlOpt, None)
+        redirectToCreateCleanCreds(agentSubContinueUrlOpt, None)
       }
     }
   }
 
-  private def redirectToCreateCreds(maybeContinueUrl: Option[ContinueUrl], continueId: Option[String]): Result = {
+  private def redirectToCreateCleanCreds(maybeContinueUrl: Option[ContinueUrl], continueId: Option[String]): Result = {
 
     val continueUrl =
       addParamsToUrl(

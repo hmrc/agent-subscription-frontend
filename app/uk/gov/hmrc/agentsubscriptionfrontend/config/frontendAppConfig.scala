@@ -95,10 +95,10 @@ class FrontendAppConfig @Inject()(val environment: Environment, val configuratio
   override val ggRegistrationFrontendExternalUrl: String =
     s"${getConfStringOrFail(s"$env.microservice.services.government-gateway-registration-frontend.externalUrl")}$ssoRedirectUrl"
 
-  private val rootContinuePath: String = "/agent-subscription/return-after-gg-creds-created"
+  private val returnAfterGGCredsCreatedPath: String = "/agent-subscription/return-after-gg-creds-created"
 
   override val rootContinueUrl: String =
-    if (isDevMode) s"http://localhost:9437$rootContinuePath" else rootContinuePath
+    if (isDevMode) s"http://localhost:9437$returnAfterGGCredsCreatedPath" else returnAfterGGCredsCreatedPath
 
   def getServicesConfStringOrFail(key: String): String =
     getConfString(key, throw new Exception(s"Property not found $key"))
