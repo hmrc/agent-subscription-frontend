@@ -29,7 +29,7 @@ class SignOutControllerISpec extends BaseISpec {
 
   "redirectToSos" should {
     "redirect to SOS page" in new TestSetup {
-      val result = await(controller.redirectToSos(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
+      val result = await(controller.redirectTaskListUserToCreateCleanCreds(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
 
       status(result) shouldBe 303
       redirectLocation(result).head should include(sosRedirectUrl)
@@ -38,7 +38,7 @@ class SignOutControllerISpec extends BaseISpec {
     "the SOS redirect URL should include an ID of the saved continue id" in new TestSetup {
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
-      val result = await(controller.redirectToSos(request))
+      val result = await(controller.redirectTaskListUserToCreateCleanCreds(request))
       redirectLocation(result).head should include(
         s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created%3Fid%3Dfoo")
     }
@@ -50,7 +50,7 @@ class SignOutControllerISpec extends BaseISpec {
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.continueUrl = Some(ourContinueUrl)
 
-      val result = await(controller.redirectToSos(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
+      val result = await(controller.redirectTaskListUserToCreateCleanCreds(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
 
       val sosContinueValueUnencoded =
         s"/agent-subscription/return-after-gg-creds-created?continue=${ourContinueUrl.encodedUrl}"
@@ -64,7 +64,7 @@ class SignOutControllerISpec extends BaseISpec {
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.continueUrl = Some(ourContinueUrl)
 
-      val result = await(controller.redirectToSos(request))
+      val result = await(controller.redirectTaskListUserToCreateCleanCreds(request))
 
       val sosContinueValueUnencoded =
         s"/agent-subscription/return-after-gg-creds-created?id=foo&continue=${ourContinueUrl.encodedUrl}"
