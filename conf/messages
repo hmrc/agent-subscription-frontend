@@ -432,6 +432,7 @@ sign-in-new-id.p1=You have not finished creating your agent services account.
 sign-in-new-id.p2=To finish this step, sign in again using the new user ID you created for your agent services account.
 sign-in-new-id.button=Sign in with new user ID
 
+accessibility.statement.title=Accessibility statement for agent service account service
 accessibility.statement.h1=Accessibility statement for agent service account service
 accessibility.statement.intro.p1=This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
 accessibility.statement.intro.p2=This service is part of the wider GOV.UK website. There is a separate <a href="https://www.gov.uk/help/accessibility">accessibility statement</a> for the main GOV.UK website.
