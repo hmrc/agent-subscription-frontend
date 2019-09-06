@@ -38,17 +38,17 @@ class SessionStoreServiceSpec extends UnitSpec with MockFactory {
   "cacheContinueUrl and fetchContinueUrl" should {
     "cache a continue url and fetch it back" in {
       (mockSessionStoreService
-        .cacheContinueUrl(_: ContinueUrl)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(ContinueUrl("/continue/url"), hc, *)
+        .cacheContinueUrl(_: String)(_: HeaderCarrier, _: ExecutionContext))
+        .expects("/continue/url", hc, *)
         .returns(Future(()))
       (mockSessionStoreService
         .fetchContinueUrl(_: HeaderCarrier, _: ExecutionContext))
         .expects(hc, *)
-        .returns(Future(Some(ContinueUrl("/continue/url"))))
+        .returns(Future(Some("/continue/url")))
 
-      mockSessionStoreService.cacheContinueUrl(ContinueUrl("/continue/url"))
+      mockSessionStoreService.cacheContinueUrl("/continue/url")
       val result = await(mockSessionStoreService.fetchContinueUrl)
-      result shouldBe Some(ContinueUrl("/continue/url"))
+      result shouldBe Some("/continue/url")
     }
   }
 
@@ -108,13 +108,13 @@ class SessionStoreServiceSpec extends UnitSpec with MockFactory {
   "remove" should {
     "clear the session" in {
       (mockSessionStoreService
-        .cacheContinueUrl(_: ContinueUrl)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(ContinueUrl("/continue/url"), hc, *)
+        .cacheContinueUrl(_: String)(_: HeaderCarrier, _: ExecutionContext))
+        .expects("/continue/url", hc, *)
         .returns(Future(()))
       (mockSessionStoreService
         .fetchContinueUrl(_: HeaderCarrier, _: ExecutionContext))
         .expects(hc, *)
-        .returns(Future(Some(ContinueUrl("/continue/url"))))
+        .returns(Future(Some("/continue/url")))
       (mockSessionStoreService
         .remove()(_: HeaderCarrier, _: ExecutionContext))
         .expects(hc, *)
@@ -124,9 +124,9 @@ class SessionStoreServiceSpec extends UnitSpec with MockFactory {
         .expects(hc, *)
         .returns(Future(None))
 
-      mockSessionStoreService.cacheContinueUrl(ContinueUrl("/continue/url"))
+      mockSessionStoreService.cacheContinueUrl("/continue/url")
       val fetchResult = await(mockSessionStoreService.fetchContinueUrl)
-      fetchResult shouldBe Some(ContinueUrl("/continue/url"))
+      fetchResult shouldBe Some("/continue/url")
 
       mockSessionStoreService.remove()
       val fetchResultEmpty = await(mockSessionStoreService.fetchContinueUrl)

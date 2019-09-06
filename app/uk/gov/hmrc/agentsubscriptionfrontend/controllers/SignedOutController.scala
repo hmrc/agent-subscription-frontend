@@ -24,21 +24,20 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps.addParamsToUrl
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext
 
 @Singleton
 class SignedOutController @Inject()(
   val sessionStoreService: SessionStoreService,
-  continueUrlActions: ContinueUrlActions,
+  override val redirectUrlActions: RedirectUrlActions,
   override val authConnector: AuthConnector,
   override val subscriptionJourneyService: SubscriptionJourneyService)(
   implicit messagesApi: MessagesApi,
   override val appConfig: AppConfig,
   override val metrics: Metrics,
   override val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig, subscriptionJourneyService)
+    extends AgentSubscriptionBaseController(authConnector, redirectUrlActions, appConfig, subscriptionJourneyService)
     with SessionBehaviour {
 
   def redirectTaskListUserToCreateCleanCreds: Action[AnyContent] = Action.async { implicit request =>
@@ -62,13 +61,12 @@ class SignedOutController @Inject()(
     }
   }
 
-  private def redirectToCreateCleanCreds(maybeContinueUrl: Option[ContinueUrl], continueId: Option[String]): Result = {
-
+  private def redirectToCreateCleanCreds(maybeContinueUrl: Option[String], continueId: Option[String]): Result = {
     val continueUrl =
       addParamsToUrl(
         appConfig.rootContinueUrl,
         "id"       -> continueId,
-        "continue" -> maybeContinueUrl.map(_.url)
+        "continue" -> maybeContinueUrl
       )
 
     SeeOther(addParamsToUrl(appConfig.ggRegistrationFrontendExternalUrl, "continue" -> Some(continueUrl))).withNewSession
@@ -77,7 +75,7 @@ class SignedOutController @Inject()(
   def signOutWithContinueUrl: Action[AnyContent] = Action.async { implicit request =>
     sessionStoreService.fetchContinueUrl.map { maybeContinueUrl =>
       val signOutUrlWithContinueUrl =
-        addParamsToUrl(appConfig.companyAuthSignInUrl, "continue" -> maybeContinueUrl.map(_.url))
+        addParamsToUrl(appConfig.companyAuthSignInUrl, "continue" -> maybeContinueUrl)
       SeeOther(signOutUrlWithContinueUrl).withNewSession
     }
   }

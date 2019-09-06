@@ -63,9 +63,6 @@ abstract class BaseISpec
 
   protected lazy val testSsoConnector = new SsoConnector(null, null, FakeMetrics) {
     val whitelistedSSODomains = Set("www.foo.com", "foo.org")
-
-    override def validateExternalDomain(domain: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-      Future.successful(whitelistedSSODomains.contains(domain))
   }
 
   private class TestGuiceModule extends AbstractModule {

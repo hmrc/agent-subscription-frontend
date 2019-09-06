@@ -27,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class TestSessionStoreService extends SessionStoreService(null) {
 
   class Session(
-    var continueUrl: Option[ContinueUrl] = None,
+    var continueUrl: Option[String] = None,
     var goBackUrl: Option[String] = None,
     var changingAnswers: Option[Boolean] = None,
     var agentSession: Option[AgentSession] = None)
@@ -48,10 +48,10 @@ class TestSessionStoreService extends SessionStoreService(null) {
   def allSessionsRemoved: Boolean =
     sessions.isEmpty
 
-  override def fetchContinueUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[ContinueUrl]] =
+  override def fetchContinueUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[String]] =
     Future successful currentSession.continueUrl
 
-  override def cacheContinueUrl(url: ContinueUrl)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  override def cacheContinueUrl(url: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     Future.successful(currentSession.continueUrl = Some(url))
 
   override def cacheGoBackUrl(url: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =

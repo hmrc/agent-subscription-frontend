@@ -497,7 +497,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
 
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-        sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/some/url"))
+        sessionStoreService.currentSession.continueUrl = Some("/some/url")
 
         val result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
@@ -511,7 +511,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
 
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-        sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/some/url"))
+        sessionStoreService.currentSession.continueUrl = Some("/some/url")
 
         val result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
@@ -526,7 +526,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
 
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-        sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/some/url"))
+        sessionStoreService.currentSession.continueUrl = Some("/some/url")
         val result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url

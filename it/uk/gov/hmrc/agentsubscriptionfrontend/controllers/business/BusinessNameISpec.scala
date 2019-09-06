@@ -90,7 +90,7 @@ class BusinessNameISpec extends BaseISpec {
       implicit val request =
         authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("name" -> "new Agent name")
       sessionStoreService.currentSession.agentSession = Some(agentSession)
-      sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/continue/url"))
+      sessionStoreService.currentSession.continueUrl = Some("/continue/url")
 
       val result = await(controller.submitBusinessNameForm(request))
       status(result) shouldBe 303
