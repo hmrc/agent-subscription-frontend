@@ -20,7 +20,8 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.binders.ContinueUrl
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
+import uk.gov.hmrc.play.bootstrap.binders.{RedirectUrl, UnsafePermitAll}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -48,11 +49,11 @@ class TestSessionStoreService extends SessionStoreService(null) {
   def allSessionsRemoved: Boolean =
     sessions.isEmpty
 
-  override def fetchContinueUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[String]] =
-    Future successful currentSession.continueUrl
+  override def fetchContinueUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[RedirectUrl]] =
+    Future successful currentSession.continueUrl.map(c => RedirectUrl(c))
 
-  override def cacheContinueUrl(url: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
-    Future.successful(currentSession.continueUrl = Some(url))
+  override def cacheContinueUrl(url: RedirectUrl)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+    Future.successful(currentSession.continueUrl = Some(url.get(UnsafePermitAll).url))
 
   override def cacheGoBackUrl(url: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
     toFuture(currentSession.goBackUrl =  Some(url))

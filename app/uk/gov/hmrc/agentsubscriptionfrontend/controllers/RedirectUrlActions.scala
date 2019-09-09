@@ -21,17 +21,19 @@ import play.api.Logger
 import play.api.mvc._
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.SsoConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
-import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
 import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromWhitelist, RedirectUrl, UnsafePermitAll}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.higherKinds
 import scala.util.{Failure, Success, Try}
 
 @Singleton
 class RedirectUrlActions @Inject()(sessionStoreService: SessionStoreService, ssoConnector: SsoConnector)(
   implicit executor: ExecutionContext) {
+
+  def whitelistedDomains()(implicit hc: HeaderCarrier): Future[Set[String]] = ssoConnector.getWhitelistedDomains()
 
   def extractRedirectUrl[A](implicit request: Request[A], hc: HeaderCarrier): Option[RedirectUrl] =
     request.getQueryString("continue") match {
@@ -46,31 +48,44 @@ class RedirectUrlActions @Inject()(sessionStoreService: SessionStoreService, sso
         None
     }
 
-  def withMaybeRedirectUrl[A](
-    block: Option[String] => Future[Result])(implicit request: Request[A], hc: HeaderCarrier): Future[Result] = {
-    val whitelistPolicy = AbsoluteWithHostnameFromWhitelist(ssoConnector.getWhitelistedDomains())
+  def checkRedirectUrlAndContinue[A](redirectUrl: RedirectUrl, block: Option[String] => Future[A])(
+    implicit hc: HeaderCarrier): Future[A] = {
+    val whitelistPolicy = AbsoluteWithHostnameFromWhitelist(whitelistedDomains)
+    val unsafeUrl = redirectUrl.get(UnsafePermitAll).url
 
-    val redirectUrlOpt: Future[Option[RedirectUrl]] = extractRedirectUrl
-    redirectUrlOpt.flatMap {
-      case Some(redirectUrl) =>
-        val unsafeUrl = redirectUrl.get(UnsafePermitAll).url
-        if (RedirectUrl.isRelativeUrl(unsafeUrl)) block(Some(unsafeUrl))
-        else
-          redirectUrl.getEither(whitelistPolicy).flatMap {
-            case Right(safeRedirectUrl) => block(Some(safeRedirectUrl.url))
-            case Left(errorMessage) =>
-              Logger.warn(s"url does not comply with whitelist policy, removing redirect url... $errorMessage")
-              block(None)
-          }
-      case None => block(None)
-    }
+    if (RedirectUrl.isRelativeUrl(unsafeUrl)) block(Some(unsafeUrl))
+    else
+      redirectUrl.getEither(whitelistPolicy).flatMap {
+        case Right(safeRedirectUrl) => block(Some(safeRedirectUrl.url))
+        case Left(errorMessage) =>
+          Logger.warn(s"url does not comply with whitelist policy, removing redirect url... $errorMessage")
+          block(None)
+      }
   }
+
+  def withMaybeRedirectUrl[A](
+    block: Option[String] => Future[Result])(implicit request: Request[A], hc: HeaderCarrier): Future[Result] =
+    extractRedirectUrl match {
+      case Some(redirectUrl) => checkRedirectUrlAndContinue[Result](redirectUrl, block)
+      case None              => block(None)
+    }
 
   def withMaybeRedirectUrlCached[A](
     block: => Future[Result])(implicit hc: HeaderCarrier, request: Request[A]): Future[Result] =
     withMaybeRedirectUrl {
       case None => block
       case Some(url) =>
-        sessionStoreService.cacheContinueUrl(url).flatMap(_ => block)
+        sessionStoreService.cacheContinueUrl(RedirectUrl(url)).flatMap(_ => block)
     }
+
+  def getUrl(redirectUrlOpt: Option[RedirectUrl])(implicit hc: HeaderCarrier): Future[Option[String]] =
+    redirectUrlOpt match {
+      case Some(redirectUrl) =>
+        checkRedirectUrlAndContinue[Option[String]](redirectUrl, urlOpt => Future successful urlOpt)
+      case None => Future successful None
+    }
+
+  def getUrl(redirectUrl: RedirectUrl)(implicit hc: HeaderCarrier): Future[Option[String]] =
+    checkRedirectUrlAndContinue[Option[String]](redirectUrl, urlOpt => Future successful urlOpt)
+
 }

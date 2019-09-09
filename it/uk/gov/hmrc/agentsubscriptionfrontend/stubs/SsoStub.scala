@@ -11,7 +11,7 @@ object SsoStub {
         aResponse()
           .withStatus(200)
           .withBody(
-            """{"externalDomains": ["127.0.0.1","online-qa.ibt.hmrc.gov.uk","ibt.hmrc.gov.uk"],"internalDomains":["localhost"]}""")))
+            """{"externalDomains": ["127.0.0.1","online-qa.ibt.hmrc.gov.uk","ibt.hmrc.gov.uk"],"internalDomains":["localhost", "www.tax.service.gov.uk"]}""")))
 
   def givenWhitelistedDomainsError: StubMapping =
     stubFor(

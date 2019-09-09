@@ -10,8 +10,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingClean
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{validUtr, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub._
-import uk.gov.hmrc.play.binders.ContinueUrl
-import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
 
 class BusinessNameISpec extends BaseISpec {
 

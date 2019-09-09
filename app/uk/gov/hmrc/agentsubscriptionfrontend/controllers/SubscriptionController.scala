@@ -233,8 +233,11 @@ class SubscriptionController @Inject()(
           val agencyEmail = registration.emailAddress.getOrElse(
             throw new RuntimeException("agency email is missing from registration"))
 
-          sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
-            .flatMap {
+
+          for {
+          continueUrl <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
+          redirectUrl <- redirectUrlActions.getUrl(continueUrl)
+          } yield redirectUrl match {
               case Some(continueUrl) => result(agencyName, agencyEmail, continueUrl)
               case None =>
                 val asaUrl = appConfig.agentServicesAccountUrl
@@ -250,8 +253,7 @@ class SubscriptionController @Inject()(
     withSubscribedAgent { (arn, sjrOpt) =>
       sjrOpt match {
         case Some(sjr) => handleRegistrationAndGoToComplete(sjr.businessDetails.registration, (agencyName, agencyEmail, continueUrl) =>
-                          Ok(html.subscription_complete(continueUrl, arn.value, agencyName, agencyEmail)))
-
+            Ok(html.subscription_complete(continueUrl, arn.value, agencyName, agencyEmail)))
         case None => sessionStoreService.fetchAgentSession.flatMap {
           case Some(agentSession) => handleRegistrationAndGoToComplete(agentSession.registration, (agencyName, agencyEmail, continueUrl) =>
             Ok(html.subscription_complete(continueUrl, arn.value, agencyName, agencyEmail)))
