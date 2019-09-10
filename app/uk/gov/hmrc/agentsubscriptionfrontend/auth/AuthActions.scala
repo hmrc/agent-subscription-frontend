@@ -135,7 +135,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
             redirectUrlActions.withMaybeRedirectUrl {
               case Some(redirectUrl) =>
                 mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
-                Redirect(redirectUrl) // end of journey; back to calling service)
+                Redirect(redirectUrl) // end of journey; back to calling service
               case None =>
                 mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
                 Redirect(appConfig.agentServicesAccountUrl) // dashboard

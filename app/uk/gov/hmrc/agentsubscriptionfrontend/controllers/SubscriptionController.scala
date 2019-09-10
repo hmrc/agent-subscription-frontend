@@ -236,9 +236,9 @@ class SubscriptionController @Inject()(
 
           for {
           continueUrl <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
-          redirectUrl <- redirectUrlActions.getUrl(continueUrl)
-          } yield redirectUrl match {
-              case Some(continueUrl) => result(agencyName, agencyEmail, continueUrl)
+          redirectUrlOpt <- redirectUrlActions.getUrl(continueUrl)
+          } yield redirectUrlOpt match {
+              case Some(redirectUrl) => result(agencyName, agencyEmail, redirectUrl)
               case None =>
                 val asaUrl = appConfig.agentServicesAccountUrl
                 result(agencyName, agencyEmail, asaUrl)
@@ -252,11 +252,11 @@ class SubscriptionController @Inject()(
 
     withSubscribedAgent { (arn, sjrOpt) =>
       sjrOpt match {
-        case Some(sjr) => handleRegistrationAndGoToComplete(sjr.businessDetails.registration, (agencyName, agencyEmail, continueUrl) =>
-            Ok(html.subscription_complete(continueUrl, arn.value, agencyName, agencyEmail)))
+        case Some(sjr) => handleRegistrationAndGoToComplete(sjr.businessDetails.registration, (agencyName, agencyEmail, redirectUrl) =>
+            Ok(html.subscription_complete(redirectUrl, arn.value, agencyName, agencyEmail)))
         case None => sessionStoreService.fetchAgentSession.flatMap {
-          case Some(agentSession) => handleRegistrationAndGoToComplete(agentSession.registration, (agencyName, agencyEmail, continueUrl) =>
-            Ok(html.subscription_complete(continueUrl, arn.value, agencyName, agencyEmail)))
+          case Some(agentSession) => handleRegistrationAndGoToComplete(agentSession.registration, (agencyName, agencyEmail, redirectUrl) =>
+            Ok(html.subscription_complete(redirectUrl, arn.value, agencyName, agencyEmail)))
 
           case None => throw new RuntimeException("no record found for agent")
         }

@@ -53,6 +53,7 @@ class RedirectUrlActions @Inject()(sessionStoreService: SessionStoreService, sso
     val whitelistPolicy = AbsoluteWithHostnameFromWhitelist(whitelistedDomains)
     val unsafeUrl = redirectUrl.get(UnsafePermitAll).url
 
+    //if relative let through else check url domain is on whitelist
     if (RedirectUrl.isRelativeUrl(unsafeUrl)) block(Some(unsafeUrl))
     else
       redirectUrl.getEither(whitelistPolicy).flatMap {
