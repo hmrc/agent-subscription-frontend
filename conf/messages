@@ -209,7 +209,7 @@ postcode.llp.title=What is the postcode of your limited liability partnership's 
 
 #Nino page
 nino.title=What is your National Insurance number?
-nino.hint=It’s on your National Insurance card, benefit letter, payslip or P60. For example, ’QQ 12 34 56 C’.
+nino.hint=It’s on your National Insurance card, benefit letter, payslip or P60. For example, ‘QQ 12 34 56 C’.
 
 #Date of Birth page
 date-of-birth.title=What is your date of birth?
