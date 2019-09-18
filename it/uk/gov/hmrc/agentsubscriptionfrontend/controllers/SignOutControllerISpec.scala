@@ -64,7 +64,6 @@ class SignOutControllerISpec extends BaseISpec {
         await(controller.redirectUserToCreateCleanCreds(authenticatedAs(subscribingAgentEnrolledForNonMTD))),
         ourContinueUrl
       )
-
     }
 
     "include both an ID and a continue URL in the SOS redirect URL if both a continue URL and KnownFacts exist in the session store" in new TestSetup {

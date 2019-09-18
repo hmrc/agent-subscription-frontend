@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps.addParamsToUrl
@@ -46,10 +46,7 @@ class SignedOutController @Inject()(
         agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
         redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
         continueId = {
-          agent.subscriptionJourneyRecord match {
-            case Some(sjr) if sjr.continueId.nonEmpty => sjr.continueId
-            case _                                    => None
-          }
+          agent.subscriptionJourneyRecord.flatMap(_.continueId)
         }
       } yield {
         val continueUrl =
