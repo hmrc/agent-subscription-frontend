@@ -40,38 +40,28 @@ class SignedOutController @Inject()(
     extends AgentSubscriptionBaseController(authConnector, redirectUrlActions, appConfig, subscriptionJourneyService)
     with SessionBehaviour {
 
-  def redirectTaskListUserToCreateCleanCreds: Action[AnyContent] = Action.async { implicit request =>
+  def redirectUserToCreateCleanCreds: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       for {
         agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
         redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
-        continueId = agent.getMandatorySubscriptionRecord.continueId
+        continueId = {
+          agent.subscriptionJourneyRecord match {
+            case Some(sjr) if sjr.continueId.nonEmpty => sjr.continueId
+            case _                                    => None
+          }
+        }
       } yield {
-        redirectToCreateCleanCreds(redirectUrl, continueId)
+        val continueUrl =
+          addParamsToUrl(
+            appConfig.rootContinueUrl,
+            "id"       -> continueId,
+            "continue" -> redirectUrl
+          )
+
+        SeeOther(addParamsToUrl(appConfig.ggRegistrationFrontendExternalUrl, "continue" -> Some(continueUrl))).withNewSession
       }
     }
-  }
-
-  def redirectUserToCreateCleanCreds: Action[AnyContent] = Action.async { implicit request =>
-    withAuthenticatedUser {
-      for {
-        agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
-        redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
-      } yield {
-        redirectToCreateCleanCreds(redirectUrl, None)
-      }
-    }
-  }
-
-  private def redirectToCreateCleanCreds(maybeContinueUrl: Option[String], continueId: Option[String]): Result = {
-    val continueUrl =
-      addParamsToUrl(
-        appConfig.rootContinueUrl,
-        "id"       -> continueId,
-        "continue" -> maybeContinueUrl
-      )
-
-    SeeOther(addParamsToUrl(appConfig.ggRegistrationFrontendExternalUrl, "continue" -> Some(continueUrl))).withNewSession
   }
 
   def signOutWithContinueUrl: Action[AnyContent] = Action.async { implicit request =>
