@@ -265,11 +265,11 @@ businessDetails.label.utr.llp=Partnership Unique Taxpayer Reference (UTR)
 businessDetails.details.heading.sole_trader=Where to find your Self Assessment UTR
 businessDetails.details.content.sole_trader=You’ll <a href="https://www.gov.uk/find-lost-utr-number" target="_blank" rel="noopener noreferrer">find your UTR (opens in a new window or tab)</a> on the letter HMRC sent you when you registered for Self Assessment. It’s a 10-digit number, sometimes with a letter ''K'' on the end.
 businessDetails.details.heading.limited_company=Where to find your Corporation Tax or company UTR
-businessDetails.details.content.limited_company=You can usually find your Corporation Tax or company UTR in the header of letters from HM Revenue & Customs (HMRC), next to headings such as ’Tax Reference’, ’UTR’ or ’Official Use’.
+businessDetails.details.content.limited_company=You can usually find your Corporation Tax or company UTR in the header of letters from HM Revenue & Customs (HMRC), next to headings such as ‘Tax Reference’, ‘UTR’ or ‘Official Use’.
 businessDetails.details.heading.partnership=Where to find your partnership UTR
-businessDetails.details.content.partnership=You can find your partnership UTR in the header of letters from HM Revenue & Customs (HMRC), next to headings such as ’Tax Reference’, ’UTR’ or ’Official Use’.
+businessDetails.details.content.partnership=You can find your partnership UTR in the header of letters from HM Revenue & Customs (HMRC), next to headings such as ‘Tax Reference’, ‘UTR’ or ‘Official Use’.
 businessDetails.details.heading.llp=Where to find your partnership UTR
-businessDetails.details.content.llp=You can find your partnership UTR in the header of letters from HM Revenue & Customs (HMRC), next to headings such as ’Tax Reference’, ’UTR’ or ’Official Use’.
+businessDetails.details.content.llp=You can find your partnership UTR in the header of letters from HM Revenue & Customs (HMRC), next to headings such as ‘Tax Reference’, ‘UTR’ or ‘Official Use’.
 
 ##dynamic content finish
 
@@ -292,7 +292,7 @@ createNewAccount.p1=You will need this user ID to sign in to your new agent serv
 #Non agent
 nonAgent.title=You have not signed in with an agent user ID
 nonAgent.p1=<a href="{0}">Sign in with an agent Government Gateway user ID</a> to continue.
-nonAgent.p2=If you do not have one, <a href="{0}">create a new user ID</a>, selecting the ’Agent’ option.
+nonAgent.p2=If you do not have one, <a href="{0}">create a new user ID</a>, selecting the ‘Agent’ option.
 
 #Link account
 linkClients.title=Link your clients to your agent services account
