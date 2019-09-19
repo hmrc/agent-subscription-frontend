@@ -30,40 +30,44 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class SignedOutController @Inject()(
   val sessionStoreService: SessionStoreService,
-  continueUrlActions: ContinueUrlActions,
+  override val redirectUrlActions: RedirectUrlActions,
   override val authConnector: AuthConnector,
   override val subscriptionJourneyService: SubscriptionJourneyService)(
   implicit messagesApi: MessagesApi,
   override val appConfig: AppConfig,
   override val metrics: Metrics,
   override val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig, subscriptionJourneyService)
+    extends AgentSubscriptionBaseController(authConnector, redirectUrlActions, appConfig, subscriptionJourneyService)
     with SessionBehaviour {
 
-  def redirectToSos: Action[AnyContent] = Action.async { implicit request =>
+  def redirectUserToCreateCleanCreds: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       for {
         agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
-        continueId = agent.getMandatorySubscriptionRecord.continueId
+        redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
+        continueId = {
+          agent.subscriptionJourneyRecord.flatMap(_.continueId)
+        }
       } yield {
-        val rootContinueUrl: String =
-          if (appConfig.isDevMode) "http://localhost:9437/agent-subscription/return-after-gg-creds-created"
-          else "/agent-subscription/return-after-gg-creds-created"
         val continueUrl =
           addParamsToUrl(
-            rootContinueUrl,
+            appConfig.rootContinueUrl,
             "id"       -> continueId,
-            "continue" -> agentSubContinueUrlOpt.map(_.url)
+            "continue" -> redirectUrl
           )
-        SeeOther(addParamsToUrl(appConfig.sosRedirectUrl, "continue" -> Some(continueUrl))).withNewSession
+
+        SeeOther(addParamsToUrl(appConfig.ggRegistrationFrontendExternalUrl, "continue" -> Some(continueUrl))).withNewSession
       }
     }
   }
 
   def signOutWithContinueUrl: Action[AnyContent] = Action.async { implicit request =>
-    sessionStoreService.fetchContinueUrl.map { maybeContinueUrl =>
+    for {
+      agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
+      redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
+    } yield {
       val signOutUrlWithContinueUrl =
-        addParamsToUrl(appConfig.companyAuthSignInUrl, "continue" -> maybeContinueUrl.map(_.url))
+        addParamsToUrl(appConfig.companyAuthSignInUrl, "continue" -> redirectUrl)
       SeeOther(signOutUrlWithContinueUrl).withNewSession
     }
   }

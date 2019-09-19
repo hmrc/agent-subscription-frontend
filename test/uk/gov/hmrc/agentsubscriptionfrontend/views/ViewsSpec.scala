@@ -46,13 +46,14 @@ class ViewsSpec extends MixedPlaySpec {
     override val configuration: Configuration = null
     override val addressLookupContinueUrl: String = "addressLookupContinueUrl"
     override val surveyRedirectUrl: String = "surveyRedirectUrl"
-    override val sosRedirectUrl: String = "sosRedirectUrl"
     override val companyAuthSignInUrl: String = "signOutUrl"
     override val chainedSessionDetailsTtl: Int = 900
     override val cacheableSessionDomain: String = "cacheableSessionDomain"
     override val isDevMode: Boolean = true
     override def agentMappingFrontendStartUrl(continueId: String): String =
       s"http://localhost:9438/agent-mapping/start?continueId=$continueId"
+    override val ggRegistrationFrontendExternalUrl: String = "http://localhost:8571"
+    override val rootContinueUrl: String = "http://localhost:9437/agent-subscription/return-after-gg-creds-created"
   }
 
   "error_template view" should {

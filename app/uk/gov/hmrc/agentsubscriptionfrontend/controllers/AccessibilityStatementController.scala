@@ -15,42 +15,35 @@
  */
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
+
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService, TaskListService}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.ContinueId
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService, SubscriptionService}
+import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TaskListController @Inject()(
+@Singleton
+class AccessibilityStatementController @Inject()(
   override val authConnector: AuthConnector,
-  agentAssuranceConnector: AgentAssuranceConnector,
-  redirectUrlActions: RedirectUrlActions,
+  continueUrlActions: ContinueUrlActions,
   val sessionStoreService: SessionStoreService,
-  override val subscriptionJourneyService: SubscriptionJourneyService,
-  taskListService: TaskListService)(
+  subscriptionService: SubscriptionService,
+  subscriptionJourneyService: SubscriptionJourneyService)(
   implicit override implicit val appConfig: AppConfig,
   metrics: Metrics,
   override val messagesApi: MessagesApi,
   val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(authConnector, redirectUrlActions, appConfig, subscriptionJourneyService)
+    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig, subscriptionJourneyService)
     with SessionBehaviour {
 
-  def showTaskList: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
-      agent.subscriptionJourneyRecord match {
-        case Some(record) => taskListService.createTasks(record).map(tasks => (Ok(html.task_list(tasks))))
-        case None         => Future.successful(Redirect(routes.BusinessTypeController.showBusinessTypeForm()))
-      }
-    }
-  }
-
-  def savedProgress(backLink: Option[String] = None): Action[AnyContent] = Action { implicit request =>
-    Ok(html.saved_progress(backLink))
+  def showAccessibilityStatement: Action[AnyContent] = Action { implicit request =>
+    Ok(html.accessibility_statement())
   }
 }

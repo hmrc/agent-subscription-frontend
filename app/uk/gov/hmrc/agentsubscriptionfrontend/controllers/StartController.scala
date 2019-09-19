@@ -19,22 +19,21 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, ContinueId, Postcode}
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService, SubscriptionService}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.ContinueId
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscribedButNotEnrolled, SubscriptionJourneyService, SubscriptionProcess, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class StartController @Inject()(
   override val authConnector: AuthConnector,
-  continueUrlActions: ContinueUrlActions,
+  redirectUrlActions: RedirectUrlActions,
   val sessionStoreService: SessionStoreService,
   subscriptionService: SubscriptionService,
   subscriptionJourneyService: SubscriptionJourneyService)(
@@ -42,27 +41,27 @@ class StartController @Inject()(
   metrics: Metrics,
   override val messagesApi: MessagesApi,
   val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig, subscriptionJourneyService)
+    extends AgentSubscriptionBaseController(authConnector, redirectUrlActions, appConfig, subscriptionJourneyService)
     with SessionBehaviour {
 
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
 
-  val root: Action[AnyContent] = Action.async { implicit request =>
-    continueUrlActions.withMaybeContinueUrl { urlOpt =>
-      Redirect(routes.StartController.start().toURLWithParams("continue" -> urlOpt.map(_.url)))
+  def root: Action[AnyContent] = Action.async { implicit request =>
+    redirectUrlActions.withMaybeRedirectUrl { urlOpt =>
+      Redirect(routes.StartController.start().toURLWithParams("continue" -> urlOpt))
     }
   }
 
   def start: Action[AnyContent] = Action.async { implicit request =>
-    continueUrlActions.withMaybeContinueUrl { urlOpt =>
+    redirectUrlActions.withMaybeRedirectUrl { urlOpt =>
       val nextUrl: String = routes.BusinessTypeController
         .showBusinessTypeForm()
-        .toURLWithParams("continue" -> urlOpt.map(_.url))
+        .toURLWithParams("continue" -> urlOpt)
       Ok(html.start(nextUrl))
     }
   }
 
-  val showNotAgent: Action[AnyContent] = Action.async { implicit request =>
+  def showNotAgent: Action[AnyContent] = Action.async { implicit request =>
     withAuthenticatedUser {
       Ok(html.not_agent())
     }
@@ -70,17 +69,13 @@ class StartController @Inject()(
 
   def returnAfterGGCredsCreated(id: Option[String] = None): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
-      continueUrlActions.withMaybeContinueUrlCached {
+      redirectUrlActions.withMaybeRedirectUrlCached {
         id match {
           case Some(continueId) =>
             // sanity check - they just came back with a brand new Auth Id
             require(agent.subscriptionJourneyRecord.isEmpty)
 
-            for {
-              record <- subscriptionJourneyService.getMandatoryJourneyRecord(ContinueId(continueId))
-              _ <- subscriptionJourneyService.saveJourneyRecord(
-                    record.copy(cleanCredsAuthProviderId = Some(agent.authProviderId)))
-            } yield Redirect(routes.TaskListController.showTaskList())
+            subscriptionService.redirectAfterGGCredsCreatedBasedOnStatus(ContinueId(continueId), agent)
 
           case None => Future.successful(Redirect(routes.TaskListController.showTaskList()))
         }
@@ -91,7 +86,7 @@ class StartController @Inject()(
   def returnAfterMapping(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       val sjr = agent.getMandatorySubscriptionRecord
-      continueUrlActions.withMaybeContinueUrlCached {
+      redirectUrlActions.withMaybeRedirectUrlCached {
         subscriptionJourneyService
           .saveJourneyRecord(sjr.copy(mappingComplete = true))
           .map(_ => Redirect(routes.TaskListController.showTaskList()))
