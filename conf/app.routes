@@ -12,9 +12,6 @@ GET         /progress-saved                                uk.gov.hmrc.agentsubs
 GET         /business-type                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessTypeController.showBusinessTypeForm
 POST        /business-type                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessTypeController.submitBusinessTypeForm
 
-GET         /business-details                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessDetailsController.showBusinessDetailsForm
-POST        /business-details                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessDetailsController.submitBusinessDetails
-
 GET         /unique-taxpayer-reference                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.UtrController.showUtrForm()
 POST        /unique-taxpayer-reference                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.UtrController.submitUtrForm()
 
@@ -100,8 +97,6 @@ GET         /complete                                        uk.gov.hmrc.agentsu
 GET         /sign-in-with-new-user-id                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showSignInWithNewID
 
 GET         /create-clean-creds                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectUserToCreateCleanCreds
-
-GET         /redirect-to-sos                               uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectTaskListUserToCreateCleanCreds
 
 GET         /redirect-to-asaccount                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToASAccountPage
 GET         /start-survey                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.startSurvey

@@ -45,20 +45,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class BusinessIdentificationController @Inject()(
-  assuranceService: AssuranceService,
-  override val authConnector: AuthConnector,
-  agentAssuranceConnector: AgentAssuranceConnector,
-  val subscriptionService: SubscriptionService,
-  val sessionStoreService: SessionStoreService,
-  continueUrlActions: ContinueUrlActions,
-  val businessDetailsValidator: BusinessDetailsValidator,
-  auditService: AuditService,
-  override val subscriptionJourneyService: SubscriptionJourneyService)(
+                                                  assuranceService: AssuranceService,
+                                                  override val authConnector: AuthConnector,
+                                                  agentAssuranceConnector: AgentAssuranceConnector,
+                                                  val subscriptionService: SubscriptionService,
+                                                  val sessionStoreService: SessionStoreService,
+                                                  redirectUrlActions: RedirectUrlActions,
+                                                  val businessDetailsValidator: BusinessDetailsValidator,
+                                                  auditService: AuditService,
+                                                  override val subscriptionJourneyService: SubscriptionJourneyService)(
   implicit messagesApi: MessagesApi,
   override val appConfig: AppConfig,
   override val metrics: Metrics,
   override val ec: ExecutionContext)
-    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig, subscriptionJourneyService)
+    extends AgentSubscriptionBaseController(authConnector, redirectUrlActions, appConfig, subscriptionJourneyService)
     with SessionBehaviour {
 
   import BusinessIdentificationForms._
@@ -93,11 +93,10 @@ class BusinessIdentificationController @Inject()(
     implicit request: Request[_]) = {
 
     val getBackLinkForConfirmBusiness =
-      routes.BusinessDetailsController.showBusinessDetailsForm()
-//      existingSession.registeredForVat match {
-//        case Some("Yes") => routes.VatDetailsController.showVatDetailsForm()
-//        case _           => routes.VatDetailsController.showRegisteredForVatForm()
-//      }
+      existingSession.registeredForVat match {
+        case Some("Yes") => routes.VatDetailsController.showVatDetailsForm()
+        case _           => routes.VatDetailsController.showRegisteredForVatForm()
+      }
 
     (
       existingSession.utr,
@@ -114,8 +113,7 @@ class BusinessIdentificationController @Inject()(
           ))
       case (None, _, _) =>
         Logger.warn("utr is missing from registration, redirecting to /unique-taxpayer-reference")
-        //Redirect(routes.UtrController.showUtrForm())
-        Redirect(routes.BusinessDetailsController.showBusinessDetailsForm())
+        Redirect(routes.UtrController.showUtrForm())
       case (_, None, _) =>
         Logger.warn("taxpayerName is missing from registration, redirecting to /business-name")
         Redirect(routes.BusinessIdentificationController.showBusinessNameForm())
@@ -143,8 +141,7 @@ class BusinessIdentificationController @Inject()(
                   } else validatedBusinessDetailsAndRedirect(existingSession, agent)
 
                 case No =>
-                  //Redirect(routes.UtrController.showUtrForm())
-                  Redirect(routes.BusinessDetailsController.showBusinessDetailsForm())
+                  Redirect(routes.UtrController.showUtrForm())
               }
             }
           )
@@ -169,8 +166,7 @@ class BusinessIdentificationController @Inject()(
 
           subscriptionService.handlePartiallySubscribedAndRedirect(
             agent,
-            existingSession.utr.getOrElse(Utr("")),
-            existingSession.postcode.getOrElse(Postcode("")))(
+            existingSession)(
             whenNotPartiallySubscribed = createRecordAndRedirectToTasklist())
     }
 

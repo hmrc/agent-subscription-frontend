@@ -7,13 +7,14 @@ import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContinueUrlActions
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.RedirectUrlActions
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AuthProviderId
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SubscriptionJourneyService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.givenSubscriptionJourneyRecordExists
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData, TestSetupNoJourneyRecord}
-import uk.gov.hmrc.auth.core.{AuthConnector, InsufficientEnrolments}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.minimalSubscriptionJourneyRecord
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestSetupNoJourneyRecord}
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 
 import scala.concurrent.Future
@@ -30,7 +31,7 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar {
 
     override def authConnector: AuthConnector = app.injector.instanceOf[AuthConnector]
     override def appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-    override def continueUrlActions: ContinueUrlActions = app.injector.instanceOf[ContinueUrlActions]
+    override def redirectUrlActions: RedirectUrlActions = app.injector.instanceOf[RedirectUrlActions]
     override def metrics: Metrics = app.injector.instanceOf[Metrics]
     override def subscriptionJourneyService: SubscriptionJourneyService = app.injector.instanceOf[SubscriptionJourneyService]
 
@@ -43,8 +44,7 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar {
     val providerId = AuthProviderId("12345-credId")
 
     "call body with arn when valid agent" in new TestSetupNoJourneyRecord {
-      givenSubscriptionJourneyRecordExists(providerId,
-        TestData.minimalSubscriptionJourneyRecord(providerId))
+      givenSubscriptionJourneyRecordExists(providerId, minimalSubscriptionJourneyRecord(providerId))
       authenticatedAgent("fooArn", "12345-credId")
 
       val result = TestController.withSubscribedAgent
@@ -53,27 +53,14 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar {
       bodyOf(result) shouldBe "fooArn"
     }
 
-    "throw InsufficientEnrolments when agent not enrolled for service" in new TestSetupNoJourneyRecord {
-      givenSubscriptionJourneyRecordExists(providerId,
-        TestData.minimalSubscriptionJourneyRecord(providerId))
-      givenAuthorisedFor(
-        "{}",
-        s"""{
-           |"authorisedEnrolments": [
-           |  { "key":"HMRC-MTD-IT", "identifiers": [
-           |    { "key":"MTDITID", "value": "fooMtdItId" }
-           |  ]}
-           |],
-           |"optionalCredentials": {"providerId": "${providerId.id}", "providerType": "GovernmentGateway"}}""".stripMargin
-      )
-      an[InsufficientEnrolments] shouldBe thrownBy {
-        TestController.withSubscribedAgent
-      }
+    "throw Forbidden when agent not enrolled for service" in new TestSetupNoJourneyRecord {
+      givenSubscriptionJourneyRecordExists(providerId, minimalSubscriptionJourneyRecord(providerId))
+      userHasInsufficientEnrolments()
+      status(TestController.withSubscribedAgent) shouldBe 403
     }
 
-    "throw InsufficientEnrolments when expected agent's identifier missing" in new TestSetupNoJourneyRecord {
-      givenSubscriptionJourneyRecordExists(providerId,
-        TestData.minimalSubscriptionJourneyRecord(providerId))
+    "throw Forbidden when expected agent's identifier missing" in new TestSetupNoJourneyRecord {
+      givenSubscriptionJourneyRecordExists(providerId, minimalSubscriptionJourneyRecord(providerId))
       givenAuthorisedFor(
         "{}",
         s"""{
@@ -84,9 +71,8 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar {
            |],
            |"optionalCredentials": {"providerId": "${providerId.id}", "providerType": "GovernmentGateway"}}""".stripMargin
       )
-      an[InsufficientEnrolments] shouldBe thrownBy {
-        TestController.withSubscribedAgent
-      }
+
+      status(TestController.withSubscribedAgent) shouldBe 403
     }
 
     "UnsupportedAuthProvider error should redirect user to start page" in new TestSetupNoJourneyRecord {

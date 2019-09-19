@@ -2,13 +2,13 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import java.time.LocalDate
 
-import org.jsoup.Jsoup
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub._
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.{partialSubscriptionWillSucceed, withMatchingUtrAndPostcode}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionJourneyStub, AgentSubscriptionStub, AuthStub}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{individual, subscribingAgentEnrolledForNonMTD}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
@@ -89,10 +89,7 @@ class StartControllerISpec extends BaseISpec {
 
     "contain a start button pointing to /business-type" in {
       val result = await(controller.start(FakeRequest()))
-      val doc = Jsoup.parse(bodyOf(result))
-      val startLink = doc.getElementById("start")
-      startLink.attr("href") shouldBe routes.BusinessTypeController.showBusinessTypeForm().url
-      startLink.text() shouldBe htmlEscapedMessage("startpage.continue")
+      result should containLink("startpage.continue", routes.BusinessTypeController.showBusinessTypeForm().url)
     }
 
     behave like aPageWithFeedbackLinks(request => controller.start(request))
@@ -146,8 +143,6 @@ class StartControllerISpec extends BaseISpec {
 
   "returnAfterGGCredsCreated" should {
 
-    import FixturesForReturnAfterGGCredsCreated._
-
     "given a valid subscription journey record" when {
 
       "redirect to the /task-list page and update journey record with new clean creds id" in new SetupUnsubscribed {
@@ -172,29 +167,40 @@ class StartControllerISpec extends BaseISpec {
       }
     }
 
-    "returnAfterMapping" should {
+    "complete partial subscription and resirect to complete when the user comes back as partially subscribed" in new SetupUnsubscribed {
+      withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = false, isSubscribedToETMP = true)
+      partialSubscriptionWillSucceed(CompletePartialSubscriptionBody(validUtr, knownFacts = SubscriptionRequestKnownFacts(validPostcode)), arn = "TARN00023")
+      implicit val request = FakeRequest()
 
-      "given a valid subscription journey record" when {
+      val result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
 
-        "redirect to the /task-list page and update journey record with mappingComplete as true" in {
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          givenSubscriptionJourneyRecordExists(id, record)
-          givenSubscriptionRecordCreated(record.authProviderId, record.copy(continueId = None, mappingComplete = true))
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.SubscriptionController.showSubscriptionComplete().url)
+    }
+  }
 
-          val result = await(controller.returnAfterMapping()(request))
+  "returnAfterMapping" should {
 
-          status(result) shouldBe 303
-          redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
-        }
+    "given a valid subscription journey record" when {
 
-        "throw a runtime exception when there is no record" in {
-          implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] =
-            authenticatedAs(subscribingAgentEnrolledForNonMTD)
-          givenNoSubscriptionJourneyRecordExists(id)
-          intercept[RuntimeException] {
-            await(controller.returnAfterMapping()(authenticatedRequest))
-          }.getMessage shouldBe "Expected Journey Record missing"
-        }
+      "redirect to the /task-list page and update journey record with mappingComplete as true" in {
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        givenSubscriptionJourneyRecordExists(id, record)
+        givenSubscriptionRecordCreated(record.authProviderId, record.copy(continueId = None, mappingComplete = true))
+
+        val result = await(controller.returnAfterMapping()(request))
+
+        status(result) shouldBe 303
+        redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
+      }
+
+      "throw a runtime exception when there is no record" in {
+        implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] =
+          authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        givenNoSubscriptionJourneyRecordExists(id)
+        intercept[RuntimeException] {
+          await(controller.returnAfterMapping()(authenticatedRequest))
+        }.getMessage shouldBe "Expected Journey Record missing"
       }
     }
   }

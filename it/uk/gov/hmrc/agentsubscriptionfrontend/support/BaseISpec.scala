@@ -14,16 +14,12 @@ import play.api.mvc.{AnyContentAsEmpty, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
 import play.twirl.api.HtmlFormat.escape
-import uk.gov.hmrc.agentsubscriptionfrontend.connectors.SsoConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.DataStreamStubs
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.test.UnitSpec
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 abstract class BaseISpec
     extends UnitSpec with OneAppPerSuite with WireMockSupport with EndpointBehaviours with DataStreamStubs
@@ -61,17 +57,9 @@ abstract class BaseISpec
     override def toJson: String = ???
   }
 
-  protected lazy val testSsoConnector = new SsoConnector(null, null, FakeMetrics) {
-    val whitelistedSSODomains = Set("www.foo.com", "foo.org")
-
-    override def validateExternalDomain(domain: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-      Future.successful(whitelistedSSODomains.contains(domain))
-  }
-
   private class TestGuiceModule extends AbstractModule {
     override def configure(): Unit = {
       bind(classOf[SessionStoreService]).toInstance(sessionStoreService)
-      bind(classOf[SsoConnector]).toInstance(testSsoConnector)
     }
   }
 
@@ -149,7 +137,7 @@ abstract class BaseISpec
     }
   }
 
-  protected def containInputElement(expectedElementId: String, expectedInputType: String): Matcher[Result] = {
+  protected def containInputElement(expectedElementId: String, expectedInputType: String, expectedValue: Option[String] = None): Matcher[Result] = {
     new Matcher[Result] {
       override def apply(result: Result): MatchResult = {
         val doc = Jsoup.parse(bodyOf(result))
@@ -158,10 +146,11 @@ abstract class BaseISpec
 
         val isAsExpected = Option(foundElement) match {
           case None => false
-          case Some(elAmls) => {
-            val isExpectedTag = elAmls.tagName() == "input"
-            val isExpectedType = elAmls.attr("type") == expectedInputType
-            isExpectedTag && isExpectedType
+          case Some(el) => {
+            val isExpectedTag = el.tagName() == "input"
+            val isExpectedType = el.attr("type") == expectedInputType
+            val isExpectedValue = expectedValue.fold(true)(el.attr("value") == _)
+            isExpectedTag && isExpectedType && isExpectedValue
           }
         }
 
@@ -231,6 +220,23 @@ abstract class BaseISpec
           wasFoundWithCorrectMessage,
           s"""Response does not contain a link to "$expectedHref" with content for message key "$expectedMessageKey" """,
           s"""Response contains a link to "$expectedHref" with content for message key "$expectedMessageKey" """
+        )
+      }
+    }
+  }
+
+  protected def containLinkText(expectedMessageText: String, expectedHref: String): Matcher[Result] = {
+    import scala.collection.JavaConversions._
+    new Matcher[Result] {
+      override def apply(result: Result): MatchResult = {
+        val doc = Jsoup.parse(bodyOf(result))
+        val foundElements = doc.select(s"a[href=$expectedHref]")
+
+        val wasFoundWithCorrectMessage = foundElements.toList.exists(_.text() == expectedMessageText)
+        MatchResult(
+          wasFoundWithCorrectMessage,
+          s"""Response does not contain a link to "$expectedHref" with link text "$expectedMessageText" """,
+          s"""Response contains a link to "$expectedHref" with link text "$expectedMessageText" """
         )
       }
     }

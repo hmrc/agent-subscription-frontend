@@ -29,12 +29,10 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.{partialSubscriptionWillSucceed, withPartiallySubscribedAgent}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, AuthStub}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData, TestSetupNoJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{utr, _}
-import uk.gov.hmrc.play.binders.ContinueUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -128,6 +126,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         "checkAnswers.businessAddress.label"
       )
       result should not(containMessages("checkAnswers.userMapping.label"))
+      result should not(containMessages("checkAnswers.ggId.label"))
       result should not(containMessages("checkAnswers.amlsDetails.pending.label"))
     }
 
@@ -147,9 +146,11 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         "checkAnswers.businessName.label",
         "checkAnswers.businessEmailAddress.label",
         "checkAnswers.businessAddress.label",
-        "checkAnswers.userMapping.label"
+        "checkAnswers.userMapping.label",
+        "checkAnswers.ggId.label"
       )
       result should not(containMessages("checkAnswers.amlsDetails.pending.label"))
+      checkHtmlResultWithBodyText(result, "XXXX-XXXX-1234", "XXXX-XXXX-5678")
     }
 
     "throw an exception when there is no continue url in the record" in new TestSetupWithCompleteJourneyRecordWithMapping {
@@ -497,7 +498,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
 
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-        sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/some/url"))
+        sessionStoreService.currentSession.continueUrl = Some("/some/url")
 
         val result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
@@ -511,7 +512,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
 
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-        sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/some/url"))
+        sessionStoreService.currentSession.continueUrl = Some("/some/url")
 
         val result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
@@ -526,7 +527,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
 
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-        sessionStoreService.currentSession.continueUrl = Some(ContinueUrl("/some/url"))
+        sessionStoreService.currentSession.continueUrl = Some("/some/url")
         val result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
@@ -545,7 +546,11 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       status(result) shouldBe 200
       checkHtmlResultWithBodyText(result, "Sign in with your new user ID",
-        "You have not finished creating your agent services account.")
+        "You have not finished creating your agent services account.",
+        "To finish this step, sign in again using the new user ID you created for your agent services account.",
+      "If you do not have one")
+
+      result should containLinkText("create a new user ID", routes.SignedOutController.redirectUserToCreateCleanCreds().url)
     }
   }
 

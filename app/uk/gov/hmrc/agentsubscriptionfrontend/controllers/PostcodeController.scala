@@ -38,7 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PostcodeController @Inject()(
-  override val continueUrlActions: ContinueUrlActions,
+  override val redirectUrlActions: RedirectUrlActions,
   override val authConnector: AuthConnector,
   val sessionStoreService: SessionStoreService,
   subscriptionService: SubscriptionService,
@@ -49,16 +49,16 @@ class PostcodeController @Inject()(
   override val appConfig: AppConfig,
   val ec: ExecutionContext,
   override val messagesApi: MessagesApi)
-    extends AgentSubscriptionBaseController(authConnector, continueUrlActions, appConfig, subscriptionJourneyService)
+    extends AgentSubscriptionBaseController(authConnector, redirectUrlActions, appConfig, subscriptionJourneyService)
     with SessionBehaviour {
 
   def showPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-      withValidSession { (_, existingSession) =>
+      withValidSession { (businessType, existingSession) =>
         existingSession.postcode match {
           case Some(postcode) =>
-            Ok(html.postcode(postcodeForm.fill(postcode)))
-          case None => Ok(html.postcode(postcodeForm))
+            Ok(html.postcode(postcodeForm.fill(postcode), businessType))
+          case None => Ok(html.postcode(postcodeForm, businessType))
         }
       }
     }
@@ -66,11 +66,11 @@ class PostcodeController @Inject()(
 
   def submitPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
-      withValidSession { (_, existingSession) =>
+      withValidSession { (businessType, existingSession) =>
         postcodeForm
           .bindFromRequest()
           .fold(
-            formWithErrors => Ok(html.postcode(formWithErrors)),
+            formWithErrors => Ok(html.postcode(formWithErrors, businessType)),
             validPostcode => {
               existingSession.utr match {
                 case Some(utr) => checkSubscriptionStatusAndUpdateSession(utr, validPostcode, existingSession)
@@ -87,22 +87,9 @@ class PostcodeController @Inject()(
     request: Request[AnyContent],
     agent: Agent): Future[Result] =
     subscriptionService.getSubscriptionStatus(utr, postcode).flatMap {
-      case SubscriptionProcess(Unsubscribed, Some(registrationDetails)) =>
+      case SubscriptionProcess(subscriptionState, Some(registrationDetails))
+          if subscriptionState == Unsubscribed || subscriptionState == SubscribedButNotEnrolled =>
         checkAssuranceAndUpdateSession(utr, postcode, registrationDetails, agentSession)
-
-      case SubscriptionProcess(SubscribedButNotEnrolled, Some(reg)) =>
-        for {
-          _ <- sessionStoreService.cacheAgentSession(
-                agentSession.copy(postcode = Some(postcode), registration = Some(reg)))
-          result <- agent.withCleanCredsOrCreateNewAccount {
-                     subscriptionService
-                       .completePartialSubscription(utr, postcode)
-                       .map { _ =>
-                         mark("Count-Subscription-PartialSubscriptionCompleted")
-                         Redirect(routes.SubscriptionController.showSubscriptionComplete())
-                       }
-                   }
-        } yield result
 
       case SubscriptionProcess(SubscribedAndEnrolled, _) =>
         mark("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
