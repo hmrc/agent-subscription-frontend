@@ -120,6 +120,30 @@ class SubscriptionService @Inject()(
       Redirect(routes.SubscriptionController.showSubscriptionComplete())
     }
 
+  def redirectAfterGGCredsCreatedBasedOnStatus(continueId: ContinueId, agent: Agent)(
+    implicit hc: HeaderCarrier,
+    ex: ExecutionContext): Future[Result] =
+    for {
+      record             <- subscriptionJourneyService.getMandatoryJourneyRecord(continueId)
+      subscriptionStatus <- getSubscriptionStatus(record.businessDetails.utr, record.businessDetails.postcode)
+      //if user is partially subscribed when they come back with a new user ID can complete partial subscription with clean creds
+      completePartialSubscriptionOrTaskList <- subscriptionStatus match {
+                                                case SubscriptionProcess(SubscribedButNotEnrolled, Some(_)) =>
+                                                  completePartialSubscriptionAndGoToComplete(
+                                                    record.businessDetails.utr,
+                                                    record.businessDetails.postcode)
+
+                                                case _ =>
+                                                  subscriptionJourneyService
+                                                    .saveJourneyRecord(
+                                                      record.copy(
+                                                        cleanCredsAuthProviderId = Some(agent.authProviderId)))
+                                                    .map { _ =>
+                                                      Redirect(routes.TaskListController.showTaskList())
+                                                    }
+                                              }
+    } yield completePartialSubscriptionOrTaskList
+
   def getSubscriptionStatus(utr: Utr, postcode: Postcode)(
     implicit hc: HeaderCarrier,
     ec: ExecutionContext): Future[SubscriptionProcess] =

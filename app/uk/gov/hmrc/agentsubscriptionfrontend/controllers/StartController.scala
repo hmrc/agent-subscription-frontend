@@ -75,28 +75,7 @@ class StartController @Inject()(
             // sanity check - they just came back with a brand new Auth Id
             require(agent.subscriptionJourneyRecord.isEmpty)
 
-            for {
-              record <- subscriptionJourneyService.getMandatoryJourneyRecord(ContinueId(continueId))
-              subscriptionStatus <- subscriptionService
-                                     .getSubscriptionStatus(record.businessDetails.utr, record.businessDetails.postcode)
-
-              //if user is partially subscribed when coming back from gg, they now have clean creds so can complete the subscription
-              completePartialSubscriptionOrTaskList <- subscriptionStatus match {
-                                                        case SubscriptionProcess(SubscribedButNotEnrolled, Some(_)) =>
-                                                          subscriptionService
-                                                            .completePartialSubscriptionAndGoToComplete(
-                                                              record.businessDetails.utr,
-                                                              record.businessDetails.postcode)
-
-                                                        case _ =>
-                                                          subscriptionJourneyService
-                                                            .saveJourneyRecord(record.copy(
-                                                              cleanCredsAuthProviderId = Some(agent.authProviderId)))
-                                                            .map { _ =>
-                                                              Redirect(routes.TaskListController.showTaskList())
-                                                            }
-                                                      }
-            } yield completePartialSubscriptionOrTaskList
+            subscriptionService.redirectAfterGGCredsCreatedBasedOnStatus(ContinueId(continueId), agent)
 
           case None => Future.successful(Redirect(routes.TaskListController.showTaskList()))
         }
