@@ -19,10 +19,11 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
+import play.api.mvc.Results.Redirect
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.ContinueId
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService, SubscriptionService}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscribedButNotEnrolled, SubscriptionJourneyService, SubscriptionProcess, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -76,9 +77,26 @@ class StartController @Inject()(
 
             for {
               record <- subscriptionJourneyService.getMandatoryJourneyRecord(ContinueId(continueId))
-              _ <- subscriptionJourneyService.saveJourneyRecord(
-                    record.copy(cleanCredsAuthProviderId = Some(agent.authProviderId)))
-            } yield Redirect(routes.TaskListController.showTaskList())
+              subscriptionStatus <- subscriptionService
+                                     .getSubscriptionStatus(record.businessDetails.utr, record.businessDetails.postcode)
+
+              //if user is partially subscribed when coming back from gg, they now have clean creds so can complete the subscription
+              completePartialSubscriptionOrTaskList <- subscriptionStatus match {
+                                                        case SubscriptionProcess(SubscribedButNotEnrolled, Some(_)) =>
+                                                          subscriptionService
+                                                            .completePartialSubscriptionAndGoToComplete(
+                                                              record.businessDetails.utr,
+                                                              record.businessDetails.postcode)
+
+                                                        case _ =>
+                                                          subscriptionJourneyService
+                                                            .saveJourneyRecord(record.copy(
+                                                              cleanCredsAuthProviderId = Some(agent.authProviderId)))
+                                                            .map { _ =>
+                                                              Redirect(routes.TaskListController.showTaskList())
+                                                            }
+                                                      }
+            } yield completePartialSubscriptionOrTaskList
 
           case None => Future.successful(Redirect(routes.TaskListController.showTaskList()))
         }
