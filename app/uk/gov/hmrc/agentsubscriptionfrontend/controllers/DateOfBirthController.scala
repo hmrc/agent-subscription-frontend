@@ -20,7 +20,6 @@ import java.time.LocalDate
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
-import org.apache.http.cookie.SM
 import play.api.data.Forms.{mapping, text, tuple}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError, Mapping}
@@ -35,7 +34,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators.checkOn
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
 @Singleton
@@ -54,12 +53,22 @@ class DateOfBirthController @Inject()(
     with SessionBehaviour {
 
   def showDateOfBirthForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
+    withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
-        existingSession.dateOfBirth match {
-          case Some(dob) =>
-            Ok(html.date_of_birth(dateOfBirthForm.fill(dob)))
-          case None => Ok(html.date_of_birth(dateOfBirthForm))
+        (agent.authNino, existingSession.nino, existingSession.dateOfBirthFromCid) match {
+
+          case (None, _, _) => Redirect(routes.VatDetailsController.showRegisteredForVatForm())
+
+          case (Some(_), None, _) => Redirect(routes.NationalInsuranceController.showNationalInsuranceNumberForm())
+
+          case (Some(_), Some(_), None) => Redirect(routes.VatDetailsController.showRegisteredForVatForm())
+
+          case (_, _, Some(_)) =>
+            existingSession.dateOfBirth match {
+              case Some(dob) =>
+                Ok(html.date_of_birth(dateOfBirthForm.fill(dob)))
+              case None => Ok(html.date_of_birth(dateOfBirthForm))
+            }
         }
       }
     }
@@ -75,13 +84,12 @@ class DateOfBirthController @Inject()(
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
                 existingSession.nino match {
-                  case Some(nino) =>
-                    subscriptionService.checkDobAndNino(nino, validDob).flatMap {
-                      case true => {
-                        updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(
-                          routes.VatDetailsController.showRegisteredForVatForm())
-                      }
-                      case false => Redirect(routes.BusinessIdentificationController.showNoMatchFound())
+                  case Some(_) =>
+                    if (existingSession.dateOfBirthFromCid.contains(validDob)) {
+                      updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(
+                        routes.VatDetailsController.showRegisteredForVatForm())
+                    } else {
+                      Redirect(routes.BusinessIdentificationController.showNoMatchFound())
                     }
                   case None => Redirect(routes.NationalInsuranceController.showNationalInsuranceNumberForm())
                 }
