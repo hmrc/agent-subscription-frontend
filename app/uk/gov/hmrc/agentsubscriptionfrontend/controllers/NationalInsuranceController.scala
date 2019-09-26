@@ -82,7 +82,7 @@ class NationalInsuranceController @Inject()(
           .fold(
             formWithErrors => Ok(html.national_insurance_number(formWithErrors)),
             validNino =>
-              if (agent.authNino.flatMap(normalizeNino).contains(validNino)) {
+              if (agent.authNino.flatMap(normalizeNino) == normalizeNino(validNino.value)) {
                 subscriptionService
                   .getDesignatoryDetails(validNino)
                   .map(_.person.flatMap(_.dateOfBirth))
