@@ -121,7 +121,7 @@ class PostcodeControllerWithOutAssuranceFlagISpec extends BaseISpec with Session
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
       val result = await(controller.submitPostcodeForm()(request))
-      redirectLocation(result) shouldBe Some(routes.SubscriptionController.showSubscriptionComplete().url)
+      redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
     }
 
     "redirect to no match found when the subscription status is strange" in new TestSetupNoJourneyRecord {
