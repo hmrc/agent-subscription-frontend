@@ -53,7 +53,7 @@ class DateOfBirthController @Inject()(
     with SessionBehaviour {
 
   /**
-    * In-case of SoleTrader or Partnerships, and we should display NI and DOB pages based on if nino and dob exist or not, for a logged in user with Agent affinity
+    * In-case of SoleTrader or Partnerships, we should display NI and DOB pages based on if nino and dob exist or not.
     * We need to force users to go through these pages, hence the below checks
     */
   def showDateOfBirthForm(): Action[AnyContent] = Action.async { implicit request =>
