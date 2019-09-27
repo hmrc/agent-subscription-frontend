@@ -52,6 +52,10 @@ class DateOfBirthController @Inject()(
     extends AgentSubscriptionBaseController(authConnector, redirectUrlActions, appConfig, subscriptionJourneyService)
     with SessionBehaviour {
 
+  /**
+    * In-case of SoleTrader or Partnerships, and we should display NI and DOB pages based on if nino and dob exist or not, for a logged in user with Agent affinity
+    * We need to force users to go through these pages, hence the below checks
+    */
   def showDateOfBirthForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>

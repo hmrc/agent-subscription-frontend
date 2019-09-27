@@ -76,6 +76,10 @@ class VatDetailsController @Inject()(
     }
   }
 
+  /**
+    * In-case of SoleTrader or Partnerships, and we should display NI and DOB pages based on if nino and dob exist or not, for a logged in user with Agent affinity
+    * We need to force users to go through these pages, hence the below checks
+    */
   private def withAAChecks(agent: Agent, existingSession: AgentSession)(result: Result): Result =
     existingSession.businessType match {
       case Some(SoleTrader) | Some(Partnership) =>

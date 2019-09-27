@@ -30,6 +30,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters.nor
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,6 +49,10 @@ class NationalInsuranceController @Inject()(
     extends AgentSubscriptionBaseController(authConnector, redirectUrlActions, appConfig, subscriptionJourneyService)
     with SessionBehaviour {
 
+  /**
+    * In-case of SoleTrader or Partnerships, and we should display NI and DOB pages based on if nino and dob exist or not, for a logged in user with Agent affinity
+    * We need to force users to go through these pages, hence the below checks
+    */
   def showNationalInsuranceNumberForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       withValidSession { (_, existingSession) =>
@@ -81,8 +86,9 @@ class NationalInsuranceController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors => Ok(html.national_insurance_number(formWithErrors)),
-            validNino =>
-              if (agent.authNino.flatMap(normalizeNino) == normalizeNino(validNino.value)) {
+            validNino => {
+              def ninosMatched = agent.authNino.flatMap(normalizeNino) == normalizeNino(validNino.value)
+              if (ninosMatched) {
                 subscriptionService
                   .getDesignatoryDetails(validNino)
                   .map(_.person.flatMap(_.dateOfBirth))
@@ -98,6 +104,7 @@ class NationalInsuranceController @Inject()(
                   }
               } else {
                 Future.successful(Redirect(routes.BusinessIdentificationController.showNoMatchFound()))
+              }
             }
           )
       }

@@ -19,7 +19,6 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DesignatoryDetails.Person
 
-//Add more fields as required: https://github.com/hmrc/citizen-details
 case class DesignatoryDetails(person: Option[Person] = None)
 
 object DesignatoryDetails {
