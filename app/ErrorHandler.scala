@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import javax.inject.{Inject, Singleton}
 import com.google.inject.name.Named
+import javax.inject.{Inject, Singleton}
 import play.api.http.Status.FORBIDDEN
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results._
@@ -25,7 +25,7 @@ import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{error_template, error_template_5xx}
 import uk.gov.hmrc.auth.core.{InsufficientEnrolments, NoActiveSession}
-import uk.gov.hmrc.http.{JsValidationException, NotFoundException, Upstream5xxResponse}
+import uk.gov.hmrc.http.{JsValidationException, NotFoundException}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.config.{AuthRedirects, HttpAuditEvent}
