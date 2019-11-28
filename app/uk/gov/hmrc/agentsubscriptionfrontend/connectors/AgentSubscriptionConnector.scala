@@ -18,7 +18,6 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import java.time.LocalDate
 
-import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
