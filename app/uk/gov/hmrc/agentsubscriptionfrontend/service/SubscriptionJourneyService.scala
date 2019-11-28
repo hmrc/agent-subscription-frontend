@@ -66,7 +66,7 @@ class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubs
         .fromAgentSession(agentSession, agent.authProviderId, agent.maybeCleanCredsAuthProviderId)
     saveJourneyRecord(sjr) map {
       case 204 => Right(())
-      case 409 => Left("the record already exists in the database")
+      case 409 => Left("the subscription journey record already exists in the database")
     }
   }
 }

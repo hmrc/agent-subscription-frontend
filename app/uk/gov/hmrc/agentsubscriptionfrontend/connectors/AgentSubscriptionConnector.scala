@@ -22,6 +22,7 @@ import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr, Vrn}
@@ -80,14 +81,13 @@ class AgentSubscriptionConnector @Inject()(
         s"/agent-subscription/subscription/journey/primaryId/${encodePathSegment(journeyRecord.authProviderId.id)}"
       http
         .POST[SubscriptionJourneyRecord, HttpResponse](s"${appConfig.agentSubscriptionBaseUrl}$path", journeyRecord)
-        .map(handleUpdateJourneyResponse(_, path))
-    }
-
-  private def handleUpdateJourneyResponse(httpResponse: HttpResponse, path: String): Int =
-    httpResponse.status match {
-      case 204    => 204
-      case 409    => 409
-      case status => throw new RuntimeException(s"POST to $path returned $status")
+        .map(_.status)
+        .recoverWith {
+          case ex: Upstream4xxResponse if ex.upstreamResponseCode == 409 => Future successful 409
+          case ex =>
+            Logger.error(s"creating subscription journey record failed for reason: ${ex.getMessage}")
+            throw ex
+        }
     }
 
   def getRegistration(utr: Utr, postcode: String)(implicit hc: HeaderCarrier): Future[Option[Registration]] =

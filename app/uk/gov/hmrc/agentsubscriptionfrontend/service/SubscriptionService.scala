@@ -189,7 +189,7 @@ class SubscriptionService @Inject()(
                      .createJourneyRecord(agentSession, agent)
                      .map {
                        case Right(()) => Redirect(routes.SubscriptionController.showSignInWithNewID())
-                       case Left(msg) => Conflict(msg)
+                       case Left(msg) => Logger.warn(msg); Conflict
                      }
                  })(
                    isClean = completePartialSubscriptionAndGoToComplete(utr, postcode)
