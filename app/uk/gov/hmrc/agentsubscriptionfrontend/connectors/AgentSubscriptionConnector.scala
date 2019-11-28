@@ -18,6 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import java.time.LocalDate
 
+import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
@@ -73,7 +74,7 @@ class AgentSubscriptionConnector @Inject()(
       http.GET[Option[SubscriptionJourneyRecord]](url.toString)
     }
 
-  def createOrUpdateJourney(journeyRecord: SubscriptionJourneyRecord)(implicit hc: HeaderCarrier): Future[Unit] =
+  def createOrUpdateJourney(journeyRecord: SubscriptionJourneyRecord)(implicit hc: HeaderCarrier): Future[Int] =
     monitor("ConsumedAPI-Agent-Subscription-createOrUpdate-POST") {
       val path =
         s"/agent-subscription/subscription/journey/primaryId/${encodePathSegment(journeyRecord.authProviderId.id)}"
@@ -82,9 +83,10 @@ class AgentSubscriptionConnector @Inject()(
         .map(handleUpdateJourneyResponse(_, path))
     }
 
-  private def handleUpdateJourneyResponse(httpResponse: HttpResponse, path: String): Unit =
+  private def handleUpdateJourneyResponse(httpResponse: HttpResponse, path: String): Int =
     httpResponse.status match {
-      case 204    => ()
+      case 204    => 204
+      case 409    => 409
       case status => throw new RuntimeException(s"POST to $path returned $status")
     }
 

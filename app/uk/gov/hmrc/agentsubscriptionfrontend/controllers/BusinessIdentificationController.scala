@@ -173,8 +173,10 @@ class BusinessIdentificationController @Inject()(
       case _ =>
 
         def createRecordAndRedirectToTasklist(): Future[Result] = subscriptionJourneyService
-          .createJourneyRecord(existingSession, agent)
-          .map(_ => Redirect(routes.TaskListController.showTaskList()))
+          .createJourneyRecord(existingSession, agent) map {
+          case Right(()) => Redirect(routes.TaskListController.showTaskList())
+          case Left(msg) => Conflict(msg)
+        }
 
           subscriptionService.handlePartiallySubscribedAndRedirect(
             agent,
