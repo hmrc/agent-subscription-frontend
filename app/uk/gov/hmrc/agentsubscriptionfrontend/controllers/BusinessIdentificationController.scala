@@ -39,6 +39,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.validators.BusinessDetailsValidator
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.binders.{OnlyRelative, PermitAllOnDev, RedirectUrl}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -419,7 +420,13 @@ class BusinessIdentificationController @Inject()(
 
   def showAlreadySubscribed: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Ok(alreadySubscribedTemplate())
+      for {
+        agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
+        redirectUrl <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
+      } yield {
+        val continueUrl = redirectUrl.getOrElse(routes.SignedOutController.redirectToBusinessTypeForm().url)
+        Ok(alreadySubscribedTemplate(continueUrl))
+      }
     }
   }
 
