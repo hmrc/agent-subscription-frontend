@@ -39,7 +39,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.validators.BusinessDetailsValidator
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.binders.{OnlyRelative, PermitAllOnDev, RedirectUrl}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}

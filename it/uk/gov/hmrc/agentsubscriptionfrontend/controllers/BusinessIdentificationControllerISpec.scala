@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import org.jsoup.Jsoup
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
@@ -24,13 +23,13 @@ import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessAddress
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.givenAgentIsNotManuallyAssured
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.id
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData, TestSetupNoJourneyRecord}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class BusinessIdentificationControllerISpec extends BaseISpec {
