@@ -23,9 +23,10 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.CompanyRegistrationForms._
+import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.Llp
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{company_registration}
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.company_registration
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -68,12 +69,18 @@ class CompanyRegistrationController @Inject()(
             validCrn =>
               existingSession.utr match {
                 case Some(utr) =>
-                  subscriptionService.matchCorporationTaxUtrWithCrn(utr, validCrn).flatMap { foundMatch =>
-                    if (foundMatch)
-                      updateSessionAndRedirect(existingSession.copy(companyRegistrationNumber = Some(validCrn)))(
-                        routes.VatDetailsController.showRegisteredForVatForm())
-                    else
-                      Redirect(routes.BusinessIdentificationController.showNoMatchFound())
+                  existingSession.businessType match {
+                    case Some(businessType) => {
+                      subscriptionService.matchCorporationTaxUtrWithCrn(utr, validCrn).flatMap { foundMatch =>
+                        if (foundMatch || businessType == Llp) {
+                          updateSessionAndRedirect(existingSession.copy(companyRegistrationNumber = Some(validCrn)))(
+                            routes.VatDetailsController.showRegisteredForVatForm())
+                        } else {
+                          Redirect(routes.BusinessIdentificationController.showNoMatchFound())
+                        }
+                      }
+                    }
+                    case _ => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
                   }
                 case _ => Redirect(routes.UtrController.showUtrForm())
             }
