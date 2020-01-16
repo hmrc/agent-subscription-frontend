@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Logger}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -73,6 +73,7 @@ class CompanyRegistrationController @Inject()(
                     case Some(businessType) => {
                       subscriptionService.matchCorporationTaxUtrWithCrn(utr, validCrn).flatMap { foundMatch =>
                         if (foundMatch || businessType == Llp) {
+                          if(businessType == Llp) Logger.warn(s"businessType $businessType CTUtr CRN match result was $foundMatch")
                           updateSessionAndRedirect(existingSession.copy(companyRegistrationNumber = Some(validCrn)))(
                             routes.VatDetailsController.showRegisteredForVatForm())
                         } else {
