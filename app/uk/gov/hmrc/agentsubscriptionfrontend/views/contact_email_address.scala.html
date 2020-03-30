@@ -32,6 +32,12 @@
     if(isChange){routes.SubscriptionController.showCheckAnswers()}else{routes.ContactDetailsController.showContactEmailCheck()}
 }
 
+@formValue = @{
+    if(contactEmailForm.data.get("email").isDefined){
+        contactEmailForm.data.get("email").get
+    }
+    else{""}}
+
 @mainTemplate(appConfig, title =  errorPrefix(contactEmailForm) +  Messages("contactEmailAddress.title"), bodyClasses = None) {
 
     <a href=@backLinkUrl class="link-back">@Messages("button.back")</a>
@@ -54,7 +60,7 @@
                     @Messages(formError.message)
            </span>
            }
-        <input class="form-control" type="text" id="email" name="email" aria-invalid="true" value="@contactEmailForm.data("email")">
+        <input class="form-control" type="text" id="email" name="email" aria-invalid="true" value="@formValue">
         </div>
 
         <div class="form-field margin-top-10">

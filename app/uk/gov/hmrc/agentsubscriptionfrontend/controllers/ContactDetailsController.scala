@@ -75,7 +75,7 @@ class ContactDetailsController @Inject()(
       sjr.businessDetails.registration
         .flatMap(_.emailAddress)
         .fold(
-          Future successful Redirect(routes.StartController.start()) // will there always be a email in reg?
+          Future successful Redirect(routes.StartController.start())
         )(
           businessEmail =>
             contactEmailCheckForm.bindFromRequest
@@ -85,11 +85,9 @@ class ContactDetailsController @Inject()(
                 },
                 validForm => {
                   val updatedSjr = if (validForm.check == Yes) {
-                    sjr.copy(contactEmailData =
-                      Some(ContactEmailData(RadioInputAnswer.toBoolean(validForm.check), Some(businessEmail))))
+                    sjr.copy(contactEmailData = Some(ContactEmailData(true, Some(businessEmail))))
                   } else {
-                    sjr.copy(
-                      contactEmailData = Some(ContactEmailData(RadioInputAnswer.toBoolean(validForm.check), None)))
+                    sjr.copy(contactEmailData = Some(ContactEmailData(true, None)))
                   }
                   val call: Call =
                     if (validForm.check == Yes) routes.TaskListController.showTaskList()
@@ -107,7 +105,7 @@ class ContactDetailsController @Inject()(
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
         agent.getMandatorySubscriptionRecord.contactEmailData
-          .fold(Redirect(routes.TaskListController.showTaskList())) { contactEmailData =>
+          .fold(Redirect(routes.ContactDetailsController.showContactEmailCheck())) { contactEmailData =>
             contactEmailData.contactEmail match {
               case Some(email) =>
                 Ok(
