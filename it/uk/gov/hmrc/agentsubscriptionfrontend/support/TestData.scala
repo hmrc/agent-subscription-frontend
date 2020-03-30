@@ -89,7 +89,7 @@ object TestData {
             "supervisory",
             Right(RegisteredDetails("123456789", LocalDate.now().plusDays(10))))))),
     cleanCredsAuthProviderId = Some(id),
-    contactDetailsEmailCheck = true,
+    contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
     contactDetailsTradingName = Some(registrationName),
     contactDetailsTradingAddress = Some(businessAddress)
   )
