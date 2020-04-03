@@ -150,11 +150,10 @@ error.trading-name.empty=Enter the main trading name of your business
 
 #Contact Trading Address Check
 contactTradingAddressCheck.title=Is this your main trading address?
-contactTradingAddressCheck.option.yes=Yes
-contactTradingAddressCheck.option.no=No
+contactTradingAddressCheck.option.yes=Yes - I want to use this address for all my agents services correspondence
+contactTradingAddressCheck.option.no=No - I need to enter a different address
 contactTradingAddressCheck.continue.button=Continue
 error.contact-trading-address-check.invalid=Select yes if this is your main trading address
-
 
 #Modifying address
 address.form.with-errors.error.summary = Please check the following:
