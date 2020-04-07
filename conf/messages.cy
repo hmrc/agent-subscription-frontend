@@ -119,6 +119,42 @@ error.amls.pending.appliedOn.date.invalid=Nodwch ddyddiad go iawn
 error.amls.pending.appliedOn.date.too-old=Rhaid i’r dyddiad y gwnaethoch gais fod ar ôl {0}
 error.amls.pending.appliedOn.date.cannot-be-in-future=Rhaid i’r dyddiad y gwnaethoch gais fod heddiw neu yn y gorffennol
 
+#Contact Email Check
+contactEmailCheck.title=
+contactEmailCheck.option.differentEmail=
+contactEmailCheck.continue.button=
+error.contact-email-check.invalid=
+
+#Contact Email Address
+contactEmailAddress.title=
+contactEmailAddress.p=
+contactEmailAddress.button=
+error.contact-email.empty=
+error.contact-email.maxLength=
+error.contact-email.missingSeparator=
+error.contact-email.invalidChar=
+
+#Contact Trading Name Check
+contactTradingNameCheck.title=
+contactTradingNameCheck.option.yes=
+contactTradingNameCheck.option.no=
+contactTradingNameCheck.continue.button=
+error.contact-trading-name-check.invalid=
+
+#Contact Trading Name
+contactTradingName.title=
+contactTradingName.continue.button=
+error.trading-name-name.maxlength=
+error.trading-name.invalid=
+error.trading-name.empty=
+
+#Contact Trading Address Check
+contactTradingAddressCheck.title=
+contactTradingAddressCheck.option.yes=
+contactTradingAddressCheck.option.no=
+contactTradingAddressCheck.continue.button=
+error.contact-trading-address-check.invalid=
+
 ##Modifying address
 address.form.with-errors.error.summary =Gwiriwch y canlynol:
 address.form.with-errors.heading =Nodwch gyfeiriad
@@ -432,6 +468,14 @@ checkAnswers.userMapping.label=Nifer y perthnasoedd cleientiaid a gopïwyd
 checkAnswers.addMore.button=Ychwanegu rhagor
 checkAnswers.ggId.label=Dynodyddion Defnyddiwr (ID) ar gyfer Porth y Llywodraeth a nodwyd (er eich diogelwch dangosir y 4 rhif olaf yn unig)
 checkAnswers.ggId.xs=XXXX-XXXX-{0}
+checkAnswers.contactEmailAddress.label=
+checkAnswers.contactTradingName.label=
+checkAnswers.contactTradingAddress.label=
+checkAnswers.amls.h2=
+checkAnswers.businessDetails.h2=
+checkAnswers.contactDetails.h2=
+checkAnswers.mapping.h2=
+checkAnswers.tradingName.none=
 
 businessName.title=Beth yw enw eich busnes?
 businessName.updated.title=Diweddaru enw eich busnes

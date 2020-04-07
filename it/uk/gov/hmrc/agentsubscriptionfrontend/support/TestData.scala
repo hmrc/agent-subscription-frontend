@@ -21,6 +21,7 @@ object TestData {
   val testPostcode = "AA1 1AA"
   val registrationName = "My Agency"
   val tradingName = "My Trading Name"
+  val emailTooLong = "emailaddresstoolongxxxxxxxxxxxxxxxxxxxxxwaytoolong@emailaddressistoolongggggggggggggggg_________waytoolong.comxxxxxxxxxxxxxxxxxxxxxxx"
   val businessAddress =
     BusinessAddress(
       "AddressLine1 A",
@@ -89,9 +90,9 @@ object TestData {
             "supervisory",
             Right(RegisteredDetails("123456789", LocalDate.now().plusDays(10))))))),
     cleanCredsAuthProviderId = Some(id),
-    contactDetailsEmailCheck = true,
-    contactDetailsTradingName = Some(registrationName),
-    contactDetailsTradingAddress = Some(businessAddress)
+    contactEmailData = Some(ContactEmailData(false, Some("email@email.com"))),
+    contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),
+    contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
   )
 
   val completeJourneyRecordWithMappings: SubscriptionJourneyRecord = completeJourneyRecordNoMappings
@@ -107,8 +108,8 @@ object TestData {
                                                                tradingAddress: Option[BusinessAddress]) =
     completeJourneyRecordWithMappings
     .copy(
-      contactDetailsTradingName = tradingName,
-      contactDetailsTradingAddress = tradingAddress
+      contactTradingNameData = Some(ContactTradingNameData(true, tradingName)),
+      contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
     )
 
   def completeJourneyRecordWithUpdatedBusinessName(newBusinessName: String): SubscriptionJourneyRecord =

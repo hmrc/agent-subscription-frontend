@@ -4,10 +4,10 @@ import java.time.LocalDate
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, AuthProviderId, PendingDetails, RegisteredDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, AuthProviderId, ContactEmailData, ContactTradingAddressData, ContactTradingNameData, PendingDetails, RegisteredDetails}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenSubscriptionJourneyRecordExists, givenNoSubscriptionJourneyRecordExists}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenNoSubscriptionJourneyRecordExists, givenSubscriptionJourneyRecordExists}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForHMRCASAGENT, subscribingAgentEnrolledForNonMTD}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData}
@@ -100,7 +100,7 @@ class TaskListControllerISpec extends BaseISpec {
       result should containLink("task-list.amlsSubTask", routes.AMLSController.showAmlsRegisteredPage().url)
     }
 
-    "contain a url to the contact details task when user has completed amls" in {
+    "contain a url to the contact details email check task when user has completed amls" in {
       givenAgentIsNotManuallyAssured(validUtr.value)
       givenSubscriptionJourneyRecordExists(
         AuthProviderId("12345-credId"),
@@ -113,7 +113,45 @@ class TaskListControllerISpec extends BaseISpec {
       val result = await(controller.showTaskList(request))
       status(result) shouldBe 200
 
-      checkHtmlResultWithBodyText(result, "")
+      result should containLink("task-list.contactDetailsEmailSubTask", routes.ContactDetailsController.showContactEmailCheck().url)
+    }
+
+    "contain a url to the contact details trading name sub-task when user has completed email-subtask" in {
+      givenAgentIsNotManuallyAssured(validUtr.value)
+      givenSubscriptionJourneyRecordExists(
+        AuthProviderId("12345-credId"),
+        TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
+          .copy(amlsData = Some(AmlsData(amlsRegistered = true, None,
+            Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id"),
+            contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))))
+      )
+
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+
+      val result = await(controller.showTaskList(request))
+      status(result) shouldBe 200
+
+      result should containLink("task-list.contactDetailsTradingNameSubTask", routes.ContactDetailsController.showTradingNameCheck().url)
+    }
+
+    "contain a url to the contact details trading address sub-task when user has completed trading-name-subtask" in {
+      givenAgentIsNotManuallyAssured(validUtr.value)
+      givenSubscriptionJourneyRecordExists(
+        AuthProviderId("12345-credId"),
+        TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
+          .copy(amlsData = Some(AmlsData(amlsRegistered = true, None,
+            Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id"),
+            contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
+            contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))))
+      )
+
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+
+      val result = await(controller.showTaskList(request))
+      status(result) shouldBe 200
+
+      result should containLink("task-list.contactDetailsTradingNameSubTask", routes.ContactDetailsController.showTradingNameCheck().url)
+      result should containLink("task-list.contactDetailsTradingAddressSubTask", routes.ContactDetailsController.showCheckMainTradingAddress().url)
     }
 
     "contain a url to the mapping journey when user has completed contact details" in {
@@ -123,9 +161,9 @@ class TaskListControllerISpec extends BaseISpec {
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
           .copy(amlsData = Some(AmlsData(amlsRegistered = true, None,
             Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id"),
-            contactDetailsEmailCheck = true,
-            contactDetailsTradingName = Some(tradingName),
-            contactDetailsTradingAddress = Some(tradingAddress)))
+            contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
+            contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),
+            contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))))
 
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
