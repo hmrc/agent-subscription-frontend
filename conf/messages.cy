@@ -474,8 +474,8 @@ checkAnswers.contactTradingAddress.label=Cyfeiriad masnachu
 checkAnswers.amls.h2=Manylion cydymffurfiad gwyngalchu arian
 checkAnswers.businessDetails.h2=
 checkAnswers.contactDetails.h2=Manylion cyswllt y cyfrif gwasanaethau asiant
-checkAnswers.mapping.h2=
-checkAnswers.tradingName.none=
+checkAnswers.mapping.h2=Perthnasoedd â chleientiaid presennol
+checkAnswers.tradingName.none=Dim
 
 businessName.title=Beth yw enw eich busnes?
 businessName.updated.title=Diweddaru enw eich busnes
