@@ -371,7 +371,7 @@ linkClients.error.no-radio-selected= Select yes if you want to link your clients
 subscriptionComplete.title=Agent services account created
 subscriptionComplete.h1=Agent services account created
 subscriptionComplete.accountName=You created an account for
-subscriptionComplete.copiedAcross=You have also copied across {0} clients to your new agent services account.
+subscriptionComplete.copiedAcross=You have also copied across <strong class="bold">{0}</strong> clients to your new agent services account.
 subscriptionComplete.p1=Make a note of your account reference number <strong class="bold">{0}</strong>. Make sure you have this with you if you contact us about your agent services account.
 subscriptionComplete.p2=We have sent an email to {0} confirming these details.
 subscriptionComplete.nextStepsMTD.header=Next steps for Making Tax Digital as an agent
