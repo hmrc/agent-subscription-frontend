@@ -149,7 +149,6 @@ class LLPController @Inject()(
                 subscriptionService
                   .companiesHouseCheckName(crn, name)
                   .flatMap { result =>
-                    println(s"result is $result")
                     updateSessionAndRedirect(existingSession.copy(partnerPostcode = Some(validPostcode)))(
                       routes.VatDetailsController.showRegisteredForVatForm()
                     )
