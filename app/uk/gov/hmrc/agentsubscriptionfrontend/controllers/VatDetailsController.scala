@@ -31,7 +31,7 @@ import uk.gov.hmrc.agentmtdidentifiers.model.Vrn
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.{formWithRefinedErrors, registeredForVatForm, vatDetailsForm}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Partnership, SoleTrader}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, SubscriptionJourneyService, SubscriptionService}
@@ -154,14 +154,17 @@ class VatDetailsController @Inject()(
   }
 
   private def getBackLink(agent: Agent, businessType: BusinessType) =
-    if (businessType == SoleTrader || businessType == Partnership) {
-      agent.authNino match {
-        case Some(_) => routes.DateOfBirthController.showDateOfBirthForm().url
-        case None    => routes.PostcodeController.showPostcodeForm().url
+    businessType match {
+      case SoleTrader | Partnership => {
+        agent.authNino match {
+          case Some(_) => routes.DateOfBirthController.showDateOfBirthForm().url
+          case None    => routes.PostcodeController.showPostcodeForm().url
+        }
       }
-    } else {
-      routes.CompanyRegistrationController.showCompanyRegNumberForm().url
+      case Llp            => routes.DateOfBirthController.showDateOfBirthForm().url
+      case LimitedCompany => routes.CompanyRegistrationController.showCompanyRegNumberForm().url
     }
+
 }
 
 object VatDetailsController {

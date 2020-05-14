@@ -145,9 +145,9 @@ class LLPController @Inject()(
             sessionStoreService.fetchAgentSession.flatMap {
               case Some(existingSession) =>
                 val crn = existingSession.companyRegistrationNumber.get
-                val name = existingSession.partnerName.get
+                val name = existingSession.lastNameFromCid.get
                 subscriptionService
-                  .companiesHouseCheckName(crn, name)
+                  .companiesHouseNameCheck(crn, name)
                   .flatMap { result =>
                     updateSessionAndRedirect(existingSession.copy(partnerPostcode = Some(validPostcode)))(
                       routes.VatDetailsController.showRegisteredForVatForm()

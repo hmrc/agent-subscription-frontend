@@ -233,7 +233,7 @@ object AgentSubscriptionStub {
         .willReturn(aResponse()
           .withStatus(500)))
 
-  def givenDesignatoryDetailsForNino(nino: Nino, dob: DateOfBirth): StubMapping =
+  def givenDesignatoryDetailsForNino(nino: Nino, lastName: Option[String], dob: DateOfBirth): StubMapping =
     stubFor(
       get(
         urlEqualTo(
@@ -244,8 +244,8 @@ object AgentSubscriptionStub {
                        |       "etag" : "115",
                        |       "person" : {
                        |         "firstName" : "HIPPY",
-                       |         "middleName" : "T",
-                       |         "lastName" : "NEWYEAR",
+                       |         "middleName" : "T"${if(lastName.isDefined){},
+                       |         "lastName" : s"$lastName",
                        |         "title" : "Mr",
                        |         "honours": "BSC",
                        |         "sex" : "M",
