@@ -36,10 +36,7 @@ case class AgentSession(
   registration: Option[Registration] = None,
   dateOfBirthFromCid: Option[DateOfBirth] = None, //just caching this dob from CID so we dont need to make multiple calls to CID
   clientCount: Option[Int] = None,
-  partnerType: Option[PartnerType] = None,
   lastNameFromCid: Option[String] = None,
-  partnerUtr: Option[Utr] = None,
-  partnerPostcode: Option[Postcode] = None,
   ctUtrCheckResult: Option[Boolean] = None
 )
 
