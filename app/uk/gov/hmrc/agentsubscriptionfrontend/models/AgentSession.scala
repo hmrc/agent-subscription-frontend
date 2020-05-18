@@ -39,7 +39,8 @@ case class AgentSession(
   partnerType: Option[PartnerType] = None,
   lastNameFromCid: Option[String] = None,
   partnerUtr: Option[Utr] = None,
-  partnerPostcode: Option[Postcode] = None
+  partnerPostcode: Option[Postcode] = None,
+  ctUtrCheckResult: Option[Boolean] = None
 )
 
 object AgentSession {

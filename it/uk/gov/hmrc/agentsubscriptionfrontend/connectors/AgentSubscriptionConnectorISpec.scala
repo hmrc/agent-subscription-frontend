@@ -354,7 +354,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
     val lastName = "Matchmaker"
 
     "return DesignatoryDetails if found for a given nino" in {
-      AgentSubscriptionStub.givenDesignatoryDetailsForNino(nino, dob)
+      AgentSubscriptionStub.givenDesignatoryDetailsForNino(nino, Some(lastName), dob)
       await(connector.getDesignatoryDetails(nino)) shouldBe DesignatoryDetails(Some(Person(Some(lastName), Some(dob))))
     }
 

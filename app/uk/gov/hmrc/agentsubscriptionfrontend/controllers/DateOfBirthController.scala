@@ -67,7 +67,7 @@ class DateOfBirthController @Inject()(
           if (businessType == Llp)
             existingSession.lastNameFromCid match {
               case Some(_) => Ok(dateOfBirthTemplate(getForm(existingSession.dateOfBirth)))
-              case None    => Redirect(routes.NationalInsuranceController.showNationalInsuranceNumberForm())
+              case None    => Redirect(routes.BusinessIdentificationController.showNoMatchFound())
             } else Ok(dateOfBirthTemplate(getForm(existingSession.dateOfBirth)))
         }
       }
@@ -86,8 +86,10 @@ class DateOfBirthController @Inject()(
                 existingSession.nino match {
                   case Some(_) =>
                     if (existingSession.dateOfBirthFromCid.contains(validDob)) {
-                      updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(
-                        routes.VatDetailsController.showRegisteredForVatForm())
+                      companiesHouseCheckForLlp(existingSession) {
+                        updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(
+                          routes.VatDetailsController.showRegisteredForVatForm())
+                      }
                     } else {
                       Redirect(routes.BusinessIdentificationController.showNoMatchFound())
                     }
@@ -99,6 +101,27 @@ class DateOfBirthController @Inject()(
         )
     }
   }
+
+  private def companiesHouseCheckForLlp(agentSession: AgentSession)(f: => Future[Result])(
+    implicit hc: HeaderCarrier): Future[Result] =
+    agentSession.businessType match {
+      case Some(bt) =>
+        if (bt == Llp) {
+          (agentSession.companyRegistrationNumber, agentSession.lastNameFromCid) match {
+            case (Some(crn), Some(name)) =>
+              subscriptionService
+                .companiesHouseNameCheck(crn, name)
+                .flatMap(
+                  checkResult =>
+                    if (checkResult) f
+                    else Redirect(routes.BusinessIdentificationController.showNoMatchFound()))
+
+            case (None, Some(_)) => Redirect(routes.CompanyRegistrationController.showCompanyRegNumberForm())
+            case _               => Redirect(routes.NationalInsuranceController.showNationalInsuranceNumberForm())
+          }
+        } else f
+      case None => Future successful Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+    }
 
   private def getForm(dateOfBirth: Option[DateOfBirth]): Form[DateOfBirth] = dateOfBirth match {
     case Some(dob) => dateOfBirthForm.fill(dob)

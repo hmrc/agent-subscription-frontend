@@ -73,14 +73,20 @@ class CompanyRegistrationController @Inject()(
                   subscriptionService.matchCorporationTaxUtrWithCrn(utr, validCrn).flatMap {
                     foundMatch =>
                       if (foundMatch)
-                        updateSessionAndRedirect(existingSession.copy(companyRegistrationNumber = Some(validCrn)))(
-                          routes.VatDetailsController.showRegisteredForVatForm())
+                        updateSessionAndRedirect(existingSession.copy(
+                          companyRegistrationNumber = Some(validCrn),
+                          ctUtrCheckResult = Some(foundMatch),
+                          nino = None, // in case they are LLP and re-entered a new CRN that does match
+                          dateOfBirth = None,
+                          lastNameFromCid = None,
+                          dateOfBirthFromCid = None
+                        ))(routes.VatDetailsController.showRegisteredForVatForm())
                       else {
                         existingSession.businessType match {
                           case Some(bt) =>
                             if (bt == Llp)
-                              updateSessionAndRedirect(
-                                existingSession.copy(companyRegistrationNumber = Some(validCrn)))(
+                              updateSessionAndRedirect(existingSession
+                                .copy(companyRegistrationNumber = Some(validCrn), ctUtrCheckResult = Some(foundMatch)))(
                                 routes.NationalInsuranceController.showNationalInsuranceNumberForm())
                             else
                               Redirect(routes.BusinessIdentificationController.showNoMatchFound())

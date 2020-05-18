@@ -52,7 +52,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.VatDetailsController.showRegisteredForVatForm().url)
 
-      sessionStoreService.currentSession.agentSession shouldBe Some(agentSessionForLimitedCompany.copy(companyRegistrationNumber = Some(crn)))
+      sessionStoreService.currentSession.agentSession shouldBe Some(agentSessionForLimitedCompany.copy(companyRegistrationNumber = Some(crn), nino = None, ctUtrCheckResult = Some(true)))
     }
 
 
@@ -92,7 +92,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
       redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
 
       sessionStoreService.currentSession.agentSession shouldBe Some(agentSessionForLimitedPartnership
-        .copy(companyRegistrationNumber = Some(CompanyRegistrationNumber("12345678"))))
+        .copy(companyRegistrationNumber = Some(CompanyRegistrationNumber("12345678")), ctUtrCheckResult = Some(false)))
     }
 
     "redirect to /unique-taxpayer-reference page utr is not available in agent session" in new TestSetupNoJourneyRecord{

@@ -173,13 +173,11 @@ class BusinessIdentificationController @Inject()(
         Redirect(routes.BusinessIdentificationController.showBusinessEmailForm())
       case _ =>
 
-        additionalChecksOnlyForLlps(existingSession, agent) {
-
           subscriptionService.handlePartiallySubscribedAndRedirect(
             agent,
             existingSession)(
             whenNotPartiallySubscribed = createRecordAndRedirectToTasklist(existingSession, agent))
-        }
+
     }
 
   private def createRecordAndRedirectToTasklist(existingSession: AgentSession, agent: Agent)
@@ -188,25 +186,6 @@ class BusinessIdentificationController @Inject()(
     .createJourneyRecord(existingSession, agent) map {
     case Right(()) => Redirect(routes.TaskListController.showTaskList())
     case Left(msg) => Logger.warn(msg); Conflict
-  }
-
-
-  def additionalChecksOnlyForLlps(agentSession: AgentSession, agent: Agent)(f: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
-    agentSession.businessType match {
-      case Some(bt) => if (bt == Llp) {
-        (agentSession.lastNameFromCid, agentSession.companyRegistrationNumber) match {
-          case (Some(name), Some(crn)) =>
-            subscriptionService.companiesHouseNameCheck(crn, name)
-            .flatMap(checkResult =>
-              if (checkResult) createRecordAndRedirectToTasklist(agentSession, agent)
-            else Redirect(routes.BusinessIdentificationController.showNoMatchFound()))
-
-          case (None, Some(_)) => Redirect(routes.NationalInsuranceController.showNationalInsuranceNumberForm())
-          case _ => Redirect(routes.CompanyRegistrationController.showCompanyRegNumberForm())
-        }
-      } else f
-      case None => Future successful Redirect(routes.BusinessTypeController.showBusinessTypeForm())
-  }
   }
 
   def showBusinessEmailForm: Action[AnyContent] = Action.async { implicit request =>

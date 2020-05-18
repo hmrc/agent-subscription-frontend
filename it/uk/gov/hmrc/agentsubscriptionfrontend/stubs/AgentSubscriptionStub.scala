@@ -21,6 +21,7 @@ import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
+import play.utils.UriEncoding
 import uk.gov.hmrc.agentmtdidentifiers.model.{Utr, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.domain.Nino
@@ -244,8 +245,8 @@ object AgentSubscriptionStub {
                        |       "etag" : "115",
                        |       "person" : {
                        |         "firstName" : "HIPPY",
-                       |         "middleName" : "T"${if(lastName.isDefined){},
-                       |         "lastName" : s"$lastName",
+                       |         "middleName" : "T",
+                       |         ${lastName.map(name => s""" "lastName" : "$name", """).getOrElse("")}
                        |         "title" : "Mr",
                        |         "honours": "BSC",
                        |         "sex" : "M",
@@ -272,6 +273,15 @@ object AgentSubscriptionStub {
         urlEqualTo(
           s"/agent-subscription/citizen-details/${nino.value}/designatory-details"
         )).willReturn(aResponse().withStatus(status))
+    )
+
+  def givenCompaniesHouseNameCheckReturnsStatus(crn: CompanyRegistrationNumber, name: String, status: Int): StubMapping =
+    stubFor(
+      get(
+        urlEqualTo(
+          s"/agent-subscription/companies-house-api-proxy/company/${encodePathSegment(crn.value)}/officers/$name"
+        )
+      ).willReturn(aResponse().withStatus(status))
     )
 
   private def subscriptionRequestFor(utr: Utr, request: SubscriptionRequest) = {
