@@ -160,8 +160,8 @@ class AgentSubscriptionConnector @Inject()(
         .GET[HttpResponse](url)
         .map(_.status == 200)
     }.recover {
-      case _: NotFoundException => {
-        Logger.warn(s"companies house returned Not Found for crn $crn and name: $name")
+      case e: NotFoundException => {
+        Logger.warn(s" ${e.message}")
         false
       }
     }
