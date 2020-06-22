@@ -267,10 +267,12 @@ postcode.llp.title=Beth yw cod post cyfeiriad cofrestredig eich partneriaeth ate
 #Nino page
 nino.title=Beth yw’ch rhif Yswiriant Gwladol?
 nino.hint=Mae hwn ar eich cerdyn Yswiriant Gwladol, llythyr ynghylch budd-daliadau, slip cyflog neu P60. Er enghraifft, ‘QQ 12 34 56 C’.
+nino.hint-llp=
 
 #Date of Birth page
 date-of-birth.title=Beth yw’ch dyddiad geni?
 date-of-birth.hint=Er enghraifft, 31 3 1980
+date-of-birth.hint-llp=
 date-of-birth.empty=Nodwch eich dyddiad geni
 date-of-birth.invalid=Nodwch ddyddiad geni go iawn
 date-of-birth.day.invalid=Rhaid i’r dyddiad geni gynnwys diwrnod dilys
