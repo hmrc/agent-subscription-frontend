@@ -55,19 +55,25 @@ class AddressLookupConfig @Inject()(appConfig: AppConfig, messagesApi: MessagesA
   "en": {
     "appLevelLabels": {
     "navTitle": "${messagesApi("app.name")}"
+<<<<<<< HEAD
     },
     "lookupPageLabels": {
       "title": "${messagesApi("address.lookup.title")}",
       "heading": "${messagesApi("address.lookup.header")}"
+=======
+>>>>>>> master
     }
   },
   "cy": {
     "appLevelLabels": {
     "navTitle": "${messagesApi("app.name")(cy)}"
+<<<<<<< HEAD
     },
      "lookupPageLabels": {
       "title": "${messagesApi("address.lookup.title")(cy)}",
       "heading": "${messagesApi("address.lookup.header")(cy)}"
+=======
+>>>>>>> master
     }
    }
  }
