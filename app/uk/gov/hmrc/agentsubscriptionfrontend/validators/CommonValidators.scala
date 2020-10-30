@@ -190,7 +190,7 @@ object CommonValidators {
   }
 
   // Same as play.api.data.validation.Constraints.maxLength but with a chance to use a custom message instead of error.maxLength
-  private def maxLength(length: Int, messageKey: String = "error.maxLength"): Constraint[String] =
+  private def maxLength(length: Int, messageKey: String): Constraint[String] =
     Constraint[String]("constraint.maxLength", length) { o =>
       require(length >= 0, "string maxLength must not be negative")
       if (o == null) Invalid(ValidationError(messageKey, length))

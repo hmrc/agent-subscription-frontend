@@ -438,7 +438,6 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
   private def anAddressLineValidatingMapping(unprefixedAddressLineMapping: Mapping[String], lineNumber: Int): Unit = {
 
     val addressLine1Mapping = unprefixedAddressLineMapping.withPrefix("testKey")
-    val emptyError = s"error.addressline.$lineNumber.empty"
 
     def bind(fieldValue: String) = addressLine1Mapping.bind(Map("testKey" -> fieldValue))
 

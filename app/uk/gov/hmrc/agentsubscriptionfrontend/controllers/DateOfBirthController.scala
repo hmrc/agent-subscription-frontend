@@ -36,7 +36,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators.checkOn
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.date_of_birth
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}

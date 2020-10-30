@@ -24,8 +24,8 @@ import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.domain.{SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-
+import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -43,8 +43,8 @@ class AgentAssuranceConnector @Inject()(http: HttpClient, metrics: Metrics, appC
         .map { response =>
           response.status == 204
         } recover {
-        case e: Upstream4xxResponse =>
-          if (e.upstreamResponseCode == 401 || e.upstreamResponseCode == 403) false else throw e
+        case e: UpstreamErrorResponse =>
+          if (e.statusCode == 401 || e.statusCode == 403) false else throw e
       }
     }
 
@@ -54,8 +54,8 @@ class AgentAssuranceConnector @Inject()(http: HttpClient, metrics: Metrics, appC
         .GET[HttpResponse](s"${appConfig.agentAssuranceBaseUrl}$url")
         .map(_ => true)
         .recover {
-          case e: Upstream4xxResponse if e.upstreamResponseCode == 403 => false
-          case _: NotFoundException                                    => false
+          case e: UpstreamErrorResponse if e.statusCode == 403 => false
+          case _: NotFoundException                            => false
         }
     }
 
@@ -68,7 +68,7 @@ class AgentAssuranceConnector @Inject()(http: HttpClient, metrics: Metrics, appC
           response.status == 403
         }
         .recover {
-          case e: Upstream4xxResponse if e.upstreamResponseCode == 403 => true
+          case e: UpstreamErrorResponse if e.statusCode == 403 => true
           case _: NotFoundException => {
             throw new IllegalStateException(
               s"unable to reach ${appConfig.agentAssuranceBaseUrl}$endpoint. R2dw list might not have been configured")
@@ -85,7 +85,7 @@ class AgentAssuranceConnector @Inject()(http: HttpClient, metrics: Metrics, appC
           (200 until 300) contains response.status
         }
         .recover {
-          case e: Upstream4xxResponse if e.upstreamResponseCode == 403 => false
+          case e: UpstreamErrorResponse if e.statusCode == 403 => false
           case _: NotFoundException => {
             throw new IllegalStateException(
               s"unable to reach ${appConfig.agentAssuranceBaseUrl}/$endpoint. Manually assured agents list might not have been configured")

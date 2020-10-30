@@ -20,7 +20,7 @@ import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import play.api.{Configuration, Environment, Logger}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.ninoForm
@@ -34,7 +34,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html.national_insurance_numbe
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -85,7 +85,6 @@ class NationalInsuranceController @Inject()(
             .fold(
               formWithErrors => {
                 val backUrl = Some(backUrlForBusinessType(businessType))
-                val isLlp = businessType == Llp
                 Ok(nationalInsuranceNumberTemplate(formWithErrors, businessType, backUrl))
               },
               validNino => {
@@ -97,7 +96,7 @@ class NationalInsuranceController @Inject()(
                     .map(_.person)
                     .flatMap {
                       case Some(Person(_, None)) if businessType != Llp =>
-                        Logger.warn("no DateOfBirth in the /citizen-details response for logged in agent")
+                        logger.warn("no DateOfBirth in the /citizen-details response for logged in agent")
                         updateSessionAndRedirect(existingSession.copy(nino = Some(validNino)))(
                           routes.VatDetailsController.showRegisteredForVatForm())
                       case Some(Person(_, Some(dateOfBirth))) if businessType != Llp =>
@@ -112,7 +111,7 @@ class NationalInsuranceController @Inject()(
                               dateOfBirthFromCid = Some(dateOfBirth),
                               lastNameFromCid = Some(lastName)))(routes.DateOfBirthController.showDateOfBirthForm())
                       case _ => {
-                        Logger.warn(s"business type $businessType no lastName and or no dob from CiD")
+                        logger.warn(s"business type $businessType no lastName and or no dob from CiD")
                         if (businessType != Llp)
                           Redirect(routes.VatDetailsController.showRegisteredForVatForm())
                         else
@@ -120,7 +119,7 @@ class NationalInsuranceController @Inject()(
                       }
                     }
                 } else {
-                  Logger.warn(s"Auth Nino did not match ValidNino for businessType $businessType")
+                  logger.warn(s"Auth Nino did not match ValidNino for businessType $businessType")
                   Future.successful(Redirect(routes.BusinessIdentificationController.showNoMatchFound()))
                 }
               }

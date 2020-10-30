@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.{I18nSupport, Lang, Langs, MessagesApi}
+import play.api.i18n.Lang
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
@@ -32,7 +32,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{SessionStoreService, Subsc
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -106,7 +106,7 @@ class ContactDetailsController @Inject()(
 
                     val (check, mayBeEmail): (Boolean, Option[String]) =
                       sjr.contactEmailData
-                        .fold(useBusinessEmail, maybeBusinessEmail)(data =>
+                        .fold((useBusinessEmail, maybeBusinessEmail))(data =>
                           if (useBusinessEmail) (true, maybeBusinessEmail)
                           else (false, data.contactEmail))
 
@@ -221,7 +221,7 @@ class ContactDetailsController @Inject()(
                   validForm => {
                     val hasTradingName = RadioInputAnswer.toBoolean(validForm.check)
                     val (check, maybeTradingName): (Boolean, Option[String]) =
-                      sjr.contactTradingNameData.fold(hasTradingName, Option.empty[String])(data =>
+                      sjr.contactTradingNameData.fold((hasTradingName, Option.empty[String]))(data =>
                         if (hasTradingName) (true, data.contactTradingName)
                         else (false, None))
 

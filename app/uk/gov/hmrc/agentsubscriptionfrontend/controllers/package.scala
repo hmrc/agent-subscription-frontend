@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend
 
-import play.api.Logger
+import play.api.Logging
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
 import play.api.i18n.Messages
@@ -24,12 +24,12 @@ import play.api.mvc.{AnyContent, Call, Request}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters.{normalizeUtr, normalizedText}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters.normalizedText
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.voa.play.form.ConditionalMappings.{mandatoryIfEqual, mandatoryIfTrue}
 
-package object controllers {
+package object controllers extends Logging {
 
   def continueOrStop(next: Call, previous: Call)(implicit request: Request[AnyContent]): Call = {
 
@@ -40,7 +40,7 @@ package object controllers {
       case Some("continue") => next
       case Some("save")     => routes.TaskListController.savedProgress(Some(previous.url))
       case _ => {
-        Logger.warn("unexpected value in submit")
+        logger.warn("unexpected value in submit")
         routes.TaskListController.showTaskList()
       }
     }

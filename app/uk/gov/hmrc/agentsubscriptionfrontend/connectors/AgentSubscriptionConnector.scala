@@ -21,7 +21,7 @@ import java.time.LocalDate
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.utils.UriEncoding
 import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
@@ -31,9 +31,9 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{NotFoundException, _}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.encoding.UriPathEncoding.encodePathSegment
-
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -42,7 +42,7 @@ class AgentSubscriptionConnector @Inject()(
   metrics: Metrics,
   appConfig: AppConfig
 )(implicit ec: ExecutionContext)
-    extends HttpAPIMonitor {
+    extends HttpAPIMonitor with Logging {
 
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
@@ -83,9 +83,9 @@ class AgentSubscriptionConnector @Inject()(
         .POST[SubscriptionJourneyRecord, HttpResponse](s"${appConfig.agentSubscriptionBaseUrl}$path", journeyRecord)
         .map(_.status)
         .recoverWith {
-          case ex: Upstream4xxResponse if ex.upstreamResponseCode == 409 => Future successful 409
+          case ex: UpstreamErrorResponse if ex.statusCode == 409 => Future successful 409
           case ex =>
-            Logger.error(s"creating subscription journey record failed for reason: ${ex.getMessage}")
+            logger.error(s"creating subscription journey record failed for reason: ${ex.getMessage}")
             throw ex
         }
     }
@@ -161,7 +161,7 @@ class AgentSubscriptionConnector @Inject()(
         .map(_.status == 200)
     }.recover {
       case e: NotFoundException => {
-        Logger.warn(s" ${e.message}")
+        logger.warn(s" ${e.message}")
         false
       }
     }

@@ -80,8 +80,7 @@ class AuditService @Inject()(val auditConnector: AuditConnector)(implicit ec: Ex
     assuranceCheckInput: Option[AssuranceCheckInput] = None)(
     implicit request: Request[AnyContent],
     agent: Agent,
-    hc: HeaderCarrier,
-    ec: ExecutionContext): Future[Unit] = {
+    hc: HeaderCarrier): Future[Unit] = {
     implicit val auditData: AuditData = new AuditData
 
     auditData

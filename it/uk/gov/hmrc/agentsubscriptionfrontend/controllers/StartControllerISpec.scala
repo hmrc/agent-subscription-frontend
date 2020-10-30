@@ -170,8 +170,6 @@ class StartControllerISpec extends BaseISpec {
       }
 
       "redirect to the /task-list page when there is no continueId" in {
-        implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] =
-          authenticatedAs(subscribingAgentEnrolledForNonMTD)
         givenNoSubscriptionJourneyRecordExists(id)
         implicit val request = FakeRequest()
 

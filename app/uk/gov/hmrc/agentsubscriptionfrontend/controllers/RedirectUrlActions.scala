@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
+import play.api.Logging
 import play.api.mvc._
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.SsoConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SessionStoreService
@@ -26,7 +26,6 @@ import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
 import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromWhitelist, RedirectUrl, UnsafePermitAll}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.higherKinds
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -37,17 +36,18 @@ import scala.util.{Failure, Success, Try}
 
 @Singleton
 class RedirectUrlActions @Inject()(sessionStoreService: SessionStoreService, ssoConnector: SsoConnector)(
-  implicit executor: ExecutionContext) {
+  implicit executor: ExecutionContext)
+    extends Logging {
 
   def whitelistedDomains()(implicit hc: HeaderCarrier): Future[Set[String]] = ssoConnector.getWhitelistedDomains()
 
-  def extractRedirectUrl[A](implicit request: Request[A], hc: HeaderCarrier): Option[RedirectUrl] =
+  def extractRedirectUrl[A](implicit request: Request[A]): Option[RedirectUrl] =
     request.getQueryString("continue") match {
       case Some(redirectUrl) =>
         Try(RedirectUrl(redirectUrl)) match {
           case Success(url) => Some(url)
           case Failure(e) =>
-            Logger.warn(s"[$redirectUrl] is not a valid redirect URL, $e")
+            logger.warn(s"[$redirectUrl] is not a valid redirect URL, $e")
             None
         }
       case None =>
@@ -65,7 +65,7 @@ class RedirectUrlActions @Inject()(sessionStoreService: SessionStoreService, sso
       redirectUrl.getEither(whitelistPolicy).flatMap {
         case Right(safeRedirectUrl) => block(Some(safeRedirectUrl.url))
         case Left(errorMessage) =>
-          Logger.warn(s"url does not comply with whitelist policy, removing redirect url... $errorMessage")
+          logger.warn(s"url does not comply with whitelist policy, removing redirect url... $errorMessage")
           block(None)
       }
   }

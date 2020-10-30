@@ -18,9 +18,8 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
+import play.api.mvc._
 import play.api.{Configuration, Environment, Logger}
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
@@ -34,7 +33,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.postcode
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -55,7 +54,7 @@ class PostcodeController @Inject()(
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def showPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { implicit agent =>
+    withSubscribingAgent { agent =>
       withValidSession { (businessType, existingSession) =>
         existingSession.postcode match {
           case Some(postcode) =>
@@ -148,7 +147,7 @@ class PostcodeController @Inject()(
           agent.authNino match {
             case Some(_) => routes.NationalInsuranceController.showNationalInsuranceNumberForm()
             case None =>
-              Logger.warn("NINO doesn't exist for logged in agent")
+              logger.warn("NINO doesn't exist for logged in agent")
               routes.VatDetailsController.showRegisteredForVatForm()
           }
         } else {
