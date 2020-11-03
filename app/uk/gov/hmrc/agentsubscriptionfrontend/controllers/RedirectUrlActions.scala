@@ -35,8 +35,7 @@ import scala.util.{Failure, Success, Try}
   */
 
 @Singleton
-class RedirectUrlActions @Inject()(sessionStoreService: SessionStoreService, ssoConnector: SsoConnector)(
-  implicit executor: ExecutionContext)
+class RedirectUrlActions @Inject()(sessionStoreService: SessionStoreService, ssoConnector: SsoConnector)(implicit executor: ExecutionContext)
     extends Logging {
 
   def whitelistedDomains()(implicit hc: HeaderCarrier): Future[Set[String]] = ssoConnector.getWhitelistedDomains()
@@ -54,8 +53,7 @@ class RedirectUrlActions @Inject()(sessionStoreService: SessionStoreService, sso
         None
     }
 
-  def checkRedirectUrlAndContinue[A](redirectUrl: RedirectUrl, block: Option[String] => Future[A])(
-    implicit hc: HeaderCarrier): Future[A] = {
+  def checkRedirectUrlAndContinue[A](redirectUrl: RedirectUrl, block: Option[String] => Future[A])(implicit hc: HeaderCarrier): Future[A] = {
     val whitelistPolicy = AbsoluteWithHostnameFromWhitelist(whitelistedDomains)
     val unsafeUrl = redirectUrl.get(UnsafePermitAll).url
 
@@ -70,15 +68,13 @@ class RedirectUrlActions @Inject()(sessionStoreService: SessionStoreService, sso
       }
   }
 
-  def withMaybeRedirectUrl[A](
-    block: Option[String] => Future[Result])(implicit request: Request[A], hc: HeaderCarrier): Future[Result] =
+  def withMaybeRedirectUrl[A](block: Option[String] => Future[Result])(implicit request: Request[A], hc: HeaderCarrier): Future[Result] =
     extractRedirectUrl match {
       case Some(redirectUrl) => checkRedirectUrlAndContinue[Result](redirectUrl, block)
       case None              => block(None)
     }
 
-  def withMaybeRedirectUrlCached[A](
-    block: => Future[Result])(implicit hc: HeaderCarrier, request: Request[A]): Future[Result] =
+  def withMaybeRedirectUrlCached[A](block: => Future[Result])(implicit hc: HeaderCarrier, request: Request[A]): Future[Result] =
     withMaybeRedirectUrl {
       case None => block
       case Some(url) =>

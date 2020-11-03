@@ -55,8 +55,7 @@ class AddressLookupFrontendConnector @Inject()(
       }
     }
 
-  def getAddressDetails(
-    id: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AddressLookupFrontendAddress] = {
+  def getAddressDetails(id: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AddressLookupFrontendAddress] = {
     import AddressLookupFrontendAddress._
 
     monitor(s"ConsumedAPI-Address-Lookup-Frontend-getAddressDetails-GET") {

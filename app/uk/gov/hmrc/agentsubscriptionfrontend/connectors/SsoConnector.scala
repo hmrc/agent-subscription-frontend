@@ -29,8 +29,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SsoConnector @Inject()(http: HttpClient, metrics: Metrics, appConfig: AppConfig)(
-  implicit val ec: ExecutionContext)
+class SsoConnector @Inject()(http: HttpClient, metrics: Metrics, appConfig: AppConfig)(implicit val ec: ExecutionContext)
     extends HttpAPIMonitor with Logging {
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 

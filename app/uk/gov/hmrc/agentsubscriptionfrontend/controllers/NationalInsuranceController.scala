@@ -49,9 +49,7 @@ class NationalInsuranceController @Inject()(
   val subscriptionJourneyService: SubscriptionJourneyService,
   val subscriptionService: SubscriptionService,
   mcc: MessagesControllerComponents,
-  nationalInsuranceNumberTemplate: national_insurance_number)(
-  implicit val appConfig: AppConfig,
-  val ec: ExecutionContext)
+  nationalInsuranceNumberTemplate: national_insurance_number)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   /**
@@ -89,7 +87,6 @@ class NationalInsuranceController @Inject()(
               },
               validNino => {
                 def ninosMatched = agent.authNino.flatMap(normalizeNino) == normalizeNino(validNino.value)
-
                 if (ninosMatched || businessType == Llp) {
                   subscriptionService
                     .getDesignatoryDetails(validNino)
@@ -97,19 +94,14 @@ class NationalInsuranceController @Inject()(
                     .flatMap {
                       case Some(Person(_, None)) if businessType != Llp =>
                         logger.warn("no DateOfBirth in the /citizen-details response for logged in agent")
-                        updateSessionAndRedirect(existingSession.copy(nino = Some(validNino)))(
-                          routes.VatDetailsController.showRegisteredForVatForm())
+                        updateSessionAndRedirect(existingSession.copy(nino = Some(validNino)))(routes.VatDetailsController.showRegisteredForVatForm())
                       case Some(Person(_, Some(dateOfBirth))) if businessType != Llp =>
                         updateSessionAndRedirect(existingSession
-                          .copy(nino = Some(validNino), dateOfBirthFromCid = Some(dateOfBirth)))(
-                          routes.DateOfBirthController.showDateOfBirthForm())
+                          .copy(nino = Some(validNino), dateOfBirthFromCid = Some(dateOfBirth)))(routes.DateOfBirthController.showDateOfBirthForm())
                       case Some(Person(Some(lastName), Some(dateOfBirth))) =>
-                        updateSessionAndRedirect(
-                          existingSession
-                            .copy(
-                              nino = Some(validNino),
-                              dateOfBirthFromCid = Some(dateOfBirth),
-                              lastNameFromCid = Some(lastName)))(routes.DateOfBirthController.showDateOfBirthForm())
+                        updateSessionAndRedirect(existingSession
+                          .copy(nino = Some(validNino), dateOfBirthFromCid = Some(dateOfBirth), lastNameFromCid = Some(lastName)))(
+                          routes.DateOfBirthController.showDateOfBirthForm())
                       case _ => {
                         logger.warn(s"business type $businessType no lastName and or no dob from CiD")
                         if (businessType != Llp)

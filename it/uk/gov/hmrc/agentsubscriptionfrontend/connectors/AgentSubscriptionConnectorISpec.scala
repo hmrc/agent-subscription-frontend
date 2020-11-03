@@ -107,7 +107,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
     "throw a runtime exception when the endpoint returns a bad request" in {
       AgentSubscriptionJourneyStub
         .givenSubscriptionRecordNotCreated(authProviderId, TestData.minimalSubscriptionJourneyRecord(authProviderId), Status.BAD_REQUEST)
-      intercept[BadRequestException] {
+      intercept[UpstreamErrorResponse] {
         await(connector.createOrUpdateJourney(TestData.minimalSubscriptionJourneyRecord(authProviderId)))
       }
     }
@@ -268,11 +268,11 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT") {
         AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 400)
 
-        val e = intercept[BadRequestException] {
+        val e = intercept[UpstreamErrorResponse] {
           await(connector.completePartialSubscription(partialSubscriptionRequest))
         }
 
-        e.responseCode shouldBe 400
+        e.statusCode shouldBe 400
       }
     }
 

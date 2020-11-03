@@ -80,8 +80,7 @@ class BusinessTypeController @Inject()(
             sessionStoreService.fetchAgentSession
               .flatMap(_.getOrElse(AgentSession()))
               .flatMap { agentSession =>
-                updateSessionAndRedirect(agentSession.copy(businessType = Some(validatedBusinessType)))(
-                  routes.UtrController.showUtrForm())
+                updateSessionAndRedirect(agentSession.copy(businessType = Some(validatedBusinessType)))(routes.UtrController.showUtrForm())
               }
           }
         )

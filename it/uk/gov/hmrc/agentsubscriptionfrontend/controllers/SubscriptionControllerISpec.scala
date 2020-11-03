@@ -663,7 +663,6 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
         implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.continueUrl = Some("/some/url")
-
         val result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.StartController.showCannotCreateAccount().url

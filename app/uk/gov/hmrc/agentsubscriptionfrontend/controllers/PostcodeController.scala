@@ -101,11 +101,7 @@ class PostcodeController @Inject()(
         Redirect(routes.BusinessIdentificationController.showNoMatchFound())
     }
 
-  private def checkAssuranceAndUpdateSession(
-    utr: Utr,
-    postcode: Postcode,
-    registration: Registration,
-    agentSession: AgentSession)(
+  private def checkAssuranceAndUpdateSession(utr: Utr, postcode: Postcode, registration: Registration, agentSession: AgentSession)(
     implicit hc: HeaderCarrier,
     request: Request[AnyContent],
     agent: Agent): Future[Result] =
@@ -127,10 +123,7 @@ class PostcodeController @Inject()(
               .sendAgentAssuranceAuditEvent(utr, postcode, assuranceResults)
               .flatMap { _ =>
                 updateSessionAndRedirect(
-                  agentSession.copy(
-                    postcode = Some(postcode),
-                    registration = Some(registration),
-                    isMAA = Some(assuranceResults.isManuallyAssured)))(
+                  agentSession.copy(postcode = Some(postcode), registration = Some(registration), isMAA = Some(assuranceResults.isManuallyAssured)))(
                   getNextPage(agentSession.businessType, maybeAssured))
               }
           case None =>
@@ -139,8 +132,7 @@ class PostcodeController @Inject()(
         }
     }
 
-  private def getNextPage(businessType: Option[BusinessType], assuranceResults: Option[AssuranceResults])(
-    implicit agent: Agent) =
+  private def getNextPage(businessType: Option[BusinessType], assuranceResults: Option[AssuranceResults])(implicit agent: Agent) =
     businessType match {
       case Some(bt) =>
         if (bt == SoleTrader || bt == Partnership) {

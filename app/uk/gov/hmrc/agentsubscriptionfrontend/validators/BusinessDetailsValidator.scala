@@ -92,12 +92,8 @@ class BusinessDetailsValidator @Inject()(appConfig: AppConfig) {
       .map(postcode => CommonValidators.postcode.constraints.map(_(postcode)))
       .getOrElse(Seq(Invalid("invalid postcode")))
 
-    val validators: Seq[PlayValdationResult] = Seq(
-      addressLine1Validator,
-      addressLine2Validator,
-      addressLine3Validator,
-      addressLine4Validator,
-      basicPostcodeValidator).flatten
+    val validators: Seq[PlayValdationResult] =
+      Seq(addressLine1Validator, addressLine2Validator, addressLine3Validator, addressLine4Validator, basicPostcodeValidator).flatten
 
     if (validators.forall(_ == Valid)) Pass else Failure(InvalidBusinessAddress)
   }

@@ -67,12 +67,10 @@ class Agent(
     cleanCredsFold(None: Option[AuthProviderId])(Some(this.authProviderId))
 
   def withCleanCredsOrCreateNewAccount(cleanCredsBody: => Future[Result]): Future[Result] =
-    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.BusinessIdentificationController.showCreateNewAccount())))(
-      isClean = cleanCredsBody)
+    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.BusinessIdentificationController.showCreateNewAccount())))(isClean = cleanCredsBody)
 
   def withCleanCredsOrSignIn(cleanCredsBody: => Future[Result]): Future[Result] =
-    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.SubscriptionController.showSignInWithNewID())))(
-      isClean = cleanCredsBody)
+    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.SubscriptionController.showSignInWithNewID())))(isClean = cleanCredsBody)
 
 }
 
@@ -128,14 +126,10 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
   /**
     * User is half way through a setup/onboarding journey
     **/
-  def withSubscribingAgent[A](body: Agent => Future[Result])(
-    implicit request: Request[A],
-    hc: HeaderCarrier,
-    ec: ExecutionContext): Future[Result] =
+  def withSubscribingAgent[A](body: Agent => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
       .retrieve(allEnrolments and credentials and nino) {
         case enrolments ~ creds ~ mayBeNino =>
-          println("############  5")
           if (isEnrolledForHmrcAsAgent(enrolments)) {
             redirectUrlActions.withMaybeRedirectUrl {
               case Some(redirectUrl) =>
@@ -157,8 +151,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
         handleException
       }
 
-  def withAuthenticatedUser[A](
-    body: => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+  def withAuthenticatedUser[A](body: => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     authorised(AuthProviders(GovernmentGateway))(body)
       .recover {
         handleException

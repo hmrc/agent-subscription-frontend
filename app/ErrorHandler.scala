@@ -47,10 +47,7 @@ class ErrorHandler @Inject()(
     auditClientError(request, statusCode, message)
 
     if (statusCode == FORBIDDEN)
-      Future.successful(
-        Forbidden(
-          standardErrorTemplate("global.error.403.title", "global.error.403.heading", "global.error.403.message")(
-            request)))
+      Future.successful(Forbidden(standardErrorTemplate("global.error.403.title", "global.error.403.heading", "global.error.403.message")(request)))
     else
       super.onClientError(request, statusCode, message)
   }
@@ -62,15 +59,12 @@ class ErrorHandler @Inject()(
       case _: NoActiveSession =>
         toGGLogin(if (env.mode.equals(Mode.Dev)) s"http://${request.host}${request.uri}" else s"${request.uri}")
       case _: InsufficientEnrolments =>
-        Forbidden(
-          standardErrorTemplate("global.error.403.title", "global.error.403.heading", "global.error.403.message")(
-            request))
+        Forbidden(standardErrorTemplate("global.error.403.title", "global.error.403.heading", "global.error.403.message")(request))
       case _ => super.resolveError(request, exception)
     }
   }
 
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(
-    implicit request: Request[_]): HtmlFormat.Appendable =
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): HtmlFormat.Appendable =
     errorTemplate(Messages(pageTitle), Messages(heading), Messages(message))
 
   override def internalServerErrorTemplate(implicit request: Request[_]): Html = errorTemplate5xx()
@@ -113,8 +107,7 @@ trait ErrorAuditing extends HttpAuditEvent {
     ()
   }
 
-  def auditClientError(request: RequestHeader, statusCode: Int, message: String)(
-    implicit ec: ExecutionContext): Unit = {
+  def auditClientError(request: RequestHeader, statusCode: Int, message: String)(implicit ec: ExecutionContext): Unit = {
     import play.api.http.Status._
     statusCode match {
       case NOT_FOUND =>

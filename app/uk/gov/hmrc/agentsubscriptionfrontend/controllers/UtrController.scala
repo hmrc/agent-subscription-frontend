@@ -68,9 +68,7 @@ class UtrController @Inject()(
             formWithErrors => {
               Ok(utrDetailsTemplate(formWithErrors, businessType))
             },
-            validUtr =>
-              updateSessionAndRedirect(existingSession.copy(utr = Some(validUtr)))(
-                routes.PostcodeController.showPostcodeForm())
+            validUtr => updateSessionAndRedirect(existingSession.copy(utr = Some(validUtr)))(routes.PostcodeController.showPostcodeForm())
           )
       }
     }

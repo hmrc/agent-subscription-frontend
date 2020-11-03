@@ -169,7 +169,7 @@ class StartControllerISpec extends BaseISpec {
         redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
       }
 
-      "redirect to the /task-list page when there is no continueId" in {
+      "redirect to the /task-list page when there is no continueId" in new SetupUnsubscribed {
         givenNoSubscriptionJourneyRecordExists(id)
         implicit val request = FakeRequest()
 

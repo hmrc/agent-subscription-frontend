@@ -98,10 +98,7 @@ class AMLSController @Inject()(
                     routes.AMLSController.showAmlsDetailsForm()
                   case No => routes.AMLSController.showCheckAmlsAlreadyAppliedForm()
                 }
-                val cleanAmlsData = AmlsData(
-                  amlsRegistered = RadioInputAnswer.toBoolean(validForm),
-                  amlsAppliedFor = None,
-                  amlsDetails = None)
+                val cleanAmlsData = AmlsData(amlsRegistered = RadioInputAnswer.toBoolean(validForm), amlsAppliedFor = None, amlsDetails = None)
 
                 updateAmlsJourneyRecord(
                   agent, { amlsData =>
@@ -145,9 +142,7 @@ class AMLSController @Inject()(
               case Yes => routes.AMLSController.showAmlsApplicationDatePage()
               case No  => routes.AMLSController.showAmlsNotAppliedPage()
             }
-            updateAmlsJourneyRecord(
-              agent,
-              amlsData => Some(amlsData.copy(amlsAppliedFor = Some(RadioInputAnswer.toBoolean(validForm))))).map(
+            updateAmlsJourneyRecord(agent, amlsData => Some(amlsData.copy(amlsAppliedFor = Some(RadioInputAnswer.toBoolean(validForm))))).map(
               _ => Redirect(continueOrStop(continue, routes.AMLSController.showCheckAmlsAlreadyAppliedForm()))
             )
           }
@@ -200,10 +195,8 @@ class AMLSController @Inject()(
                 updateAmlsJourneyRecord(
                   agent,
                   amlsData =>
-                    Some(
-                      amlsData.copy(amlsDetails = Some(AmlsDetails(
-                        supervisoryBodyData,
-                        Right(RegisteredDetails(validForm.membershipNumber, validForm.expiry))))))
+                    Some(amlsData.copy(
+                      amlsDetails = Some(AmlsDetails(supervisoryBodyData, Right(RegisteredDetails(validForm.membershipNumber, validForm.expiry))))))
                 ).map(
                   _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsDetailsForm()))
                 )
@@ -264,9 +257,7 @@ class AMLSController @Inject()(
                 val continue = toTaskListOrCheckYourAnswers(isChanging)
                 updateAmlsJourneyRecord(
                   agent,
-                  amlsData =>
-                    Some(amlsData.copy(
-                      amlsDetails = Some(AmlsDetails(supervisoryBodyData, Left(PendingDetails(validForm.appliedOn))))))
+                  amlsData => Some(amlsData.copy(amlsDetails = Some(AmlsDetails(supervisoryBodyData, Left(PendingDetails(validForm.appliedOn))))))
                 ).map(
                   _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsApplicationDatePage()))
                 )
@@ -281,8 +272,7 @@ class AMLSController @Inject()(
     if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
     else routes.TaskListController.showTaskList()
 
-  private def withManuallyAssuredAgent(agent: Agent)(body: => Future[Result])(
-    implicit hc: HeaderCarrier): Future[Result] = {
+  private def withManuallyAssuredAgent(agent: Agent)(body: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
     val utr = agent.getMandatorySubscriptionRecord.businessDetails.utr
     agentAssuranceConnector.isManuallyAssuredAgent(utr).flatMap { response =>
       if (response) toFuture(Redirect(routes.TaskListController.showTaskList()))
