@@ -528,6 +528,13 @@ timed-out.p1=Nid ydych wedi gwneud dim byd ers {0}, felly rydym wedi’ch allgof
 timed-out.p2.link=Mewngofnodwch eto
 timed-out.p2=i ddefnyddio’r gwasanaeth hwn.
 
+#already started
+already-started.title=You have already started to create an account on a different Government Gateway user ID
+already-started.header={0} has already started to create an account on a different Government Gateway user ID
+already-started.p1=If you want to continue to create an account,
+already-started.p1.link=you must sign out and sign back in with the Government Gateway user ID you originally used.
+already-started.p2=If you do not want to continue with the Government Gateway user ID you originally used, you will lose the details you entered. You will have to wait until {0} to start again.
+
 accessibility.statement.title=Datganiad hygyrchedd ar gyfer creu cyfrif gwasanaethau asiant
 accessibility.statement.h1=Datganiad hygyrchedd ar gyfer creu cyfrif gwasanaethau asiant
 accessibility.statement.intro.p1=Mae’r datganiad hygyrchedd hwn yn esbonio pa mor hygyrch yw’r gwasanaeth hwn, beth i’w wneud os ydych yn cael anhawster wrth ei ddefnyddio, a sut i roi gwybod am broblemau hygyrchedd gyda’r gwasanaeth.
