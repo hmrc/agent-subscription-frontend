@@ -193,7 +193,7 @@ class BusinessIdentificationController @Inject()(
     subscriptionJourneyService
     .createJourneyRecord(existingSession, agent) map {
     case Right(()) => Redirect(routes.TaskListController.showTaskList())
-    case Left(msg) => logger.warn(msg); Redirect(routes.BusinessIdentificationController.alreadyStarted())
+    case Left(msg) => logger.warn(msg); Redirect(routes.BusinessIdentificationController.showAlreadyStarted())
   }
 
   def showBusinessEmailForm: Action[AnyContent] = Action.async { implicit request =>
@@ -461,7 +461,7 @@ class BusinessIdentificationController @Inject()(
       case _                                                      => false
     }
 
-  def alreadyStarted: Action[AnyContent] = Action.async { implicit request =>
+  def showAlreadyStarted: Action[AnyContent] = Action.async { implicit request =>
       withValidSession { (_, existingSession) =>
         {
           for {
