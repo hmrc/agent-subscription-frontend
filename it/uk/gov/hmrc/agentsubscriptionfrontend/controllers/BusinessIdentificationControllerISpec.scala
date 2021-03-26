@@ -16,15 +16,17 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import play.api.mvc.AnyContentAsEmpty
+import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessAddress
+import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessAddress, Postcode}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.givenAgentIsNotManuallyAssured
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenConflictingSubscriptionJourneyRecordExists, givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.id
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{id, minimalSubscriptionJourneyRecord, testRegistration, validPostcode, validUtr}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData, TestSetupNoJourneyRecord}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -224,6 +226,27 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
     }
   }
 
+  "POST /confirm-business" should {
+    "display warning page when an Agent tries to return to the subscription journey with a different credential" in {
 
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("confirmBusiness" -> "yes")
 
+      givenConflictingSubscriptionJourneyRecordExists(id)
+      givenSubscriptionJourneyRecordExists(id, minimalSubscriptionJourneyRecord(TestData.id))
+      AgentSubscriptionStub.withMatchingUtrAndPostcode(validUtr, validPostcode)
+
+      await(sessionStoreService.cacheAgentSession(
+        AgentSession(
+          businessType = Some(SoleTrader),
+          utr = Some(validUtr),
+          registration = Some(testRegistration.copy(isSubscribedToETMP = true)),
+          postcode = Some(Postcode(validPostcode))
+        )))
+
+      val result: Result = await(controller.submitConfirmBusinessForm(request))
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showAlreadyStarted().url)
+    }
+  }
 }

@@ -160,7 +160,6 @@ class BusinessIdentificationController @Inject()(
                     mark("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
                     Redirect(routes.BusinessIdentificationController.showAlreadySubscribed())
                   } else validatedBusinessDetailsAndRedirect(existingSession, agent)
-
                 case No =>
                   Redirect(routes.UtrController.showUtrForm())
               }
@@ -180,12 +179,10 @@ class BusinessIdentificationController @Inject()(
       case Failure(responses) if responses.contains(InvalidEmail) =>
         Redirect(routes.BusinessIdentificationController.showBusinessEmailForm())
       case _ =>
-
-          subscriptionService.handlePartiallySubscribedAndRedirect(
-            agent,
-            existingSession)(
-            whenNotPartiallySubscribed = createRecordAndRedirectToTasklist(existingSession, agent))
-
+        subscriptionService.handlePartiallySubscribedAndRedirect(
+          agent,
+          existingSession)(
+          whenNotPartiallySubscribed = createRecordAndRedirectToTasklist(existingSession, agent))
     }
 
   private def createRecordAndRedirectToTasklist(existingSession: AgentSession, agent: Agent)
