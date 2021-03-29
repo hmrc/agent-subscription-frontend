@@ -529,11 +529,11 @@ timed-out.p2.link=Mewngofnodwch eto
 timed-out.p2=i ddefnyddio’r gwasanaeth hwn.
 
 #already started
-already-started.title=You have already started to create an account on a different Government Gateway user ID
-already-started.header={0} has already started to create an account on a different Government Gateway user ID
-already-started.p1=If you want to continue to create an account,
-already-started.p1.link=you must sign out and sign back in with the Government Gateway user ID you originally used.
-already-started.p2=If you do not want to continue with the Government Gateway user ID you originally used, you will lose the details you entered. You will have to wait until {0} to start again.
+already-started.title=Rydych eisoes wedi dechrau creu cyfrif gan ddefnyddio Dynodydd Defnyddiwr gwahanol (ID) ar gyfer Porth y Llywodraeth
+already-started.header=Mae {0} eisoes wedi dechrau creu cyfrif gan ddefnyddio Dynodydd Defnyddiwr gwahanol (ID) ar gyfer Porth y Llywodraeth
+already-started.p1=Os ydych eisiau parhau i greu cyfrif,
+already-started.p1.link=mae’n rhaid i chi allgofnodi a mewngofnodi eto gyda’r Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth y gwnaethoch ei ddefnyddio’n wreiddiol
+already-started.p2=Os nad ydych eisiau parhau â’r Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth y gwnaethoch ei ddefnyddio’n wreiddiol, byddwch yn colli’r manylion y gwnaethoch eu nodi. Bydd angen i chi aros tan {0} i ddechrau eto.
 
 accessibility.statement.title=Datganiad hygyrchedd ar gyfer creu cyfrif gwasanaethau asiant
 accessibility.statement.h1=Datganiad hygyrchedd ar gyfer creu cyfrif gwasanaethau asiant

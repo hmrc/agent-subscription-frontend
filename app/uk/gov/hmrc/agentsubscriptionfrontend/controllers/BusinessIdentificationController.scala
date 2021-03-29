@@ -468,9 +468,13 @@ class BusinessIdentificationController @Inject()(
             date <- OptionT(Future(journey.lastModifiedDate))
           } yield {
             sessionStoreService.cacheContinueUrl(RedirectUrl("/agent-subscriptions/start"))
-            Ok(alreadyStartedTemplate(name, date.plusDays(31).format(DateTimeFormatter.ofPattern("dd MM yyyy"))))
+            Ok(alreadyStartedTemplate(name, date.plusDays(31).format(BusinessIdentificationController.dateFormatter)))
           }
         }.value.map(_.getOrElse(Conflict))
       }
     }
+}
+
+object BusinessIdentificationController {
+  val dateFormatter = DateTimeFormatter.ofPattern("dd MM yyyy")
 }
