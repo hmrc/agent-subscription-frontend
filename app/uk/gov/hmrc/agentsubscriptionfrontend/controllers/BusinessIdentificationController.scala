@@ -187,11 +187,13 @@ class BusinessIdentificationController @Inject()(
 
   private def createRecordAndRedirectToTasklist(existingSession: AgentSession, agent: Agent)
                                                (implicit hc: HeaderCarrier): Future[Result] =
-    subscriptionJourneyService
-    .createJourneyRecord(existingSession, agent) map {
-    case Right(()) => Redirect(routes.TaskListController.showTaskList())
-    case Left(msg) => logger.warn(msg); Redirect(routes.BusinessIdentificationController.showAlreadyStarted())
-  }
+    subscriptionJourneyService.createJourneyRecord(existingSession, agent)
+      .map(_ => Redirect(routes.TaskListController.showTaskList()))
+    .recover {
+      case HttpError(msg, _) =>
+        logger.warn(msg)
+        Redirect(routes.BusinessIdentificationController.showAlreadyStarted())
+    }
 
   def showBusinessEmailForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
