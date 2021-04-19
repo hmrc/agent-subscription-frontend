@@ -17,9 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
-import cats.implicits._
-import cats.data.OptionT
-
+import uk.gov.hmrc.agentsubscriptionfrontend.util.Syntax._
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
@@ -192,8 +190,17 @@ class BusinessIdentificationController @Inject()(
     .recover {
       case HttpError(msg, _) =>
         logger.warn(msg)
+        // Switch authProviderId
+        //replaceAuthProviderId(agent)
         Redirect(routes.BusinessIdentificationController.showAlreadyStarted())
     }
+
+  /*private def replaceAuthProviderId(agent: Agent)(implicit hc: HeaderCarrier): Future[Result] = {
+    for {
+      existing <- subscriptionJourneyService.getJourneyRecord(agent.authProviderId)
+    } yield existing
+    ???
+  }*/
 
   def showBusinessEmailForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
@@ -464,10 +471,10 @@ class BusinessIdentificationController @Inject()(
       withValidSession { (_, existingSession) =>
         {
           for {
-            utr <- OptionT(Future(existingSession.utr))
-            journey <- OptionT(subscriptionJourneyService.getJourneyByUtr(utr))
-            name <- OptionT(Future(journey.businessDetails.registration.flatMap(_.taxpayerName)))
-            date <- OptionT(Future(journey.lastModifiedDate))
+            utr <- existingSession.utr.liftOptionT
+            journey <- subscriptionJourneyService.getJourneyByUtr(utr).liftOptionT
+            name <- journey.businessDetails.registration.flatMap(_.taxpayerName).liftOptionT
+            date <- journey.lastModifiedDate.liftOptionT
           } yield {
             sessionStoreService.cacheContinueUrl(RedirectUrl("/agent-subscriptions/start"))
             Ok(alreadyStartedTemplate(name, date.plusDays(31).format(BusinessIdentificationController.dateFormatter)))

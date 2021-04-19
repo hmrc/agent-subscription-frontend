@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentsubscriptionfrontend
+package uk.gov.hmrc.agentsubscriptionfrontend.util
+
+import cats.data.OptionT
 
 import scala.concurrent.Future
 
-package object util {
+object Syntax {
 
-  implicit def toFuture[T](a: T): Future[T] = Future.successful(a)
+  implicit class ValueOps[A](val a: A) extends AnyVal {
+    def liftOptionT: OptionT[Future, A] = OptionT(Future successful Option(a))
+  }
+  implicit class OptOps[A](val a: Option[A]) extends AnyVal {
+    def liftOptionT: OptionT[Future, A] = OptionT(Future successful a)
+  }
+  implicit class OptFutureOps[A](val a: Future[Option[A]]) extends AnyVal {
+    def liftOptionT: OptionT[Future, A] = OptionT(a)
+  }
 }
