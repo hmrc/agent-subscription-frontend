@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
+
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.Lang
 import play.api.mvc.{AnyContent, _}
@@ -29,8 +30,8 @@ import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AddressLookupFrontendCo
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{SubscriptionJourneyRecord, UserMapping}
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService, HttpError, SubscriptionService}
-import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{HttpError, MongoDBSessionStoreService, SubscriptionJourneyService, SubscriptionService}
+import uk.gov.hmrc.agentsubscriptionfrontend.util.{toFuture, valueOps}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{address_form_with_errors, check_answers, sign_in_new_id, subscription_complete}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
@@ -265,9 +266,9 @@ class SubscriptionController @Inject()(
         val clientCount = sjr.userMappings.map(_.count).sum
 
         (agencyName, agencyEmail, clientCount)
-      }
+      }.toFuture
       case None => {
-        sessionStoreService.fetchAgentSession.flatMap {
+        sessionStoreService.fetchAgentSession.map {
           case Some(agentSession) => {
             val reg = agentSession.registration.getOrElse(throw new Exception("agent session should have a registration "))
             val agencyName = reg.taxpayerName.getOrElse(throw new Exception("taxpayer name should be defined"))
