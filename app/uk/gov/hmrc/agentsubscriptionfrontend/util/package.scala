@@ -25,8 +25,6 @@ package object util {
 
   implicit def toFuture(result: Result): Future[Result] = Future.successful(result)
 
-  def toFuture[A](a: A): Future[A] = Future.successful(a)
-
   implicit class valueOps[A](val a: A) extends AnyVal {
     def toFuture: Future[A] = Future.successful(a)
   }
