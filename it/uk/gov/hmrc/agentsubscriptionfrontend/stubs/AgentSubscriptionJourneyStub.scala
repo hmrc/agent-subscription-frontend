@@ -123,6 +123,6 @@ object AgentSubscriptionJourneyStub {
         s"/agent-subscription/subscription/journey/primaryId/${encodePathSegment(authProviderId.id)}"))
         .willReturn(
           aResponse()
-            .withStatus(Status.CONFLICT))
+            .withStatus(Status.OK))
     )
 }

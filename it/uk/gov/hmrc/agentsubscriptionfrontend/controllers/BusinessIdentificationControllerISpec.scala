@@ -21,7 +21,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessAddress, Postcode, Registration}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AuthProviderId, BusinessAddress, Postcode}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.givenAgentIsNotManuallyAssured
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenConflictingSubscriptionJourneyRecordExists, givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub
@@ -32,7 +32,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
-import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class BusinessIdentificationControllerISpec extends BaseISpec {
@@ -228,10 +227,12 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
   }
 
   "POST /confirm-business" should {
-    "display warning page when an Agent tries to return to the subscription journey with a different credential" in {
+    "continue to task list when an Agent tries to return to the subscription journey with a different credential" in {
 
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("confirmBusiness" -> "yes")
 
+      val existingAuthId = AuthProviderId("67890-credId")
+      givenSubscriptionJourneyRecordExists(utr, minimalSubscriptionJourneyRecord(existingAuthId))
       givenConflictingSubscriptionJourneyRecordExists(id)
       givenSubscriptionJourneyRecordExists(id, minimalSubscriptionJourneyRecord(TestData.id))
       AgentSubscriptionStub.withMatchingUtrAndPostcode(validUtr, validPostcode)
@@ -247,40 +248,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
       val result: Result = await(controller.submitConfirmBusinessForm(request))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showAlreadyStarted().url)
-    }
-  }
-
-  "GET /already-started" should {
-    "display error page with correct details" in {
-      val name = "Test"
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-      val minimalSubscriptionJourney = minimalSubscriptionJourneyRecord(TestData.id)
-      val existingSubscriptionJourney = minimalSubscriptionJourney.copy(
-          lastModifiedDate = Some(LocalDateTime.now()),
-          businessDetails = minimalSubscriptionJourney.businessDetails.copy(
-            registration = Some(Registration(taxpayerName = Some(name),
-              isSubscribedToAgentServices = false,
-              isSubscribedToETMP = true,
-              address = businessAddress,
-              emailAddress = Some("test@example.com")
-            ))))
-
-      givenSubscriptionJourneyRecordExists(utr: Utr, existingSubscriptionJourney)
-
-      await(sessionStoreService.cacheAgentSession(
-        AgentSession(
-          businessType = Some(SoleTrader),
-          utr = Some(validUtr),
-          registration = Some(testRegistration.copy(isSubscribedToETMP = true, taxpayerName = Some("Test"))),
-          postcode = Some(Postcode(validPostcode))
-        )))
-
-      val result: Result = await(controller.showAlreadyStarted(request))
-
-      status(result) shouldBe 200
-      result should containSubstrings(name)
-      result should containSubstrings(LocalDateTime.now().plusDays(31).format(BusinessIdentificationController.dateFormatter))
+      redirectLocation(result) shouldBe Some(routes.TaskListController.showTaskList().url)
     }
   }
 }

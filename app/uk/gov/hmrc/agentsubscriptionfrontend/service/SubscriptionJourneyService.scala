@@ -57,9 +57,8 @@ class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubs
     val sjr =
       SubscriptionJourneyRecord
         .fromAgentSession(agentSession, agent.authProviderId, agent.maybeCleanCredsAuthProviderId)
-    saveJourneyRecord(sjr) flatMap {
-      case 204 => Future successful (())
-      case 409 => Future failed HttpError("the subscription journey record already exists in the database", 409)
+    saveJourneyRecord(sjr) map {
+      case 200 | 204 => ()
     }
   }
 }

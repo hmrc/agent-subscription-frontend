@@ -83,7 +83,6 @@ class AgentSubscriptionConnector @Inject()(
         .map { response =>
           response.status match {
             case s if is2xx(s) => s
-            case CONFLICT      => CONFLICT
             case s =>
               logger.error(s"creating subscription journey record failed for reason: ${response.body}")
               throw UpstreamErrorResponse(response.body, s)
