@@ -96,14 +96,6 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
       result shouldBe 204
     }
 
-    "return 409 when there is a database exception" in {
-      AgentSubscriptionJourneyStub
-        .givenSubscriptionRecordNotCreated(authProviderId, TestData.minimalSubscriptionJourneyRecord(authProviderId), Status.CONFLICT)
-      val result = await(connector.createOrUpdateJourney(TestData.minimalSubscriptionJourneyRecord(authProviderId)))
-
-      result shouldBe 409
-    }
-
     "throw a runtime exception when the endpoint returns a bad request" in {
       AgentSubscriptionJourneyStub
         .givenSubscriptionRecordNotCreated(authProviderId, TestData.minimalSubscriptionJourneyRecord(authProviderId), Status.BAD_REQUEST)

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
+
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.i18n.I18nSupport
@@ -40,7 +41,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.validators.BusinessDetailsValidator
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import java.time.format.DateTimeFormatter
@@ -70,8 +70,7 @@ class BusinessIdentificationController @Inject()(
                                                   businessNameTemplate: business_name,
                                                   alreadySubscribedTemplate: already_subscribed,
                                                   updateBusinessAddressTemplate: update_business_address,
-                                                  postcodeNotAllowedTemplate: postcode_not_allowed,
-                                                  alreadyStartedTemplate: already_started)(
+                                                  postcodeNotAllowedTemplate: postcode_not_allowed)(
   implicit val appConfig: AppConfig,
   val ec: ExecutionContext)
     extends FrontendController(mcc) with AuthActions
@@ -186,11 +185,6 @@ class BusinessIdentificationController @Inject()(
                                                (implicit hc: HeaderCarrier): Future[Result] =
     subscriptionJourneyService.createJourneyRecord(existingSession, agent)
       .map(_ => Redirect(routes.TaskListController.showTaskList()))
-    .recover {
-      case HttpError(msg, _) =>
-        logger.warn(msg)
-        Redirect(routes.BusinessIdentificationController.showAlreadyStarted())
-    }
 
   def showBusinessEmailForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
@@ -455,22 +449,6 @@ class BusinessIdentificationController @Inject()(
     businessDetailsValidator.validate(registration) match {
       case Failure(responses) if responses.contains(InvalidEmail) => true
       case _                                                      => false
-    }
-
-  def showAlreadyStarted: Action[AnyContent] = Action.async { implicit request =>
-      withValidSession { (_, existingSession) =>
-        {
-          for {
-            utr <- existingSession.utr.toOptionT
-            journey <- subscriptionJourneyService.getJourneyByUtr(utr).toOptionT
-            name <- journey.businessDetails.registration.flatMap(_.taxpayerName).toOptionT
-            date <- journey.lastModifiedDate.toOptionT
-          } yield {
-            sessionStoreService.cacheContinueUrl(RedirectUrl("/agent-subscriptions/start"))
-            Ok(alreadyStartedTemplate(name, date.plusDays(31).format(BusinessIdentificationController.dateFormatter)))
-          }
-        }.value.map(_.getOrElse(Conflict))
-      }
     }
 }
 

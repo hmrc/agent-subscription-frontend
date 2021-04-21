@@ -19,17 +19,23 @@ package uk.gov.hmrc.agentsubscriptionfrontend
 import cats.data.OptionT
 import play.api.mvc.Result
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 package object util {
 
   implicit def toFuture(result: Result): Future[Result] = Future.successful(result)
 
+  implicit class throwableOps(val t: Throwable) extends AnyVal {
+    def toFailure[A]: Future[A] = Future.failed(t)
+  }
   implicit class valueOps[A](val a: A) extends AnyVal {
     def toFuture: Future[A] = Future.successful(a)
   }
   implicit class OptOps[A](val a: Option[A]) extends AnyVal {
     def toOptionT: OptionT[Future, A] = OptionT(Future successful a)
+  }
+  implicit class FutureOps[A](val a: Future[A]) extends AnyVal {
+    def toOptionT(implicit ec: ExecutionContext): OptionT[Future, A] = OptionT(a.map(Option.apply))
   }
   implicit class OptFutureOps[A](val a: Future[Option[A]]) extends AnyVal {
     def toOptionT: OptionT[Future, A] = OptionT(a)
