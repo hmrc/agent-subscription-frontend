@@ -17,7 +17,6 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.i18n.Lang
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import play.api.{Configuration, Environment, Logger}
@@ -34,6 +33,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -215,14 +215,14 @@ class ContactDetailsController @Inject()(
                     Ok(contactTradingNameCheckTemplate(formWithErrors, businessName, isChanging.getOrElse(false)))
                   },
                   validForm => {
-                    val hasTradingName = RadioInputAnswer.toBoolean(validForm.check)
+                    val useBusinessName = RadioInputAnswer.toBoolean(validForm.check)
                     val (check, maybeTradingName): (Boolean, Option[String]) =
-                      sjr.contactTradingNameData.fold((hasTradingName, Option.empty[String]))(data =>
-                        if (hasTradingName) (true, data.contactTradingName)
-                        else (false, None))
+                      sjr.contactTradingNameData.fold((useBusinessName, Option.empty[String]))(data =>
+                        if (useBusinessName) (true, None)
+                        else (false, data.contactTradingName))
 
                     val call: Call =
-                      if (!hasTradingName) routes.ContactDetailsController.showTradingName
+                      if (!useBusinessName) routes.ContactDetailsController.showTradingName
                       else if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
                       else routes.TaskListController.showTaskList()
 
@@ -275,7 +275,7 @@ class ContactDetailsController @Inject()(
 
               subscriptionJourneyService
                 .saveJourneyRecord(agent.getMandatorySubscriptionRecord
-                  .copy(contactTradingNameData = Some(ContactTradingNameData(true, Some(validForm.name)))))
+                  .copy(contactTradingNameData = Some(ContactTradingNameData(false, Some(validForm.name)))))
                 .map(_ => Redirect(redirectCall))
             }
           )
