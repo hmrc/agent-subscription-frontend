@@ -58,8 +58,7 @@ class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubs
       SubscriptionJourneyRecord
         .fromAgentSession(agentSession, agent.authProviderId, agent.maybeCleanCredsAuthProviderId)
     saveJourneyRecord(sjr) map {
-      case 200 => ()
-      case 204 => ()
+      case 200 | 204 => ()
     }
   }
 }
