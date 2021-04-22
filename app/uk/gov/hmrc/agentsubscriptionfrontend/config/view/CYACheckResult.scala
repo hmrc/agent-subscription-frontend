@@ -57,7 +57,7 @@ object CYACheckResult {
     tradingNameData: ContactTradingNameData,
     tradingAddressData: ContactTradingAddressData)(reg: Registration, maybeAmls: Option[AmlsData]): CYACheckResult =
     if (emailData.contactEmail.isEmpty) FailedContactEmail
-    else if (tradingNameData.hasTradingName && tradingNameData.contactTradingName.isEmpty)
+    else if (!tradingNameData.hasTradingName && tradingNameData.contactTradingName.isEmpty)
       FailedContactTradingName
     else if (tradingAddressData.contactTradingAddress.isEmpty) FailedContactTradingAddress
     else

@@ -38,7 +38,7 @@ trait MongoSessionStore[T] extends Logging {
           .map(_.flatMap(_.data))
           .map {
             case Some(cache) =>
-              (cache \ sessionName).asOpt[JsObject] match {
+              (cache \ sessionName).asOpt[JsValue] match {
                 case None => Right(None)
                 case Some(obj) =>
                   obj.validate[T] match {

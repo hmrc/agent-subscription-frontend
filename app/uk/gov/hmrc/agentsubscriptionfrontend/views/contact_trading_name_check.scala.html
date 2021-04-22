@@ -57,6 +57,7 @@
       '_inputHint          -> Html(s"""<p>${Messages("contactTradingNameCheck.p")}</p>"""),
       '_fieldsetDiv        -> Html(s"""<p>${Messages(s"$businessName")}</p>"""),
       '_groupDivClass      -> "form-group",
+      '_horizontal          -> true,
       '_fieldsetAttributes -> Html("""id='check'""")
     )
       <button class="button" type="submit" id="continue">@Messages("contactTradingNameCheck.continue.button")</button>

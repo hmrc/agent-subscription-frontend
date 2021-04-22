@@ -135,14 +135,14 @@ class CYACheckResultSpec extends UnitSpec {
       CYACheckResult.check(sjr) shouldBe FailedContactTradingName
     }
 
-    "FailedContactTradingName when SubscriptionJourneyRecord is complete except contact trading name check is true but no trading name defined" in {
+    "FailedContactTradingName when SubscriptionJourneyRecord is complete except contact trading name check is false but no trading name defined" in {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
         businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
-        contactTradingNameData = Some(ContactTradingNameData(true, None)),
+        contactTradingNameData = Some(ContactTradingNameData(false, None)),
         contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
       )
 

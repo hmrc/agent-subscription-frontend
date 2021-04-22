@@ -53,7 +53,7 @@ object CheckYourAnswers {
       businessAddressRow = makeBusinessAddressRow(address),
       maybeAmlsDataRow = if (isManuallyAssured) None else makeAmlsDataRow(amlsData),
       contactEmailRow = makeContactEmailRow(contactEmailAddress),
-      contactTradingNameRow = makeContactTradingNameRow(contactTradingName),
+      contactTradingNameRow = makeContactTradingNameRow(contactTradingName, registrationName),
       contactTradingAddressRow = makeContactTradingAddressRow(contactTradingAddress),
       maybeMappingClientNumberRow =
         if (userMappings.isEmpty)
@@ -129,10 +129,10 @@ object CheckYourAnswers {
       buttonText = Some(defaultButtonText)
     )
 
-  private def makeContactTradingNameRow(contactTradingName: Option[String])(implicit messages: Messages) =
+  private def makeContactTradingNameRow(contactTradingName: Option[String], registrationName: String)(implicit messages: Messages) =
     AnswerRow(
       question = Messages("checkAnswers.contactTradingName.label"),
-      answerLines = List(contactTradingName.getOrElse(Messages("checkAnswers.tradingName.none"))),
+      answerLines = List(contactTradingName.getOrElse(registrationName)),
       changeLink = Some(routes.ContactDetailsController.changeTradingName()),
       buttonText = Some(defaultButtonText)
     )
