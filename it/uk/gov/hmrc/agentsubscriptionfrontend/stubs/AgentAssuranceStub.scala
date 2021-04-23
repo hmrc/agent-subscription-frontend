@@ -37,6 +37,7 @@ object AgentAssuranceStub {
     verify(times, getRequestedFor(urlEqualTo(s"$r2dwUrl/$utr")))
 
   val manuallyAssuredAgentUrl = (utr: String) => urlEqualTo(s"/agent-assurance/manually-assured/utr/$utr")
+  val retrieveAmlsDataUrl = (utr: String) => urlEqualTo(s"/agent-assurance/amls/utr/$utr")
 
   def givenAgentIsNotManuallyAssured(utr: String): StubMapping =
     stubFor(
@@ -49,6 +50,24 @@ object AgentAssuranceStub {
       get(manuallyAssuredAgentUrl(utr))
         .willReturn(aResponse()
           .withStatus(200)))
+
+  def givenAmlsDataIsFound(utr: String): StubMapping =
+    stubFor(
+      get(retrieveAmlsDataUrl(utr))
+        .willReturn(aResponse()
+        .withBody(
+          """
+            |{
+            | "supervisoryBody": "HMRC",
+            | "appliedOn": "2020-10-20"
+            |}
+            |""".stripMargin)
+        .withStatus(200)))
+
+  def givenAmlsDataIsNotFound(utr: String): StubMapping =
+    stubFor(
+      get(retrieveAmlsDataUrl(utr))
+        .willReturn(aResponse().withStatus(404)))
 
   def givenManuallyAssuredAgentsReturns(utr: String, status: Int): StubMapping =
     stubFor(

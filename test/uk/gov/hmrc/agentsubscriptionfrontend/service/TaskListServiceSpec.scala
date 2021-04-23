@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
-import java.time.LocalDate
+import org.mockito.ArgumentMatchers.any
 
+import java.time.LocalDate
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
+import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector, AgentSubscriptionConnector}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,18 +38,19 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
   implicit lazy val ec: ExecutionContextExecutor = ExecutionContext.global
 
   private val stubAssuranceConnector = mock[AgentAssuranceConnector]
+  private val stubAgentSubscriptionConnector = mock[AgentSubscriptionConnector]
 
   private val stubAppConfig = mock[AppConfig]
 
-  private def givenNotManuallyAssured: OngoingStubbing[Future[Boolean]] =
-    when(stubAssuranceConnector.isManuallyAssuredAgent(Utr("12345")))
-      .thenReturn(Future.successful(false))
+  private def givenAmlsDataNotPresent: OngoingStubbing[Future[Option[AmlsDetails]]] =
+    when(stubAssuranceConnector.getAmlsData(Utr("12345")))
+      .thenReturn(Future.successful(None))
 
-  private def givenManuallyAssured: OngoingStubbing[Future[Boolean]] =
-    when(stubAssuranceConnector.isManuallyAssuredAgent(Utr("12345")))
-      .thenReturn(Future.successful(true))
+  private def givenAmlsDataIsPresent: OngoingStubbing[Future[Option[AmlsDetails]]] =
+    when(stubAssuranceConnector.getAmlsData(Utr("12345")))
+      .thenReturn(Future.successful(Some(AmlsDetails("HMRC", Left(PendingDetails(LocalDate.now()))))))
 
-  private val taskListService = new TaskListService(stubAssuranceConnector, stubAppConfig)
+  private val taskListService = new TaskListService(stubAssuranceConnector, stubAgentSubscriptionConnector, stubAppConfig)
 
   val minimalUncleanCredsRecord = SubscriptionJourneyRecord(
     AuthProviderId("cred-1234"),
@@ -79,8 +81,8 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
 
   "when the user has unclean creds show the full task list" should {
     "AmlsTask" should {
-      "when agent is not manually assured show AMLS link" in {
-        givenNotManuallyAssured
+      "when agent doesn't has amls data show AMLS link" in {
+        givenAmlsDataNotPresent
         val tasks = await(taskListService.createTasks(minimalUncleanCredsRecord))
 
         tasks.length shouldBe 5
@@ -88,17 +90,8 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
         tasks.head.subTasks.head.showLink shouldBe true
       }
 
-      "when agent is manually assured don't show AMLS link" in {
-        givenManuallyAssured
-        val tasks = await(taskListService.createTasks(minimalUncleanCredsRecord))
-
-        tasks.length shouldBe 5
-        tasks.head.taskKey shouldBe "amlsTask"
-        tasks.head.subTasks.head.showLink shouldBe false
-      }
-
       "when agent has registered AMLS data show AMLS as complete" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val amlsRecord = minimalUncleanCredsRecord.copy(
           amlsData = Some(
             AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Right(RegisteredDetails("123", LocalDate.now().plusDays(20))))))))
@@ -110,7 +103,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
       }
 
       "when agent has pending AMLS data show AMLS as complete" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val amlsRecord = minimalUncleanCredsRecord.copy(
           amlsData =
             Some(AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))))
@@ -121,15 +114,17 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
         tasks.head.isComplete shouldBe true
       }
 
-      "when agent is manually assured show AMLS as complete" in {
-        givenManuallyAssured
+      "when agent is has amls data already stored show AMLS as complete" in {
+        givenAmlsDataIsPresent
+        when(stubAgentSubscriptionConnector.createOrUpdateJourney(any[SubscriptionJourneyRecord])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(1))
         val tasks = await(taskListService.createTasks(minimalUncleanCredsRecord))
         tasks.length shouldBe 5
         tasks.head.isComplete shouldBe true
       }
 
       "when agent has partially completed AMLS details show AMLS as not complete" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val partialAmlsRecord =
           minimalUncleanCredsRecord.copy(amlsData = Some(AmlsData(amlsRegistered = true, None, None)))
         val tasks = await(taskListService.createTasks(partialAmlsRecord))
@@ -142,7 +137,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
 
     "contactDetailsTask" should {
       "when agent has no clean creds auth provider id and the amls task is complete show the contact details email task link" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val record = minimalUncleanCredsRecord.copy(
           amlsData =
             Some(AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20)))))))
@@ -157,7 +152,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
       }
 
       "when agent has no clean creds auth provider id and the email task is complete show the business name task link" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val record = minimalUncleanCredsRecord.copy(
           amlsData =
             Some(AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))),
@@ -174,7 +169,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
       }
 
       "when agent has no clean creds auth provider id and the email and the business name tasks are complete show the business address task link" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val record = minimalUncleanCredsRecord.copy(
           amlsData =
             Some(AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))),
@@ -194,7 +189,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
 
     "MappingTask" should {
       "when agent has no clean creds auth provider id and the previous task is complete show the mapping task link" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val record = minimalUncleanCredsRecord.copy(
           amlsData =
             Some(AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))),
@@ -211,7 +206,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
       }
 
       "when an agent has completed mapping and the previous task is complete show the mapping task as complete" in {
-        givenManuallyAssured
+        givenAmlsDataNotPresent
         val record = minimalUncleanCredsRecord.copy(
           mappingComplete = true,
           contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
@@ -228,7 +223,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
 
     "CreateIDTask" should {
       "when the previous task is complete show the create id link" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val record = minimalUncleanCredsRecord.copy(
           mappingComplete = true,
           amlsData =
@@ -246,7 +241,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
       }
 
       "when an agent has an auth provider id and the previous task is complete show the create id task as complete" in {
-        givenManuallyAssured
+        givenAmlsDataNotPresent
         val record = minimalUncleanCredsRecord
           .copy(
             cleanCredsAuthProviderId = Some(AuthProviderId("cred-123")),
@@ -266,7 +261,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
 
     "CheckAnswersTask" should {
       "when an agent has completed the previous task show the check answers link" in {
-        givenManuallyAssured
+        givenAmlsDataNotPresent
         val record = minimalUncleanCredsRecord
           .copy(
             cleanCredsAuthProviderId = Some(AuthProviderId("cred-123")),
@@ -287,8 +282,8 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
 
   "when the user has clean creds show a reduced task list" should {
     "AmlsTask" should {
-      "when agent is not manually assured show AMLS link" in {
-        givenNotManuallyAssured
+      "when agent doesn't has AMLS data show AMLS link" in {
+        givenAmlsDataNotPresent
         val tasks = await(taskListService.createTasks(minimalCleanCredsRecord))
 
         tasks.length shouldBe 3
@@ -297,18 +292,8 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
         tasks.head.subTasks.head.showLink shouldBe true
       }
 
-      "when agent is manually assured don't show AMLS link" in {
-        givenManuallyAssured
-        val tasks = await(taskListService.createTasks(minimalCleanCredsRecord))
-
-        tasks.length shouldBe 3
-        tasks.head.taskKey shouldBe "amlsTask"
-        tasks.head.subTasks.length shouldBe 1
-        tasks.head.subTasks.head.showLink shouldBe false
-      }
-
       "when agent has registered AMLS data show AMLS as complete" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val amlsRecord = minimalCleanCredsRecord.copy(
           amlsData = Some(
             AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Right(RegisteredDetails("123", LocalDate.now().plusDays(20))))))))
@@ -320,7 +305,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
       }
 
       "when agent has pending AMLS data show AMLS as complete" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val amlsRecord = minimalCleanCredsRecord.copy(
           amlsData =
             Some(AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))))
@@ -331,15 +316,17 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
         tasks.head.isComplete shouldBe true
       }
 
-      "when agent is manually assured show AMLS as complete" in {
-        givenManuallyAssured
+      "when agent has AMLS data show AMLS as complete" in {
+        givenAmlsDataIsPresent
+        when(stubAgentSubscriptionConnector.createOrUpdateJourney(any[SubscriptionJourneyRecord])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(1))
         val tasks = await(taskListService.createTasks(minimalCleanCredsRecord))
         tasks.length shouldBe 3
         tasks.head.isComplete shouldBe true
       }
 
       "when agent has partially completed AMLS details show AMLS as not complete" in {
-        givenNotManuallyAssured
+        givenAmlsDataNotPresent
         val partialAmlsRecord =
           minimalCleanCredsRecord.copy(amlsData = Some(AmlsData(amlsRegistered = true, None, None)))
         val tasks = await(taskListService.createTasks(partialAmlsRecord))
@@ -352,7 +339,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
 
     "contactDetailsTask" should {
       "when an agent has completed amls task show the contact details task" in {
-        givenManuallyAssured
+        givenAmlsDataNotPresent
         val record = minimalCleanCredsRecord.copy(
           amlsData =
             Some(AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))))
@@ -367,7 +354,7 @@ class TaskListServiceSpec extends UnitSpec with MockitoSugar {
 
     "CheckAnswersTask" should {
       "when an agent has completed the previous task show the check answers link" in {
-        givenManuallyAssured
+        givenAmlsDataNotPresent
         val record = minimalCleanCredsRecord.copy(
           amlsData =
             Some(AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))),

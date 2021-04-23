@@ -18,41 +18,52 @@ package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
+import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector, AgentSubscriptionConnector}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, SubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TaskListService @Inject()(agentAssuranceConnector: AgentAssuranceConnector, appConfig: AppConfig) {
+class TaskListService @Inject()(
+  agentAssuranceConnector: AgentAssuranceConnector,
+  agentSubscriptionConnector: AgentSubscriptionConnector,
+  appConfig: AppConfig) {
 
   def createTasks(subscriptionJourneyRecord: SubscriptionJourneyRecord)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[List[Task]] =
     for {
-      maa <- agentAssuranceConnector.isManuallyAssuredAgent(subscriptionJourneyRecord.businessDetails.utr)
+      amlsOpt <- agentAssuranceConnector.getAmlsData(subscriptionJourneyRecord.businessDetails.utr)
     } yield {
-      if (isCleanCredsAgent(subscriptionJourneyRecord)) {
-        val amlsAndContactDetailsTaskList: List[Task] = amlsAndContactDetailsTasks(subscriptionJourneyRecord, maa)
+      val journeyRecord = (subscriptionJourneyRecord.amlsData, amlsOpt) match {
+        case (None, Some(amls)) =>
+          val newJourneyRecord = subscriptionJourneyRecord
+            .copy(amlsData = Some(AmlsData(amlsRegistered = amls.details.isRight, Some(amls.details.isLeft), amlsOpt)))
+          agentSubscriptionConnector.createOrUpdateJourney(newJourneyRecord)
+          newJourneyRecord
+        case _ => subscriptionJourneyRecord
+      }
+      if (isCleanCredsAgent(journeyRecord)) {
+        val amlsAndContactDetailsTaskList: List[Task] = amlsAndContactDetailsTasks(journeyRecord)
         val checkAnswersTask: Task = CheckAnswersTask(List(CheckAnswersSubTask(amlsAndContactDetailsTaskList.forall(_.isComplete))))
         amlsAndContactDetailsTaskList ::: List(checkAnswersTask)
 
       } else {
 
-        val amlsAndContactDetailsTaskList: List[Task] = amlsAndContactDetailsTasks(subscriptionJourneyRecord, maa)
+        val amlsAndContactDetailsTaskList: List[Task] = amlsAndContactDetailsTasks(journeyRecord)
 
         val mappingTask: Task = MappingTask(
           List(
             MappingSubTask(
-              subscriptionJourneyRecord.cleanCredsAuthProviderId,
-              subscriptionJourneyRecord.mappingComplete,
-              subscriptionJourneyRecord.continueId.getOrElse(" "),
+              journeyRecord.cleanCredsAuthProviderId,
+              journeyRecord.mappingComplete,
+              journeyRecord.continueId.getOrElse(" "),
               amlsAndContactDetailsTaskList.forall(_.isComplete),
               appConfig
             )
           )
         )
-        val createIDTask: Task = CreateIDTask(List(CreateIDSubTask(subscriptionJourneyRecord.cleanCredsAuthProviderId, mappingTask.isComplete)))
+        val createIDTask: Task = CreateIDTask(List(CreateIDSubTask(journeyRecord.cleanCredsAuthProviderId, mappingTask.isComplete)))
         val checkAnswersTask: Task = CheckAnswersTask(List(CheckAnswersSubTask(createIDTask.isComplete)))
         amlsAndContactDetailsTaskList ::: List(mappingTask, createIDTask, checkAnswersTask)
       }
@@ -61,9 +72,9 @@ class TaskListService @Inject()(agentAssuranceConnector: AgentAssuranceConnector
   def isCleanCredsAgent(subscriptionJourneyRecord: SubscriptionJourneyRecord) =
     subscriptionJourneyRecord.cleanCredsAuthProviderId.contains(subscriptionJourneyRecord.authProviderId)
 
-  private def amlsAndContactDetailsTasks(subscriptionJourneyRecord: SubscriptionJourneyRecord, maa: Boolean): List[Task] = {
+  private def amlsAndContactDetailsTasks(subscriptionJourneyRecord: SubscriptionJourneyRecord): List[Task] = {
 
-    val amlsTask: Task = AmlsTask(List(AmlsSubTask(maa, subscriptionJourneyRecord.amlsData)))
+    val amlsTask: Task = AmlsTask(List(AmlsSubTask(subscriptionJourneyRecord.amlsData)))
 
     val contactEmailSubTask: SubTask = ContactDetailsEmailSubTask(
       subscriptionJourneyRecord.contactEmailData,
