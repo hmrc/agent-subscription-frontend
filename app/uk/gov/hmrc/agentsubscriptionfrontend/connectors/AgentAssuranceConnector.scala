@@ -23,6 +23,8 @@ import play.api.http.Status._
 import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AmlsDetails
+import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpClientConverter.transformOptionResponse
 import uk.gov.hmrc.domain.{SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http.HttpErrorFunctions._
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -94,6 +96,16 @@ class AgentAssuranceConnector @Inject()(http: HttpClient, metrics: Metrics, appC
                 s"unable to reach ${appConfig.agentAssuranceBaseUrl}/$endpoint. Manually assured agents list might not have been configured")
             case s => throw UpstreamErrorResponse(response.body, s)
           }
+        }
+    }
+
+  def getAmlsData(utr: Utr)(implicit hc: HeaderCarrier): Future[Option[AmlsDetails]] =
+    monitor(s"ConsumedAPI-AgentAssurance-getAmlsData-GET") {
+      val endpoint = s"/agent-assurance/amls/utr/${utr.value}"
+      transformOptionResponse[AmlsDetails](http.GET[HttpResponse](s"${appConfig.agentAssuranceBaseUrl}$endpoint"))
+        .recover {
+          case e: UpstreamErrorResponse if e.statusCode == 404 => None
+          case e                                               => throw e
         }
     }
 

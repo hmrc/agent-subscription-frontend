@@ -102,6 +102,22 @@ class AgentAssuranceConnectorISpec extends BaseISpec with MetricTestSupport {
 
   }
 
+  "getAmlsData" should {
+    val utr = Utr("2000000009")
+
+    "return AMLS data when agent-assurance responds with 200" in {
+      givenAmlsDataIsFound(utr.value)
+      val amlsDetails = await(connector.getAmlsData(utr))
+      amlsDetails.isDefined shouldBe true
+    }
+
+    "return None when agent-assurance response with 400" in {
+      givenAmlsDataIsNotFound(utr.value)
+      val amlsDetails = await(connector.getAmlsData(utr))
+      amlsDetails.isDefined shouldBe false
+    }
+  }
+
   "getManuallyAssuredAgents" should {
     val utr = Utr("2000000009")
     "return true is utr found in the manually assured agents list" in {

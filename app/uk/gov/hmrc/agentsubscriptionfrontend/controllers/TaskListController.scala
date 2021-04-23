@@ -34,7 +34,7 @@ class TaskListController @Inject()(
   val metrics: Metrics,
   val env: Environment,
   val config: Configuration,
-  agentAssuranceConnector: AgentAssuranceConnector,
+  val agentAssuranceConnector: AgentAssuranceConnector,
   val redirectUrlActions: RedirectUrlActions,
   val sessionStoreService: MongoDBSessionStoreService,
   val subscriptionJourneyService: SubscriptionJourneyService,
