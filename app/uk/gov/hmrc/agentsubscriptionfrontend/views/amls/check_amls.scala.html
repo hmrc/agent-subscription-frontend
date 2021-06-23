@@ -56,6 +56,7 @@ action = routes.AMLSController.submitAmlsRegistered(), 'class -> "form js-form")
         "no" -> Messages("button.no")
         ),
         '_legend -> headerTitle,
+        '_horizontal          -> true,
         '_groupDivClass -> "form-group",
         '_fieldsetAttributes -> Html("""id='registeredAmls'""")
         )

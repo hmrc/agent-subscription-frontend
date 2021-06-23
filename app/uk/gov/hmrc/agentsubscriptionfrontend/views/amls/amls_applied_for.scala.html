@@ -52,6 +52,7 @@ action = routes.AMLSController.submitCheckAmlsAlreadyAppliedForm, 'class -> "for
         "no" -> Messages("button.no")
         ),
         '_groupDivClass -> "form-group",
+        '_horizontal          -> true,
         '_legend -> Html("""<h1 class="heading-xlarge">""" + Messages(s"amlsAppliedFor.title") + """</h1>"""),
         '_fieldsetAttributes -> Html("""id='amlsAppliedFor'""")
         )
