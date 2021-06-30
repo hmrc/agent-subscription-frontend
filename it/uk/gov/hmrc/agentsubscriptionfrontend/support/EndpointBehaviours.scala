@@ -1,7 +1,6 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import java.net.URLEncoder
-
 import org.scalatest.Assertion
 import play.api.mvc._
 import play.api.test.FakeRequest
@@ -10,7 +9,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AuthStub, SsoStub}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.individual
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -161,7 +160,7 @@ trait EndpointBehaviours {
   protected def aPageTakingContinueUrlAndCachingInSessionStore(action: PlayRequest, sessionKeys: => Seq[(String, String)], expectedStatusCode: Int = 200): Unit = {
     aPageTakingContinueUrl(action, sessionKeys, checkContinueUrlIsInCache, checkContinueUrlIsNotInCache)
 
-    def hc(request: Request[AnyContent]) = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+    def hc(request: Request[AnyContent]) = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     def checkContinueUrlIsInCache(request: Request[AnyContent], result: Result, expectedContinueUrl: String) = {
       status(result) shouldBe expectedStatusCode

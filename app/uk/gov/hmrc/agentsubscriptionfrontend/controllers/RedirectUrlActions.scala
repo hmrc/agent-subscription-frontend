@@ -23,7 +23,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.connectors.SsoConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.MongoDBSessionStoreService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
-import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromWhitelist, RedirectUrl, UnsafePermitAll}
+import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, RedirectUrl, UnsafePermitAll}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -54,7 +54,7 @@ class RedirectUrlActions @Inject()(sessionStoreService: MongoDBSessionStoreServi
     }
 
   def checkRedirectUrlAndContinue[A](redirectUrl: RedirectUrl, block: Option[String] => Future[A])(implicit hc: HeaderCarrier): Future[A] = {
-    val whitelistPolicy = AbsoluteWithHostnameFromWhitelist(whitelistedDomains)
+    val whitelistPolicy = AbsoluteWithHostnameFromAllowlist(whitelistedDomains)
     val unsafeUrl = redirectUrl.get(UnsafePermitAll).url
 
     //if relative let through else check url domain is on whitelist

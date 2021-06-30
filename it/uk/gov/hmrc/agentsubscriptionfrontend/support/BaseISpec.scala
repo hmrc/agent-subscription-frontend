@@ -16,7 +16,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.DataStreamStubs
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.play.test.UnitSpec
 
 abstract class BaseISpec
@@ -247,7 +247,7 @@ abstract class BaseISpec
   protected def htmlEscapedMessage(key: String, args: Any*): String = escape(Messages(key, args: _*)).toString
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier  =
-  HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+  HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
 protected def hasMessage(key: String, args: Any*): String = Messages(key, args: _*).toString
 
