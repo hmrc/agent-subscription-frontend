@@ -173,7 +173,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
       Redirect(routes.StartController.showNotAgent())
 
     case _: NoActiveSession =>
-      Redirect(s"$signInUrl?continue_url=$continueUrl${request.uri}")
+      Redirect(s"$signInUrl?continue_url=$continueUrl${request.uri}&origin=$appName")
 
     case _: InsufficientEnrolments =>
       logger.warn(s"Logged in user does not have required enrolments")
@@ -188,4 +188,5 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
 
   private val signInUrl = getString("bas-gateway.url")
   private val continueUrl = getString("login.continue")
+  private val appName = getString("appName")
 }

@@ -30,7 +30,7 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
     import scala.concurrent.ExecutionContext.Implicits.global
     val env = app.injector.instanceOf[Environment]
-    val config = app.injector.instanceOf[Configuration]
+    lazy val config = app.injector.instanceOf[Configuration]
 
 
     override def authConnector: AuthConnector = app.injector.instanceOf[AuthConnector]
