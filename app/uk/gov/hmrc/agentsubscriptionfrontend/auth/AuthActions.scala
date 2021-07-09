@@ -173,7 +173,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
       Redirect(routes.StartController.showNotAgent())
 
     case _: NoActiveSession =>
-      toGGLogin(s"${appConfig.agentSubscriptionFrontendExternalUrl}${request.uri}")
+      Redirect(s"$signInUrl?continue_url=$continueUrl${request.uri}")
 
     case _: InsufficientEnrolments =>
       logger.warn(s"Logged in user does not have required enrolments")
@@ -183,4 +183,9 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
       logger.warn("User is not logged in via  GovernmentGateway, signing out and redirecting")
       Redirect(routes.SignedOutController.signOut())
   }
+
+  private def getString(key: String): String = config.underlying.getString(key)
+
+  private val signInUrl = getString("bas-gateway.url")
+  private val continueUrl = getString("login.continue")
 }
