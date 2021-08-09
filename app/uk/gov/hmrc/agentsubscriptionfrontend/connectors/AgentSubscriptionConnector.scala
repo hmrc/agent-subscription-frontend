@@ -169,6 +169,19 @@ class AgentSubscriptionConnector @Inject()(
         }
     }
 
+  def getAmlsSubscriptionRecord(amlsRegistrationNumber: String)(implicit hc: HeaderCarrier): Future[Option[AmlsSubscriptionRecord]] =
+    monitor(s"ConsumedAPI-Agent-Subscription-getAmlsSubscription-GET") {
+      val url = s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/amls-subscription/$amlsRegistrationNumber"
+      http
+        .GET[HttpResponse](url)
+        .map { response =>
+          response.status match {
+            case OK        => response.json.asOpt[AmlsSubscriptionRecord]
+            case NOT_FOUND => None
+          }
+        }
+    }
+
   private val subscriptionUrl = s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription"
 
   private def getRegistrationUrlFor(utr: Utr, postcode: String) =

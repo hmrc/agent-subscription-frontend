@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
+
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{AnyContent, _}
 import play.api.{Configuration, Environment}
@@ -27,7 +28,8 @@ import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.AmlsValidationResult.{AmlsCheckFailed, AmlsSuspended, DateNotMatched, RecordNotFound, ResultOK}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{AmlsService, MongoDBSessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls._
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -47,12 +49,15 @@ class AMLSController @Inject()(
   val subscriptionJourneyService: SubscriptionJourneyService,
   val sessionStoreService: MongoDBSessionStoreService,
   agentAssuranceConnector: AgentAssuranceConnector,
+  amlsService: AmlsService,
   mcc: MessagesControllerComponents,
   checkAmlsTemplate: check_amls,
   amlsAppliedForTemplate: amls_applied_for,
   amlsNotAppliedTemplate: amls_not_applied,
   amlsDetailsTemplate: amls_details,
-  amlsPendingDetailsTemplate: amls_pending_details)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  amlsPendingDetailsTemplate: amls_pending_details,
+  amlsDetailsNotFoundTemplate: amls_details_not_found,
+  amlsRecordIneligibleStatusTemplate: amls_record_ineligible_status)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   import AMLSForms._
@@ -182,21 +187,40 @@ class AMLSController @Inject()(
                 Ok(amlsDetailsTemplate(form, amlsBodies))
               },
               validForm => {
-                val supervisoryBodyData =
-                  amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))
-                val continue = toTaskListOrCheckYourAnswers(isChanging)
-                updateAmlsJourneyRecord(
-                  agent,
-                  amlsData =>
-                    Some(amlsData.copy(
-                      amlsDetails = Some(AmlsDetails(supervisoryBodyData, Right(RegisteredDetails(validForm.membershipNumber, validForm.expiry))))))
-                ).map(
-                  _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsDetailsForm()))
-                )
+                amlsService.validateAmlsSubscription(validForm).flatMap {
+                  case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus)
+                  case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound)
+                  case ResultOK => {
+                    val supervisoryBodyData =
+                      amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))
+
+                    val continue = toTaskListOrCheckYourAnswers(isChanging)
+                    updateAmlsJourneyRecord(
+                      agent,
+                      amlsData =>
+                        Some(amlsData.copy(amlsDetails =
+                          Some(AmlsDetails(supervisoryBodyData, Right(RegisteredDetails(validForm.membershipNumber, validForm.expiry))))))
+                    ).map(
+                      _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsDetailsForm()))
+                    )
+                  }
+                }
               }
             )
         }
       }
+    }
+  }
+
+  def showAmlsDetailsNotFound: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Ok(amlsDetailsNotFoundTemplate())
+    }
+  }
+
+  def showAmlsRecordIneligibleStatus: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Ok(amlsRecordIneligibleStatusTemplate())
     }
   }
 

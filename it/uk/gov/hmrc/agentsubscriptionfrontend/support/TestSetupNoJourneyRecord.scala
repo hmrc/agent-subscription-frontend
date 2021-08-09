@@ -1,7 +1,5 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
-import java.time.LocalDate
-
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -9,6 +7,8 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsDat
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.givenAgentIsNotManuallyAssured
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenNoSubscriptionJourneyRecordExists, givenSubscriptionJourneyRecordExists}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.SsoStub
+
+import java.time.LocalDate
 
 trait TestSetupNoJourneyRecord {
   SsoStub.givenWhitelistedDomainsExist

@@ -184,8 +184,6 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
       Redirect(routes.SignedOutController.signOut())
   }
 
-  private def getString(key: String): String = config.underlying.getString(key)
-
-  private val signInUrl = getString("bas-gateway.url")
-  private val continueUrl = getString("login.continue")
+  private val signInUrl = appConfig.signinUrl
+  private val continueUrl = appConfig.loginContinueUrl
 }

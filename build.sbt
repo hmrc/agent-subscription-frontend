@@ -17,7 +17,7 @@ lazy val scoverageSettings = {
 lazy val wartRemoverSettings = {
   val wartRemoverWarning = {
     val warningWarts = Seq(
-      Wart.JavaSerializable,
+      //Wart.JavaSerializable,
       //Wart.StringPlusAny,
       Wart.AsInstanceOf,
       Wart.IsInstanceOf
@@ -32,7 +32,7 @@ lazy val wartRemoverSettings = {
       Wart.ArrayEquals,
       Wart.AnyVal,
       Wart.EitherProjectionPartial,
-      Wart.Enumeration,
+      //Wart.Enumeration,
       Wart.ExplicitImplicitTypes,
       Wart.FinalVal,
       Wart.JavaConversions,
@@ -64,16 +64,16 @@ lazy val wartRemoverSettings = {
 }
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc"   %% "bootstrap-frontend-play-27"    % "5.6.0",
-  "uk.gov.hmrc"   %% "govuk-template"                % "5.61.0-play-27",
-  "uk.gov.hmrc"   %% "play-ui"                       % "8.21.0-play-27",
-  "uk.gov.hmrc"   %% "play-partials"                 % "7.1.0-play-27",
+  "uk.gov.hmrc"   %% "bootstrap-frontend-play-27"    % "5.8.0",
+  "uk.gov.hmrc"   %% "govuk-template"                % "5.69.0-play-27",
+  "uk.gov.hmrc"   %% "play-ui"                       % "9.6.0-play-27",
+  "uk.gov.hmrc"   %% "play-partials"                 % "8.1.0-play-27",
   "uk.gov.hmrc"   %% "agent-kenshoo-monitoring"      % "4.7.0-play-27",
   "uk.gov.hmrc"   %% "agent-mtd-identifiers"         % "0.25.0-play-27",
-  "uk.gov.hmrc"   %% "mongo-caching"                 % "6.16.0-play-27",
-  "uk.gov.hmrc"   %% "play-conditional-form-mapping" % "1.6.0-play-27",
-  "uk.gov.hmrc"   %% "simple-reactivemongo"          % "7.31.0-play-27",
-  "uk.gov.hmrc"   %% "play-language"                 % "4.12.0-play-27",
+  "uk.gov.hmrc"   %% "mongo-caching"                 % "7.0.0-play-27",
+  "uk.gov.hmrc"   %% "play-conditional-form-mapping" % "1.9.0-play-27",
+  "uk.gov.hmrc"   %% "simple-reactivemongo"          % "8.0.0-play-27",
+  "uk.gov.hmrc"   %% "play-language"                 % "5.1.0-play-27",
   "org.typelevel" %% "cats-core"                     % "2.2.0"
 )
 
@@ -83,7 +83,7 @@ def testDeps(scope: String) = Seq(
   "org.mockito" % "mockito-core" % "3.4.6" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
   "com.github.tomakehurst" % "wiremock-jre8" % "2.23.2" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.22.0-play-27" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "5.0.0-play-27" % scope,
   "org.scalamock" %% "scalamock" % "4.4.0" % scope,
   "org.jsoup" % "jsoup" % "1.12.1" % scope
 )

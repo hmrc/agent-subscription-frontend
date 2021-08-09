@@ -58,6 +58,10 @@ POST        /money-laundering-application-details          uk.gov.hmrc.agentsubs
 
 GET         /money-laundering-compliance-incomplete        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsNotAppliedPage
 
+GET         /amls-details-not-found                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsDetailsNotFound
+
+GET         /amls-suspended-cancelled                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsRecordIneligibleStatus
+
 GET         /check-money-laundering-application            uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showCheckAmlsAlreadyAppliedForm
 POST        /check-money-laundering-application            uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitCheckAmlsAlreadyAppliedForm
 
