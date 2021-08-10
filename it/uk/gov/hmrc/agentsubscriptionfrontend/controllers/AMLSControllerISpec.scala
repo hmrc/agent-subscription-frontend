@@ -17,14 +17,15 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import java.time.LocalDate
-
 import org.jsoup.Jsoup
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
+import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.{Approved, Rejected}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.{givenAgentIsManuallyAssured, givenAgentIsNotManuallyAssured}
@@ -32,10 +33,12 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.{givenAmlsRecordFound, givenAmlsRecordNotFound}
 
 class AMLSControllerISpec extends BaseISpec {
 
   lazy val controller: AMLSController = app.injector.instanceOf[AMLSController]
+  val appConfig = app.injector.instanceOf[AppConfig]
 
   val utr = Utr("2000000000")
   val businessAddress =
@@ -46,6 +49,8 @@ class AMLSControllerISpec extends BaseISpec {
       Some("AddressLine4 A"),
       Some("AA11AA"),
       "GB")
+
+  val validAmlsRegistrationNumber = "XAML00000200000"
 
   trait Setup {
     implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(
@@ -524,6 +529,113 @@ class AMLSControllerISpec extends BaseISpec {
       redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
     }
 
+    "store AMLS form in temporary store when the AMLS body is HMRC and the registration number is valid" in new Setup {
+      val amlsBody = amlsBodies.getOrElse("HMRC", throw new Exception("Invalid AMLS code"))
+      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
+      givenAmlsRecordFound(validAmlsRegistrationNumber, Approved)
+      givenSubscriptionRecordCreated(
+        id,
+        record.copy(
+          amlsData = Some(AmlsData.registeredUserNoDataEntered
+            .copy(amlsDetails = Some(AmlsDetails(amlsBody, Right(RegisteredDetails(validAmlsRegistrationNumber, expiryDate))))))))
+
+      implicit val request = authenticatedRequest.withFormUrlEncodedBody(
+        "amlsCode"         -> "HMRC",
+        "membershipNumber" -> validAmlsRegistrationNumber,
+        "expiry.day"       -> expiryDay,
+        "expiry.month"     -> expiryMonth,
+        "expiry.year"      -> expiryYear,
+        "submit" -> "continue")
+
+      sessionStoreService.currentSession.changingAnswers = Some(false)
+
+      val result = await(controller.submitAmlsDetailsForm(request))
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
+    }
+
+    "redirect to /money-laundering-compliance-not-found if the AMLS body is HMRC and the dates do not match" in new Setup {
+
+      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
+      givenAmlsRecordFound(validAmlsRegistrationNumber, Approved)
+
+      val wrongDate = LocalDate.now().plusDays(4)
+
+      implicit val request = authenticatedRequest.withFormUrlEncodedBody(
+        "amlsCode"         -> "HMRC",
+        "membershipNumber" -> validAmlsRegistrationNumber,
+        "expiry.day"       -> s"${wrongDate.getDayOfMonth.toString}",
+        "expiry.month"     -> s"${wrongDate.getMonthValue.toString}",
+        "expiry.year"      -> s"${wrongDate.getYear.toString}",
+        "submit" -> "continue")
+
+      sessionStoreService.currentSession.changingAnswers = Some(false)
+
+      val result = await(controller.submitAmlsDetailsForm(request))
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.AMLSController.showAmlsDetailsNotFound().url
+    }
+
+    "redirect to /money-laundering-compliance-not-found if the AMLS body is HMRC and the status is Rejected" in new Setup {
+
+      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
+      givenAmlsRecordFound(validAmlsRegistrationNumber, Rejected)
+
+      implicit val request = authenticatedRequest.withFormUrlEncodedBody(
+        "amlsCode"         -> "HMRC",
+        "membershipNumber" -> validAmlsRegistrationNumber,
+        "expiry.day"       -> expiryDay,
+        "expiry.month"     -> expiryMonth,
+        "expiry.year"      -> expiryYear,
+        "submit" -> "continue")
+
+      sessionStoreService.currentSession.changingAnswers = Some(false)
+
+      val result = await(controller.submitAmlsDetailsForm(request))
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.AMLSController.showAmlsRecordIneligibleStatus().url
+    }
+
+    "redirect to /money-laundering-compliance-not-found if the AMLS body is HMRC and the registration number is not found" in new Setup {
+
+      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
+      givenAmlsRecordNotFound(validAmlsRegistrationNumber)
+
+      implicit val request = authenticatedRequest.withFormUrlEncodedBody(
+        "amlsCode"         -> "HMRC",
+        "membershipNumber" -> validAmlsRegistrationNumber,
+        "expiry.day"       -> expiryDay,
+        "expiry.month"     -> expiryMonth,
+        "expiry.year"      -> expiryYear,
+        "submit" -> "continue")
+
+      sessionStoreService.currentSession.changingAnswers = Some(false)
+
+      val result = await(controller.submitAmlsDetailsForm(request))
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.AMLSController.showAmlsDetailsNotFound().url
+    }
+
+    "redirect to /money-laundering-compliance-suspended if the AMLS body is HMRC and the registration record is marked as suspended" in new Setup {
+
+      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
+      givenAmlsRecordFound(validAmlsRegistrationNumber, Approved, Some(true))
+
+      implicit val request = authenticatedRequest.withFormUrlEncodedBody(
+        "amlsCode"         -> "HMRC",
+        "membershipNumber" -> validAmlsRegistrationNumber,
+        "expiry.day"       -> expiryDay,
+        "expiry.month"     -> expiryMonth,
+        "expiry.year"      -> expiryYear,
+        "submit" -> "continue")
+
+      sessionStoreService.currentSession.changingAnswers = Some(false)
+
+      val result = await(controller.submitAmlsDetailsForm(request))
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.AMLSController.showAmlsRecordIneligibleStatus().url
+    }
+
     "store AMLS form in temporary store after successful submission, and redirect to change answers when change flag is true" in new Setup {
       val amlsBody: String = amlsBodies.getOrElse("AAT", throw new Exception("Invalid AMLS code"))
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
@@ -705,6 +817,19 @@ class AMLSControllerISpec extends BaseISpec {
       result shouldNot containMessages(
         "error.moneyLaunderingCompliance.month.empty",
         "error.moneyLaunderingCompliance.year.empty")
+    }
+
+    "show validation error when the form is submitted with HMRC as AMLS body and the membership number fails the HMRC regex" in new Setup {
+      implicit val request = authenticatedRequest.withFormUrlEncodedBody(
+        "amlsCode"         -> "HMRC",
+        "membershipNumber" -> "12345",
+        "expiry.day"       -> expiryDay,
+        "expiry.month"     -> expiryMonth,
+        "expiry.year"      -> expiryYear)
+
+      val result = await(controller.submitAmlsDetailsForm(request))
+      status(result) shouldBe 200
+      result should containMessages("error.moneyLaunderingCompliance.membershipNumber.invalid")
     }
 
     "redirect to /task-list page if the agent is manually assured" in new Setup {
@@ -923,7 +1048,34 @@ class AMLSControllerISpec extends BaseISpec {
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
     }
+  }
 
+  "GET /money-laundering-details-not-found" should {
+    "display the correct content" in new Setup {
+      val result = await(controller.showAmlsDetailsNotFound(authenticatedRequest))
+
+      result should containMessages(
+        "amls-details-not-found.title",
+        "amls-details-not-found.p"
+      )
+
+      result should containLink("amls-details-not-found.button", routes.AMLSController.showAmlsDetailsForm().url)
+    }
+  }
+
+  "GET /money-laundering-not-eligible" should {
+    "display the correct content" in new Setup {
+      val result = await(controller.showAmlsRecordIneligibleStatus(authenticatedRequest))
+
+      result should containMessages(
+        "amls-ineligible-status.title",
+        "amls-ineligible-status.p1",
+        "amls-ineligible-status.li.1",
+        "amls-ineligible-status.li.2",
+        "amls-ineligible-status.li.3",
+      )
+      result should containLink("amls-ineligible-status.link", appConfig.amlsGuidanceLink)
+    }
   }
 
 }

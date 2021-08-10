@@ -17,11 +17,11 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.stubs
 
 import java.time.LocalDate
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
 import uk.gov.hmrc.agentmtdidentifiers.model.{Utr, Vrn}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.FormBundleStatus
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.encoding.UriPathEncoding.encodePathSegment
@@ -282,6 +282,33 @@ object AgentSubscriptionStub {
         )
       ).willReturn(aResponse().withStatus(status))
     )
+
+  def givenAmlsRecordFound(amlsRegistrationNumber: String, status: FormBundleStatus, suspended: Option[Boolean] = None): StubMapping =
+    stubFor(
+      get(
+        urlEqualTo(
+          s"/agent-subscription/amls-subscription/$amlsRegistrationNumber"
+        )
+      ).willReturn(aResponse().withBody(
+        s"""
+           |{
+           |"formBundleStatus": "$status",
+           |"safeId": "111234567890123",
+           |"currentRegYearStartDate": "2021-01-01",
+           |"currentRegYearEndDate": "${LocalDate.now().plusDays(2)}"""".stripMargin ++ suspended.map(x => s""",""" ++
+          s"""
+             |"suspended": $x """.stripMargin).getOrElse("") ++
+          """
+            |}""".stripMargin
+    ).withStatus(200)))
+
+  def givenAmlsRecordNotFound(amlsRegistrationNumber: String): StubMapping =
+    stubFor(
+      get(
+        urlEqualTo(
+          s"/agent-subscription/amls-subscription/$amlsRegistrationNumber"
+        )
+      ).willReturn(aResponse().withStatus(404)))
 
   private def subscriptionRequestFor(utr: Utr, request: SubscriptionRequest) = {
     val agency = request.agency

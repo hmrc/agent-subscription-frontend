@@ -2,11 +2,11 @@ package uk.gov.hmrc.agentsubscriptionfrontend.auth
 
 import com.kenshoo.play.metrics.Metrics
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.{Configuration, Environment}
 import play.api.mvc.Results._
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.RedirectUrlActions
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AuthProviderId

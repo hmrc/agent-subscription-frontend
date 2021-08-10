@@ -1,0 +1,22 @@
+@import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
+
+
+@this(mainTemplate: main_template)
+
+@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+
+@mainTemplate(appConfig, title =  Messages("amls-details-not-found.title"), bodyClasses = None) {
+
+  <h1 class="heading-xlarge">@Messages("amls-details-not-found.title")</h1>
+
+  <p>@Messages("amls-details-not-found.p")</p>
+
+  <a class="button margin-top-10" href="@routes.AMLSController.showAmlsDetailsForm()">@Messages("amls-details-not-found.button")</a>
+
+}
+
+
+
+

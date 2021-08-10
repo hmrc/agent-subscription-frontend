@@ -63,7 +63,6 @@ errorPrefixTemplate: error_prefix,
 
 @mainTemplate(appConfig, title =  errorPrefixTemplate(amlsForm) + Messages("moneyLaunderingCompliance.title"), bodyClasses = None) {
 
-
 <a href="@mayBeGoBackUrl.getOrElse(routes.AMLSController.showAmlsRegisteredPage.url)" class="link-back">@Messages("button.back")</a>
 
     @if(amlsForm.hasErrors) {
@@ -109,7 +108,7 @@ errorPrefixTemplate: error_prefix,
 
 
             @uiDateFieldsCustom(
-            dateFormWithRefinedErrors,
+            dateFormWithRefinedErrors.copy(errors = dateFormWithRefinedErrors.errors.filterNot(error => error.key.contains("membershipNumber") || error.key.contains("amlsCode"))),
             "expiry",
             '_legend -> Messages("moneyLaunderingCompliance.expiry.title"),
             '_inputHint -> Messages("moneyLaunderingCompliance.expiry.hint"),

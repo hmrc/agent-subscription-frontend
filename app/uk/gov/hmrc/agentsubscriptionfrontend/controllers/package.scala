@@ -156,13 +156,22 @@ package object controllers extends Logging {
           .verifying("error.check-amlsAppliedFor-value.invalid", a => a.contains("yes") || a.contains("no")))(a =>
           RadioInputAnswer.apply(a.getOrElse("")))(a => Some(RadioInputAnswer.unapply(a))))
 
+    private val HMRC_AMLS_ERROR = "error.moneyLaunderingCompliance.membershipNumber.invalid"
+
     def amlsForm(bodies: Set[String]): Form[AMLSForm] =
       Form[AMLSForm](
         mapping(
           "amlsCode"         -> amlsCode(bodies),
           "membershipNumber" -> membershipNumber,
           "expiry"           -> expiryDate
-        )(AMLSForm.apply)(AMLSForm.unapply))
+        )(AMLSForm.apply)(AMLSForm.unapply) verifying (HMRC_AMLS_ERROR, { (o: AMLSForm) =>
+          o match {
+            case AMLSForm(code, number, _) if code == "HMRC" => number.matches(amlsRegex)
+            case AMLSForm(_, _, _)                           => true
+          }
+        }))
+
+    private def amlsRegex = "X[A-Z]ML00000[0-9]{6}"
 
     def amlsPendingForm(implicit messages: Messages): Form[AmlsPendingForm] =
       Form[AmlsPendingForm](
@@ -196,7 +205,11 @@ package object controllers extends Logging {
       val refinedMessage = refineErrors(dateFieldErrors).getOrElse("")
 
       dateFieldErrors match {
-        case Nil => form
+        case Nil =>
+          form.copy(errors = form.errors collect {
+            case FormError(_, message, _) if message == Seq(HMRC_AMLS_ERROR) => FormError("membershipNumber", List(HMRC_AMLS_ERROR))
+            case a: FormError                                                => a
+          })
         case _ =>
           form.copy(errors = form.errors.map { error =>
             if (error.key.contains("expiry")) {
@@ -281,5 +294,4 @@ package object controllers extends Logging {
         )
     )
   }
-
 }

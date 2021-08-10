@@ -93,7 +93,7 @@ error.saAgentCode.length=Rhaid i’r cod asiant Hunanasesiad fod yn 6 o gymeriad
 error.moneyLaunderingCompliance.amlscode.empty=Dewiswch enw eich corff goruchwylio gwyngalchu arian o’r rhestr
 error.moneyLaunderingCompliance.amlscode.invalid=Dewiswch enw eich corff goruchwylio gwyngalchu arian o’r rhestr
 error.moneyLaunderingCompliance.membershipNumber.empty=Nodwch eich rhif aelodaeth
-error.moneyLaunderingCompliance.membershipNumber.invalid=Nodwch eich rhif aelodaeth
+error.moneyLaunderingCompliance.membershipNumber.invalid=Enter a membership number in the correct format
 error.moneyLaunderingCompliance.date.empty=Nodwch y dyddiad y mae’ch aelodaeth yn dod i ben
 error.moneyLaunderingCompliance.day.empty=Rhaid i’r dyddiad y daw’ch aelodaeth i ben gynnwys diwrnod 
 error.moneyLaunderingCompliance.day.month.empty=Rhaid i’r dyddiad y daw’ch aelodaeth i ben gynnwys diwrnod a mis
@@ -459,6 +459,23 @@ moneyLaunderingCompliance.expiry.day.title=Diwrnod
 moneyLaunderingCompliance.expiry.month.title=Mis
 moneyLaunderingCompliance.expiry.year.title=Blwyddyn
 moneyLaunderingCompliance.continue=Yn eich blaen
+
+# Amls Not Found
+amls-details-not-found.title=We cannot find your membership details
+amls-details-not-found.p=Check your membership number and renewal date and try again.
+amls-details-not-found.button=Try again
+
+# Amls Ineligible status
+amls-ineligible-status.title=You cannot create an agent services account at this time
+amls-ineligible-status.p1=This is because your Anti Money Laundering Supervision registration has been either:
+amls-ineligible-status.li.1=suspended
+amls-ineligible-status.li.2=cancelled
+amls-ineligible-status.li.3=rejected
+amls-ineligible-status.p2=or it is either:
+amls-ineligible-status.li.4=pending
+amls-ineligible-status.li.5=under appeal
+amls-ineligible-status.p3=or the registration has expired or you de-registered.
+amls-ineligible-status.link=Read about how to challenge an HMRC decision to refuse registration (opens in a new tab)
 
 # Pending AMLS Details page
 amls.pending.appliedOn.title=Pryd gwnaethoch gais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian?

@@ -56,6 +56,9 @@ trait AppConfig {
   def routeToSwitchLanguage: String => Call
   val companiesHouseUrl: String
   val mongoDbExpireAfterSeconds: Int
+  val signinUrl: String
+  val loginContinueUrl: String
+  val amlsGuidanceLink: String
 }
 
 @Singleton
@@ -124,4 +127,9 @@ class FrontendAppConfig @Inject()(servicesConfig: ServicesConfig) extends AppCon
 
   override val companiesHouseUrl: String = getConf("companies-house.url")
   override val mongoDbExpireAfterSeconds: Int = servicesConfig.getInt("mongodb.session.expireAfterSeconds")
+  override val signinUrl: String = servicesConfig.getString("bas-gateway.url")
+  override val loginContinueUrl: String = servicesConfig.getString("login.continue")
+
+  override val amlsGuidanceLink: String = "https://www.gov.uk/guidance/money-laundering-regulations-appeals-and-penalties"
+
 }
