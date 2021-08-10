@@ -1050,7 +1050,7 @@ class AMLSControllerISpec extends BaseISpec {
     }
   }
 
-  "GET /amls-details-not-found" should {
+  "GET /money-laundering-details-not-found" should {
     "display the correct content" in new Setup {
       val result = await(controller.showAmlsDetailsNotFound(authenticatedRequest))
 
@@ -1063,7 +1063,7 @@ class AMLSControllerISpec extends BaseISpec {
     }
   }
 
-  "GET /amls-suspended-cancelled" should {
+  "GET /money-laundering-not-eligible" should {
     "display the correct content" in new Setup {
       val result = await(controller.showAmlsRecordIneligibleStatus(authenticatedRequest))
 
@@ -1073,10 +1073,6 @@ class AMLSControllerISpec extends BaseISpec {
         "amls-ineligible-status.li.1",
         "amls-ineligible-status.li.2",
         "amls-ineligible-status.li.3",
-        "amls-ineligible-status.p2",
-        "amls-ineligible-status.li.4",
-        "amls-ineligible-status.li.5",
-        "amls-ineligible-status.p3"
       )
       result should containLink("amls-ineligible-status.link", appConfig.amlsGuidanceLink)
     }

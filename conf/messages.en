@@ -467,14 +467,10 @@ amls-details-not-found.button=Try again
 
 # Amls Ineligible status
 amls-ineligible-status.title=You cannot create an agent services account at this time
-amls-ineligible-status.p1=This is because your Anti Money Laundering Supervision registration has been either:
-amls-ineligible-status.li.1=suspended
-amls-ineligible-status.li.2=cancelled
-amls-ineligible-status.li.3=rejected
-amls-ineligible-status.p2=or it is either:
-amls-ineligible-status.li.4=pending
-amls-ineligible-status.li.5=under appeal
-amls-ineligible-status.p3=or the registration has expired or you de-registered.
+amls-ineligible-status.p1=This is because your anti-money laundering supervision registration:
+amls-ineligible-status.li.1=has been suspended, cancelled or rejected
+amls-ineligible-status.li.2=is under appeal
+amls-ineligible-status.li.3=has stopped because it expired or you deregistered
 amls-ineligible-status.link=Read about how to challenge an HMRC decision to refuse registration (opens in a new tab)
 
 # Pending AMLS Details page
