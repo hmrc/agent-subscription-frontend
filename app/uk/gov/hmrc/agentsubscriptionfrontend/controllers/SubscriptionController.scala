@@ -125,7 +125,7 @@ class SubscriptionController @Inject()(
         isSubscribedToAgentServices = false,
         isSubscribedToETMP = false,
         agencyAddress,
-        agencyEmail)), clientCount = Some(clientCount))).map(_ => Agency(
+        agencyEmail, registration.safeId)), clientCount = Some(clientCount))).map(_ => Agency(
       agencyName.getOrElse(registration.taxpayerName.getOrElse(throw new Exception("taxpayer name should be defined"))),
       DesAddress.fromBusinessAddress(agencyAddress),
       agencyEmail.getOrElse(throw new Exception("contact email address should be defined"))))

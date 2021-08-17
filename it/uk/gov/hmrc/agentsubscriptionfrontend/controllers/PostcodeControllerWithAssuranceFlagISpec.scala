@@ -69,7 +69,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
                 businessType = Some(businessType),
                 postcode = Some(Postcode(validPostcode)),
                 nino = None,
-                registration = Some(testRegistration.copy(emailAddress = Some("someone@example.com"))),
+                registration = Some(testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)),
               isMAA = Some(false)))
         }
       }
@@ -94,7 +94,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
                 businessType = Some(businessType),
                 postcode = Some(Postcode(validPostcode)),
                 nino = None,
-                registration = Some(testRegistration.copy(emailAddress = Some("someone@example.com"))),
+                registration = Some(testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)),
               isMAA = Some(false)))
         }
       }
@@ -117,7 +117,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
           redirectLocation(result) shouldBe Some(routes.CompanyRegistrationController.showCompanyRegNumberForm().url)
 
           sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
-            testRegistration.copy(emailAddress = Some("someone@example.com")))
+            testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None))
 
       }
     }
@@ -137,7 +137,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
         redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showConfirmBusinessForm().url)
 
         sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
-          testRegistration.copy(emailAddress = Some("someone@example.com")))
+          testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None))
 
       }
 
@@ -155,7 +155,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
         redirectLocation(result) shouldBe Some(routes.CompanyRegistrationController.showCompanyRegNumberForm().url)
 
         sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
-          testRegistration.copy(emailAddress = Some("someone@example.com")))
+          testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None))
 
       }
     }

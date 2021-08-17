@@ -52,7 +52,7 @@ object TestData {
 
   val agentSessionForLimitedPartnership: AgentSession = agentSession.copy(businessType = Some(Llp))
 
-  val testRegistration = Registration(Some(registrationName), isSubscribedToAgentServices = false, isSubscribedToETMP = false, businessAddress, Some("test@gmail.com"))
+  val testRegistration = Registration(Some(registrationName), isSubscribedToAgentServices = false, isSubscribedToETMP = false, businessAddress, Some("test@gmail.com"), Some("safeId"))
 
   val id = AuthProviderId("12345-credId")
 
@@ -72,7 +72,8 @@ object TestData {
           isSubscribedToAgentServices = false,
           isSubscribedToETMP = true,
           businessAddress,
-          Some("test@gmail.com"))),
+          Some("test@gmail.com"),
+          Some("safeId"))),
         nino = None,
         companyRegistrationNumber = Some(CompanyRegistrationNumber("01234567")),
         dateOfBirth = None,
@@ -104,7 +105,8 @@ object TestData {
           isSubscribedToAgentServices = true,
           isSubscribedToETMP = true,
           businessAddress,
-          Some("test@gmail.com")))
+          Some("test@gmail.com"),
+        Some("safeId")))
     ),
     amlsData = Some(AmlsData(
         amlsRegistered = true,
@@ -142,7 +144,8 @@ object TestData {
       Postcode(validPostcode),
       Some(Registration(Some(newBusinessName), isSubscribedToAgentServices = true, isSubscribedToETMP = true,
         businessAddress,
-        Some("test@gmail.com")))))
+        Some("test@gmail.com"),
+        Some("safeId")))))
 
   def completeJourneyRecordWithUpdatedBusinessEmail(newBusinessEmail: String): SubscriptionJourneyRecord =
     completeJourneyRecordNoMappings.copy(businessDetails = BusinessDetails(SoleTrader,
@@ -150,6 +153,7 @@ object TestData {
       Postcode(validPostcode),
       Some(Registration(Some(registrationName), isSubscribedToAgentServices = true, isSubscribedToETMP = true,
         businessAddress,
-        Some(newBusinessEmail)))))
+        Some(newBusinessEmail),
+        Some("safeId")))))
 
 }

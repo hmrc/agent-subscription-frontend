@@ -159,7 +159,7 @@ class AMLSController @Inject()(
           case Some(amlsDetails) =>
             amlsDetails.details match {
               case Left(PendingDetails(_)) => Ok(amlsDetailsTemplate(amlsForm(amlsBodies.keySet), amlsBodies))
-              case Right(RegisteredDetails(membershipNumber, membershipExpiresOn)) =>
+              case Right(RegisteredDetails(membershipNumber, membershipExpiresOn, _, _)) =>
                 val form: Map[String, String] = Map(
                   "amlsCode"         -> amlsBodies.find(_._2 == amlsDetails.supervisoryBody).map(_._1).getOrElse(""),
                   "membershipNumber" -> membershipNumber,
@@ -190,7 +190,7 @@ class AMLSController @Inject()(
                 amlsService.validateAmlsSubscription(validForm).flatMap {
                   case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus)
                   case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound)
-                  case ResultOK => {
+                  case ResultOK(safeId) => {
                     val supervisoryBodyData =
                       amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))
 
@@ -198,8 +198,15 @@ class AMLSController @Inject()(
                     updateAmlsJourneyRecord(
                       agent,
                       amlsData =>
-                        Some(amlsData.copy(amlsDetails =
-                          Some(AmlsDetails(supervisoryBodyData, Right(RegisteredDetails(validForm.membershipNumber, validForm.expiry))))))
+                        Some(amlsData.copy(amlsDetails = Some(AmlsDetails(
+                          supervisoryBodyData,
+                          Right(RegisteredDetails(
+                            membershipNumber = validForm.membershipNumber,
+                            membershipExpiresOn = validForm.expiry,
+                            amlsSafeId = safeId,
+                            agentBPRSafeId = agent.getMandatorySubscriptionRecord.businessDetails.registration.flatMap(_.safeId)
+                          ))
+                        ))))
                     ).map(
                       _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsDetailsForm()))
                     )
@@ -244,7 +251,7 @@ class AMLSController @Inject()(
                   "appliedOn.year"  -> appliedOn.getYear.toString
                 )
                 Ok(amlsPendingDetailsTemplate(amlsPendingForm.bind(form)))
-              case Right(RegisteredDetails(_, _)) => Ok(amlsPendingDetailsTemplate(amlsPendingForm))
+              case Right(RegisteredDetails(_, _, _, _)) => Ok(amlsPendingDetailsTemplate(amlsPendingForm))
             }
           case _ => Ok(amlsPendingDetailsTemplate(amlsPendingForm))
         }

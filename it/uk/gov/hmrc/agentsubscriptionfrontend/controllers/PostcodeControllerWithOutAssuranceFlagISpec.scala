@@ -45,7 +45,7 @@ class PostcodeControllerWithOutAssuranceFlagISpec extends BaseISpec with Session
             routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
 
           sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
-            testRegistration.copy(emailAddress = Some("someone@example.com")))
+            testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None))
         }
       }
 
@@ -65,7 +65,7 @@ class PostcodeControllerWithOutAssuranceFlagISpec extends BaseISpec with Session
           redirectLocation(result) shouldBe Some(routes.VatDetailsController.showRegisteredForVatForm().url)
 
           sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
-            testRegistration.copy(emailAddress = Some("someone@example.com")))
+            testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None))
         }
       }
     }
@@ -87,7 +87,7 @@ class PostcodeControllerWithOutAssuranceFlagISpec extends BaseISpec with Session
           redirectLocation(result) shouldBe Some(routes.CompanyRegistrationController.showCompanyRegNumberForm().url)
 
           sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
-            testRegistration.copy(emailAddress = Some("someone@example.com")))
+            testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None))
         }
       }
 

@@ -30,18 +30,18 @@ import scala.concurrent.{ExecutionContext, Future}
 class AmlsService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector) {
 
   def validateAmlsSubscription(amlsForm: AMLSForm)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmlsValidationResult] =
-    if (amlsForm.amlsCode != "HMRC") Future successful ResultOK
+    if (amlsForm.amlsCode != "HMRC") Future successful ResultOK(None)
     else {
       agentSubscriptionConnector.getAmlsSubscriptionRecord(amlsForm.membershipNumber).map {
         case Some(amlsRecord) =>
           if (amlsRecord.suspended.contains(true)) AmlsSuspended
           else
             amlsRecord.formBundleStatus match {
-              case Pending => ResultOK
+              case Pending => ResultOK(Some(amlsRecord.safeId))
               case Approved | ApprovedWithConditions =>
                 amlsRecord.currentRegYearEndDate.map(_ == amlsForm.expiry) match {
                   case Some(false) | None => DateNotMatched
-                  case Some(true)         => ResultOK
+                  case Some(true)         => ResultOK(Some(amlsRecord.safeId))
                 }
               case status => {
                 logger.warn(s"amls record returned an ineligible status $status")
@@ -57,7 +57,7 @@ object AmlsValidationResult {
 
   sealed trait AmlsValidationResult
 
-  case object ResultOK extends AmlsValidationResult
+  case class ResultOK(amlsSafeId: Option[String]) extends AmlsValidationResult
 
   case object RecordNotFound extends AmlsValidationResult
 
