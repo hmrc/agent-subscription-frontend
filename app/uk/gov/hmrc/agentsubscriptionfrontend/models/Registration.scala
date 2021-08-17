@@ -45,7 +45,8 @@ case class Registration(
   isSubscribedToAgentServices: Boolean, // TODO remove?
   isSubscribedToETMP: Boolean, // TODO remove?
   address: BusinessAddress,
-  emailAddress: Option[String])
+  emailAddress: Option[String],
+  safeId: Option[String])
 
 object Registration {
 

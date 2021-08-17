@@ -35,7 +35,13 @@ class CYACheckResultSpec extends UnitSpec {
   val amlsData = AmlsData.registeredUserNoDataEntered
 
   val testRegistration =
-    Registration(Some(registrationName), isSubscribedToAgentServices = false, isSubscribedToETMP = false, businessAddress, Some("test@gmail.com"))
+    Registration(
+      Some(registrationName),
+      isSubscribedToAgentServices = false,
+      isSubscribedToETMP = false,
+      businessAddress,
+      Some("test@gmail.com"),
+      Some("safeId"))
 
   "CYACheckResult" should {
 

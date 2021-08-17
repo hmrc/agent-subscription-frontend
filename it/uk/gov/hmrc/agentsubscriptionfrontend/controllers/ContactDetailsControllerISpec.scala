@@ -40,7 +40,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 isSubscribedToAgentServices = false,
                 isSubscribedToETMP = true,
                 businessAddress,
-                Some("test@gmail.com")))
+                Some("test@gmail.com"),
+                Some("safeId")))
             )
           ))
 
@@ -79,7 +80,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 isSubscribedToAgentServices = false,
                 isSubscribedToETMP = true,
                 businessAddress,
-                Some("test@gmail.com")))
+                Some("test@gmail.com"),
+                Some("safeId")))
             ),
             contactEmailData = Some(ContactEmailData(true, Some("test@gmail.com")))
           ))
@@ -118,7 +120,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 isSubscribedToAgentServices = false,
                 isSubscribedToETMP = true,
                 businessAddress,
-                None)
+                None,
+                Some("safeId"))
               )
             )))
 
@@ -144,7 +147,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com"))
+            Some("email@email.com"),
+            Some("safeId"))
           )
         ))
 
@@ -174,7 +178,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           ))))
 
       givenSubscriptionJourneyRecordExists(id, sjr)
@@ -201,7 +206,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           ))))
 
       givenSubscriptionJourneyRecordExists(id, sjr)
@@ -228,7 +234,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           )
           ))))
 
@@ -255,7 +262,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           )
           )),
         contactEmailData = Some(ContactEmailData(true, None))))
@@ -286,7 +294,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
               isSubscribedToAgentServices = false,
               isSubscribedToETMP = true,
               businessAddress,
-              Some("email@email.com")
+              Some("email@email.com"),
+              Some("safeId")
             )
             ))))
 
@@ -313,7 +322,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
           isSubscribedToAgentServices = false,
           isSubscribedToETMP = true,
           businessAddress,
-          Some("email@email.com")
+          Some("email@email.com"),
+          Some("safeId")
         )
         )),
       contactEmailData = Some(ContactEmailData(true, None)))
@@ -328,7 +338,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
           isSubscribedToAgentServices = false,
           isSubscribedToETMP = true,
           businessAddress,
-          Some("email@email.com")
+          Some("email@email.com"),
+          Some("safeId")
         )
         )),
       contactEmailData = Some(ContactEmailData(true, Some("new@email.com"))))
@@ -352,7 +363,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           )
           )),
         contactEmailData = Some(ContactEmailData(true, None)))
@@ -380,7 +392,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           )
           )),
         contactEmailData = Some(ContactEmailData(true, None)))
@@ -408,7 +421,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           )
           )),
         contactEmailData = Some(ContactEmailData(true, None)))
@@ -444,7 +458,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 isSubscribedToAgentServices = false,
                 isSubscribedToETMP = true,
                 businessAddress,
-                Some("test@gmail.com")))
+                Some("test@gmail.com"),
+                Some("safeId")))
             )
           ))
 
@@ -482,7 +497,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 isSubscribedToAgentServices = false,
                 isSubscribedToETMP = true,
                 businessAddress,
-                Some("test@gmail.com")))
+                Some("test@gmail.com"),
+                Some("safeId")))
             ),
             contactEmailData = Some(ContactEmailData(true, Some("test@gmail.com"))),
             contactTradingNameData = Some(ContactTradingNameData(true, Some(registrationName)))
@@ -521,7 +537,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 isSubscribedToAgentServices = false,
                 isSubscribedToETMP = true,
                 businessAddress,
-                None)
+                None,
+                Some("safeId"))
               )
             )))
 
@@ -547,7 +564,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com"))
+            Some("email@email.com"),
+            Some("safeId"))
           )
         ))
 
@@ -577,7 +595,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           ))))
 
       givenSubscriptionJourneyRecordExists(id, sjr)
@@ -604,7 +623,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           ))))
 
       givenSubscriptionJourneyRecordExists(id, sjr)
@@ -631,7 +651,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
               isSubscribedToAgentServices = false,
               isSubscribedToETMP = true,
               businessAddress,
-              Some("email@email.com")
+              Some("email@email.com"),
+              Some("safeId")
             )
             ))))
 
@@ -660,7 +681,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 isSubscribedToAgentServices = false,
                 isSubscribedToETMP = true,
                 businessAddress,
-                Some("test@gmail.com")))
+                Some("test@gmail.com"),
+                Some("safeId")))
             )
           ))
 
@@ -698,7 +720,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 isSubscribedToAgentServices = false,
                 isSubscribedToETMP = true,
                 businessAddress,
-                Some("test@gmail.com")))
+                Some("test@gmail.com"),
+                Some("safeId")))
             ),
             contactEmailData = Some(ContactEmailData(true, Some("test@gmail.com"))),
             contactTradingNameData = Some(ContactTradingNameData(true, Some(registrationName))),
@@ -759,7 +782,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com"))
+            Some("email@email.com"),
+            Some("safeId"))
           )
         ))
 
@@ -789,7 +813,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           ))))
 
       givenSubscriptionJourneyRecordExists(id, sjr)
@@ -816,7 +841,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             isSubscribedToAgentServices = false,
             isSubscribedToETMP = true,
             businessAddress,
-            Some("email@email.com")
+            Some("email@email.com"),
+            Some("safeId")
           ))))
 
       givenSubscriptionJourneyRecordExists(id, sjr)
@@ -843,7 +869,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
               isSubscribedToAgentServices = false,
               isSubscribedToETMP = true,
               businessAddress,
-              Some("email@email.com")
+              Some("email@email.com"),
+              Some("safeId")
             )
             ))))
 

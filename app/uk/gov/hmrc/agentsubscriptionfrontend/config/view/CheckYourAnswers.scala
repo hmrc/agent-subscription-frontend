@@ -100,7 +100,7 @@ object CheckYourAnswers {
         amlsDetails.details match {
           case Left(PendingDetails(appliedOn)) =>
             List(appliedOn.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))
-          case Right(RegisteredDetails(membershipNumber, membershipExpiresOn)) =>
+          case Right(RegisteredDetails(membershipNumber, membershipExpiresOn, _, _)) =>
             List(
               amlsDetails.supervisoryBody,
               membershipNumber,
@@ -115,7 +115,7 @@ object CheckYourAnswers {
       case Some(amlsDetails) =>
         amlsDetails.details match {
           case Left(PendingDetails(appliedOn)) => Messages("checkAnswers.amlsDetails.pending.label")
-          case Right(RegisteredDetails(membershipNumber, membershipExpiresOn)) =>
+          case Right(RegisteredDetails(membershipNumber, membershipExpiresOn, _, _)) =>
             Messages("checkAnswers.amlsDetails.label")
         }
       case None => throw new Exception("AMLS details incomplete")
