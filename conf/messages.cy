@@ -193,7 +193,7 @@ existingJourneyFound.p3=I orffen y cam hwn, mewngofnodwch eto gyda’r Dynodydd 
 
 #Task list
 task-list.header=Creu cyfrif gwasanaethau asiant
-task-list.subheader=Cwblhewch bob adran yn ei thro. Gallwch gadw’ch cynnydd wrth fynd yn eich blaen.
+task-list.subheader=Complete each section in turn. You can save your progress as you go. Your details will be saved for 30 days.
 task-list.1.number=1.
 task-list.amlsTask.header=Nodwch eich manylion cydymffurfiad gwyngalchu arian
 task-list.amlsSubTask=Nodwch eich manylion cydymffurfiad gwyngalchu arian
@@ -206,8 +206,8 @@ task-list.3.number=3.
 task-list.mappingTask.header=Copïwch ar draws eich perthnasoedd presennol â chleientiaid
 task-list.mappingSubTask=Copïwch eich cleientiaid Hunanasesiad a TAW presennol ar draws i’ch cyfrif newydd
 task-list.4.number=4.
-task-list.createIDTask.header=Crëwch eich Dynodydd Defnyddiwr (ID) newydd
-task-list.createIDSubTask=Crëwch eich Dynodydd Defnyddiwr (ID) ar gyfer eich cyfrif gwasanaethau asiant
+task-list.createIDTask.header=Create your new Government Gateway user ID
+task-list.createIDSubTask=Create your Government Gateway user ID for your agent services account
 task-list.5.number=5.
 task-list.checkAnswersTask.header=Gwiriwch eich atebion a chrëwch eich cyfrif
 task-list.checkAnswersSubTask=Gallwch wirio’ch atebion ar ôl i chi gwblhau’r adrannau eraill.

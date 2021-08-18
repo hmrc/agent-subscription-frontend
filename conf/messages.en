@@ -193,7 +193,7 @@ existingJourneyFound.p3=To finish this step, sign in again with the user ID you 
 
 #Task list
 task-list.header=Create an agent services account
-task-list.subheader=Complete each section in turn. You can save your progress as you go. Your details will be saved for 30 days.
+task-list.subheader=You must finish each section before you can go on to the next one. You can save your progress as you go. Your details will be saved for 30 days.
 task-list.1.number=1.
 task-list.amlsTask.header=Enter your money laundering compliance details
 task-list.amlsSubTask=Enter your money laundering compliance details
@@ -206,8 +206,8 @@ task-list.3.number=3.
 task-list.mappingTask.header=Copy across your existing client relationships
 task-list.mappingSubTask=Copy across VAT and Self Assessment clients to your new account
 task-list.4.number=4.
-task-list.createIDTask.header=Create your new user ID
-task-list.createIDSubTask=Create your user ID for your agent services account
+task-list.createIDTask.header=Create your new Government Gateway user ID
+task-list.createIDSubTask=Create your Government Gateway user ID for your agent services account
 task-list.5.number=5.
 task-list.checkAnswersTask.header=Check your answers and create your account
 task-list.checkAnswersSubTask=You can check your answers once you have completed the other sections.
