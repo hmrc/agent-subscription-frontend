@@ -93,7 +93,7 @@ error.saAgentCode.length=Rhaid i’r cod asiant Hunanasesiad fod yn 6 o gymeriad
 error.moneyLaunderingCompliance.amlscode.empty=Dewiswch enw eich corff goruchwylio gwyngalchu arian o’r rhestr
 error.moneyLaunderingCompliance.amlscode.invalid=Dewiswch enw eich corff goruchwylio gwyngalchu arian o’r rhestr
 error.moneyLaunderingCompliance.membershipNumber.empty=Nodwch eich rhif aelodaeth
-error.moneyLaunderingCompliance.membershipNumber.invalid=Enter a membership number in the correct format
+error.moneyLaunderingCompliance.membershipNumber.invalid=Nodwch rif aelodaeth yn y fformat cywir
 error.moneyLaunderingCompliance.date.empty=Nodwch y dyddiad y mae’ch aelodaeth yn dod i ben
 error.moneyLaunderingCompliance.day.empty=Rhaid i’r dyddiad y daw’ch aelodaeth i ben gynnwys diwrnod 
 error.moneyLaunderingCompliance.day.month.empty=Rhaid i’r dyddiad y daw’ch aelodaeth i ben gynnwys diwrnod a mis
@@ -193,7 +193,7 @@ existingJourneyFound.p3=I orffen y cam hwn, mewngofnodwch eto gyda’r Dynodydd 
 
 #Task list
 task-list.header=Creu cyfrif gwasanaethau asiant
-task-list.subheader=Complete each section in turn. You can save your progress as you go. Your details will be saved for 30 days.
+task-list.subheader=Llenwch bob adran yn ei thro. Gallwch gadw eich manylion wrth i chi fynd yn eich blaen. Cedwir eich manylion am 30 diwrnod.
 task-list.1.number=1.
 task-list.amlsTask.header=Nodwch eich manylion cydymffurfiad gwyngalchu arian
 task-list.amlsSubTask=Nodwch eich manylion cydymffurfiad gwyngalchu arian
@@ -206,8 +206,8 @@ task-list.3.number=3.
 task-list.mappingTask.header=Copïwch ar draws eich perthnasoedd presennol â chleientiaid
 task-list.mappingSubTask=Copïwch eich cleientiaid Hunanasesiad a TAW presennol ar draws i’ch cyfrif newydd
 task-list.4.number=4.
-task-list.createIDTask.header=Create your new Government Gateway user ID
-task-list.createIDSubTask=Create your Government Gateway user ID for your agent services account
+task-list.createIDTask.header=Creu eich Dynodydd Defnyddiwr (ID) newydd ar gyfer Porth y Llywodraeth
+task-list.createIDSubTask=Creu eich Dynodydd Defnyddiwr (ID) Porth y Llywodraeth ar gyfer eich cyfrif gwasanaethau asiant
 task-list.5.number=5.
 task-list.checkAnswersTask.header=Gwiriwch eich atebion a chrëwch eich cyfrif
 task-list.checkAnswersSubTask=Gallwch wirio’ch atebion ar ôl i chi gwblhau’r adrannau eraill.
@@ -397,7 +397,7 @@ subscriptionComplete.button.continueToASAccount=Ewch i’ch cyfrif gwasanaethau 
 button.startAgain=Rhoi cynnig arall arni
 button.continue=Yn eich blaen
 button.saveContinue=Cadw ac yn eich blaen
-button.saveComeBackLater=Save as draft
+button.saveComeBackLater=Cadw ar ffurf drafft
 button.yes=Iawn
 button.no=Na
 button.createAccount=Creu cyfrif
@@ -461,21 +461,21 @@ moneyLaunderingCompliance.expiry.year.title=Blwyddyn
 moneyLaunderingCompliance.continue=Yn eich blaen
 
 # Amls Not Found
-amls-details-not-found.title=We cannot find your membership details
-amls-details-not-found.p=Check your membership number and renewal date and try again.
-amls-details-not-found.button=Try again
+amls-details-not-found.title=Ni allwn ddod o hyd i fanylion eich aelodaeth
+amls-details-not-found.p=Gwiriwch eich rhif aelodaeth a’ch dyddiad adnewyddu, a rhowch gynnig arall arni.
+amls-details-not-found.button=Rhowch gynnig arall arni
 
 # Amls Ineligible status
-amls-ineligible-status.title=You cannot create an agent services account at this time
-amls-ineligible-status.p1=This is because your Anti Money Laundering Supervision registration has been either:
-amls-ineligible-status.li.1=suspended
-amls-ineligible-status.li.2=cancelled
-amls-ineligible-status.li.3=rejected
-amls-ineligible-status.p2=or it is either:
-amls-ineligible-status.li.4=pending
-amls-ineligible-status.li.5=under appeal
-amls-ineligible-status.p3=or the registration has expired or you de-registered.
-amls-ineligible-status.link=Read about how to challenge an HMRC decision to refuse registration (opens in a new tab)
+amls-ineligible-status.title=Ni allwch greu cyfrif gwasanaethau asiant ar hyn o bryd
+amls-ineligible-status.p1=Mae hyn gan fod eich cofrestriad Goruchwyliaeth Gwrth-wyngalchu Arian naill ai:
+amls-ineligible-status.li.1=wedi’i ohirio
+amls-ineligible-status.li.2=wedi’i ganslo
+amls-ineligible-status.li.3=wedi’i wrthod
+amls-ineligible-status.p2=neu mae naill ai:
+amls-ineligible-status.li.4=ar y gweill
+amls-ineligible-status.li.5=yn destun apêl
+amls-ineligible-status.p3=neu mae’r cofrestriad wedi dod i ben neu rydych wedi dadgofrestru.
+amls-ineligible-status.link=Darllenwch sut i herio penderfyniad CThEM i wrthod cofrestriad (yn agor tab newydd)
 
 # Pending AMLS Details page
 amls.pending.appliedOn.title=Pryd gwnaethoch gais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian?
