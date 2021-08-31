@@ -28,7 +28,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.{Approved, Rejected}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.{givenAgentIsManuallyAssured, givenAgentIsNotManuallyAssured}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.givenAgentIsNotManuallyAssured
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenNoSubscriptionJourneyRecordExists, givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
@@ -461,15 +461,6 @@ class AMLSControllerISpec extends BaseISpec {
       elForm.attr("method") shouldBe "POST"
     }
 
-    "redirect to /task-list page if the agent is manually assured" in new Setup {
-      givenAgentIsManuallyAssured(utr.value)
-
-      val result = await(controller.showAmlsDetailsForm(authenticatedRequest))
-
-      status(result) shouldBe 303
-      redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
-    }
-
     "pre-populate amls form if they are coming from /check_answers and also go to /check-money-laundering-compliance page when user clicks on 'Go Back' link" in
       new Setup {
       def minimalSubscriptionJourneyRecordWithAmls(authProviderId: AuthProviderId) =
@@ -831,15 +822,6 @@ class AMLSControllerISpec extends BaseISpec {
       status(result) shouldBe 200
       result should containMessages("error.moneyLaunderingCompliance.membershipNumber.invalid")
     }
-
-    "redirect to /task-list page if the agent is manually assured" in new Setup {
-      givenAgentIsManuallyAssured(utr.value)
-
-      val result = await(controller.submitAmlsDetailsForm(authenticatedRequest))
-
-      status(result) shouldBe 303
-      redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
-    }
   }
 
   "GET /money-laundering-compliance-incomplete" should {
@@ -1040,14 +1022,6 @@ class AMLSControllerISpec extends BaseISpec {
         "error.amls.pending.appliedOn.year.empty")
     }
 
-    "redirect to /task-list page if the agent is manually assured" in new Setup {
-      givenAgentIsManuallyAssured(utr.value)
-
-      val result = await(controller.submitAmlsApplicationDatePage(authenticatedRequest))
-
-      status(result) shouldBe 303
-      redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
-    }
   }
 
   "GET /money-laundering-details-not-found" should {
