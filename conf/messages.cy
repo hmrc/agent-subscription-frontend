@@ -244,10 +244,10 @@ businessType.progressive.content.link=Gorffen ac allgofnodi
 businessType.error.invalid-choice=Dewiswch pa fath o fusnes ydych chi
 
 #LLP Interrupt
-llp-interrupt.title=We need more information to check your identity
-llp-interrupt.p1=You must be a registered member of the Limited Liability Partnership to proceed.
-llp-interrupt.p2=We need to ask you for some additional information to confirm this.
-llp-interrupt.link=<a href={0} target='_blank'>If you’re not sure if you’re a registered member or if your registration is up to date, check the Companies House website (opens in new tab).</a>
+llp-interrupt.title=Mae angen rhagor o wybodaeth arnom i allu cadarnhau pwy ydych
+llp-interrupt.p1=Mae’n rhaid i chi fod yn aelod cofrestredig o’r Bartneriaeth Atebolrwydd Cyfyngedig er mwyn mynd yn eich blaen.
+llp-interrupt.p2=Mae angen i ni ofyn i chi am wybodaeth ychwanegol er mwyn cadarnhau hyn.
+llp-interrupt.link=<a href={0} target='_blank'>Os nad ydych yn siŵr a ydych yn aelod cofrestredig neu a yw’ch cofrestriad yn gyfredol, gwiriwch ar wefan Tŷ’r Cwmnïau (yn agor tab newydd).</a>
 
 #UTR details page
 utr.title=Beth yw Cyfeirnod Unigryw y Trethdalwr (UTR) eich cwmni?
