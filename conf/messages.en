@@ -302,7 +302,7 @@ registered-for-vat.option.no=No
 registered-for-vat.error.no-radio-selected=Select yes if your business is registered for VAT
 
 #Vat Details page
-vat-details.title=Your VAT registration details
+vat-details.title=What are your VAT registration details?
 vat-details.vrn.title=VAT registration number
 vat-details.vrn.hint=For example, 123456789
 vat-details.reg-date.title=VAT registration date
