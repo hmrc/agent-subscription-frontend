@@ -302,9 +302,9 @@ registered-for-vat.option.no=Na
 registered-for-vat.error.no-radio-selected=Dewiswch ‘Iawn’ os yw’ch busnes wedi’i gofrestru ar gyfer TAW
 
 #Vat Details page
-vat-details.title=Eich manylion cofrestru TAW
+vat-details.title=Beth yw’ch manylion cofrestru TAW?
 vat-details.vrn.title=Rhif cofrestru TAW
-vat-details.vrn.hint=Er enghraifft, 123456789
+vat-details.vrn.hint=Rhif 9 digid yw hwn, weithiau â ‘GB’ ar y dechrau, er enghraifft 123456789 neu GB123456789. Mae hwn i’w weld ar eich tystysgrif cofrestru TAW.
 vat-details.reg-date.title=Dyddiad cofrestru TAW
 vat-details.reg-date.hint=Er enghraifft, 31 3 1980
 vat-details.vrn.required=Nodwch eich rhif cofrestru TAW

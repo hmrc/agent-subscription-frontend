@@ -302,9 +302,9 @@ registered-for-vat.option.no=No
 registered-for-vat.error.no-radio-selected=Select yes if your business is registered for VAT
 
 #Vat Details page
-vat-details.title=Your VAT registration details
+vat-details.title=What are your VAT registration details?
 vat-details.vrn.title=VAT registration number
-vat-details.vrn.hint=For example, 123456789
+vat-details.vrn.hint=This is 9 numbers, sometimes with ‘GB’ at the start, for example 123456789 or GB123456789. You can find it on your VAT registration certificate.
 vat-details.reg-date.title=VAT registration date
 vat-details.reg-date.hint=For example, 31 3 1980
 vat-details.vrn.required=Enter your VAT registration number
