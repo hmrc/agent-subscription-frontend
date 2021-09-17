@@ -25,13 +25,48 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
   lazy val controller: PostcodeController = app.injector.instanceOf[PostcodeController]
 
   "GET /postcode" should {
-    "display the postcode page" in new TestSetupNoJourneyRecord {
+    "display the postcode page with content tailored to the business type - Sole Trader" in new TestSetupNoJourneyRecord {
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(postcode = None, nino = None))
       val result = await(controller.showPostcodeForm()(request))
 
       status(result) shouldBe 200
-      checkHtmlResultWithBodyText(result, "What is the postcode of your registered address?")
+      checkHtmlResultWithBodyText(result,
+        "What is the postcode of the address you registered with HMRC for Self Assessment?",
+      "This could be a home address.")
+    }
+
+    "display the postcode page with content tailored to the business type - Limited Company" in new TestSetupNoJourneyRecord {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(LimitedCompany), postcode = None, nino = None))
+      val result = await(controller.showPostcodeForm()(request))
+
+      status(result) shouldBe 200
+      checkHtmlResultWithBodyText(result,
+        "What is the postcode of your registered office?",
+        "The registered office address is an address you submitted to Companies House when you registered your LLP or limited company.")
+    }
+
+    "display the postcode page with content tailored to the business type - Limited Liability Partnership" in new TestSetupNoJourneyRecord {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Llp), postcode = None, nino = None))
+      val result = await(controller.showPostcodeForm()(request))
+
+      status(result) shouldBe 200
+      checkHtmlResultWithBodyText(result,
+        "What is the postcode of your registered office?",
+        "The registered office address is an address you submitted to Companies House when you registered your LLP or limited company.")
+    }
+
+    "display the postcode page with content tailored to the business type - Partnership" in new TestSetupNoJourneyRecord {
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Partnership), postcode = None, nino = None))
+      val result = await(controller.showPostcodeForm()(request))
+
+      status(result) shouldBe 200
+      checkHtmlResultWithBodyText(result,
+        "What is the postcode of the address you registered with HMRC for Self Assessment?",
+        "This could be a home address.")
     }
   }
 
