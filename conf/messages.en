@@ -270,10 +270,14 @@ crn.title=What is the company registration number of your business?
 crn.hint=For example, 01234567 or SC123456
 
 #Postcode page
-postcode.sole_trader.title=What is the postcode of your registered address?
-postcode.limited_company.title=What is the postcode of your company’s registered address?
-postcode.partnership.title=What is the postcode of your partnership’s registered address?
-postcode.llp.title=What is the postcode of your limited liability partnership’s registered address?
+postcode.sole_trader.title=What is the postcode of the address you registered with HMRC for Self Assessment?
+postcode.sole_trader.hint=This could be a home address.
+postcode.limited_company.title=What is the postcode of your registered office?
+postcode.limited_company.hint=The registered office address is an address you submitted to Companies House when you registered your LLP or limited company.
+postcode.partnership.title=What is the postcode of the address you registered with HMRC for Self Assessment?
+postcode.partnership.hint=This could be a home address.
+postcode.llp.title=What is the postcode of your registered office?
+postcode.llp.hint=The registered office address is an address you submitted to Companies House when you registered your LLP or limited company.
 
 #Nino page
 nino.title=What is your National Insurance number?
