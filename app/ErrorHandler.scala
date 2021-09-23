@@ -15,14 +15,14 @@
  */
 
 import com.google.inject.name.Named
+import play.api.Logger
 
 import javax.inject.{Inject, Singleton}
-import play.api.Logger.logger
 import play.api.http.Status.FORBIDDEN
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results._
 import play.api.mvc.{Request, RequestHeader, Result}
-import play.api.{Configuration, Environment, Mode}
+import play.api.{Configuration, Environment, Logging, Mode}
 import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{error_template, error_template_5xx}
@@ -43,7 +43,9 @@ class ErrorHandler @Inject()(
   errorTemplate: error_template,
   errorTemplate5xx: error_template_5xx,
   @Named("appName") val appName: String)(implicit val config: Configuration, ec: ExecutionContext, appConfig: AppConfig)
-    extends FrontendErrorHandler with AuthRedirects with ErrorAuditing {
+    extends FrontendErrorHandler with AuthRedirects with ErrorAuditing with Logging {
+
+  def theLogger: Logger = this.logger // for testing
 
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
     auditClientError(request, statusCode, message)

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.config.amls
 
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader.AMLSLoaderException
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
 class AMLSLoaderSpec extends UnitSpec {
   "AMLSLoaderSpec" should {

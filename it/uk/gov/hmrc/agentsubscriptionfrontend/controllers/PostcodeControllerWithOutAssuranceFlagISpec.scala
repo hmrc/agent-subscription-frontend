@@ -2,7 +2,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import play.api.i18n.Lang
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.Helpers.{redirectLocation, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, CompletePartialSubscriptionBody, SubscriptionRequestKnownFacts}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub._

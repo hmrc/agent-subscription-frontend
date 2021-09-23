@@ -12,10 +12,11 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.individual
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait EndpointBehaviours {
   me: BaseISpec =>
-  type PlayRequest = Request[AnyContent] => Result
+  type PlayRequest = Request[AnyContent] => Future[Result]
 
   protected def authenticatedAs(user: SampleUser): FakeRequest[AnyContentAsEmpty.type]
 
@@ -24,10 +25,10 @@ trait EndpointBehaviours {
       AuthStub.userIsNotAuthenticated()
 
       val request = FakeRequest()
-      val result = await(doRequest(request))
+      val result = doRequest(request)
 
       status(result) shouldBe 303
-      redirectLocation(result).get should include("/bas-gateway/sign-in")
+      redirectLocation(result.futureValue).get should include("/bas-gateway/sign-in")
       noMetricExpectedAtThisPoint()
     }
 
@@ -35,10 +36,10 @@ trait EndpointBehaviours {
       val sessionKeys = AuthStub.userIsNotAnAgent(individual)
 
       val request = FakeRequest().withSession(sessionKeys: _*)
-      val result = await(doRequest(request))
+      val result = doRequest(request)
 
       status(result) shouldBe 303
-      redirectLocation(result).get shouldBe routes.StartController.showNotAgent().url
+      redirectLocation(result.futureValue).get shouldBe routes.StartController.showNotAgent().url
       metricShouldExistAndBeUpdated("Count-Subscription-NonAgent")
     }
   }
@@ -47,23 +48,23 @@ trait EndpointBehaviours {
 
     "have a 'is this page not working properly?' link" in new TestSetupWithCompleteJourneyRecord {
       await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(hc(request), global))
-      val result = await(action(request))
+      val result = action(request)
 
-      bodyOf(result) should include("Is this page not working properly?")
+      bodyOf(result.futureValue) should include("Is this page not working properly?")
     }
 
     "have a beta feedback banner" in new TestSetupWithCompleteJourneyRecord {
       await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(hc(request), global))
-      val result = await(action(request))
+      val result = action(request)
 
-      bodyOf(result) should include("This is a new service")
+      bodyOf(result.futureValue) should include("This is a new service")
     }
 
     "have a beta feedback link" in new TestSetupWithCompleteJourneyRecord {
       await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(hc(request), global))
-      val result = await(action(request))
+      val result = action(request)
 
-      bodyOf(result) should include("/contact/beta-feedback")
+      bodyOf(result.futureValue) should include("/contact/beta-feedback")
     }
   }
 
@@ -76,7 +77,7 @@ trait EndpointBehaviours {
     def doRequestWithContinueUrl(continueUrl: String) = {
       implicit val request = FakeRequest("GET", s"?continue=${urlencoded(continueUrl)}").withSession(sessionKeys: _*)
       await(sessionStoreService.cacheAgentSession(AgentSession(businessType = Some(BusinessType.SoleTrader))))
-      val result = await(action(request))
+      val result = action(request)
       (request, result)
     }
 
@@ -84,44 +85,44 @@ trait EndpointBehaviours {
       SsoStub.givenWhitelistedDomainsExist
       val continueUrl = "http://localhost"
       val (request, result) = doRequestWithContinueUrl(continueUrl)
-      assertContinueUrlKept(request, result, continueUrl)
+      assertContinueUrlKept(request, result.futureValue, continueUrl)
     }
 
     "include relative continue URL" in new TestSetupNoJourneyRecord{
       val continueUrl = "/foo"
       val (request, result) = doRequestWithContinueUrl(continueUrl)
-      assertContinueUrlKept(request, result, continueUrl)
+      assertContinueUrlKept(request, result.futureValue, continueUrl)
     }
 
     "include continue URL if it's the absolute www.tax.service.gov.uk continue url" in new TestSetupNoJourneyRecord{
       val continueUrl = "http://www.tax.service.gov.uk/foo/bar?some=true"
       val (request, result) = doRequestWithContinueUrl(continueUrl)
-      assertContinueUrlKept(request, result, continueUrl)
+      assertContinueUrlKept(request, result.futureValue, continueUrl)
     }
 
     "include continue URL if it's whitelisted" in new TestSetupNoJourneyRecord{
       val continueUrl = "http://online-qa.ibt.hmrc.gov.uk/foo?some=false"
       val (request, result) = doRequestWithContinueUrl(continueUrl)
-      assertContinueUrlKept(request, result, continueUrl)
+      assertContinueUrlKept(request, result.futureValue, continueUrl)
     }
 
     "not include a continue URL if it's not whitelisted" in new TestSetupNoJourneyRecord{
       val continueUrl = "http://www.foo.org/bar?some=false"
       val (request, result) = doRequestWithContinueUrl(continueUrl)
-      assertContinueUrlNotKept(request, result, Some(continueUrl))
+      assertContinueUrlNotKept(request, result.futureValue, Some(continueUrl))
     }
 
     "not include a continue URL if it contains an invalid character" in new TestSetupNoJourneyRecord{
       val continueUrl = "http://www@foo.com"
       val (request, result) = doRequestWithContinueUrl(continueUrl)
-      assertContinueUrlNotKept(request, result, Some(continueUrl))
+      assertContinueUrlNotKept(request, result.futureValue, Some(continueUrl))
     }
 
     "not include a continue URL if it's not provided" in new TestSetupNoJourneyRecord{
       implicit val request = FakeRequest("GET", "/").withSession(sessionKeys: _*)
       await(sessionStoreService.cacheAgentSession(AgentSession(businessType = Some(BusinessType.SoleTrader))))
-      val result = await(action(request))
-      assertContinueUrlNotKept(request, result, None)
+      val result = action(request)
+      assertContinueUrlNotKept(request, result.futureValue, None)
     }
   }
 

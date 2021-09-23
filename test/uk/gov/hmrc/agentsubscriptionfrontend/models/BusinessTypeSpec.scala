@@ -18,16 +18,16 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models
 
 import play.api.libs.json.{JsString, Json}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType._
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
 class BusinessTypeSpec extends UnitSpec {
 
   "BusinessType" should {
     "serialize to json string for each business type" in {
-      Json.toJson(SoleTrader) shouldBe JsString("sole_trader")
-      Json.toJson(LimitedCompany) shouldBe JsString("limited_company")
-      Json.toJson(Partnership) shouldBe JsString("partnership")
-      Json.toJson(Llp) shouldBe JsString("llp")
+      Json.toJson[BusinessType](SoleTrader) shouldBe JsString("sole_trader")
+      Json.toJson[BusinessType](LimitedCompany) shouldBe JsString("limited_company")
+      Json.toJson[BusinessType](Partnership) shouldBe JsString("partnership")
+      Json.toJson[BusinessType](Llp) shouldBe JsString("llp")
 
     }
     "deserialize from json string for each business type" in {

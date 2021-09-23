@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
-import play.api.Logger.logger
+import play.api.Logging
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.{Approved, ApprovedWithConditions, FormBundleStatus, Pending}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AMLSForm
@@ -27,7 +27,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AmlsService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector) {
+class AmlsService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector) extends Logging {
 
   def validateAmlsSubscription(amlsForm: AMLSForm)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmlsValidationResult] =
     if (amlsForm.amlsCode != "HMRC") Future successful ResultOK(None)

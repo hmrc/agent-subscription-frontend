@@ -1,6 +1,6 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import play.api.test.Helpers.{redirectLocation, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Llp, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, CompanyRegistrationNumber}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub

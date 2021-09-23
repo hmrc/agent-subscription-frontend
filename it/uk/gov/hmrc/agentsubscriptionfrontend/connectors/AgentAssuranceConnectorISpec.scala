@@ -8,6 +8,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, MetricTestSuppo
 import uk.gov.hmrc.domain.{Nino, SaAgentReference}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpClient
+import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

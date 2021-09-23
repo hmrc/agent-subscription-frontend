@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.config.view
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, BusinessDetails, SubscriptionJourneyRecord}
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 
 class CYACheckResultSpec extends UnitSpec {

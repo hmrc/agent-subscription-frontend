@@ -18,12 +18,13 @@ package uk.gov.hmrc.agentsubscriptionfrontend.views
 
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.Messages
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.twirl.api.Html
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
 class ViewsSpec extends UnitSpec with GuiceOneAppPerSuite {
 
@@ -37,7 +38,7 @@ class ViewsSpec extends UnitSpec with GuiceOneAppPerSuite {
       val html = view
         .render("My custom page title", "My custom heading", "My custom message", FakeRequest(), messages, appConfig)
 
-      contentAsString(html) should {
+      html.toString should {
         include("My custom page title") and
           include("My custom heading") and
           include("My custom message")
@@ -70,7 +71,7 @@ class ViewsSpec extends UnitSpec with GuiceOneAppPerSuite {
         hasTimeout = true
       )
 
-      contentAsString(html) should {
+      html.toString should {
         include("My custom page title") and
           include("sidebarLinks") and
           include("contentHeader") and

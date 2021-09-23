@@ -15,10 +15,9 @@
  */
 
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.Logger
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.test.{LogCapturing, UnitSpec}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{LogCapturing, UnitSpec}
 
 class ErrorHandlerSpec extends UnitSpec with GuiceOneServerPerSuite with LogCapturing {
 
@@ -27,7 +26,7 @@ class ErrorHandlerSpec extends UnitSpec with GuiceOneServerPerSuite with LogCapt
   "ErrorHandler should show the error page" when {
 
     "a client error (400) occurs with log" in {
-      withCaptureOfLoggingFrom(Logger) { logEvents =>
+      withCaptureOfLoggingFrom(handler.theLogger) { logEvents =>
         val result = handler.onClientError(FakeRequest(), BAD_REQUEST, "some error")
         Thread.sleep(2000)
         status(result) shouldBe BAD_REQUEST
@@ -36,7 +35,7 @@ class ErrorHandlerSpec extends UnitSpec with GuiceOneServerPerSuite with LogCapt
     }
 
     "a client error (403) occurs" in {
-      withCaptureOfLoggingFrom(Logger) { logEvents =>
+      withCaptureOfLoggingFrom(handler.theLogger) { logEvents =>
         val result = handler.onClientError(FakeRequest(), FORBIDDEN, "some error")
         Thread.sleep(2000)
         status(result) shouldBe FORBIDDEN
@@ -45,7 +44,7 @@ class ErrorHandlerSpec extends UnitSpec with GuiceOneServerPerSuite with LogCapt
     }
 
     "standardErrorTemplate shows up with log" in {
-      withCaptureOfLoggingFrom(Logger) { logEvents =>
+      withCaptureOfLoggingFrom(handler.theLogger) { logEvents =>
         handler.standardErrorTemplate("", "", "some error")(FakeRequest())
         logEvents.count(_.getMessage.contains(s"some error")) shouldBe 1
       }

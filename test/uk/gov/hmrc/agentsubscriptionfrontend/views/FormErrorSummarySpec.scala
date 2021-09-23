@@ -21,7 +21,7 @@ import play.api.data.Forms._
 import play.api.i18n.{DefaultMessagesApi, Messages}
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
 class FormErrorSummarySpec extends UnitSpec {
 
