@@ -3,7 +3,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers.business
 import play.api.i18n.Lang
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Cookie}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{redirectLocation, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{BusinessIdentificationController, routes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._

@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import com.kenshoo.play.metrics.Metrics
 import play.api.i18n.Lang
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
-import play.api.{Configuration, Environment, Logger}
+import play.api.{Configuration, Environment, Logging}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AddressLookupFrontendConnector
@@ -54,11 +54,11 @@ class ContactDetailsController @Inject()(
   contactTradingAddressCheckTemplate: contact_trading_address_check,
   addressFormWithErrorsTemplate: address_form_with_errors
 )(implicit val appConfig: AppConfig, val ec: ExecutionContext)
-    extends FrontendController(mcc) with SessionBehaviour with AuthActions {
+    extends FrontendController(mcc) with SessionBehaviour with AuthActions with Logging {
 
   private val blacklistedPostCodes: Set[String] = appConfig.blacklistedPostcodes
 
-  val desAddressForm = new DesAddressForm(Logger, blacklistedPostCodes)
+  val desAddressForm = new DesAddressForm(logger, blacklistedPostCodes)
 
   def showContactEmailCheck: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>

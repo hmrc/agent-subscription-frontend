@@ -26,9 +26,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.Postcod
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DesAddress
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{ResettingMockitoSugar, testAddressLookupFrontendAddress, testCountry}
-import uk.gov.hmrc.play.test.UnitSpec
-
-import scala.concurrent.Future
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
 class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with EitherValues {
 
@@ -224,7 +222,4 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
       )
     }
   }
-
-  // remove implicit
-  override def liftFuture[A](v: A): Future[A] = super.liftFuture(v)
 }

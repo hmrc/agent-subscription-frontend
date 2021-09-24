@@ -16,18 +16,15 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessAddress
-@import uk.gov.hmrc.agentsubscriptionfrontend.models.AmlsDetails
-@import uk.gov.hmrc.play.views.html.helpers.{form, input, errorSummary}
-@import java.time.format.DateTimeFormatter
 
-@import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.view.CheckYourAnswers
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.view.AnswerRow
 
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template
+
 @this(
 mainTemplate: main_template,
-        uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 )
 
 @(checkYourAnswers: CheckYourAnswers)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)

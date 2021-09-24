@@ -2,7 +2,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import java.time.LocalDate
 
-import play.api.test.Helpers.{redirectLocation, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Llp, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, CompanyRegistrationNumber, DateOfBirth}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub

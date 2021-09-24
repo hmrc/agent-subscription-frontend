@@ -3,15 +3,15 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData}
-import play.api.test.Helpers.{cookies, redirectLocation}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.givenAgentIsNotManuallyAssured
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.givenSubscriptionJourneyRecordExists
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingCleanAgentWithoutEnrolments
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.id
+import play.api.test.Helpers
+import play.api.test.Helpers._
 
 import scala.concurrent.duration._
-
 
 class AgentSubscriptionLanguageControllerISpec extends BaseISpec {
 
@@ -35,7 +35,7 @@ class AgentSubscriptionLanguageControllerISpec extends BaseISpec {
 
       val result = controller.switchToLanguage("english")(request)
       status(result) shouldBe 303
-      redirectLocation(result)(timeout) shouldBe Some("https://www.tax.service.gov.uk/agent-subscription/start")
+      Helpers.redirectLocation(result)(timeout) shouldBe Some("https://www.tax.service.gov.uk/agent-subscription/start")
 
       cookies(result)(timeout).get("PLAY_LANG").get.value shouldBe "en"
     }
@@ -46,7 +46,7 @@ class AgentSubscriptionLanguageControllerISpec extends BaseISpec {
 
       val result = controller.switchToLanguage("english")(request)
       status(result) shouldBe 303
-      redirectLocation(result)(timeout) shouldBe Some("/some-page")
+      Helpers.redirectLocation(result)(timeout) shouldBe Some("/some-page")
 
       cookies(result)(timeout).get("PLAY_LANG").get.value shouldBe "en"
 
@@ -56,9 +56,9 @@ class AgentSubscriptionLanguageControllerISpec extends BaseISpec {
 
       val request = FakeRequest("GET", "/language/english").withHeaders("referer" -> "/check-money-laundering-compliance")
 
-      val result = await(controller.switchToLanguage("cymraeg")(request))
+      val result = controller.switchToLanguage("cymraeg")(request)
       status(result) shouldBe 303
-      redirectLocation(result)(timeout) shouldBe Some("/check-money-laundering-compliance")
+      Helpers.redirectLocation(result)(timeout) shouldBe Some("/check-money-laundering-compliance")
 
       cookies(result)(timeout).get("PLAY_LANG").get.value shouldBe "cy"
     }

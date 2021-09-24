@@ -1,7 +1,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.Helpers.{redirectLocation, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, Postcode}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
@@ -218,7 +218,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
         passVatDecOrgAgentAssuranceCheck = Some(false),
         passIRCTAgentAssuranceCheck = Some(false))
 
-      sessionStoreService.fetchAgentSession.get.registration.get.taxpayerName shouldBe Some(registrationName)
+      await(sessionStoreService.fetchAgentSession).get.registration.get.taxpayerName shouldBe Some(registrationName)
     }
 
     "redirect to /business-type if businessType is not found in session" in new TestSetupNoJourneyRecord {

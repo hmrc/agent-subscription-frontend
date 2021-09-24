@@ -21,7 +21,7 @@ import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.Lang
 import play.api.mvc.{AnyContent, _}
-import play.api.{Configuration, Environment, Logger}
+import play.api.{Configuration, Environment, Logging}
 import uk.gov.hmrc.agentmtdidentifiers.model.Arn
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -59,11 +59,11 @@ class SubscriptionController @Inject()(
                                         signInNewIdTemplate: sign_in_new_id)(
   implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc)
-    with SessionBehaviour  with AuthActions {
+    with SessionBehaviour with AuthActions with Logging {
 
   private val blacklistedPostCodes: Set[String] = appConfig.blacklistedPostcodes
 
-  val desAddressForm = new DesAddressForm(Logger, blacklistedPostCodes)
+  val desAddressForm = new DesAddressForm(logger, blacklistedPostCodes)
 
   def showCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
@@ -162,7 +162,7 @@ class SubscriptionController @Inject()(
               Future failed new HttpException(s"Subscription failed: HTTP status $status from agent-subscription service ", status)
           }
           case _ =>
-            Logger(getClass).warn(s"Missing data in session, redirecting back to /business-type")
+            logger.warn(s"Missing data in session, redirecting back to /business-type")
             Redirect(routes.BusinessTypeController.showBusinessTypeForm())
         }
       }
@@ -286,7 +286,7 @@ class SubscriptionController @Inject()(
 
     def recoverSessionStoreWithNone[T]: PartialFunction[Throwable, Option[T]] = {
       case NonFatal(ex) =>
-        Logger(getClass).warn("Session store service failure", ex)
+        logger.warn("Session store service failure", ex)
         None
     }
 
