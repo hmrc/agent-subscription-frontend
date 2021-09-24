@@ -73,7 +73,7 @@ lazy val compileDeps = Seq(
   "uk.gov.hmrc"   %% "mongo-caching"                 % "7.0.0-play-28",
   "uk.gov.hmrc"   %% "play-conditional-form-mapping" % "1.9.0-play-28",
   "uk.gov.hmrc"   %% "simple-reactivemongo"          % "8.0.0-play-28",
-  "uk.gov.hmrc"   %% "play-language"                 % "5.1.0-play-27",
+  "uk.gov.hmrc"   %% "play-language"                 % "5.1.0-play-28",
   "org.typelevel" %% "cats-core"                     % "2.6.1"
 )
 
