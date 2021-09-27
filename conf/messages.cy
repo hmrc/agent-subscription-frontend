@@ -270,14 +270,14 @@ crn.title=Beth yw rhif cofrestru cwmni eich busnes?
 crn.hint=Er enghraifft, 01234567 neu SC123456
 
 #Postcode page
-postcode.sole_trader.title=What is the postcode of the address you registered with HMRC for Self Assessment?
-postcode.sole_trader.hint=This could be a home address.
-postcode.limited_company.title=What is the postcode of your registered office?
-postcode.limited_company.hint=The registered office address is an address you submitted to Companies House when you registered your LLP or limited company.
-postcode.partnership.title=What is the postcode of the address you registered with HMRC for Self Assessment?
-postcode.partnership.hint=This could be a home address.
-postcode.llp.title=What is the postcode of your registered office?
-postcode.llp.hint=The registered office address is an address you submitted to Companies House when you registered your LLP or limited company.
+postcode.sole_trader.title=Beth yw cod post y cyfeiriad wnaethoch ei gofrestru â CThEM ar gyfer Hunanasesiad?
+postcode.sole_trader.hint=Gallai hyn fod yn gyfeiriad cartref.
+postcode.limited_company.title=Beth yw cod post eich swyddfa gofrestredig?
+postcode.limited_company.hint=Mae cyfeiriad y swyddfa gofrestredig yn gyfeiriad a gyflwynwyd gennych i Dŷ'r Cwmnïau pan wnaethoch chi gofrestru’ch PAC neu'ch cwmni cyfyngedig.
+postcode.partnership.title=Beth yw cod post y cyfeiriad wnaethoch ei gofrestru â CThEM ar gyfer Hunanasesiad?
+postcode.partnership.hint=Gallai hyn fod yn gyfeiriad cartref.
+postcode.llp.title=Beth yw cod post eich swyddfa gofrestredig?
+postcode.llp.hint=Mae cyfeiriad y swyddfa gofrestredig yn gyfeiriad a gyflwynwyd gennych i Dŷ'r Cwmnïau pan wnaethoch chi gofrestru’ch PAC neu'ch cwmni cyfyngedig. 
 
 #Nino page
 nino.title=Beth yw’ch rhif Yswiriant Gwladol?
