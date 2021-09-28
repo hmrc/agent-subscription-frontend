@@ -10,14 +10,13 @@ import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsEmpty, Request, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentType, _}
+import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat.escape
 import uk.gov.hmrc.agentsubscriptionfrontend.service.MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.DataStreamStubs
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
-import uk.gov.hmrc.play.test.UnitSpec
 
 abstract class BaseISpec
     extends UnitSpec with GuiceOneAppPerSuite with WireMockSupport with EndpointBehaviours with DataStreamStubs

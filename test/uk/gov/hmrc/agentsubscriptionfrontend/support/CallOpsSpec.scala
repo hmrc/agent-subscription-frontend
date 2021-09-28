@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class CallOpsSpec extends WordSpec with Matchers {
+class CallOpsSpec extends AnyWordSpecLike with Matchers {
   "addParamsToUrl" should {
     val url = "http://localhost:1/"
 

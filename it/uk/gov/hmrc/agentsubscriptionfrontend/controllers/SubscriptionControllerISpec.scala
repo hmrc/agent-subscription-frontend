@@ -281,19 +281,19 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
       implicit val request = FakeRequest()
     }
-    def resultOf(request: Request[AnyContent]) = await(controller.showSubscriptionComplete(request))
+    def resultOf(request: Request[AnyContent]) = controller.showSubscriptionComplete(request)
 
     behave like aPageWithFeedbackLinks(resultOf, new AuthRequest {}.request)
 
     "display the ARN in a raw format (without dashes)" in new AuthRequest with TestSetupWithCompleteJourneyRecord {
       val expectedArn = arn
       expectedArn shouldBe "AARN0000001"
-      resultOf(request) should containSubstrings(expectedArn)
+      resultOf(request).futureValue should containSubstrings(expectedArn)
     }
 
     "display the static page content" in new AuthRequest with TestSetupWithCompleteJourneyRecordWithMapping {
 
-      val result = resultOf(request)
+      val result = await(resultOf(request))
 
       result should containMessages(
         "subscriptionComplete.title",
@@ -313,7 +313,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
     "display the correct content when the user is partially-subscribed (has skipped task-list)" in new AuthRequest
       with TestSetupWithCouldBePartiallySubscribedRecord {
-      val result = resultOf(request)
+      val result = await(resultOf(request))
 
       result should containMessages(
         "subscriptionComplete.title",
@@ -333,7 +333,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
 
     "continue button redirects to agent services account" in new AuthRequest with TestSetupWithCompleteJourneyRecord {
-      val result = resultOf(request)
+      val result = await(resultOf(request))
       result should containMessages(
         "subscriptionComplete.button.continueToASAccount"
       )

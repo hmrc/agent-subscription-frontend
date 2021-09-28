@@ -16,16 +16,14 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import akka.util.Timeout
 import org.scalatest.Assertion
 import play.api.mvc.Result
-import play.api.test.Helpers.redirectLocation
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
 trait SessionDataMissingSpec {
   this: UnitSpec =>
 
-  def resultShouldBeSessionDataMissing(result: Result)(implicit timeout: Timeout): Assertion = {
+  def resultShouldBeSessionDataMissing(result: Result): Assertion = {
     status(result) shouldBe 303
     redirectLocation(result).get shouldBe routes.BusinessTypeController.showBusinessTypeForm().url
   }

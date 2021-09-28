@@ -7,7 +7,7 @@ import play.api.i18n.Lang
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsEmpty, Cookie}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentType, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.{partialSubscriptionWillSucceed, withMatchingUtrAndPostcode}
