@@ -480,7 +480,7 @@ amls-ineligible-status.link=Read about how to challenge an HMRC decision to refu
 # Pending AMLS Details page
 amls.pending.appliedOn.title=When did you apply to register for money laundering supervision with HMRC?
 
-checkAnswers.title=Check your details before creating your account
+checkAnswers.title=Check your answers before creating your account
 checkAnswers.description.p3=By setting up this account, you confirm that, to the best of your knowledge, the details you provided are correct.
 checkAnswers.businessName.label=Business name
 checkAnswers.businessAddress.label=Business address
