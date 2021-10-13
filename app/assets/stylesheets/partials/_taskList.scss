@@ -1,6 +1,15 @@
-
+// From https://govuk-prototype-kit.herokuapp.com/docs/templates/task-list
 .app-task-list__section-number {
-  padding-right: 10px;
+  display: table-cell;
+
+    @media (min-width: 48.0625em) {
+      min-width: 30px;
+      padding-right: 0;
+    }
+}
+
+.app-task-list__section {
+  display: table;
 }
 
 .app-task-list__items {
@@ -10,6 +19,11 @@
 @media (min-width: 48.0625em) {
   .app-task-list__items {
     padding-left: 30px;
+  }
+ /* allows tag to wrap underneath on mobile */
+  .app-task-list__task-completed {
+    margin-top: 0;
+    float: right;
   }
 }
 
@@ -33,11 +47,9 @@
 .app-task-list__name {
   display: block;
   float: left;
-  width: 75%;
+  width: 65%;
 }
 
 .app-task-list__task-completed {
-  float: right;
-  margin-top: 0;
   margin-bottom: 0;
 }
