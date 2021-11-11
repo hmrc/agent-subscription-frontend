@@ -25,7 +25,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.ContinueId
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService, SubscriptionService}
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{accessibility_statement, cannot_create_account, not_agent, sign_in_check}
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{cannot_create_account, not_agent, sign_in_check}
 import uk.gov.hmrc.auth.core.AuthConnector
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -44,8 +44,7 @@ class StartController @Inject()(
   mcc: MessagesControllerComponents,
   notAgentTemplate: not_agent,
   signInCheckTemplate: sign_in_check,
-  cannotCreateAccountTemplate: cannot_create_account,
-  accessibilityStatementTemplate: accessibility_statement)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  cannotCreateAccountTemplate: cannot_create_account)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
@@ -113,7 +112,4 @@ class StartController @Inject()(
     Ok(cannotCreateAccountTemplate())
   }
 
-  def showAccessibilityStatement: Action[AnyContent] = Action { implicit request =>
-    Ok(accessibilityStatementTemplate())
-  }
 }
