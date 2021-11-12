@@ -28,13 +28,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
 class ViewsSpec extends UnitSpec with GuiceOneAppPerSuite {
 
-  "error_template view" should {
+  "ErrorTemplate view" should {
 
     "render title, heading and message" in new App {
       val appConfig = app.injector.instanceOf[AppConfig]
       val messages = app.injector.instanceOf[Messages]
 
-      val view = app.injector.instanceOf[error_template]
+      val view = app.injector.instanceOf[ErrorTemplate]
       val html = view
         .render("My custom page title", "My custom heading", "My custom message", FakeRequest(), messages, appConfig)
 
@@ -46,7 +46,7 @@ class ViewsSpec extends UnitSpec with GuiceOneAppPerSuite {
 
       val hmtl2 =
         view.f("My custom page title", "My custom heading", "My custom message")(FakeRequest(), messages, appConfig)
-      hmtl2 shouldBe (html)
+      hmtl2 shouldBe html
     }
   }
 
@@ -92,7 +92,7 @@ class ViewsSpec extends UnitSpec with GuiceOneAppPerSuite {
         true,
         true
       )(Html("mainContent"))(FakeRequest(), messages)
-      hmtl2 shouldBe (html)
+      hmtl2 shouldBe html
     }
 
   }
