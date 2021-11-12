@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessAddress
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.ConfirmBusiness
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
 mainTemplate: main_template,
@@ -42,12 +43,12 @@ mainTemplate: main_template,
         action = routes.BusinessIdentificationController.submitConfirmBusinessForm(),
         'class -> "form js-form") {
 
-      <div class="form-group @if(confirmBusinessRadioForm.hasErrors){form-field--error soft--ends}">
+      <div class="govuk-form-group @if(confirmBusinessRadioForm.hasErrors){form-field--error soft--ends}">
       <fieldset>
           <legend>
-              <h1 class="heading-xlarge">@Messages("confirmBusiness.title")</h1>
+              <h1 class="govuk-heading-xl">@Messages("confirmBusiness.title")</h1>
           </legend>
-          <p class="hint-text">@Html(Messages("confirmBusiness.content.utr", utr))</p>
+          <p class="govuk-hint">@Html(Messages("confirmBusiness.content.utr", utr))</p>
 
 
             <div class="margin-bottom-30">
@@ -98,7 +99,7 @@ mainTemplate: main_template,
       </fieldset>
       </div>
 
-        <div class="form-group">
+        <div class="govuk-form-group">
             <button class="button" type="submit" id="continue">@Messages("button.continue")</button>
         </div>
     }

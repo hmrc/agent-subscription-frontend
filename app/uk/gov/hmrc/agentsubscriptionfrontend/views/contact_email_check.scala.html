@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.ContactEmailCheck
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
         mainTemplate: main_template,
@@ -55,7 +55,7 @@
             '_legend             -> Html(s"""<h1 class="heading-xlarge ${if(contactEmailCheckForm.hasErrors)"push--top" else ""}">${Messages("contactEmailCheck.title")}</h1>"""),
             '_inputHint          -> Html(s"""<p class="inputHintClass" ${if(contactEmailCheckForm.hasErrors)"push--top" else ""}">${Messages("contactEmailCheck.p")}</p>"""),
             '_fieldsetDiv        -> Html(s"""<p class="inputEmailClass" ${if(contactEmailCheckForm.hasErrors)"push--top" else ""}">${Messages(s"$businessEmail")}</p>"""),
-            '_groupDivClass      -> "form-group",
+            '_groupDivClass      -> "govuk-form-group",
             '_fieldsetAttributes -> Html("""id='check'""")
         )
             <button class="button" type="submit" id="continue">@Messages("contactEmailCheck.continue.button")</button>

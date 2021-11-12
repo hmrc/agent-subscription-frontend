@@ -27,7 +27,7 @@ mainTemplate: main_template)
 
 @mainTemplate(appConfig, title = Messages("setupIncomplete.title"), bodyClasses = None) {
 
-    <h1 class="heading-xlarge">@Messages("setupIncomplete.title")</h1>
+    <h1 class="govuk-heading-xl">@Messages("setupIncomplete.title")</h1>
     <p>@Html(Messages("setupIncomplete.p1"))</p>
     <p>@Html(Messages("setupIncomplete.p2", routes.SignedOutController.redirectToBusinessTypeForm))</p>
 }

@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInvasiveStartSaAgentCode
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.error_prefix
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
 mainTemplate: main_template,
@@ -35,15 +35,15 @@ uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary)
     }
 
     @uiFormHelper(action = routes.AssuranceChecksController.invasiveSaAgentCodePost(), 'class -> "form js-form") {
-        <div class="form-group @if(radioResponseForm.error("hasSaAgentCode").isDefined){form-field--error soft--ends}">
+        <div class="govuk-form-group @if(radioResponseForm.error("hasSaAgentCode").isDefined){form-field--error soft--ends}">
             <fieldset aria-describedby="agentCode-hint @if(radioResponseForm.hasErrors){agentCode-error}">
                 <legend>
-                    <h1 class="heading-xlarge">@Messages("invasive.title.saCode")</h1>
+                    <h1 class="govuk-heading-xl">@Messages("invasive.title.saCode")</h1>
                 </legend>
 
-                <p class="hint-text" id="agentCode-hint">@Messages("invasive.check.p1")</p>
+                <p class="govuk-hint" id="agentCode-hint">@Messages("invasive.check.p1")</p>
 
-                <details class="form-group govuk-details">
+                <details class="govuk-form-group govuk-details">
                     <summary class="govuk-details__summary">
                         <span class="summary summary govuk-details__summary-text">@Messages("invasive.expandable.p1")</span>
                     </summary>

@@ -18,8 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.error_prefix
-
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 @this(
 mainTemplate: main_template,
 errorPrefix: error_prefix,
@@ -42,9 +41,9 @@ uiInput: uk.gov.hmrc.play.views.html.helpers.Input
  @uiFormHelper(action = routes.CompanyRegistrationController.submitCompanyRegNumberForm(), 'class -> "form js-form"){
 
     @* Can't use play ui text input as h1 needs to wrap a label *@
-     <div class="form-group @if(crnForm.hasErrors){form-field--error soft--ends}">
+     <div class="govuk-form-group @if(crnForm.hasErrors){form-field--error soft--ends}">
          <h1>
-             <label for="crn" class="heading-xlarge">
+             <label for="crn" class="govuk-heading-xl">
              @Messages(s"crn.title")
              </label>
          </h1>

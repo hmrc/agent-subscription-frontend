@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.DesAddress
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
         mainTemplate: main_template,
@@ -37,7 +38,7 @@
     @if(detailsForm.hasErrors) {
         @uiErrorSummary(Messages("error.summary.heading"), detailsForm, Seq.empty, Some("return-from-address-lookup"))
     }
-    <h1 class="heading-xlarge">@Messages("invalidAddress.title")</h1>
+    <h1 class="govuk-heading-xl">@Messages("invalidAddress.title")</h1>
 
 
     <p>@Messages("invalidAddress.p1")</p>
@@ -48,7 +49,7 @@
         <fieldset>
             <legend><h2 class="heading-medium">@Messages("address.form.with-errors.heading")</h2></legend>
 
-            <div class="form-group">
+            <div class="govuk-form-group">
             @uiInput(
                 detailsForm("addressLine1"),
                 '_label -> Messages("address.form.with-errors.address_line_1"),
@@ -57,7 +58,7 @@
                 '_errorPrefix -> Messages("error.prefix")
             )
             </div>
-            <div class="form-group">
+            <div class="govuk-form-group">
             @uiInput(
                 detailsForm("addressLine2"),
                 '_label -> Messages("address.form.with-errors.address_line_2"),
@@ -66,7 +67,7 @@
                 '_errorPrefix -> Messages("error.prefix")
             )
             </div>
-            <div class="form-group">
+            <div class="govuk-form-group">
             @uiInput(
                 detailsForm("addressLine3"),
                 '_label -> Messages("address.form.with-errors.address_line_3"),
@@ -75,7 +76,7 @@
                 '_errorPrefix -> Messages("error.prefix")
             )
             </div>
-            <div class="form-group">
+            <div class="govuk-form-group">
             @uiInput(
                 detailsForm("addressLine4"),
                 '_label -> Messages("address.form.with-errors.town"),
@@ -84,7 +85,7 @@
                 '_errorPrefix -> Messages("error.prefix")
             )
             </div>
-            <div class="form-group">
+            <div class="govuk-form-group">
             @uiInput(
                 detailsForm("postcode"),
                 '_label -> Messages("address.form.with-errors.postcode"),
@@ -99,7 +100,7 @@
 
         </fieldset>
 
-        <div class="form-group">
+        <div class="govuk-form-group">
             <button class="button" type="submit" id="continue">@Messages("address.form.with-errors.button.confirm_address")</button>
         </div>
     }

@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SignedOutController
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
 mainTemplate: main_template,
@@ -55,12 +56,12 @@ formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
                 "llp" -> Messages("businessType.option.partnership-llp")
             ),
             '_legend -> headerTitle,
-          '_groupDivClass -> "form-group",
+          '_groupDivClass -> "govuk-form-group",
             '_fieldsetAttributes -> Html("""id='businessType'""")
         )
 
 
-        <div class="form-group">
+        <div class="govuk-form-group">
             <details class="govuk-details">
                 <summary class="govuk-details__summary">
                     <span class="summary govuk-details__summary-text">@Messages("businessType.progressive.title")</span>
@@ -72,7 +73,7 @@ formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
             </details>
         </div>
 
-        <div class="form-group">
+        <div class="govuk-form-group">
             <button class="button" type="submit" id="continue">@Messages("button.continue")</button>
         </div>
     }

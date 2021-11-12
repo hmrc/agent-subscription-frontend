@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.ContactTradingNameCheck
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
   mainTemplate: main_template,
@@ -53,10 +53,10 @@
         "yes" -> Messages("contactTradingNameCheck.option.yes"),
         "no" -> Messages("contactTradingNameCheck.option.no")
       ),
-      '_legend             -> Html(s"""<h1 class="heading-xlarge">${Messages("contactTradingNameCheck.title")}</h1>"""),
+      '_legend             -> Html(s"""<h1 class="govuk-heading-xl">${Messages("contactTradingNameCheck.title")}</h1>"""),
       '_inputHint          -> Html(s"""<p>${Messages("contactTradingNameCheck.p")}</p>"""),
       '_fieldsetDiv        -> Html(s"""<p>${Messages(s"$businessName")}</p>"""),
-      '_groupDivClass      -> "form-group",
+      '_groupDivClass      -> "govuk-form-group",
       '_horizontal          -> true,
       '_fieldsetAttributes -> Html("""id='check'""")
     )

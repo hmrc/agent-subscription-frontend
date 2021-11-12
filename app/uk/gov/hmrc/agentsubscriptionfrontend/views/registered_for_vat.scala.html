@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.play.views.html.helpers._
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.RegisteredForVat
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
 mainTemplate: main_template,
@@ -50,8 +51,8 @@ uiInputRadioGroupCustom: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helper
                 "yes" -> Messages("registered-for-vat.option.yes"),
                 "no" -> Messages("registered-for-vat.option.no")
                 ),
-                '_legend -> Html("""<h1 class="heading-xlarge">""" + Messages("registered-for-vat.title") + """</h1>"""),
-                '_groupDivClass -> "form-group",
+                '_legend -> Html("""<h1 class="govuk-heading-xl">""" + Messages("registered-for-vat.title") + """</h1>"""),
+                '_groupDivClass -> "govuk-form-group",
                 '_horizontal          -> true,
                 '_fieldsetAttributes -> Html("""id='registeredForVat'""")
             )

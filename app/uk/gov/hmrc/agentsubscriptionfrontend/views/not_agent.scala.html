@@ -24,7 +24,7 @@ mainTemplate: main_template
 
 @mainTemplate(appConfig, title = Messages("nonAgent.title"), bodyClasses = None) {
 
-    <h1 class="heading-xlarge">@Messages("nonAgent.title")</h1>
+    <h1 class="govuk-heading-xl">@Messages("nonAgent.title")</h1>
     <p>@Html(Messages("nonAgent.p1", routes.SignedOutController.redirectToBusinessTypeForm))</p>
     <p>@Html(Messages("nonAgent.p2", routes.SignedOutController.redirectToCreateCleanCreds))</p>
 }

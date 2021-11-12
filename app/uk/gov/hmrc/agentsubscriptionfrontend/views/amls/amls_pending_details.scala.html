@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.AmlsPendingForm
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
 mainTemplate: main_template,
@@ -56,7 +57,7 @@ mainTemplate: main_template,
 }
 
 @headerTitle = {
-    <h1 class="heading-xlarge">@Messages("amls.pending.appliedOn.title")</h1>
+    <h1 class="govuk-heading-xl">@Messages("amls.pending.appliedOn.title")</h1>
 }
 
 @mainTemplate(appConfig, title =  errorPrefix(amlsPendingForm) + Messages("amls.pending.appliedOn.title"), bodyClasses = None) {

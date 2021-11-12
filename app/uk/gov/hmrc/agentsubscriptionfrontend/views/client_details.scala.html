@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInvasiveTaxPayerOption
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
 mainTemplate: main_template,
@@ -35,12 +36,12 @@ uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
     }
 
     @formHelper(action = routes.AssuranceChecksController.submitClientDetailsForm, 'class -> "form js-form") {
-        <div class="form-group @if(radioResponseForm.error("variant").isDefined){form-field--error soft--ends}">
+        <div class="govuk-form-group @if(radioResponseForm.error("variant").isDefined){form-field--error soft--ends}">
             <fieldset aria-describedby="client-details-hint @if(radioResponseForm.hasErrors){client-details-error}">
                 <legend>
-                    <h1 class="heading-xlarge">@Messages("invasive.title.option")</h1>
+                    <h1 class="govuk-heading-xl">@Messages("invasive.title.option")</h1>
                 </legend>
-                <p class="hint-text" id="client-details-hint">@Messages("invasive.p1")</p>
+                <p class="govuk-hint" id="client-details-hint">@Messages("invasive.p1")</p>
                 <p>@Messages("invasive.p2")</p>
                 @if(radioResponseForm.error("variant").isDefined){
                     <span class="error-notification" id="client-details-error"><span class="visuallyhidden">@Messages("error.prefix")</span>@Messages("clientDetails.error.no-radio.selected")</span>
@@ -73,7 +74,7 @@ uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
                 </div>
             </fieldset>
         </div>
-        <div class="form-group">
+        <div class="govuk-form-group">
             <button class="button" type="submit" id="continue">@Messages("button.continue")</button>
         </div>
     }

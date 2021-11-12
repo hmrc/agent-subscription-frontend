@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.VatDetails
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.error_prefix
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
 mainTemplate: main_template,
@@ -72,7 +72,7 @@ errorPrefix: error_prefix
 
             <div class="form-group @if(vatDetailsForm.error("vrn").isDefined){form-field--error soft--ends}">
                 <label for="vrn">@Messages("vat-details.vrn.title")</label>
-                <span class="hint-text" id="vrn-hint">@Messages("vat-details.vrn.hint")</span>
+                <span class="govuk-hint" id="vrn-hint">@Messages("vat-details.vrn.hint")</span>
                 @vatDetailsForm.error("vrn").map { formError => <span class="error-notification" id="vrn-error">
                     <span class="visuallyhidden">@Messages("error.prefix")</span>
                     @Messages(formError.message)

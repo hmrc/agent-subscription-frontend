@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessEmail
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
 mainTemplate: main_template,
@@ -43,9 +44,9 @@ errorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary
         action = if(isChange) routes.BusinessIdentificationController.submitChangeBusinessEmail else routes.BusinessIdentificationController.submitBusinessEmailForm(),
         'class -> "form js-form") {
 
-        <div class="form-group @if(businessEmailForm.hasErrors) {form-field--error soft--ends}">
+        <div class="govuk-form-group @if(businessEmailForm.hasErrors) {form-field--error soft--ends}">
             <h1>
-                <label for="email" class="heading-xlarge">@Messages("businessEmail.title")</label>
+                <label for="email" class="govuk-heading-xl">@Messages("businessEmail.title")</label>
             </h1>
         <p class="panel panel-border-wide" id="email-panel">@Messages("businessEmail.description")</p>
 

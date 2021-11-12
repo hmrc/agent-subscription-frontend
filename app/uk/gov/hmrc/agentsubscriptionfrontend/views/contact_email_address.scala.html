@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessEmail
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
         mainTemplate: main_template,
@@ -47,9 +48,9 @@
         action = routes.ContactDetailsController.submitContactEmailAddress(),
         'class -> "form js-form") {
 
-       <div class="form-group @if(contactEmailForm("email").hasErrors){form-field--error soft--ends}">
+       <div class="govuk-form-group @if(contactEmailForm("email").hasErrors){form-field--error soft--ends}">
            <h1>
-               <label class="heading-xlarge" for="email">@Messages("contactEmailAddress.title")</label>
+               <label class="govuk-heading-xl" for="email">@Messages("contactEmailAddress.title")</label>
            </h1>
 
         <p id="email-hint">@Messages("contactEmailAddress.p")</p>

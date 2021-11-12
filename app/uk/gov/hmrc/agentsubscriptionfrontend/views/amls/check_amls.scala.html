@@ -19,6 +19,7 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
         mainTemplate: main_template,
@@ -57,7 +58,7 @@ action = routes.AMLSController.submitAmlsRegistered(), 'class -> "form js-form")
         ),
         '_legend -> headerTitle,
         '_horizontal          -> true,
-        '_groupDivClass -> "form-group",
+        '_groupDivClass -> "govuk-form-group",
         '_fieldsetAttributes -> Html("""id='registeredAmls'""")
         )
 

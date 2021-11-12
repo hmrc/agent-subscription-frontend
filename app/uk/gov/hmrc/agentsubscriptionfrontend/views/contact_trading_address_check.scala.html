@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.ContactTradingAddressCheck
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
         mainTemplate: main_template,
@@ -50,7 +50,7 @@
         action = routes.ContactDetailsController.submitCheckMainTradingAddress(),
         'class -> "form js-form") {
 
-        <div class="form-group @if(contactTradingAddressCheckForm.hasErrors){form-field--error error-container}">
+        <div class="govuk-form-group @if(contactTradingAddressCheckForm.hasErrors){form-field--error error-container}">
             <fieldset id="check">
                 <legend>
                     <h1 class="heading-xlarge @if(contactTradingAddressCheckForm.hasErrors){margin-top-0}">@Messages("contactTradingAddressCheck.title")</h1>

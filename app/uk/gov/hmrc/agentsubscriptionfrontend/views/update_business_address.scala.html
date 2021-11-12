@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.UpdateBusinessAddressForm
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 
 @this(
 mainTemplate: main_template,
@@ -35,9 +36,9 @@ uiInput: uk.gov.hmrc.play.views.html.helpers.Input
     @if(addressForm.hasErrors) {
         @uiErrorSummary(Messages("error.summary.heading"), addressForm, Seq.empty, Some("update-business-address"))
     }
-    <h1 class="heading-xlarge">@Messages("updateBusinessAddress.title")</h1>
+    <h1 class="govuk-heading-xl">@Messages("updateBusinessAddress.title")</h1>
 
-    <p class="hint-text">@Messages("updateBusinessAddress.p1")</p>
+    <p class="govuk-hint">@Messages("updateBusinessAddress.p1")</p>
 
     <p class="panel panel-border-wide">@Messages("updateBusinessAddress.p2")</p>
 
@@ -48,7 +49,7 @@ uiInput: uk.gov.hmrc.play.views.html.helpers.Input
         <fieldset>
 
           @for(index <- 1 to 4) {
-            <div class="form-group">
+            <div class="govuk-form-group">
             @uiInput(
                 addressForm(s"addressLine$index"),
                 '_label -> Messages(s"updateBusinessAddress.address_line_$index.title"),
@@ -59,7 +60,7 @@ uiInput: uk.gov.hmrc.play.views.html.helpers.Input
             </div>
           }
 
-            <div class="form-group">
+            <div class="govuk-form-group">
             @uiInput(
                 addressForm("postcode"),
                 '_label -> Messages("updateBusinessAddress.postcode.title"),
@@ -72,7 +73,7 @@ uiInput: uk.gov.hmrc.play.views.html.helpers.Input
 
         </fieldset>
 
-        <div class="form-group">
+        <div class="govuk-form-group">
             <button class="button margin-bottom-10 margin-right-5" type="submit" id="update-address-continue" name="submit" value="continue">@Messages("updateBusinessAddress.continue")</button>
             <button class="button--secondary" type="submit" id="update-address-save" name="submit" value="save">@Messages("button.saveComeBackLater")</button>
         </div>
