@@ -1,4 +1,5 @@
 #Common
+service.name=Creu cyfrif gwasanaethau asiant
 app.name=Creu cyfrif gwasanaethau asiant
 servicename.titleSuffix=– Creu cyfrif gwasanaethau asiant – GOV.UK
 

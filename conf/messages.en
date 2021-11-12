@@ -1,4 +1,5 @@
 #Common
+service.name=Create an agent services account
 app.name=Create an agent services account
 servicename.titleSuffix=- Create an agent services account - GOV.UK
 
