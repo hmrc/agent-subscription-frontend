@@ -15,52 +15,53 @@
  *@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
+@import uk.gov.hmrc.govukfrontend.views.html.components.{RadioItem, Text, ErrorSummary}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-    errorPrefix: error_prefix,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-        uiInputRadioGroupCustom: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.input_radio_group_custom,
-        uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF)
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    errorSummary: uk.gov.hmrc.govukfrontend.views.html.components.GovukErrorSummary,
+    inputRadioGroup: uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.InputRadios,
+    submitOrSaveButtonGroup: uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.SubmitOrSaveButtonGroup,
+    formHelper: uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF)
 
-@(amlsAppliedForForm: Form[RadioInputAnswer], mayBeGoBackUrl: Option[String] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(amlsAppliedForForm: Form[RadioInputAnswer])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@headerTitle = {
-
-}
-
-@mainTemplate(appConfig, title = errorPrefix(amlsAppliedForForm) + Messages("amlsAppliedFor.title"), bodyClasses = None) {
-
- <a href="@routes.AMLSController.showAmlsRegisteredPage()" class="link-back">@Messages("button.back")</a>
+@mainTemplate(
+title = errorPrefix(amlsAppliedForForm) + Messages("amlsAppliedFor.title"),
+backLinkHref = Some("@routes.AMLSController.showAmlsRegisteredPage()")) {
 
 @if(amlsAppliedForForm.hasErrors) {
-@uiErrorSummary(Messages("error.summary.heading"), amlsAppliedForForm, Seq.empty, Some("amls-applied"))
+    @errorSummary(ErrorSummary().withFormErrorsAsText(amlsAppliedForForm))
 }
 
-@uiFormHelper(
-action = routes.AMLSController.submitCheckAmlsAlreadyAppliedForm, 'class -> "form js-form") {
+    @formHelper(action = routes.AMLSController.submitCheckAmlsAlreadyAppliedForm) {
 
-
-        @uiInputRadioGroupCustom(
-        amlsAppliedForForm("amlsAppliedFor"),
-        Seq(
-        "yes" -> Messages("button.yes"),
-        "no" -> Messages("button.no")
-        ),
-        '_groupDivClass -> "form-group",
-        '_horizontal          -> true,
-        '_legend -> Html("""<h1 class="heading-xlarge">""" + Messages(s"amlsAppliedFor.title") + """</h1>"""),
-        '_fieldsetAttributes -> Html("""id='amlsAppliedFor'""")
+        @inputRadioGroup(
+            field = amlsAppliedForForm("amlsAppliedFor"),
+            legend= Messages("amlsAppliedFor.title"),
+            headingIsLegend = true,
+            inputs = Seq(
+                RadioItem(
+                    content = Text(Messages("button.yes")),
+                    value = Some("yes")
+                ),
+                RadioItem(
+                    content = Text(Messages("button.no")),
+                    value = Some("no")
+                )
+            )
         )
 
+        @submitOrSaveButtonGroup(
+            submitId = "amls-applied-for-continue",
+            saveId = "amls-applied-for-save"
+        )
 
-    <div class="form-field">
-        <button type="submit" class="button margin-bottom-10 margin-right-5" id="amls-applied-for-continue" name="submit" value="continue">@Messages("button.saveContinue")</button>
-        <button type="submit" class="button--secondary" id="amls-applied-for-save" name="submit" value="save">@Messages("button.saveComeBackLater")</button>
-    </div>
-}
+    }
 }
