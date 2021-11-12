@@ -47,7 +47,6 @@ trait AppConfig {
   val rootContinueUrl: String
   val agentSubscriptionBaseUrl: String
   val agentSubscriptionFrontendExternalUrl: String
-  def contactFrontendAccessibilityUrl(userAction: String): String
   val timeout: Int
   val timeoutCountdown: Int
   val appName: String
@@ -107,10 +106,6 @@ class FrontendAppConfig @Inject()(servicesConfig: ServicesConfig) extends AppCon
 
   private val returnAfterGGCredsCreatedPath: String = "/agent-subscription/return-after-gg-creds-created"
   override val rootContinueUrl: String = s"$agentSubscriptionFrontendExternalUrl$returnAfterGGCredsCreatedPath"
-
-  def contactFrontendAccessibilityUrl(userAction: String): String =
-    s"${getConf(s"microservice.services.contact-frontend.external-url")}" +
-      s"/contact/accessibility?service=AOSS&userAction=$userAction"
 
   override val timeout: Int = servicesConfig.getInt("timeoutDialog.timeout-seconds")
   override val timeoutCountdown: Int = servicesConfig.getInt("timeoutDialog.timeout-countdown-seconds")

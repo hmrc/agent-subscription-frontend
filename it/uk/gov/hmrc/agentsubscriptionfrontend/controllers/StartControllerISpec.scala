@@ -1,11 +1,9 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import java.time.LocalDate
-
-import play.api.http.HeaderNames
 import play.api.i18n.Lang
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{AnyContentAsEmpty, Cookie}
+import play.api.mvc.{AnyContentAsEmpty, Cookie, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, _}
@@ -30,9 +28,9 @@ class StartControllerISpec extends BaseISpec {
 
   object FixturesForReturnAfterGGCredsCreated {
 
-    val amlsSDetails = AmlsDetails("supervisory", Right(RegisteredDetails("123456789", LocalDate.now())))
+    val amlsSDetails: AmlsDetails = AmlsDetails("supervisory", Right(RegisteredDetails("123456789", LocalDate.now())))
 
-    val agentSession =
+    val agentSession: AgentSession =
       AgentSession(
         Some(BusinessType.SoleTrader),
         utr = Some(validUtr),
@@ -125,7 +123,7 @@ class StartControllerISpec extends BaseISpec {
 
       "display the sign in check page with correct links" in new SetupUnsubscribed {
         implicit val request = FakeRequest("GET", "/agent-subscription/sign-in-check?continue=/go/somewhere")
-        val result = await(controller.signInCheck(request))
+        val result: Result = await(controller.signInCheck(request))
 
         status(result) shouldBe OK
         contentType(result) shouldBe Some("text/html")
@@ -140,7 +138,7 @@ class StartControllerISpec extends BaseISpec {
         implicit val request = FakeRequest("GET", "/agent-subscription/sign-in-check")
         override implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(
           subscribingCleanAgentWithoutEnrolments)
-        val result = await(controller.signInCheck(request))
+        val result: Result = await(controller.signInCheck(request))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
@@ -163,7 +161,7 @@ class StartControllerISpec extends BaseISpec {
       "redirect to the /task-list page and update journey record with new clean creds id" in new SetupUnsubscribed {
         implicit val request = FakeRequest()
 
-        val result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
+        val result: Result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
 
         status(result) shouldBe 303
         redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
@@ -173,7 +171,7 @@ class StartControllerISpec extends BaseISpec {
         givenNoSubscriptionJourneyRecordExists(id)
         implicit val request = FakeRequest()
 
-        val result = await(controller.returnAfterGGCredsCreated()(request))
+        val result: Result = await(controller.returnAfterGGCredsCreated()(request))
 
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.TaskListController.showTaskList().url)
@@ -190,7 +188,7 @@ class StartControllerISpec extends BaseISpec {
         arn = "TARN00023")
       implicit val request = FakeRequest().withCookies(Cookie("PLAY_LANG", "en"))
 
-      val result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
+      val result: Result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.SubscriptionController.showSubscriptionComplete().url)
@@ -238,13 +236,4 @@ class StartControllerISpec extends BaseISpec {
     }
   }
 
-  "GET /accessibility-statement" should {
-    "show the accessibility statement content with link to deskpro form containing user action" in {
-      val result = await(controller.showAccessibilityStatement(FakeRequest().withHeaders(HeaderNames.REFERER -> "foo")))
-
-      status(result) shouldBe 200
-      result should containMessages("accessibility.statement.h1")
-      result should containSubstrings("http://localhost:9250/contact/accessibility?service=AOSS&userAction=foo")
-    }
-  }
 }
