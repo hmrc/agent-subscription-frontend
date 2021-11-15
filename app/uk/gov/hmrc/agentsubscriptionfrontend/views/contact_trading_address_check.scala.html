@@ -64,7 +64,7 @@
 
                 @contactTradingAddressCheckForm.error("check").map{formError =>
                     <span class="error-notification" role="tooltip" data-journey="search-page:error:contact-trading-address-check">
-                        <span class="visuallyhidden">@Messages("error.prefix")</span>
+                        <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
                         @Messages(formError.message)
                     </span>
                 }

@@ -50,7 +50,7 @@ uiInput: uk.gov.hmrc.play.views.html.helpers.Input
         </h1>
         <p class="govuk-hint" id="postcode-hint">@Messages(s"postcode.${businessType.key}.hint")</p>
         @postcodeForm.error("postcode").map { formError =>
-            <span class="error-notification" id="postcode-error"><span class="visuallyhidden">@Messages("error.prefix")</span>
+            <span class="error-notification" id="postcode-error"><span class="govuk-visually-hidden">@Messages("error.prefix")</span>
             @Messages(formError.message)
         </span>
         }

@@ -70,7 +70,7 @@ mainTemplate: main_template,
             </div>
 
           @confirmBusinessRadioForm.error("confirmBusiness").map { formError => <span class="error-notification" id="confirmBusiness-error">
-              <span class="visuallyhidden">@Messages("error.prefix")</span>
+              <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
               @Messages(formError.message)
           </span>
           }

@@ -51,7 +51,7 @@ uiInput: uk.gov.hmrc.play.views.html.helpers.Input
          <p class="hint-text margin-bottom-10" id="crn-hint">@Messages("crn.hint")</p>
 
          @crnForm.error("crn").map { formError => <span class="error-notification" id="crn-error">
-             <span class="visuallyhidden">@Messages("error.prefix")</span>
+             <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
              @Messages(formError.message)
          </span>
          }

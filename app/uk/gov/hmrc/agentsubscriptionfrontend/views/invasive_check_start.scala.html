@@ -54,7 +54,7 @@ uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary)
 
                 @radioResponseForm.error("hasSaAgentCode").map { formError =>
                   <span class="error-notification" id="agent-code-error">
-                      <span class="visuallyhidden">@Messages("error.prefix")</span>
+                      <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
                       @Messages(formError.message)
                   </span>
                 }

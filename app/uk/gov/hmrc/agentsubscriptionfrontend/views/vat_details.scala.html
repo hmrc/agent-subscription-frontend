@@ -74,7 +74,7 @@ errorPrefix: error_prefix
                 <label for="vrn">@Messages("vat-details.vrn.title")</label>
                 <span class="govuk-hint" id="vrn-hint">@Messages("vat-details.vrn.hint")</span>
                 @vatDetailsForm.error("vrn").map { formError => <span class="error-notification" id="vrn-error">
-                    <span class="visuallyhidden">@Messages("error.prefix")</span>
+                    <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
                     @Messages(formError.message)
                 </span>
                 }

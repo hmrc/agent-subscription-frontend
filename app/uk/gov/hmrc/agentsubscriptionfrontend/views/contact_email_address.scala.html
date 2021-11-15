@@ -57,7 +57,7 @@
 
            @contactEmailForm.error("email").map { formError =>
            <span class="error-notification" data-journey="search-page:error:contact-email" id="email-error">
-                <span class="visuallyhidden">@Messages("error.prefix")</span>
+                <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
                     @Messages(formError.message)
            </span>
            }

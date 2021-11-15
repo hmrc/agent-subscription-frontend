@@ -51,7 +51,7 @@ errorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary
         <p class="panel panel-border-wide" id="email-panel">@Messages("businessEmail.description")</p>
 
             @businessEmailForm.error("email").map { formError => <span class="error-message" id="email-error">
-                <span class="visuallyhidden">@Messages("error.prefix")</span>
+                <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
                 @Messages(formError.message)
             </span>
             }

@@ -44,7 +44,7 @@ uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
                 <p class="govuk-hint" id="client-details-hint">@Messages("invasive.p1")</p>
                 <p>@Messages("invasive.p2")</p>
                 @if(radioResponseForm.error("variant").isDefined){
-                    <span class="error-notification" id="client-details-error"><span class="visuallyhidden">@Messages("error.prefix")</span>@Messages("clientDetails.error.no-radio.selected")</span>
+                    <span class="error-notification" id="client-details-error"><span class="govuk-visually-hidden">@Messages("error.prefix")</span>@Messages("clientDetails.error.no-radio.selected")</span>
                 }
                 <div id="variant" data-target="variant">
                     <div class="multiple-choice" data-target="ninoRadioInput">
