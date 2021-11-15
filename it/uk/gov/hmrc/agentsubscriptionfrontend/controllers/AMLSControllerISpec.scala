@@ -833,7 +833,7 @@ class AMLSControllerISpec extends BaseISpec {
       result should containMessages(
         "amls-not-applied.title",
         "amls-not-applied.p1",
-        "amls-not-applied.finish"
+        "button.finishSignOut"
       )
 
       result should containSubstrings(

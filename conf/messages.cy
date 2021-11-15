@@ -399,7 +399,7 @@ subscriptionComplete.nextStepsTERS.p=Gallwch nawr fynd yn eich blaen i gofrestru
 subscriptionComplete.button.continueToASAccount=Ewch i’ch cyfrif gwasanaethau asiant
 
 #Common
-button.startAgain=Rhoi cynnig arall arni
+button.tryAgain=Rhoi cynnig arall arni
 button.continue=Yn eich blaen
 button.saveContinue=Cadw ac yn eich blaen
 button.saveComeBackLater=Cadw ar ffurf drafft

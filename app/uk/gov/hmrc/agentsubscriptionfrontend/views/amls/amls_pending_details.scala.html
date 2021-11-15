@@ -15,22 +15,25 @@
  *@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.AmlsPendingForm
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{InputDate, SubmitOrSaveButtonGroup}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
+    mainTemplate: MainTemplate,
     errorPrefix: error_prefix,
-        uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-        uiDateFieldsCustom: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.date_input_custom
+    formHelper: FormWithCSRF,
+    errorSummary: GovukErrorSummary,
+    inputDate: InputDate,
+    submitOrSaveButtonGroup: SubmitOrSaveButtonGroup
 )
 
 @(amlsPendingForm: Form[AmlsPendingForm], mayBeGoBackUrl: Option[String] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-
 
 @DayFieldError = @{
     if(amlsPendingForm("appliedOn.day").hasErrors)
@@ -56,40 +59,32 @@ mainTemplate: main_template,
     amlsPendingForm.copy(errors = amlsPendingForm.errors.filterNot(error => error.message == "" || error.key.contains("appliedOn.day") || error.key.contains("appliedOn.month") || error.key.contains("appliedOn.year")))
 }
 
-@headerTitle = {
-    <h1 class="govuk-heading-xl">@Messages("amls.pending.appliedOn.title")</h1>
-}
-
-@mainTemplate(appConfig, title =  errorPrefix(amlsPendingForm) + Messages("amls.pending.appliedOn.title"), bodyClasses = None) {
-
-<a href="@mayBeGoBackUrl.getOrElse(routes.AMLSController.showCheckAmlsAlreadyAppliedForm.url)" class="link-back">@Messages("button.back")</a>
+@mainTemplate(
+title = errorPrefix(amlsPendingForm) + Messages("amls.pending.appliedOn.title"),
+backLinkHref = Some("@mayBeGoBackUrl.getOrElse(routes.AMLSController.showCheckAmlsAlreadyAppliedForm.url)")
+) {
 
     @if(amlsPendingForm.hasErrors) {
-        @uiErrorSummary(Messages("error.summary.heading"), dateFormWithRefinedErrors, Seq.empty, Some("amls-pending-details"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(dateFormWithRefinedErrors))
     }
 
-
-    @uiFormHelper(action = routes.AMLSController.submitAmlsApplicationDatePage(), 'class -> "form js-form", 'id -> "amlsPendingForm") {
+    @formHelper(action = routes.AMLSController.submitAmlsApplicationDatePage(), 'id -> "amlsPendingForm") {
 
         <input type="hidden" name="amlsCode" id="amlsCode" value="HMRC" >
 
+        @inputDate(
+            field = amlsPendingForm("appliedOn"),
+            legend = Messages("amls.pending.appliedOn.title"),
+            hint = Some(Messages("moneyLaunderingCompliance.expiry.hint")),
+            legendClass = "govuk-fieldset__legend--xl",
+            legendAsHeading = true
+        )
 
-            @uiDateFieldsCustom(
-            dateFormWithRefinedErrors,
-            "appliedOn",
-            '_inputHint -> Messages("moneyLaunderingCompliance.expiry.hint"),
-            '_legend -> headerTitle,
-            '_legendClass -> "flush--ends",
-        '_hintDivClass -> "margin-bottom-10",
-            '_hintId -> "applied-on")
+        @submitOrSaveButtonGroup(
+            submitId = "amls-pending-continue",
+            saveId = "amls-pending-save"
+        )
 
-
-
-        <div class="form-field">
-            <button type="submit" class="button margin-bottom-10 margin-right-5" id="amls-pending-continue" name="submit" value="continue">@Messages("button.saveContinue")</button>
-            <button type="submit" class="button--secondary" id="amls-pending-save" name="submit" value="save">@Messages("button.saveComeBackLater")</button>
-        </div>
     }
-
 
 }

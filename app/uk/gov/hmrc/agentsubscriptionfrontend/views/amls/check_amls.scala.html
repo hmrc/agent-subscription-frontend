@@ -20,53 +20,53 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{InputRadios, SubmitOrSaveButtonGroup}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{RadioItem, Text, GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-        mainTemplate: main_template,
+    mainTemplate: MainTemplate,
     errorPrefix: error_prefix,
-        uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-        uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        uiInputRadioGroupCustom: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.input_radio_group_custom
+    errorSummary: GovukErrorSummary,
+    formHelper: FormWithCSRF,
+    inputRadio: InputRadios,
+    submitOrSaveButtonGroup: SubmitOrSaveButtonGroup
 )
 
 @(checkAmlsForm: Form[RadioInputAnswer], isChange: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@headerTitle = {
-    <h1 class="heading-xlarge @if(checkAmlsForm.hasErrors){push--top}">@Messages(s"check-amls.title")</h1>
-}
-
 @backLink = @{if(isChange) routes.SubscriptionController.showCheckAnswers() else routes.TaskListController.showTaskList()}
 
-@mainTemplate(appConfig, title =  errorPrefix(checkAmlsForm) + Messages("check-amls.title"), bodyClasses = None) {
+@mainTemplate(title =  errorPrefix(checkAmlsForm) + Messages("check-amls.title"),
+backLinkHref = Some("@backLink")) {
 
-<a href="@backLink" class="link-back">@Messages("button.back")</a>
+    @if(checkAmlsForm.hasErrors) {
+        @errorSummary(ErrorSummary().withFormErrorsAsText(checkAmlsForm))
+    }
 
-@if(checkAmlsForm.hasErrors) {
-@uiErrorSummary(Messages("error.summary.heading"), checkAmlsForm, Seq.empty, Some("check-amls"))
-}
+    @formHelper(action = routes.AMLSController.submitAmlsRegistered()) {
 
-
-@uiFormHelper(
-action = routes.AMLSController.submitAmlsRegistered(), 'class -> "form js-form") {
-
-
-        @uiInputRadioGroupCustom(
-        checkAmlsForm("registeredAmls"),
-        Seq(
-        "yes" -> Messages("button.yes"),
-        "no" -> Messages("button.no")
-        ),
-        '_legend -> headerTitle,
-        '_horizontal          -> true,
-        '_groupDivClass -> "govuk-form-group",
-        '_fieldsetAttributes -> Html("""id='registeredAmls'""")
+        @inputRadio(
+            field = checkAmlsForm("registeredAmls"),
+            legend = Messages("check-amls.title"),
+            headingIsLegend = true,
+            inputs = Seq(
+                RadioItem(
+                    content = Text(Messages("button.yes")),
+                    value = Some("yes")
+                ),
+                RadioItem(
+                    content = Text(Messages("button.no")),
+                    value = Some("no")
+                )
+            )
         )
 
+        @submitOrSaveButtonGroup(
+            submitId = "check-amls-continue",
+            saveId = "check-amls-save"
+        )
 
-    <div class="form-field">
-        <button type="submit" class="button margin-bottom-10 margin-right-5" id="check-amls-continue" name="submit" value="continue">@Messages("button.saveContinue")</button>
-        <button type="submit" class="button--secondary" id="check-amls-save" name="submit" value="save">@Messages("button.saveComeBackLater")</button>
-    </div>
-
-}
+    }
 }

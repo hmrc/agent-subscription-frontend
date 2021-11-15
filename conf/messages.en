@@ -399,7 +399,7 @@ subscriptionComplete.nextStepsTERS.p=You can now continue with registering a cli
 subscriptionComplete.button.continueToASAccount=Go to your agent services account
 
 #Common
-button.startAgain=Try again
+button.tryAgain=Try again
 button.continue=Continue
 button.saveContinue=Save and continue
 button.saveComeBackLater=Save as draft
