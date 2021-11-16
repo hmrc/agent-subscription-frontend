@@ -26,7 +26,7 @@
     mainTemplate: MainTemplate,
     errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
     errorSummary: uk.gov.hmrc.govukfrontend.views.html.components.GovukErrorSummary,
-    inputRadioGroup: uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.InputRadios,
+    inputYesNoRadio: uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.InputYesNoRadios,
     submitOrSaveButtonGroup: uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.SubmitOrSaveButtonGroup,
     formHelper: uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF)
 
@@ -42,20 +42,10 @@ backLinkHref = Some("@routes.AMLSController.showAmlsRegisteredPage()")) {
 
     @formHelper(action = routes.AMLSController.submitCheckAmlsAlreadyAppliedForm) {
 
-        @inputRadioGroup(
+        @inputYesNoRadio(
             field = amlsAppliedForForm("amlsAppliedFor"),
             legend = Messages("amlsAppliedFor.title"),
-            headingIsLegend = true,
-            inputs = Seq(
-                RadioItem(
-                    content = Text(Messages("button.yes")),
-                    value = Some("yes")
-                ),
-                RadioItem(
-                    content = Text(Messages("button.no")),
-                    value = Some("no")
-                )
-            )
+            headingIsLegend = true
         )
 
         @submitOrSaveButtonGroup(

@@ -25,15 +25,13 @@ field: Field,
 legend: String,
 legendClass: Option[String] = None,
 hint: Option[String] = None,
-headingIsLegend: Boolean = false,
-inputs: Seq[RadioItem],
-inline: Boolean = false
+headingIsLegend: Boolean = false
 )(implicit messages: Messages)
 
 @govukRadios(Radios(
     idPrefix = Some(field.id),
     name = field.name,
-    classes = if(inline) "govuk-radios--inline" else "",
+    classes = "govuk-radios--inline",
     errorMessage = field.error match {
         case Some(e) => Some(ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(messages(e.message, e.args:_*))))
         case None => None
@@ -46,6 +44,15 @@ inline: Boolean = false
             classes = legendClass.getOrElse("govuk-fieldset__legend--xl")
             ))
         )),
-    items = inputs
+    items = Seq(
+        RadioItem(
+            content = Text(Messages("button.yes")),
+            value = Some("yes")
+        ),
+        RadioItem(
+            content = Text(Messages("button.no")),
+            value = Some("no")
+        )
+    )
     ).withFormField(field)
 )
