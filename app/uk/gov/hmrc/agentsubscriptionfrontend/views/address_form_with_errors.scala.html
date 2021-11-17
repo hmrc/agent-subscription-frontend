@@ -19,14 +19,18 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.DesAddress
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{UkAddress, SubmitButton}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-errorPrefix: error_prefix,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-uiInput: uk.gov.hmrc.play.views.html.helpers.Input
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    errorSummary: GovukErrorSummary,
+    formHelper: FormWithCSRF,
+    ukAddress: UkAddress,
+    submitButton: SubmitButton
 )
 @(detailsForm: Form[DesAddress], isTradingAddress: Boolean = false)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
@@ -36,74 +40,29 @@ uiInput: uk.gov.hmrc.play.views.html.helpers.Input
     } else routes.SubscriptionController.submitModifiedAddress()
 }
 
-@mainTemplate(appConfig, title =  errorPrefix(detailsForm) + Messages("subscriptionDetails.title"), bodyClasses = None) {
-@if(detailsForm.hasErrors) {
-    @uiErrorSummary(Messages("error.summary.heading"), detailsForm, Seq.empty, Some("return-from-address-lookup"))
-}
-    <h1 class="govuk-heading-xl">@Messages("invalidAddress.title")</h1>
+@mainTemplate(title = errorPrefix(detailsForm) + Messages("subscriptionDetails.title")) {
 
+    @if(detailsForm.hasErrors) {
+        @errorSummary(ErrorSummary().withFormErrorsAsText(detailsForm))
+    }
+
+    <h1 class="govuk-heading-xl">@Messages("invalidAddress.title")</h1>
 
     <p>@Messages("invalidAddress.p1")</p>
 
-    @uiFormHelper(action = submitCall, 'class -> "form js-form") {
+    @formHelper(action = submitCall) {
 
+        @ukAddress(
+            form = detailsForm,
+            legend = Messages("address.form.with-errors.heading"),
+            line1 = Messages("address.form.with-errors.address_line_1"),
+            line2 = Messages("address.form.with-errors.address_line_2"),
+            line3 = Messages("address.form.with-errors.address_line_3"),
+            line4 = Messages("address.form.with-errors.town"),
+            hiddenCountryCode = true
+        )
 
-    <fieldset>
-        <legend><h2 class="heading-medium">@Messages("address.form.with-errors.heading")</h2></legend>
+        @submitButton(id = "continue", messageKey = "address.form.with-errors.button.confirm_address")
 
-            <div class="govuk-form-group">
-                @uiInput(
-                    detailsForm("addressLine1"),
-                    '_label -> Messages("address.form.with-errors.address_line_1"),
-                    '_inputClass -> "form-control input--cleared",
-                    '_labelClass -> "heading-small soft--ends",
-                    '_errorPrefix -> Messages("error.prefix")
-                )
-            </div>
-            <div class="govuk-form-group">
-                @uiInput(
-                    detailsForm("addressLine2"),
-                    '_label -> Messages("address.form.with-errors.address_line_2"),
-                    '_inputClass -> "form-control input--cleared",
-                    '_labelClass -> "heading-small soft--ends",
-                    '_errorPrefix -> Messages("error.prefix")
-                )
-            </div>
-            <div class="govuk-form-group">
-                @uiInput(
-                    detailsForm("addressLine3"),
-                    '_label -> Messages("address.form.with-errors.address_line_3"),
-                    '_inputClass -> "form-control input--cleared",
-                    '_labelClass -> "heading-small soft--ends",
-                    '_errorPrefix -> Messages("error.prefix")
-                )
-            </div>
-            <div class="govuk-form-group">
-                @uiInput(
-                    detailsForm("addressLine4"),
-                    '_label -> Messages("address.form.with-errors.town"),
-                    '_inputClass -> "form-control input--cleared",
-                    '_labelClass -> "heading-small soft--ends",
-                    '_errorPrefix -> Messages("error.prefix")
-                )
-            </div>
-            <div class="govuk-form-group">
-                @uiInput(
-                    detailsForm("postcode"),
-                    '_label -> Messages("address.form.with-errors.postcode"),
-                    '_inputClass -> "form-control input--cleared input--small",
-                    '_labelClass -> "heading-small soft--ends",
-                    '_dataAttributes -> Html("""data-uppercase="true""""),
-                    '_errorPrefix -> Messages("error.prefix")
-                )
-            </div>
-
-            <input type="hidden" name="countryCode" id="countryCode" value="@detailsForm("countryCode").value" >
-
-        </fieldset>
-
-        <div class="govuk-form-group">
-            <button class="button" type="submit" id="continue">@Messages("address.form.with-errors.button.confirm_address")</button>
-        </div>
     }
 }
