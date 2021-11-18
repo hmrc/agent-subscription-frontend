@@ -16,25 +16,27 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukPanel, Panel, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template
+mainTemplate: MainTemplate,
+govukPanel: GovukPanel
 )
 
 @(backLink: Option[String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@mainTemplate(appConfig, title =  Messages("saved-progress.title"), bodyClasses = None) {
+@mainTemplate(title =  Messages("saved-progress.title")) {
 
+    @govukPanel(Panel(
+        title = Text(Messages("saved-progress.title"))
+    ))
 
-    <div class="transaction-banner--complete with-govuk-success-colour">
-        <h1 class="transaction-banner__heading">@Messages("saved-progress.title")</h1>
-    </div>
+    <h2>@Messages("saved-progress.p1")</h2>
+    <p>@Messages("saved-progress.p2")</p>
 
-    <p class="margin-bottom-0">@Messages("saved-progress.p1")</p>
-        <p>@Messages("saved-progress.p2")</p>
-
-
-    <p>@Html(s"${Messages("saved-progress.p3",s"<a href='https://www.gov.uk/guidance/get-an-hmrc-agent-services-account' target='_blank'>${Messages("saved-progress.link")}</a>")}")</p>
+    <p>@Html(s"${Messages("saved-progress.p3",s"<a href='https://www.gov.uk/guidance/get-an-hmrc-agent-services-account' target='_blank' rel='noopener noreferrer'>${Messages("saved-progress.link")}</a>")}")</p>
     <p>@Messages("saved-progress.p4")</p>
     <p><a href="@backLink.getOrElse(routes.TaskListController.showTaskList().url)">@Messages("saved-progress.continue")</a></p>
     <p><a href="@routes.SignedOutController.startSurvey()">@Messages("saved-progress.finish")</a></p>

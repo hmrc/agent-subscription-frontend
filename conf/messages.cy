@@ -414,7 +414,8 @@ button.signIn=Mewngofnodi
 #Setup Incomplete
 setupIncomplete.title=Nid oeddem yn gallu cadarnhau pwy ydych
 setupIncomplete.p1=Cyn i chi allu creu cyfrif gwasanaethau asiant, mae angen i ni fod yn siŵr bod cleient wedi’ch awdurdodi i ddelio â CThEM.
-setupIncomplete.p2=<a href="{0}">Mewngofnodwch gyda Dynodydd Defnyddiwr (ID) gwahanol ar gyfer Porth y Llywodraeth</a> rydych yn ei ddefnyddio ar gyfer cleient sydd wedi’ch awdurdodi.
+setupIncomplete.a=Mewngofnodwch gyda Dynodydd Defnyddiwr (ID) gwahanol ar gyfer Porth y Llywodraeth
+setupIncomplete.p2= rydych yn ei ddefnyddio ar gyfer cleient sydd wedi’ch awdurdodi.
 #Invasive check
 invasive.title.saCode=A oes gennych god asiant Hunanasesiad?
 invasive.title.option=Manylion cleient
