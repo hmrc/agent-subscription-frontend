@@ -3,6 +3,7 @@ $hmrc-assets-path: "/agent-subscription/assets/lib/hmrc-frontend/hmrc/";
 
 @import "lib/govuk-frontend/govuk/all";
 @import "lib/hmrc-frontend/hmrc/all";
+@import 'partials/_taskList';
 
 $govuk-global-styles: true;
 
