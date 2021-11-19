@@ -22,3 +22,16 @@ h2 {
 h3 {
  @extend .govuk-heading-s;
 }
+
+// overrides hmrc-header css language toggle focus styles
+.hmrc-language-select {
+  .govuk-list {
+    a {
+      &:focus {
+            color: govuk-colour("black") !important;
+            background-color: govuk-colour("yellow")
+      }
+    }
+  }
+  text-decoration: none;
+}

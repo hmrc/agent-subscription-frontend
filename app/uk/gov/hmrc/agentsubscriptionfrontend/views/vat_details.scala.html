@@ -74,17 +74,18 @@ backLinkHref = Some("@routes.VatDetailsController.showRegisteredForVatForm()")
 
         @inputText(
             field = vatDetailsForm("vrn"),
-            label = Messages("vat-details.reg-date.title"),
+            label = Messages("vat-details.vrn.title"),
             labelClass = Some("govuk-label--s"),
-            hint = Some(Messages("vat-details.reg-date.hint")),
+            hint = Some(Messages("vat-details.vrn.hint")),
+            inputClass = Some("govuk-input--width-20"),
             inputMode = Some("numeric"),
             pattern = Some("[0-9]*")
         )
 
         @inputDate(
             field = vatDetailsForm("regDate"),
-            legend = Messages("vat-details.vrn.title"),
-            hint = Some(Messages("vat-details.vrn.hint")),
+            legend = Messages("vat-details.reg-date.title"),
+            hint = Some(Messages("vat-details.reg-date.hint")),
         )
 
         @submitButton(id = "submit-vat-details", messageKey = "button.continue")

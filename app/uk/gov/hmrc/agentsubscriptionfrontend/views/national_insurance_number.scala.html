@@ -46,12 +46,13 @@ backLinkHref = Some("@backUrl.getOrElse(routes.PostcodeController.showPostcodeFo
 
     @formHelper(action = routes.NationalInsuranceController.submitNationalInsuranceNumberForm()) {
 
+    if(businessType == Llp){Messages("nino.hint-llp")} else {Messages("nino.hint")}
         @inputText(
             field = ninoForm("nino"),
             label = Messages("nino.title"),
             labelAsHeading = true,
-            labelClass = Some("govuk-heading-xl"),
-            hint = Some(if(businessType == Llp){ Messages("nino.hint-llp")} else {Messages("nino.hint")}),
+            labelClass = Some("govuk-label--xl"),
+            hint = Some(if(businessType == Llp){Messages("nino.hint-llp")} else {Messages("nino.hint")}),
             inputClass = Some("govuk-input--width-10")
         )
 

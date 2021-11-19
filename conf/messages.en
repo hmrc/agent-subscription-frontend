@@ -209,6 +209,8 @@ task-list.5.number=5.
 task-list.checkAnswersTask.header=Check your answers and create your account
 task-list.checkAnswersSubTask=You can check your answers once you have completed the other sections.
 task-list.completed=COMPLETED
+task-list.not-started=NOT STARTED
+task-list.cannot-start-yet=CANNOT START YET
 
 #Saved Progress
 saved-progress.title=Your progress has been saved for 30 days

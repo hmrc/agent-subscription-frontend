@@ -37,7 +37,7 @@ class BusinessAddressISpec extends BaseISpec {
         "updateBusinessAddress.address_line_3.title",
         "updateBusinessAddress.address_line_4.title",
         "updateBusinessAddress.postcode.title",
-        "updateBusinessAddress.continue"
+        "button.continue"
       )
 
       val doc = Jsoup.parse(bodyOf(result))

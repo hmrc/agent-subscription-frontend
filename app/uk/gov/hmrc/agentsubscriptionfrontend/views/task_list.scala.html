@@ -24,11 +24,15 @@
 
 @(tasks: List[Task])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@progressTag(isComplete: Boolean, id: String) = {
-    if(isComplete){
+@progressTag(isComplete: Boolean, canStart: Boolean, id: String) = {
+    @if(isComplete){
     <strong class="govuk-tag app-task-list__tag" id="@id">@Messages("task-list.completed")</strong>
     } else {
-    <strong class="govuk-tag govuk-tag--grey app-task-list__tag" id="@id">@Messages("task-list.not-started")</strong>
+        @if(canStart) {
+        <strong class="govuk-tag govuk-tag--grey app-task-list__tag" id="@id">@Messages("task-list.not-started")</strong>
+        } else {
+        <strong class="govuk-tag govuk-tag--grey app-task-list__tag" id="@id">@Messages("task-list.cannot-start-yet")</strong>
+        }
     }
 }
 
@@ -49,7 +53,7 @@
                     }
                     </span>
                 </li>
-                @progressTag(subTask.isComplete, subTask.taskKey)
+                @progressTag(subTask.isComplete, subTask.showLink, subTask.taskKey)
             }
             </ul>
     </li>

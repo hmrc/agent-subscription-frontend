@@ -37,14 +37,14 @@
         @for(amlsRow <- checkYourAnswers.maybeAmlsDataRow) {
             <h2 class="govuk-heading-m govuk-!-margin-top-6">@Messages("checkAnswers.amls.h2")</h2>
             <dl class="govuk-summary-list">
-            @checkAnswersRow("amls", amlsRow))
+            @checkAnswersRow("amls", amlsRow)
             </dl>
         }
 
         <h2 class="govuk-heading-m govuk-!-margin-top-6">@Messages("checkAnswers.contactDetails.h2")</h2>
         <dl class="govuk-summary-list">
-            @checkAnswersRow("email", checkYourAnswers.contactEmailRow),
-            @checkAnswersRow("tradingName", checkYourAnswers.contactTradingNameRow),
+            @checkAnswersRow("email", checkYourAnswers.contactEmailRow)
+            @checkAnswersRow("tradingName", checkYourAnswers.contactTradingNameRow)
             @checkAnswersRow("tradingAddress", checkYourAnswers.contactTradingAddressRow)
         </dl>
 

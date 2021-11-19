@@ -210,6 +210,8 @@ task-list.5.number=5.
 task-list.checkAnswersTask.header=Gwiriwch eich atebion a chrëwch eich cyfrif
 task-list.checkAnswersSubTask=Gallwch wirio’ch atebion ar ôl i chi gwblhau’r adrannau eraill.
 task-list.completed=WEDI’I CHWBLHAU
+task-list.not-started=HEB DDECHRAU
+task-list.cannot-start-yet=METHU DECHRAU ETO
 
 #Saved Progress
 saved-progress.title=Cedwir eich cynnydd am 30 diwrnod

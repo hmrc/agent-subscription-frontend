@@ -47,7 +47,8 @@ backLinkHref = Some("@routes.PostcodeController.showPostcodeForm()")
             field = crnForm("crn"),
             label = Messages(s"crn.title"),
             labelClass = Some("govuk-label--xl"),
-            hint = Some(Messages("crn.hint"))
+            hint = Some(Messages("crn.hint")),
+            inputClass = Some("govuk-input--width-10")
         )
 
         @submitButton(id = "continue", messageKey = "button.continue")
