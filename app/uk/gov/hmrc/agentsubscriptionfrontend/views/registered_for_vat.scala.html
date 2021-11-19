@@ -18,47 +18,39 @@
 @import uk.gov.hmrc.play.views.html.helpers._
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.RegisteredForVat
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputYesNoRadios}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-errorPrefix: error_prefix,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-uiInputRadioGroupCustom: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.input_radio_group_custom
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    errorSummary: GovukErrorSummary,
+    formHelper: FormWithCSRF,
+    inputYesNoRadio: InputYesNoRadios,
+    submitButton: SubmitButton
 )
 
 @(rfvForm: Form[RegisteredForVat], backLink: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-
-@mainTemplate(appConfig, title =  errorPrefix(rfvForm) + Messages("registered-for-vat.title"), bodyClasses = None) {
-
-    <a href="@backLink" class="link-back">@Messages("button.back")</a>
+@mainTemplate(title = errorPrefix(rfvForm) + Messages("registered-for-vat.title"),
+backLinkHref = Some("@backLink")
+) {
 
     @if(rfvForm.hasErrors) {
-        @uiErrorSummary(Messages("error.summary.heading"), rfvForm, Seq.empty, Some("registered-for-vat"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(rfvForm))
     }
 
+    @formHelper(action = routes.VatDetailsController.submitRegisteredForVatForm()) {
 
-    @uiFormHelper(
-        action = routes.VatDetailsController.submitRegisteredForVatForm(),
-        'class -> "form js-form") {
+        @inputYesNoRadio(
+            field = rfvForm("registeredForVat"),
+            legend = Messages("registered-for-vat.title"),
+            headingIsLegend = true
+        )
 
-
-            @uiInputRadioGroupCustom(
-                rfvForm("registeredForVat"),
-                Seq(
-                "yes" -> Messages("registered-for-vat.option.yes"),
-                "no" -> Messages("registered-for-vat.option.no")
-                ),
-                '_legend -> Html("""<h1 class="govuk-heading-xl">""" + Messages("registered-for-vat.title") + """</h1>"""),
-                '_groupDivClass -> "govuk-form-group",
-                '_horizontal          -> true,
-                '_fieldsetAttributes -> Html("""id='registeredForVat'""")
-            )
-
-
-            <button class="button form-field--submit" type="submit" id="submit-registered-for-vat">@Messages("button.continue")</button>
+        @submitButton(id = "submit-registered-for-vat", messageKey = "button.continue")
 
     }
 }

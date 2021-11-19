@@ -19,59 +19,50 @@
 @import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.SubmitButton
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, GovukInput, Input, Label, HtmlContent, Text, Hint}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-errorPrefix: error_prefix,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-uiInput: uk.gov.hmrc.play.views.html.helpers.Input
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    errorSummary: GovukErrorSummary,
+    formHelper: FormWithCSRF,
+    govukInput: GovukInput,
+    submitButton: SubmitButton
 )
 
 @(utrForm: Form[Utr], businessType: BusinessType)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@mainTemplate(appConfig, title =  errorPrefix(utrForm) + Messages(s"utr.header.${businessType.key}"), bodyClasses = None) {
+@utrHint = {
+@Messages("utr.description.start")
+@Messages(s"utr.description.about.${businessType.key}")
+@Messages("utr.description.end")
+<a href="https://www.gov.uk/find-lost-utr-number" target="_blank" rel="noopener noreferrer">@Messages("utr.find-lost")</a>.
+}
 
-    <a href="@routes.BusinessTypeController.showBusinessTypeForm" class="link-back">@Messages("button.back")</a>
+@mainTemplate(title = errorPrefix(utrForm) + Messages(s"utr.header.${businessType.key}"),
+backLinkHref = Some("@routes.BusinessTypeController.showBusinessTypeForm")
+) {
 
     @if(utrForm.hasErrors) {
-        @uiErrorSummary(Messages("error.summary.heading"), utrForm, Seq.empty, Some("utr-details"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(utrForm))
     }
 
+    @formHelper(action = routes.UtrController.submitUtrForm()) {
 
-    @uiFormHelper(
-        action = routes.UtrController.submitUtrForm(),
-        'class -> "form js-form") {
+        @govukInput(Input(
+            label = Label(
+                isPageHeading = true,
+                classes = "govuk-label--xl",
+                content = Text(Messages(s"utr.header.${businessType.key}"))
+            ),
+            hint = Some(Hint(content = HtmlContent(utrHint))),
+            classes = "govuk-input--width-10"
+        ).withFormField(utrForm("utr")))
 
-        @* Can't use play ui text input as h1 needs to wrap a label *@
-        <div class="form-group @if(utrForm.hasErrors){form-field--error soft--ends}">
-            <h1>
-                <label for="utr" class="govuk-heading-xl">@Messages(s"utr.header.${businessType.key}")</label>
-            </h1>
-            <p class="hint-text margin-bottom-10" id="utr-hint">
-                @Messages("utr.description.start")
-                @Messages(s"utr.description.about.${businessType.key}")
-                @Messages("utr.description.end")
-                <a href="https://www.gov.uk/find-lost-utr-number" target="_blank" rel="noopener noreferrer">@Messages("utr.find-lost")</a>.
-            </p>
-            @utrForm.error("utr").map { formError => <span class="error-notification" id="utr-error">
-                <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
-                @Messages(formError.message)
-            </span>
-            }
-            <input
-            type="text"
-            class="form-control input--cleared"
-            name="utr"
-            id="utr"
-            @utrForm("utr").value.map{ v => value="@v"}
-                aria-describedby="utr-hint @if(utrForm.hasErrors){utr-error}"
-            >
-        </div>
+        @submitButton(id = "submit-utr-details", messageKey = "button.continue")
 
-        <div class="form-field">
-            <button class="button" type="submit" id="submit-utr-details">@Messages("button.continue")</button>
-        </div>
     }
 }

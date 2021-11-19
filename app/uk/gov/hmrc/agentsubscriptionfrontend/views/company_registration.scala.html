@@ -17,57 +17,42 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.CompanyRegistrationNumber
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputText}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
+
 @this(
-mainTemplate: main_template,
-errorPrefix: error_prefix,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-uiInput: uk.gov.hmrc.play.views.html.helpers.Input
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    errorSummary: GovukErrorSummary,
+    formHelper: FormWithCSRF,
+    inputText: InputText,
+    submitButton: SubmitButton
 )
 
 @(crnForm: Form[CompanyRegistrationNumber])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+@mainTemplate(title =  errorPrefix(crnForm) + Messages("crn.title"),
+backLinkHref = Some("@routes.PostcodeController.showPostcodeForm()")
+) {
 
-@mainTemplate(appConfig, title =  errorPrefix(crnForm) + Messages("crn.title"), bodyClasses = None) {
-
-  <a href="@routes.PostcodeController.showPostcodeForm()" class="link-back">@Messages("button.back")</a>
-
-  @if(crnForm.hasErrors) {
-        @uiErrorSummary(Messages("error.summary.heading"), crnForm, Seq.empty, Some("crn"))
+    @if(crnForm.hasErrors) {
+        @errorSummary(ErrorSummary().withFormErrorsAsText(crnForm))
     }
 
- @uiFormHelper(action = routes.CompanyRegistrationController.submitCompanyRegNumberForm(), 'class -> "form js-form"){
+    @formHelper(action = routes.CompanyRegistrationController.submitCompanyRegNumberForm()){
 
-    @* Can't use play ui text input as h1 needs to wrap a label *@
-     <div class="govuk-form-group @if(crnForm.hasErrors){form-field--error soft--ends}">
-         <h1>
-             <label for="crn" class="govuk-heading-xl">
-             @Messages(s"crn.title")
-             </label>
-         </h1>
+        @inputText(
+            field = crnForm("crn"),
+            label = Messages(s"crn.title"),
+            labelClass = Some("govuk-label--xl"),
+            hint = Some(Messages("crn.hint"))
+        )
 
-         <p class="hint-text margin-bottom-10" id="crn-hint">@Messages("crn.hint")</p>
-
-         @crnForm.error("crn").map { formError => <span class="error-notification" id="crn-error">
-             <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
-             @Messages(formError.message)
-         </span>
-         }
-       <input
-       type="text"
-       class="form-control input--cleared"
-       name="crn"
-       id="crn"
-         @crnForm("crn").value.map { v =>  value="@v"}
-       aria-describedby="crn-hint @if(crnForm.hasErrors){crn-error}"
-       >
-    </div>
-
-        <button class="button" type="submit" id="submit-crn">@Messages("button.continue")</button>
-
- }
+        @submitButton(id = "continue", messageKey = "button.continue")
+    }
 }
 
 

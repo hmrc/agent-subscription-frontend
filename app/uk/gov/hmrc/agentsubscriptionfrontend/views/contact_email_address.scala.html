@@ -18,60 +18,41 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessEmail
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputText}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-        mainTemplate: main_template,
-        errorPrefix: error_prefix,
-        formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        errorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    formHelper: FormWithCSRF,
+    errorSummary: GovukErrorSummary,
+    submitButton: SubmitButton,
+    inputText: InputText
 )
 
 @(contactEmailForm: Form[BusinessEmail])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-
-@formValue = @{
-    contactEmailForm.data.get("email").getOrElse("")
-}
-
-@mainTemplate(appConfig, title =  errorPrefix(contactEmailForm) +  Messages("contactEmailAddress.title"), bodyClasses = None) {
-
-    <a href='@routes.ContactDetailsController.showContactEmailCheck()' class="link-back">@Messages("button.back")</a>
-
+@mainTemplate(title = errorPrefix(contactEmailForm) + Messages("contactEmailAddress.title"),
+backLinkHref = Some("@routes.ContactDetailsController.showContactEmailCheck()")
+) {
 
     @if(contactEmailForm.hasErrors) {
-        @errorSummary(Messages("error.summary.heading"), contactEmailForm, Seq.empty, Some("contact-email"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(contactEmailForm))
     }
 
+    @formHelper(action = routes.ContactDetailsController.submitContactEmailAddress()) {
 
-    @formHelper(
-        action = routes.ContactDetailsController.submitContactEmailAddress(),
-        'class -> "form js-form") {
+        @inputText(
+            field = contactEmailForm("email"),
+            label = Messages("contactEmailAddress.title"),
+            labelAsHeading = true,
+            labelClass = Some("govuk-heading-xl"),
+            hint = Some(Messages("contactEmailAddress.p")),
+            autocomplete = Some("email")
+        )
 
-       <div class="govuk-form-group @if(contactEmailForm("email").hasErrors){form-field--error soft--ends}">
-           <h1>
-               <label class="govuk-heading-xl" for="email">@Messages("contactEmailAddress.title")</label>
-           </h1>
-
-        <p id="email-hint">@Messages("contactEmailAddress.p")</p>
-
-           @contactEmailForm.error("email").map { formError =>
-           <span class="error-notification" data-journey="search-page:error:contact-email" id="email-error">
-                <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
-                    @Messages(formError.message)
-           </span>
-           }
-
-        <input
-        class="form-control"
-        type="text"
-        id="email"
-        name="email"
-        @contactEmailForm.data.get("email").map { v => value="@v"}
-        aria-describedby="email-hint @if(contactEmailForm.hasErrors){email-error}"
-        >
-        </div>
-
-            <button class="button" type="submit" id="continue">@Messages("contactEmailCheck.continue.button")</button>
+        @submitButton(id = "continue", messageKey = "button.continue")
     }
 }

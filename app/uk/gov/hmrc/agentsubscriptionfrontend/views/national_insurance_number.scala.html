@@ -21,54 +21,42 @@
 @import uk.gov.hmrc.domain.Nino
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.Llp
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputText}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-errorPrefix: error_prefix,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-uiInput: uk.gov.hmrc.play.views.html.helpers.Input
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    errorSummary: GovukErrorSummary,
+    formHelper: FormWithCSRF,
+    inputText: InputText,
+    submitButton: SubmitButton
 )
 
 @(ninoForm: Form[Nino], businessType: BusinessType, backUrl: Option[String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-
-@mainTemplate(appConfig, title =  errorPrefix(ninoForm) + Messages("nino.title"), bodyClasses = None) {
-
-    <a href="@backUrl.getOrElse(routes.PostcodeController.showPostcodeForm().url)" class="link-back">@Messages("button.back")</a>
+@mainTemplate(title = errorPrefix(ninoForm) + Messages("nino.title"),
+backLinkHref = Some("@backUrl.getOrElse(routes.PostcodeController.showPostcodeForm().url)")
+) {
 
     @if(ninoForm.hasErrors) {
-        @uiErrorSummary(Messages("error.summary.heading"), ninoForm, Seq.empty, Some("nino"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(ninoForm))
     }
 
+    @formHelper(action = routes.NationalInsuranceController.submitNationalInsuranceNumberForm()) {
 
+        @inputText(
+            field = ninoForm("nino"),
+            label = Messages("nino.title"),
+            labelAsHeading = true,
+            labelClass = Some("govuk-heading-xl"),
+            hint = Some(if(businessType == Llp){ Messages("nino.hint-llp")} else {Messages("nino.hint")}),
+            inputClass = Some("govuk-input--width-10")
+        )
 
-
-    @uiFormHelper(action = routes.NationalInsuranceController.submitNationalInsuranceNumberForm(), 'class -> "form js-form") {
-        <div class="form-group @if(ninoForm.hasErrors){form-field--error soft--ends}">
-            <h1>
-                <label for="nino" class="govuk-heading-xl">@Messages("nino.title")</label>
-            </h1>
-            <p class="govuk-hint" id="nino-hint">@if(businessType == Llp){ @Messages("nino.hint-llp")} else {@Messages("nino.hint")}</p>
-            @ninoForm.error("nino").map { formError => <span class="error-notification" id="nino-error">
-                <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
-                @Messages(formError.message)
-            </span>
-            }
-            <input
-            type="text"
-            name="nino"
-            id="nino"
-            class="form-control input--cleared"
-            spellcheck="false"
-            @ninoForm.data.get("nino").map { v => value="@v"}
-            aria-describedby="nino-hint @if(ninoForm.hasErrors){nino-error}"
-            >
-
-        </div>
-
-            <button class="button" type="submit" id="submit-nino">@Messages("button.continue")</button>
+        @submitButton(id = "submit-nino", messageKey = "button.continue")
 
     }
 }

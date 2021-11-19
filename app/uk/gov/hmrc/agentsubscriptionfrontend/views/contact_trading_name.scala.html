@@ -18,52 +18,41 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessName
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputText}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-        mainTemplate: main_template,
-        errorPrefix: error_prefix,
-        formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        errorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    formHelper: FormWithCSRF,
+    errorSummary: GovukErrorSummary,
+    submitButton: SubmitButton,
+    inputText: InputText
 )
 
 @(contactTradingNameForm: Form[BusinessName])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@mainTemplate(appConfig, title =  errorPrefix(contactTradingNameForm) +  Messages("contactTradingName.title"), bodyClasses = None) {
-
-    <a href='@routes.ContactDetailsController.showTradingNameCheck().url' class="link-back">@Messages("button.back")</a>
+@mainTemplate(title = errorPrefix(contactTradingNameForm) + Messages("contactTradingName.title"),
+backLinkHref = Some("@routes.ContactDetailsController.showTradingNameCheck().url")
+) {
 
     @if(contactTradingNameForm.hasErrors) {
-        @errorSummary(Messages("error.summary.heading"), contactTradingNameForm, Seq.empty, Some("contact-trading-name"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(contactTradingNameForm))
     }
 
-    @formHelper(
-        action = routes.ContactDetailsController.submitTradingName,
-        'class -> "form js-form") {
+    @formHelper(action = routes.ContactDetailsController.submitTradingName) {
 
-        <div class="govuk-form-group @if(contactTradingNameForm("name").hasErrors){form-field--error soft--ends}">
-            <h1>
-                <label for="name" class="govuk-heading-xl">@Messages("contactTradingName.title")</label>
-            </h1>
-            <p>@Messages("contactTradingName.p")</p>
-            @contactTradingNameForm.error("name").map { formError =>
-                <span class="error-notification" data-journey="search-page:error:contact-trading-name" id="name-error">
-                    <span class="govuk-visually-hidden">@Messages("error.prefix")</span>
-                    @Messages(formError.message)
-                </span>
-            }
-            <input
-            class="form-control"
-            type="text"
-            spellcheck="false"
-            id="name"
-            name="name"
-            @contactTradingNameForm.data.get("name").map { v => value="@v"}
-            @if(contactTradingNameForm.error("name").isDefined){aria-describedby="name-error"}
-            >
-        </div>
+    @inputText(
+        field = contactTradingNameForm("name"),
+        label = Messages("contactTradingName.title"),
+        labelAsHeading = true,
+        labelClass = Some("govuk-heading-xl"),
+        hint = Some(Messages("contactTradingName.p"))
+    )
 
-            <button class="button" type="submit" id="continue">@Messages("contactTradingName.continue.button")</button>
+    @submitButton(id = "continue", messageKey = "button.continue")
 
     }
 }
