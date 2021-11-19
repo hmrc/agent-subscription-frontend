@@ -142,13 +142,11 @@ contactTradingNameCheck.title=Ai dyma’r enw yr hoffech ei ddangos i’ch cleie
 contactTradingNameCheck.p=Bydd cleientiaid yn gweld yr enw hwn wrth dderbyn neu reoli’ch awdurdodiadau.
 contactTradingNameCheck.option.yes=Iawn
 contactTradingNameCheck.option.no=Na
-contactTradingNameCheck.continue.button=Yn eich blaen
 error.contact-trading-name-check.invalid=Dewiswch  ‘Iawn’ os ydych yn masnachu o dan enw gwahanol
 
 #Contact Trading Name
 contactTradingName.title=Beth yw’r enw yr hoffech ei ddangos i’ch cleientiaid?
 contactTradingName.p=Bydd cleientiaid yn gweld yr enw hwn wrth dderbyn neu reoli’ch awdurdodiadau.
-contactTradingName.continue.button=Yn eich blaen
 error.trading-name-name.maxlength=Mae’n rhaid i’r prif enw masnachu gynnwys 40 o gymeriadau neu lai
 error.trading-name.invalid=Mae’n rhaid i’r prif enw masnachu gynnwys y llythrennau a i z, rhifau, comas, atalnodau llawn, collnodau, cysylltnodau, blaenslaesau a bylchau yn unig
 error.trading-name.empty=Nodwch brif enw masnachu eich busnes
@@ -158,7 +156,6 @@ contactTradingAddressCheck.title=Ai dyma’r cyfeiriad yr hoffech ei ddefnyddio 
 contactTradingAddressCheck.p=Dyma’r cyfeiriad y byddwn yn ei ddefnyddio er mwyn gwirio pwy ydych os byddwch yn ein ffonio. Efallai y byddwn yn anfon rhywfaint o ohebiaeth i’r cyfeiriad hwn.
 contactTradingAddressCheck.option.yes=Iawn
 contactTradingAddressCheck.option.no=Na – hoffwn nodi cyfeiriad gwahanol
-contactTradingAddressCheck.continue.button=Yn eich blaen
 error.contact-trading-address-check.invalid=Dewiswch ‘Iawn’ os mai dyma'r prif gyfeiriad masnachu yr ydych am ei ddefnyddio ar gyfer gohebiaeth eich cyfrif gwasanaethau asiant
 
 ##Modifying address
@@ -464,7 +461,6 @@ moneyLaunderingCompliance.expiry.hint=Er enghraifft, 31 03 2019
 moneyLaunderingCompliance.expiry.day.title=Diwrnod
 moneyLaunderingCompliance.expiry.month.title=Mis
 moneyLaunderingCompliance.expiry.year.title=Blwyddyn
-moneyLaunderingCompliance.continue=Yn eich blaen
 
 # Amls Not Found
 amls-details-not-found.title=Ni allwn ddod o hyd i fanylion eich aelodaeth
@@ -512,11 +508,9 @@ businessName.title=Beth yw enw eich busnes?
 businessName.updated.title=Diweddaru enw eich busnes
 businessName.updated.p1=Sicrhewch fod enw eich busnes dim ond yn cynnwys y llythrennau a-z, rhifau, comas, atalnodau llawn, collnodau, cysylltnodau, blaenslaesau, a bylchau.
 businessName.description=Ni chaiff enw eich busnes ei ddiweddaru ar gyfer gwasanaethau eraill y llywodraeth.
-businessName.continue.button=Yn eich blaen
 
 businessEmail.title=Beth yw cyfeiriad e-bost eich busnes?
 businessEmail.description=Ni chaiff cyfeiriad e-bost eich busnes ei ddiweddaru ar gyfer gwasanaethau eraill y llywodraeth.
-businessEmail.continue.button=Yn eich blaen
 
 updateBusinessAddress.title=Diweddaru cyfeiriad eich busnes
 updateBusinessAddress.p1=Sicrhewch fod cyfeiriad eich busnes dim ond yn cynnwys y llythrennau a-z, rhifau, comas, symbolau ampersand, dyfynodau sengl, atalnodau llawn, collnodau, cysylltnodau, blaenslaesau, a bylchau.
@@ -526,7 +520,6 @@ updateBusinessAddress.address_line_2.title =Llinell cyfeiriad 2 (dewisol)
 updateBusinessAddress.address_line_3.title =Llinell cyfeiriad 3 (dewisol)
 updateBusinessAddress.address_line_4.title =Llinell cyfeiriad 4 (dewisol)
 updateBusinessAddress.postcode.title =Cod post
-updateBusinessAddress.continue =Yn eich blaen
 
 postcodeNotAllowed.title=Ni allwch ddefnyddio’r cod post hwn
 postcodeNotAllowed.p1=Ni allwch ddefnyddio’r cod post hwn i greu cyfrif gwasanaethau asiant.

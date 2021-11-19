@@ -1,5 +1,7 @@
 // From https://github.com/alphagov/govuk-prototype-kit/blob/main/app/assets/sass/patterns/_task-list.scss
 // updated 19 Nov 2021
+@import "lib/govuk-frontend/govuk/all";
+
 .app-task-list {
   list-style-type: none;
   padding-left: 0;

@@ -2,6 +2,8 @@
 
 # microservice specific routes
 
+GET         /assets/*file                                  controllers.Assets.versioned(path="/public", file)
+
 GET         /                                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.root
 GET         /start                                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.start
 GET         /not-agent                                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.showNotAgent
@@ -141,5 +143,3 @@ GET         /redirect-to-businesstype                      uk.gov.hmrc.agentsubs
 GET         /cannot-create-account                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.showCannotCreateAccount
 
 GET         /language/:lang                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.AgentSubscriptionLanguageController.switchToLanguage(lang: String)
-
-GET         /assets/*file                                  controllers.Assets.at(path="/public", file)

@@ -125,7 +125,6 @@ contactEmailCheck.title=Is this the email address you want to use for your agent
 contactEmailCheck.p=We will use it to tell you when your agent services account has been created and to let you know the status of authorisation requests.
 contactEmailCheck.option.yes=Yes
 contactEmailCheck.option.no=No - I want to use a different email address
-contactEmailCheck.continue.button=Continue
 error.contact-email-check.invalid=Select if you want to use the email address displayed or a different email address
 
 #Contact Email Address
@@ -142,13 +141,11 @@ contactTradingNameCheck.title=Is this the name you want to show to your clients?
 contactTradingNameCheck.p=Clients will see this name when they accept or manage your authorisations.
 contactTradingNameCheck.option.yes=Yes
 contactTradingNameCheck.option.no=No
-contactTradingNameCheck.continue.button=Continue
 error.contact-trading-name-check.invalid=Select yes if you trade under a different name
 
 #Contact Trading Name
 contactTradingName.title=What is the name you want to show to your clients?
 contactTradingName.p=Clients will see this name when they accept or manage your authorisations.
-contactTradingName.continue.button=Continue
 error.trading-name-name.maxlength=Main trading name must be 40 characters or fewer
 error.trading-name.invalid=Main trading name must only include letters a to z, numbers, commas, full stops, apostrophes, hyphens, forward slashes and spaces
 error.trading-name.empty=Enter the main trading name of your business
@@ -158,7 +155,6 @@ contactTradingAddressCheck.title=Is this the address you want to use for your ag
 contactTradingAddressCheck.p=This is the address we will use to check your identity if you call us. We may send some correspondence to this address.
 contactTradingAddressCheck.option.yes=Yes
 contactTradingAddressCheck.option.no=No - I want to enter a different address
-contactTradingAddressCheck.continue.button=Continue
 error.contact-trading-address-check.invalid=Select yes if this is the main trading address you want to use for your agent services account correspondence
 
 #Modifying address
@@ -464,7 +460,6 @@ moneyLaunderingCompliance.expiry.hint=For example, 31 03 2019
 moneyLaunderingCompliance.expiry.day.title=Day
 moneyLaunderingCompliance.expiry.month.title=Month
 moneyLaunderingCompliance.expiry.year.title=Year
-moneyLaunderingCompliance.continue=Continue
 
 # Amls Not Found
 amls-details-not-found.title=We cannot find your membership details
@@ -508,11 +503,9 @@ businessName.title=What is your business name?
 businessName.updated.title=Update your business name
 businessName.updated.p1=Make sure your business name only includes letters a to z, numbers, commas, full stops, apostrophes, hyphens, forward slashes, and spaces.
 businessName.description=Your business name will only be updated in your agent services account.
-businessName.continue.button=Continue
 
 businessEmail.title=What is your business email address?
 businessEmail.description=We will only use this to send you a confirmation email. Your business email address will only be updated in your agent services account.
-businessEmail.continue.button=Continue
 
 updateBusinessAddress.title=Update your business address
 updateBusinessAddress.p1=Make sure your business address only includes letters a to z, numbers, commas, ampersands, single quotation marks, full stops, apostrophes, hyphens, forward slashes, and spaces.
@@ -522,7 +515,6 @@ updateBusinessAddress.address_line_2.title = Address line 2 (Optional)
 updateBusinessAddress.address_line_3.title = Address line 3 (Optional)
 updateBusinessAddress.address_line_4.title = Address line 4 (Optional)
 updateBusinessAddress.postcode.title = Postcode
-updateBusinessAddress.continue = Continue
 
 
 postcodeNotAllowed.title=You cannot use this postcode
