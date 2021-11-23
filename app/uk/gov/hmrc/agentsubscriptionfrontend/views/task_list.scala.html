@@ -47,13 +47,13 @@
                 <li class="app-task-list__item">
                     <span class="app-task-list__task-name">
                     @if(subTask.showLink) {
-                        <a class="app-task-list__name" href="@subTask.link" aria-describedby="${subTask.taskKey}">@Messages(s"task-list.${subTask.taskKey}")</a>
+                        <a href="@subTask.link" aria-describedby="@subTask.taskKey">@Messages(s"task-list.${subTask.taskKey}")</a>
                     } else {
-                        @Messages(s"task-list.${subTask.taskKey}")
+                        <span aria-describedby="@subTask.taskKey">@Messages(s"task-list.${subTask.taskKey}")</span>
                     }
                     </span>
+                    @progressTag(subTask.isComplete, subTask.showLink, subTask.taskKey)
                 </li>
-                @progressTag(subTask.isComplete, subTask.showLink, subTask.taskKey)
             }
             </ul>
     </li>
@@ -65,7 +65,7 @@
 
     <p>@Messages("task-list.subheader")</p>
 
-    <ol class="list">
+    <ol class="govuk-list">
     @for((task, number) <- tasks.zip(Stream from 1)) {
       @listItem(number, task)
     }

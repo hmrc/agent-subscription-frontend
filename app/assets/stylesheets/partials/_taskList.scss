@@ -51,6 +51,8 @@
 .app-task-list__task-name {
   display: block;
   @include govuk-media-query($from: 450px) {
+  // add width so tags are not pushed down
+    width: 60%;
     float: left;
   }
 }
