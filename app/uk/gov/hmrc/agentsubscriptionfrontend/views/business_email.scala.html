@@ -44,7 +44,8 @@
 }
 
 @mainTemplate(title = errorPrefix(businessEmailForm) + Messages("businessEmail.title"),
-backLinkHref = if(!invalidDesEmail) Some("@routes.SubscriptionController.showCheckAnswers()") else None) {
+backLinkHref = if(!invalidDesEmail) Some(routes.SubscriptionController.showCheckAnswers().url) else None
+) {
 
     @if(businessEmailForm.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(businessEmailForm))

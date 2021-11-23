@@ -94,9 +94,8 @@ class AMLSController @Inject()(
             formWithErrors => Ok(checkAmlsTemplate(formWithErrors, isChange.getOrElse(false))),
             validForm => {
               val continue: Call = validForm match {
-                case Yes =>
-                  routes.AMLSController.showAmlsDetailsForm()
-                case No => routes.AMLSController.showCheckAmlsAlreadyAppliedForm()
+                case Yes => routes.AMLSController.showAmlsDetailsForm()
+                case No  => routes.AMLSController.showCheckAmlsAlreadyAppliedForm()
               }
               val cleanAmlsData = AmlsData(amlsRegistered = RadioInputAnswer.toBoolean(validForm), amlsAppliedFor = None, amlsDetails = None)
 

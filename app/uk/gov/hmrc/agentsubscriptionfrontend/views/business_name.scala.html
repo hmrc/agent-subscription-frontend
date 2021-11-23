@@ -48,7 +48,7 @@
 @title = @{ if(desErrorExists) Messages("businessName.updated.title") else Messages("businessName.title") }
 
 @mainTemplate(title = errorPrefix(businessNameForm) + title,
-backLinkHref = if(!desErrorExists) Some("@routes.SubscriptionController.showCheckAnswers()") else None) {
+backLinkHref = if(!desErrorExists) Some(routes.SubscriptionController.showCheckAnswers().url) else None) {
 
     @if(businessNameForm.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(businessNameForm))

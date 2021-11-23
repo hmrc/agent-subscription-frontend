@@ -61,7 +61,7 @@
 }
 
 @mainTemplate(title = errorPrefix(vatDetailsForm) + Messages("vat-details.title"),
-backLinkHref = Some("@routes.VatDetailsController.showRegisteredForVatForm()")
+backLinkHref = Some(routes.VatDetailsController.showRegisteredForVatForm().url)
 ) {
 
     @if(vatDetailsForm.hasErrors) {

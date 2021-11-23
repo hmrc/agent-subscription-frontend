@@ -25,11 +25,15 @@ govukPanel: GovukPanel
 
 @(arn: String, agencyName: String, agencyEmail: String, copiedAcross: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+@panelContent = {
+@Messages("subscriptionComplete.accountName")
+<br><strong>@agencyName</strong>
+}
 @mainTemplate(title = Messages("subscriptionComplete.title")) {
 
     @govukPanel(Panel(
         title = Text(Messages("subscriptionComplete.h1")),
-        content = HtmlContent("""@Messages("subscriptionComplete.accountName")<br><strong>@agencyName</strong>""")
+        content = HtmlContent(s"$panelContent")
     ))
 
     <p>@Html(Messages("subscriptionComplete.copiedAcross", copiedAcross))</p>

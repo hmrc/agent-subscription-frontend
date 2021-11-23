@@ -36,10 +36,9 @@
 
 @(checkAmlsForm: Form[RadioInputAnswer], isChange: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@backLink = @{if(isChange) routes.SubscriptionController.showCheckAnswers() else routes.TaskListController.showTaskList()}
-
 @mainTemplate(title =  errorPrefix(checkAmlsForm) + Messages("check-amls.title"),
-backLinkHref = Some("@backLink")) {
+backLinkHref = if(isChange) Some(routes.SubscriptionController.showCheckAnswers().url) else Some(routes.TaskListController.showTaskList().url)
+) {
 
     @if(checkAmlsForm.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(checkAmlsForm))

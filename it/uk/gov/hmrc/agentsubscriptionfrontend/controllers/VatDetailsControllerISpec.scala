@@ -27,7 +27,7 @@ class VatDetailsControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.showRegisteredForVatForm()(request))
 
       status(result) shouldBe 200
-      result should containMessages("registered-for-vat.title", "registered-for-vat.option.yes", "registered-for-vat.option.no")
+      result should containMessages("registered-for-vat.title", "button.yes", "button.no")
     }
 
     "redirect to /national-insurance-number page if nino exists from auth but user hasn't assured it yet" in new TestSetupNoJourneyRecord {
@@ -45,7 +45,7 @@ class VatDetailsControllerISpec extends BaseISpec with SessionDataMissingSpec {
       val result = await(controller.showRegisteredForVatForm()(request))
 
       status(result) shouldBe 200
-      result should containMessages("registered-for-vat.title", "registered-for-vat.option.yes", "registered-for-vat.option.no")
+      result should containMessages("registered-for-vat.title", "button.yes", "button.no")
     }
 
     "redirect to /date-of-birth when user has assured their nino and not DOB yet" in new TestSetupNoJourneyRecord {
@@ -67,8 +67,8 @@ class VatDetailsControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       val doc = Jsoup.parse(bodyOf(result))
 
-      val link = doc.getElementById("registeredForVat-yes")
-      link.attr("checked") shouldBe "checked"
+      val link = doc.getElementById("registeredForVat")
+      link.hasAttr("checked") shouldBe true
     }
   }
 
@@ -98,8 +98,8 @@ class VatDetailsControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       result should containMessages(
         "registered-for-vat.title",
-        "registered-for-vat.option.yes",
-        "registered-for-vat.option.no",
+        "button.yes",
+        "button.no",
         "registered-for-vat.error.no-radio-selected")
     }
   }

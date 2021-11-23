@@ -34,7 +34,8 @@
 
 @mainTemplate(
 title = errorPrefix(amlsAppliedForForm) + Messages("amlsAppliedFor.title"),
-backLinkHref = Some("@routes.AMLSController.showAmlsRegisteredPage()")) {
+backLinkHref = Some(routes.AMLSController.showAmlsRegisteredPage().url)
+) {
 
 @if(amlsAppliedForForm.hasErrors) {
     @errorSummary(ErrorSummary().withFormErrorsAsText(amlsAppliedForForm))

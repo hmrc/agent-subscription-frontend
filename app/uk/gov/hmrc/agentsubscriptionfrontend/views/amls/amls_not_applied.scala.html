@@ -25,7 +25,8 @@
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = Messages("amls-not-applied.title"),
-backLinkHref = Some("@routes.AMLSController.showCheckAmlsAlreadyAppliedForm")) {
+backLinkHref = Some(routes.AMLSController.showCheckAmlsAlreadyAppliedForm().url)
+) {
 
 <h1 class="govuk-heading-xl">@Messages(s"amls-not-applied.title")</h1>
 

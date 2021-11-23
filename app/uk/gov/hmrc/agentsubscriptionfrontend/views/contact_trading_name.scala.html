@@ -34,7 +34,7 @@
 @(contactTradingNameForm: Form[BusinessName])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = errorPrefix(contactTradingNameForm) + Messages("contactTradingName.title"),
-backLinkHref = Some("@routes.ContactDetailsController.showTradingNameCheck().url")
+backLinkHref = Some(routes.ContactDetailsController.showTradingNameCheck().url)
 ) {
 
     @if(contactTradingNameForm.hasErrors) {

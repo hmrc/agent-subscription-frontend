@@ -37,7 +37,7 @@
 @(ninoForm: Form[Nino], businessType: BusinessType, backUrl: Option[String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = errorPrefix(ninoForm) + Messages("nino.title"),
-backLinkHref = Some("@backUrl.getOrElse(routes.PostcodeController.showPostcodeForm().url)")
+backLinkHref = Some(s"${backUrl.getOrElse(routes.PostcodeController.showPostcodeForm().url)}")
 ) {
 
     @if(ninoForm.hasErrors) {

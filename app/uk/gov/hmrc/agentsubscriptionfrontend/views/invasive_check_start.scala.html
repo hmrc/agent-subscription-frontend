@@ -68,8 +68,6 @@
                 isPageHeading = false
             ))
         )),
-        idPrefix = Some("hasSaAgentCode"),
-        name = "hasSaAgentCode",
         items = Seq(
             RadioItem(
                 content = Text(Messages("button.yes")),
@@ -81,7 +79,7 @@
                 value = Some("false")
             )
         )
-        ))
+        ).withFormField(radioResponseForm("hasSaAgentCode")))
 
     @submitButton(id = "continue", messageKey = "button.continue")
 

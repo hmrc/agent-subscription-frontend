@@ -125,7 +125,6 @@ contactEmailCheck.title=Ai dyma’r cyfeiriad e-bost yr hoffech ei ddefnyddio ar
 contactEmailCheck.p=Byddwn yn ei ddefnyddio i roi gwybod i chi pan fo’ch cyfrif gwasanaethau asiant wedi’i greu, ac i roi gwybod i chi am statws ceisiadau am awdurdodiad.
 contactEmailCheck.option.yes=Iawn
 contactEmailCheck.option.no=Na – hoffwn ddefnyddio cyfeiriad e-bost gwahanol
-contactEmailCheck.continue.button=Yn eich blaen
 error.contact-email-check.invalid=Dewiswch a hoffech ddefnyddio’r cyfeiriad e-bost a ddangosir neu gyfeiriad e-bost gwahanol
 
 #Contact Email Address
@@ -170,7 +169,7 @@ address.form.with-errors.button.confirm_address=Cadarnhewch y cyfeiriad
 
 ##Confirm business
 confirmBusiness.title=Ai dyma’ch busnes?
-confirmBusiness.content.utr=Dyma’r manylion sydd gennym ar gyfer Cyfeirnod Unigryw y Trethdalwr (UTR) <strong class="bold">{0}</strong>. Byddwch yn gallu newid y manylion hyn cyn i chi orffen creu cyfrif gwasanaethau asiant.
+confirmBusiness.content.utr=Dyma’r manylion sydd gennym ar gyfer Cyfeirnod Unigryw y Trethdalwr (UTR) <strong class="govuk-!-font-weight-bold">{0}</strong>. Byddwch yn gallu newid y manylion hyn cyn i chi orffen creu cyfrif gwasanaethau asiant.
 confirmBusiness.option.yes=Iawn
 confirmBusiness.option.no=Na – hoffwn nodi UTR gwahanol
 confirmBusiness.error.no-radio-selected=Dewiswch ‘Iawn’ os mai dyma’ch busnes
@@ -301,8 +300,6 @@ date-of-birth.must.be.later.than.1900=Rhaid i’r dyddiad geni fod yn hwyrach na
 
 #Registered for VAT page
 registered-for-vat.title=A yw’ch busnes wedi’i gofrestru ar gyfer TAW?
-registered-for-vat.option.yes=Iawn
-registered-for-vat.option.no=Na
 registered-for-vat.error.no-radio-selected=Dewiswch ‘Iawn’ os yw’ch busnes wedi’i gofrestru ar gyfer TAW
 
 #Vat Details page
@@ -352,7 +349,7 @@ businessDetails.label.postcode.hint=Dyma god post cyfeiriad cofrestredig eich bu
 
 #Not subscribed
 notSubscribed.title=Gallwch greu cyfrif gwasanaethau asiant
-notSubscribed.p1=Rydym wedi gwirio <strong class = "bold"> {0} </strong> ac nid oes ganddo gyfrif gwasanaethau asiant.
+notSubscribed.p1=Rydym wedi gwirio <strong class = "govuk-!-font-weight-bold"> {0} </strong> ac nid oes ganddo gyfrif gwasanaethau asiant.
 
 #Invalid address
 invalidAddress.title=Cyfeiriad annilys
@@ -388,8 +385,8 @@ linkClients.error.no-radio-selected=Dewiswch ‘Iawn’ os hoffech gysylltu’ch
 subscriptionComplete.title=Cyfrif gwasanaethau asiant wedi’i greu
 subscriptionComplete.h1=Cyfrif gwasanaethau asiant wedi’i greu
 subscriptionComplete.accountName=Rydych wedi creu cyfrif ar gyfer
-subscriptionComplete.copiedAcross=Rydych hefyd wedi copïo ar draws <strong class="bold">{0}</strong> o gleientiaid i’ch cyfrif gwasanaethau asiant newydd.
-subscriptionComplete.p1=Gwnewch nodyn o gyfeirnod eich cyfrif <strong class="bold">{0}</strong>. Gwnewch yn siŵr bod gennych chi hyn os ydych yn cysylltu â ni ynglŷn â’ch cyfrif gwasanaethau asiant
+subscriptionComplete.copiedAcross=Rydych hefyd wedi copïo ar draws <strong class="govuk-!-font-weight-bold">{0}</strong> o gleientiaid i’ch cyfrif gwasanaethau asiant newydd.
+subscriptionComplete.p1=Gwnewch nodyn o gyfeirnod eich cyfrif <strong class="govuk-!-font-weight-bold">{0}</strong>. Gwnewch yn siŵr bod gennych chi hyn os ydych yn cysylltu â ni ynglŷn â’ch cyfrif gwasanaethau asiant
 subscriptionComplete.p2=Rydym wedi anfon e-bost i {0} i gadarnhau’r manylion hyn.
 subscriptionComplete.nextStepsMTD.header=Camau nesaf ar gyfer y cynllun Troi Treth yn Ddigidol fel asiant
 subscriptionComplete.nextStepsMTD.p=Os gwnaethoch gopïo ar draws cleientiaid sydd angen dilyn rheolau’r cynllun Troi Treth yn Ddigidol, mae angen i chi nawr gofrestru’ch cleientiaid ar gyfer Troi Treth yn Ddigidol ar gyfer TAW.

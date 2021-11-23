@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.UpdateBusinessAddressForm
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{UkAddress, SubmitOrSaveButtonGroup}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{UkAddress, SubmitButton}
 @import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, GovukInsetText, InsetText, Text, FormWithCSRF}
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
@@ -29,7 +29,7 @@
     govukInsetText: GovukInsetText,
     formHelper: FormWithCSRF,
     ukAddress: UkAddress,
-    submitOrSaveButtonGroup: SubmitOrSaveButtonGroup
+    submitButton: SubmitButton
 )
 
 @(addressForm: Form[UpdateBusinessAddressForm])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -58,10 +58,10 @@
             line4 = Messages("updateBusinessAddress.address_line_4.title")
         )
 
-        @submitOrSaveButtonGroup(
-            submitId = "update-address-continue",
-            saveId = "update-address-save"
-        )
+        <div class="govuk-button-group">
+            @submitButton("update-address-continue", "button.continue")
+            @submitButton("update-address-save", "button.saveComeBackLater", Some("govuk-button--secondary"))
+        </div>
 
     }
 }

@@ -22,7 +22,8 @@
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @mainTemplate(title =  Messages("llp-interrupt.title"),
-backLinkHref = Some("@routes.CompanyRegistrationController.showCompanyRegNumberForm().url")) {
+backLinkHref = Some(routes.CompanyRegistrationController.showCompanyRegNumberForm().url)
+) {
 
     <h1 class="govuk-heading-xl">@Messages(s"llp-interrupt.title")</h1>
 

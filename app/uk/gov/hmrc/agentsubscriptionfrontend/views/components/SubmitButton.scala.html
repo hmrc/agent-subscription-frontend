@@ -27,5 +27,6 @@ button: GovukButton,
 @button(Button(
     attributes = Map("id" -> s"${id}"),
     classes = s"${submitClass.getOrElse("")}",
+    inputType = Some("submit"),
     content = Text(messages(messageKey))
 ))

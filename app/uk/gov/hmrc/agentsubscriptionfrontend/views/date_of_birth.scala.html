@@ -64,7 +64,7 @@
 }
 
 @mainTemplate(title =  errorPrefix(dobForm) + Messages("date-of-birth.title"),
-backLinkHref = Some("@routes.NationalInsuranceController.showNationalInsuranceNumberForm()")
+backLinkHref = Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
 ) {
 
     @if(dobForm.hasErrors) {

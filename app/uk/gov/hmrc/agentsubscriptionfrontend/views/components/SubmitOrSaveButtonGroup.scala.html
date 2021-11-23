@@ -32,11 +32,17 @@ button: GovukButton,
 <div class="govuk-button-group">
 @button(Button(
     attributes = Map("id" -> s"${submitId}"),
-    content = Text(messages("button.saveContinue"))
+    content = Text(messages("button.saveContinue")),
+    inputType = Some("submit"),
+    name = Some(name),
+    value = Some(submitValue)
 ))
 @button(Button(
     attributes = Map("id" -> s"${saveId}"),
     classes = "govuk-button--secondary",
-    content = Text(messages("button.saveComeBackLater"))
+    content = Text(messages("button.saveComeBackLater")),
+    inputType = Some("submit"),
+    name = Some(name),
+    value = Some(saveValue)
 ))
 </div>

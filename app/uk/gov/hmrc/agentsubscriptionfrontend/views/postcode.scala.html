@@ -34,7 +34,7 @@
 @(postcodeForm: Form[Postcode], businessType: BusinessType)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = errorPrefix(postcodeForm) + Messages(s"postcode.${businessType.key}.title"),
-backLinkHref = Some("@routes.UtrController.showUtrForm()")
+backLinkHref = Some(routes.UtrController.showUtrForm().url)
 ) {
 
     @if(postcodeForm.hasErrors) {

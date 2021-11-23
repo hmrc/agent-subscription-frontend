@@ -24,12 +24,12 @@ class BusinessNameISpec extends BaseISpec {
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
       val result = await(controller.showBusinessNameForm(request))
-      result should containMessages("businessName.title", "businessName.description", "businessName.continue.button")
+      result should containMessages("businessName.title", "businessName.description", "button.continue")
       val doc = Jsoup.parse(bodyOf(result))
 
       doc.getElementById("name").`val` shouldBe "My Agency"
 
-      val backLink = doc.getElementsByClass("link-back")
+      val backLink = doc.getElementsByClass("govuk-back-link")
       backLink.attr("href") shouldBe routes.SubscriptionController.showCheckAnswers().url
 
       val form = doc.select("form").first()
@@ -50,7 +50,7 @@ class BusinessNameISpec extends BaseISpec {
         "businessName.updated.title",
         "businessName.updated.p1",
         "businessName.description",
-        "businessName.continue.button")
+        "button.continue")
       val doc = Jsoup.parse(bodyOf(result))
       doc.getElementById("name").`val` shouldBe "My Agency &"
 

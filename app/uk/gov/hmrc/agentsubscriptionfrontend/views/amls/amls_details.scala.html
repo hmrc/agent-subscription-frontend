@@ -63,7 +63,8 @@
 }
 
 @mainTemplate(title = errorPrefix(amlsForm) + Messages("moneyLaunderingCompliance.title"),
-backLinkHref = Some("@mayBeGoBackUrl.getOrElse(routes.AMLSController.showAmlsRegisteredPage.url)")) {
+backLinkHref = Some(mayBeGoBackUrl.getOrElse(routes.AMLSController.showAmlsRegisteredPage.url))
+) {
 
     @if(dateFormWithRefinedErrors.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(dateFormWithRefinedErrors))

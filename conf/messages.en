@@ -169,7 +169,7 @@ address.form.with-errors.button.confirm_address= Confirm address
 
 ##Confirm business
 confirmBusiness.title=Is this your business?
-confirmBusiness.content.utr=These are the details we hold for Unique Taxpayer Reference (UTR) <strong class="bold">{0}</strong>. You will be able to change these details before you finish creating an agent services account.
+confirmBusiness.content.utr=These are the details we hold for Unique Taxpayer Reference (UTR) <strong class="govuk-!-font-weight-bold">{0}</strong>. You will be able to change these details before you finish creating an agent services account.
 confirmBusiness.option.yes=Yes
 confirmBusiness.option.no=No - I want to enter a different UTR
 confirmBusiness.error.no-radio-selected=Select yes if this is your business
@@ -300,8 +300,6 @@ date-of-birth.must.be.later.than.1900=Date of birth must be later than 1 January
 
 #Registered for VAT page
 registered-for-vat.title=Is your business registered for VAT?
-registered-for-vat.option.yes=Yes
-registered-for-vat.option.no=No
 registered-for-vat.error.no-radio-selected=Select yes if your business is registered for VAT
 
 #Vat Details page
@@ -351,7 +349,7 @@ businessDetails.label.postcode.hint=This is the postcode of your registered busi
 
 #Not subscribed
 notSubscribed.title=You can create an agent services account
-notSubscribed.p1=We’ve checked <strong class="bold">{0}</strong> and it doesn’t have an agent services account.
+notSubscribed.p1=We’ve checked <strong class="govuk-!-font-weight-bold">{0}</strong> and it doesn’t have an agent services account.
 
 #Invalid address
 invalidAddress.title=Invalid address
@@ -387,8 +385,8 @@ linkClients.error.no-radio-selected= Select yes if you want to link your clients
 subscriptionComplete.title=Agent services account created
 subscriptionComplete.h1=Agent services account created
 subscriptionComplete.accountName=You created an account for
-subscriptionComplete.copiedAcross=You have also copied across <strong class="bold">{0}</strong> clients to your new agent services account.
-subscriptionComplete.p1=Make a note of your account reference number <strong class="bold">{0}</strong>. Make sure you have this with you if you contact us about your agent services account.
+subscriptionComplete.copiedAcross=You have also copied across <strong class="govuk-!-font-weight-bold">{0}</strong> clients to your new agent services account.
+subscriptionComplete.p1=Make a note of your account reference number <strong class="govuk-!-font-weight-bold">{0}</strong>. Make sure you have this with you if you contact us about your agent services account.
 subscriptionComplete.p2=We have sent an email to {0} confirming these details.
 subscriptionComplete.nextStepsMTD.header=Next steps for Making Tax Digital as an agent
 subscriptionComplete.nextStepsMTD.p=If you copied across clients who need to follow the rules for Making Tax Digital, you now need to sign your clients up for Making Tax Digital for VAT.

@@ -49,10 +49,10 @@ class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val doc = Jsoup.parse(bodyOf(result))
 
       // Check form's radio inputs have correct values
-      doc.getElementById("businessType-sole_trader").`val`() shouldBe "sole_trader"
-      doc.getElementById("businessType-limited_company").`val`() shouldBe "limited_company"
-      doc.getElementById("businessType-partnership").`val`() shouldBe "partnership"
-      doc.getElementById("businessType-llp").`val`() shouldBe "llp"
+      doc.getElementById("businessType").`val`() shouldBe "limited_company"
+      doc.getElementById("businessType-2").`val`() shouldBe "sole_trader"
+      doc.getElementById("businessType-3").`val`() shouldBe "partnership"
+      doc.getElementById("businessType-4").`val`() shouldBe "llp"
     }
 
     "contain a link to sign out" in new TestSetupNoJourneyRecord{
@@ -69,8 +69,8 @@ class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val result = await(controller.showBusinessTypeForm()(request))
 
       val doc = Jsoup.parse(bodyOf(result))
-      val link = doc.getElementById("businessType-sole_trader")
-      link.attr("checked") shouldBe "checked"
+      val link = doc.getElementById("businessType-2")
+      link.hasAttr("checked") shouldBe true
     }
 
     "redirect to task list if a subscription journey exists for the logged in user" in {
