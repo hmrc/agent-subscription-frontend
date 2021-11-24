@@ -42,7 +42,7 @@
 }
 
 @mainTemplate(title = errorPrefix(utrForm) + Messages(s"utr.header.${businessType.key}"),
-backLinkHref = Some("@routes.BusinessTypeController.showBusinessTypeForm")
+backLinkHref = Some(routes.BusinessTypeController.showBusinessTypeForm.url)
 ) {
 
     @if(utrForm.hasErrors) {

@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this()
+package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-@(content: Html,
-        includeGridWrapper: Boolean = false,
-        articleClasses: Option[String] = None)
+case class RadioOption(id: String, value: String, messageKey: String)
 
-<div class="content__body@if( includeGridWrapper ){ grid-wrapper}@if(articleClasses.isDefined){ @articleClasses.get }">
-@content
-</div>
+object RadioOption {
+  def apply(keyPrefix: String, option: String): RadioOption = RadioOption(
+    s"$keyPrefix.$option",
+    option,
+    s"$keyPrefix.$option"
+  )
+}

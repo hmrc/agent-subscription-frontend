@@ -34,7 +34,7 @@
 @(rfvForm: Form[RegisteredForVat], backLink: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = errorPrefix(rfvForm) + Messages("registered-for-vat.title"),
-backLinkHref = Some("@backLink")
+backLinkHref = Some(backLink)
 ) {
 
     @if(rfvForm.hasErrors) {
