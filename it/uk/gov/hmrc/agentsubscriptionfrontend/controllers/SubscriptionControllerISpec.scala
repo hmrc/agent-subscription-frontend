@@ -294,8 +294,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     "display the static page content" in new AuthRequest with TestSetupWithCompleteJourneyRecordWithMapping {
 
       val result = await(resultOf(request))
-      // TODO remove println
-      println(bodyOf(result))
+
       result should containMessages(
         "subscriptionComplete.title",
         "subscriptionComplete.h1",

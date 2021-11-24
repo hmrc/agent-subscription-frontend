@@ -1,8 +1,5 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
-
 import java.time.LocalDate
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Llp, SoleTrader}
