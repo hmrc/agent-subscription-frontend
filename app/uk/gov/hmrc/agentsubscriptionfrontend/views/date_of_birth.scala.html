@@ -68,7 +68,7 @@ backLinkHref = Some(routes.NationalInsuranceController.showNationalInsuranceNumb
 ) {
 
     @if(dobForm.hasErrors) {
-        @errorSummary(ErrorSummary().withFormErrorsAsText(dobForm))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(dobForm, mapping = Map("dob" -> "dob.day")))
     }
 
    @formHelper(action = routes.DateOfBirthController.submitDateOfBirthForm()) {

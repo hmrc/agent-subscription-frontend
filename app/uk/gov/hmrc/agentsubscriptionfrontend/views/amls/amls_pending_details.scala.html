@@ -73,7 +73,7 @@ backLinkHref = backLink
 ) {
 
     @if(amlsPendingForm.hasErrors) {
-        @errorSummary(ErrorSummary().withFormErrorsAsText(dateFormWithRefinedErrors))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(dateFormWithRefinedErrors, mapping = Map("appliedOn" -> "appliedOn.day")))
     }
 
     @formHelper(action = routes.AMLSController.submitAmlsApplicationDatePage(), 'id -> "amlsPendingForm") {
@@ -81,7 +81,7 @@ backLinkHref = backLink
         <input type="hidden" name="amlsCode" id="amlsCode" value="HMRC" >
 
         @inputDate(
-            field = amlsPendingForm("appliedOn"),
+            field = dateFormWithRefinedErrors("appliedOn"),
             legend = Messages("amls.pending.appliedOn.title"),
             hint = Some(Messages("moneyLaunderingCompliance.expiry.hint")),
             legendClass = "govuk-fieldset__legend--xl",

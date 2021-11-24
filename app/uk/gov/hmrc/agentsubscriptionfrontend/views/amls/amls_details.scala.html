@@ -67,7 +67,7 @@ backLinkHref = Some(mayBeGoBackUrl.getOrElse(routes.AMLSController.showAmlsRegis
 ) {
 
     @if(dateFormWithRefinedErrors.hasErrors) {
-        @errorSummary(ErrorSummary().withFormErrorsAsText(dateFormWithRefinedErrors))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(dateFormWithRefinedErrors, mapping = Map("expiry" -> "expiry.day")))
     }
 
     <h1 class="govuk-heading-xl">@Messages("moneyLaunderingCompliance.title")</h1>
@@ -91,7 +91,7 @@ backLinkHref = Some(mayBeGoBackUrl.getOrElse(routes.AMLSController.showAmlsRegis
         )
 
         @inputDate(
-        field = amlsForm("expiry"),
+        field = dateFormWithRefinedErrors("expiry"),
         legend = Messages("moneyLaunderingCompliance.expiry.title"),
         hint = Some(Messages("moneyLaunderingCompliance.expiry.hint")),
         )

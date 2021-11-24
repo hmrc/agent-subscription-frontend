@@ -25,7 +25,7 @@
 
       // Set the border colour to black with orange border when clicking into the input field
       $('.autocomplete__wrapper input').focus(function(e){
-          if ($(".govuk-form-group--error .autocomplete__wrapper").length > 0) $(".autocomplete__wrapper input").css({"border" : "3px solid #0b0c0c", "-webkit-box-shadow" : "none", "box-shadow" : "none"});
+          if ($(".govuk-form-group--error .autocomplete__wrapper").length > 0) $(".autocomplete__wrapper input").css({"border" : "4px solid #0b0c0c", "-webkit-box-shadow" : "none", "box-shadow" : "none"});
       })
 
       // Set the border colour back to red when clicking out of the input field

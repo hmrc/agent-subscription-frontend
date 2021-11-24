@@ -65,7 +65,7 @@ backLinkHref = Some(routes.VatDetailsController.showRegisteredForVatForm().url)
 ) {
 
     @if(vatDetailsForm.hasErrors) {
-        @errorSummary(ErrorSummary().withFormErrorsAsText(vatDetailsForm))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(dateFormWithRefinedErrors, mapping = Map("regDate" -> "regDate.day")))
     }
 
     @formHelper(action = routes.VatDetailsController.submitVatDetailsForm()) {
@@ -83,7 +83,7 @@ backLinkHref = Some(routes.VatDetailsController.showRegisteredForVatForm().url)
         )
 
         @inputDate(
-            field = vatDetailsForm("regDate"),
+            field = dateFormWithRefinedErrors("regDate"),
             legend = Messages("vat-details.reg-date.title"),
             hint = Some(Messages("vat-details.reg-date.hint")),
         )
