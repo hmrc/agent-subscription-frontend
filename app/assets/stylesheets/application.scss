@@ -4,7 +4,7 @@ $hmrc-assets-path: "/agent-subscription/assets/lib/hmrc-frontend/hmrc/";
 @import "lib/govuk-frontend/govuk/all";
 @import "lib/hmrc-frontend/hmrc/all";
 @import 'partials/_taskList';
-// may need to add accessibleAutocomplete styles?
+@import 'partials/_accessibleAutocomplete';
 
 $govuk-global-styles: true;
 
