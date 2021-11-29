@@ -17,75 +17,64 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.ContactTradingAddressCheck
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputRadios}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, RadioItem, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-        mainTemplate: main_template,
-        errorPrefix: error_prefix,
-        formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        errorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-        uiInputRadioGroup: uk.gov.hmrc.play.views.html.helpers.InputRadioGroup
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    formHelper: FormWithCSRF,
+    errorSummary: GovukErrorSummary,
+    inputRadio: InputRadios,
+    submitButton: SubmitButton
 )
 
 @(contactTradingAddressCheckForm: Form[ContactTradingAddressCheck], businessAddress: List[String], isChange: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@prefilledValue = @{
-    contactTradingAddressCheckForm.data.getOrElse("check","")
-}
+@backLinkCall = @{if(isChange){routes.SubscriptionController.showCheckAnswers()} else {routes.TaskListController.showTaskList()}}
 
-    @backLinkCall = @{if(isChange){routes.SubscriptionController.showCheckAnswers()} else {routes.TaskListController.showTaskList()}}
-
-@mainTemplate(appConfig, title =  errorPrefix(contactTradingAddressCheckForm) +  Messages("contactTradingAddressCheck.title"), bodyClasses = None) {
-
-    <a href='@backLinkCall' class="link-back">@Messages("button.back")</a>
-
+@mainTemplate(title = errorPrefix(contactTradingAddressCheckForm) + Messages("contactTradingAddressCheck.title"),
+backLinkHref = Some(backLinkCall.toString)
+) {
 
     @if(contactTradingAddressCheckForm.hasErrors) {
-        @errorSummary(Messages("error.summary.heading"), contactTradingAddressCheckForm, Seq.empty, Some("contact-trading-address-check"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(contactTradingAddressCheckForm))
     }
 
+    @formHelper(action = routes.ContactDetailsController.submitCheckMainTradingAddress()) {
 
-    @formHelper(
-        action = routes.ContactDetailsController.submitCheckMainTradingAddress(),
-        'class -> "form js-form") {
+    <div class="govuk-form-group @if(contactTradingAddressCheckForm.hasErrors){govuk-form-group--error}">
+        <h1 class="govuk-heading-xl">@Messages("contactTradingAddressCheck.title")</h1>
 
-        <div class="form-group @if(contactTradingAddressCheckForm.hasErrors){form-field--error error-container}">
-            <fieldset id="check">
-                <legend>
-                    <h1 class="heading-xlarge @if(contactTradingAddressCheckForm.hasErrors){margin-top-0}">@Messages("contactTradingAddressCheck.title")</h1>
-                </legend>
-                    <p>@Messages("contactTradingAddressCheck.p")</p>
-                    <div class="margin-bottom-30">
-                @for(line <- businessAddress){
-                    <p class="margin-top-0 margin-bottom-0">@line</p>
-                }
-                    </div>
+        <p>@Messages("contactTradingAddressCheck.p")</p>
 
-                @contactTradingAddressCheckForm.error("check").map{formError =>
-                    <span class="error-notification" role="tooltip" data-journey="search-page:error:contact-trading-address-check">
-                        <span class="visuallyhidden">@Messages("error.prefix")</span>
-                        @Messages(formError.message)
-                    </span>
-                }
-
-                <div class="multiple-choice">
-                    <input type="radio" name="check" id="check-yes" value="yes"
-                        @if(prefilledValue == "yes"){checked="checked"}>
-                    <label for="check-yes">@messages("contactTradingAddressCheck.option.yes")</label>
-                </div>
-                <div class="multiple-choice">
-                    <input type="radio" name="check" id="check-no" value="no"
-                        @if(prefilledValue == "no"){checked="checked"}>
-                    <label for="check-no">@messages("contactTradingAddressCheck.option.no")</label>
-                </div>
-            </fieldset>
+        <div class="govuk-!-margin-bottom-6">
+            @for(line <- businessAddress){
+            <p class="govuk-!-margin-top-0 govuk-!-margin-bottom-0">@line</p>
+            }
         </div>
 
-        <div class="form-field margin-top-30">
+        @inputRadio(
+            field = contactTradingAddressCheckForm("check"),
+            legend = Messages("contactTradingAddressCheck.title"),
+            legendClass = Some("govuk-visually-hidden"),
+            headingIsLegend = false,
+            inputs = Seq(
+                RadioItem(
+                    content = Text(Messages("contactTradingAddressCheck.option.yes")),
+                    value = Some("yes")
+                ),
+                RadioItem(
+                    content = Text(Messages("contactTradingAddressCheck.option.no")),
+                    value = Some("no")
+                )
+            )
+        )
 
-            <button class="button" type="submit" id="continue">@Messages("contactTradingAddressCheck.continue.button")</button>
+    </div>
 
-        </div>
+        @submitButton(id = "continue", messageKey = "button.continue", submitClass = Some("govuk-!-margin-top-6"))
     }
 }

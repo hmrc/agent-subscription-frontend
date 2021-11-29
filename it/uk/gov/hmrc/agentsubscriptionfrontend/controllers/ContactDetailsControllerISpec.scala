@@ -53,13 +53,13 @@ class ContactDetailsControllerISpec extends BaseISpec {
         "contactEmailCheck.p",
         "contactEmailCheck.option.yes",
         "contactEmailCheck.option.no",
-        "contactEmailCheck.continue.button"
+        "button.continue"
       )
 
       val doc = Jsoup.parse(bodyOf(result))
 
-      val businessEmailRadio = doc.getElementById("check-yes")
-      val anotherEmailRadio = doc.getElementById("check-no")
+      val businessEmailRadio = doc.getElementById("check")
+      val anotherEmailRadio = doc.getElementById("check-2")
 
       businessEmailRadio.hasAttr("checked") shouldBe false
       anotherEmailRadio.hasAttr("checked") shouldBe false
@@ -94,13 +94,13 @@ class ContactDetailsControllerISpec extends BaseISpec {
         "contactEmailCheck.p",
         "contactEmailCheck.option.yes",
         "contactEmailCheck.option.no",
-        "contactEmailCheck.continue.button"
+        "button.continue"
       )
 
       val doc = Jsoup.parse(bodyOf(result))
 
-      val businessEmailRadio = doc.getElementById("check-yes")
-      val anotherEmailRadio = doc.getElementById("check-no")
+      val businessEmailRadio = doc.getElementById("check")
+      val anotherEmailRadio = doc.getElementById("check-2")
 
       businessEmailRadio.hasAttr("checked") shouldBe true
       anotherEmailRadio.hasAttr("checked") shouldBe false
@@ -470,13 +470,13 @@ class ContactDetailsControllerISpec extends BaseISpec {
        "contactTradingNameCheck.title",
         "contactTradingNameCheck.option.yes",
         "contactTradingNameCheck.option.no",
-        "contactTradingNameCheck.continue.button"
+        "button.continue"
       )
 
       val doc = Jsoup.parse(bodyOf(result))
 
-      val tradingNameRadioYes = doc.getElementById("check-yes")
-      val tradingNameRadioNo = doc.getElementById("check-no")
+      val tradingNameRadioYes = doc.getElementById("check")
+      val tradingNameRadioNo = doc.getElementById("check-2")
 
       tradingNameRadioYes.hasAttr("checked") shouldBe false
       tradingNameRadioNo.hasAttr("checked") shouldBe false
@@ -511,13 +511,13 @@ class ContactDetailsControllerISpec extends BaseISpec {
         "contactTradingNameCheck.title",
         "contactTradingNameCheck.option.yes",
         "contactTradingNameCheck.option.no",
-        "contactTradingNameCheck.continue.button"
+        "button.continue"
       )
 
       val doc = Jsoup.parse(bodyOf(result))
 
-      val tradingNameRadioYes = doc.getElementById("check-yes")
-      val tradingNameRadioNo = doc.getElementById("check-no")
+      val tradingNameRadioYes = doc.getElementById("check")
+      val tradingNameRadioNo = doc.getElementById("check-2")
 
       tradingNameRadioYes.hasAttr("checked") shouldBe true
       tradingNameRadioNo.hasAttr("checked") shouldBe false
@@ -693,13 +693,13 @@ class ContactDetailsControllerISpec extends BaseISpec {
         "contactTradingAddressCheck.title",
         "contactTradingAddressCheck.option.yes",
         "contactTradingAddressCheck.option.no",
-        "contactTradingAddressCheck.continue.button"
+        "button.continue"
       )
 
       val doc = Jsoup.parse(bodyOf(result))
 
-      val tradingNameRadioYes = doc.getElementById("check-yes")
-      val tradingNameRadioNo = doc.getElementById("check-no")
+      val tradingNameRadioYes = doc.getElementById("check")
+      val tradingNameRadioNo = doc.getElementById("check-2")
 
       tradingNameRadioYes.hasAttr("checked") shouldBe false
       tradingNameRadioNo.hasAttr("checked") shouldBe false
@@ -735,13 +735,13 @@ class ContactDetailsControllerISpec extends BaseISpec {
         "contactTradingAddressCheck.title",
         "contactTradingAddressCheck.option.yes",
         "contactTradingAddressCheck.option.no",
-        "contactTradingAddressCheck.continue.button"
+        "button.continue"
       )
 
       val doc = Jsoup.parse(bodyOf(result))
 
-      val tradingNameRadioYes = doc.getElementById("check-yes")
-      val tradingNameRadioNo = doc.getElementById("check-no")
+      val tradingNameRadioYes = doc.getElementById("check")
+      val tradingNameRadioNo = doc.getElementById("check-2")
 
       tradingNameRadioYes.hasAttr("checked") shouldBe true
       tradingNameRadioNo.hasAttr("checked") shouldBe false

@@ -19,15 +19,18 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.DateOfBirth
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.Llp
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.error_prefix
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputDate}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-errorPrefix: error_prefix,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-uiDateFieldsFreeInlineLegend: uk.gov.hmrc.play.views.html.helpers.DateFieldsFreeInlineLegend
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    errorSummary: GovukErrorSummary,
+    formHelper: FormWithCSRF,
+    inputDate: InputDate,
+    submitButton: SubmitButton
 )
 
 @(dobForm: Form[DateOfBirth], businessType: BusinessType)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -56,33 +59,30 @@ uiDateFieldsFreeInlineLegend: uk.gov.hmrc.play.views.html.helpers.DateFieldsFree
         dobForm.copy(errors = dobForm.errors.filterNot(error => error.message == "" || !error.key.contains("dob")))
     }
 
-@mainTemplate(appConfig, title =  errorPrefix(dobForm) + Messages("date-of-birth.title"), bodyClasses = None) {
+@dobHint = {
+@if(businessType == Llp){ @Messages("date-of-birth.hint-llp")}else{@Messages("date-of-birth.hint")}
+}
 
-   <a href="@routes.NationalInsuranceController.showNationalInsuranceNumberForm()" class="link-back">@Messages("button.back")</a>
+@mainTemplate(title =  errorPrefix(dobForm) + Messages("date-of-birth.title"),
+backLinkHref = Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
+) {
 
-   @if(dobForm.hasErrors) {
-     @uiErrorSummary(Messages("error.summary.heading"), dobForm, Seq.empty, Some("dob"))
-   }
+    @if(dobForm.hasErrors) {
+        @errorSummary(ErrorSummary().withFormErrorsAsText(dobForm, mapping = Map("dob" -> "dob.day")))
+    }
 
-   <h1 class="heading-xlarge margin-bottom-20">@Messages(s"date-of-birth.title")</h1>
-   <p class="form-hint">@if(businessType == Llp){ @Messages("date-of-birth.hint-llp")}else{@Messages("date-of-birth.hint")}</p>
+   @formHelper(action = routes.DateOfBirthController.submitDateOfBirthForm()) {
 
-   @uiFormHelper(action = routes.DateOfBirthController.submitDateOfBirthForm(), 'class -> "form js-form") {
+        @inputDate(
+            field = dateFormWithRefinedErrors("dob"),
+            legend = Messages("date-of-birth.title"),
+            legendAsHeading = true,
+            legendClass = "govuk-heading-xl",
+            hint = Some(dobHint.toString),
+        )
 
-    <fieldset>
-        <div class="@DayFieldError @MonthFieldError @YearFieldError @DateFieldErrorsAll">
-            @uiDateFieldsFreeInlineLegend(
-            dateFormWithRefinedErrors,
-            "dob",
-            '_legendSpanClass -> "form-label-bold",
-            '_legendClass -> "flush--ends"
-            )
-        </div>
-    </fieldset>
+        @submitButton(id = "submit-date-of-birth", messageKey = "button.continue")
 
-       <div class="form-field">
-        <button class="button" type="submit" id="submit-date-of-birth">@Messages("button.continue")</button>
-       </div>
    }
 }
 

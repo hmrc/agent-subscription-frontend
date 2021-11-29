@@ -17,53 +17,42 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.{Postcode, BusinessType}
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.error_prefix
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputText}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-errorPrefix: error_prefix,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-uiInput: uk.gov.hmrc.play.views.html.helpers.Input
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    errorSummary: GovukErrorSummary,
+    formHelper: FormWithCSRF,
+    inputText: InputText,
+    submitButton: SubmitButton
 )
 
 @(postcodeForm: Form[Postcode], businessType: BusinessType)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@mainTemplate(appConfig, title =  errorPrefix(postcodeForm) + Messages(s"postcode.${businessType.key}.title"), bodyClasses = None) {
-
-    <a href="@routes.UtrController.showUtrForm()" class="link-back">@Messages("button.back")</a>
+@mainTemplate(title = errorPrefix(postcodeForm) + Messages(s"postcode.${businessType.key}.title"),
+backLinkHref = Some(routes.UtrController.showUtrForm().url)
+) {
 
     @if(postcodeForm.hasErrors) {
-        @uiErrorSummary(Messages("error.summary.heading"), postcodeForm, Seq.empty, Some("postcode"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(postcodeForm))
     }
 
-    @uiFormHelper(
-    action = routes.PostcodeController.submitPostcodeForm(), 'class -> "form js-form") {
+    @formHelper(action = routes.PostcodeController.submitPostcodeForm()) {
 
-    @* Can't use play ui text input as h1 needs to wrap a label *@
-    <div class="form-group @if(postcodeForm.hasErrors){form-field--error soft--ends}">
-        <h1>
-            <label class="heading-xlarge" for="postcode">
-            @Messages(s"postcode.${businessType.key}.title")
-            </label>
-        </h1>
-        <p class="hint-text" id="postcode-hint">@Messages(s"postcode.${businessType.key}.hint")</p>
-        @postcodeForm.error("postcode").map { formError =>
-            <span class="error-notification" id="postcode-error"><span class="visuallyhidden">@Messages("error.prefix")</span>
-            @Messages(formError.message)
-        </span>
-        }
-        <input
-        type="text"
-        class="form-control input--cleared"
-        name="postcode"
-        id="postcode"
-        @postcodeForm("postcode").value.map{ v => value="@v"}
-        aria-describedby="postcode-hint @if(postcodeForm.hasErrors){postcode-error}"
-        >
-    </div>
+        @inputText(
+            field = postcodeForm("postcode"),
+            label = Messages(s"postcode.${businessType.key}.title"),
+            labelAsHeading = true,
+            labelClass = Some("govuk-label--xl"),
+            hint = Some(Messages(s"postcode.${businessType.key}.hint")),
+            inputClass = Some("govuk-input--width-10")
+        )
 
-        <button class="button" type="submit" id="submit-postcode">@Messages("button.continue")</button>
+        @submitButton(id = "submit-postcode", messageKey = "button.continue")
+
     }
 }

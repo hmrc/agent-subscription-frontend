@@ -17,47 +17,59 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.ContactEmailCheck
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputRadios}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, RadioItem, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 
 @this(
-        mainTemplate: main_template,
-        errorPrefix: error_prefix,
-        formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        errorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-        uiInputRadioGroupCustom: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.input_radio_group_custom
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    formHelper: FormWithCSRF,
+    errorSummary: GovukErrorSummary,
+    inputRadio: InputRadios,
+    submitButton: SubmitButton,
 )
 
 @(contactEmailCheckForm: Form[ContactEmailCheck], businessEmail: String, isChanging: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @backLinkCall = @{if(isChanging){routes.SubscriptionController.showCheckAnswers()} else {routes.TaskListController.showTaskList()}}
 
-@mainTemplate(appConfig, title =  errorPrefix(contactEmailCheckForm) +  Messages("contactEmailCheck.title"), bodyClasses = None) {
-
-        <a href='@backLinkCall' class="link-back">@Messages("button.back")</a>
-
+@mainTemplate(title = errorPrefix(contactEmailCheckForm) + Messages("contactEmailCheck.title"),
+backLinkHref = Some(backLinkCall.toString)) {
 
     @if(contactEmailCheckForm.hasErrors) {
-        @errorSummary(Messages("error.summary.heading"), contactEmailCheckForm, Seq.empty, Some("contact-email-check"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(contactEmailCheckForm))
     }
 
-    @formHelper(
-        action = routes.ContactDetailsController.submitContactEmailCheck,
-        'class -> "form js-form") {
+    @formHelper(action = routes.ContactDetailsController.submitContactEmailCheck) {
 
-        @uiInputRadioGroupCustom(
-            contactEmailCheckForm("check"),
-            Seq(
-                "yes" -> Messages("contactEmailCheck.option.yes"),
-                "no" -> Messages("contactEmailCheck.option.no")
-            ),
-            '_horizontal          -> true,
-            '_legend             -> Html(s"""<h1 class="heading-xlarge ${if(contactEmailCheckForm.hasErrors)"push--top" else ""}">${Messages("contactEmailCheck.title")}</h1>"""),
-            '_inputHint          -> Html(s"""<p class="inputHintClass" ${if(contactEmailCheckForm.hasErrors)"push--top" else ""}">${Messages("contactEmailCheck.p")}</p>"""),
-            '_fieldsetDiv        -> Html(s"""<p class="inputEmailClass" ${if(contactEmailCheckForm.hasErrors)"push--top" else ""}">${Messages(s"$businessEmail")}</p>"""),
-            '_groupDivClass      -> "form-group",
-            '_fieldsetAttributes -> Html("""id='check'""")
+        <div class="govuk-form-group @if(contactEmailCheckForm.hasErrors){govuk-form-group--error}">
+        <h1 class="govuk-heading-xl">@Messages("contactEmailCheck.title")</h1>
+
+        <p>@Messages("contactEmailCheck.p")</p>
+        <p>@Messages(s"$businessEmail")</p>
+
+        @inputRadio(
+            field = contactEmailCheckForm("check"),
+            legend = Messages("contactEmailCheck.title"),
+            legendClass = Some("govuk-visually-hidden"),
+            headingIsLegend = false,
+            inputs = Seq(
+                RadioItem(
+                    content = Text(Messages("contactEmailCheck.option.yes")),
+                    value = Some("yes")
+                ),
+                RadioItem(
+                    content = Text(Messages("contactEmailCheck.option.no")),
+                    value = Some("no")
+                )
+            )
         )
-            <button class="button" type="submit" id="continue">@Messages("contactEmailCheck.continue.button")</button>
+    </div>
+
+    @submitButton(id = "continue", messageKey = "button.continue")
+
     }
 }

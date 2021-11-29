@@ -17,15 +17,18 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.ContactTradingNameCheck
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputRadios}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, RadioItem, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-  mainTemplate: main_template,
-  errorPrefix: error_prefix,
-  formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-  errorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-  uiInputRadioGroupCustom: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.input_radio_group_custom
+    mainTemplate: MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    formHelper: FormWithCSRF,
+    errorSummary: GovukErrorSummary,
+    inputRadio: InputRadios,
+    submitButton: SubmitButton
 )
 
 @(contactTradingNameCheckForm: Form[ContactTradingNameCheck], businessName: String, isChanging: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -34,33 +37,41 @@
     if(isChanging){routes.SubscriptionController.showCheckAnswers()} else {routes.TaskListController.showTaskList()}
 }
 
-@mainTemplate(appConfig, title =  errorPrefix(contactTradingNameCheckForm) +  Messages("contactTradingNameCheck.title"), bodyClasses = None) {
+@mainTemplate(title =  errorPrefix(contactTradingNameCheckForm) +  Messages("contactTradingNameCheck.title"),
+backLinkHref = Some(backLinkCall.toString)
+) {
 
-  <a href='@backLinkCall' class="link-back">@Messages("button.back")</a>
+    @if(contactTradingNameCheckForm.hasErrors) {
+        @errorSummary(ErrorSummary().withFormErrorsAsText(contactTradingNameCheckForm))
+    }
 
+    @formHelper(action = routes.ContactDetailsController.submitTradingNameCheck) {
 
-  @if(contactTradingNameCheckForm.hasErrors) {
-    @errorSummary(Messages("error.summary.heading"), contactTradingNameCheckForm, Seq.empty, Some("contact-trading-name-check"))
-  }
+        <div class="govuk-form-group @if(contactTradingNameCheckForm.hasErrors){govuk-form-group--error}">
+            <h1 class="govuk-heading-xl">@Messages("contactTradingNameCheck.title")</h1>
 
-  @formHelper(
-    action = routes.ContactDetailsController.submitTradingNameCheck,
-    'class -> "form js-form") {
+            <p>@Messages("contactTradingNameCheck.p")</p>
+            <p>@Messages(s"$businessName")</p>
 
-    @uiInputRadioGroupCustom(
-      contactTradingNameCheckForm("check"),
-      Seq(
-        "yes" -> Messages("contactTradingNameCheck.option.yes"),
-        "no" -> Messages("contactTradingNameCheck.option.no")
-      ),
-      '_legend             -> Html(s"""<h1 class="heading-xlarge">${Messages("contactTradingNameCheck.title")}</h1>"""),
-      '_inputHint          -> Html(s"""<p>${Messages("contactTradingNameCheck.p")}</p>"""),
-      '_fieldsetDiv        -> Html(s"""<p>${Messages(s"$businessName")}</p>"""),
-      '_groupDivClass      -> "form-group",
-      '_horizontal          -> true,
-      '_fieldsetAttributes -> Html("""id='check'""")
-    )
-      <button class="button" type="submit" id="continue">@Messages("contactTradingNameCheck.continue.button")</button>
+            @inputRadio(
+                field = contactTradingNameCheckForm("check"),
+                legend = Messages("contactTradingNameCheck.title"),
+                legendClass = Some("govuk-visually-hidden"),
+                headingIsLegend = false,
+                inputs = Seq(
+                    RadioItem(
+                        content = Text(Messages("contactTradingNameCheck.option.yes")),
+                        value = Some("yes")
+                    ),
+                    RadioItem(
+                        content = Text(Messages("contactTradingNameCheck.option.no")),
+                        value = Some("no")
+                    )
+                )
+            )
+        </div>
 
-  }
+        @submitButton(id = "continue", messageKey = "button.continue")
+
+    }
 }

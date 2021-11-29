@@ -1,4 +1,5 @@
 #Common
+service.name=Creu cyfrif gwasanaethau asiant
 app.name=Creu cyfrif gwasanaethau asiant
 servicename.titleSuffix=– Creu cyfrif gwasanaethau asiant – GOV.UK
 
@@ -21,11 +22,11 @@ global.error.403.message=Gwiriwch fod gennych ganiatâd i gael at y dudalen hon.
 
 global.error.badRequest400.title=Heb ddod o hyd i’r dudalen
 global.error.badRequest400.heading=Heb ddod o hyd i’r dudalen
-global.error.badRequest400.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p>Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p class="margin-bottom-0">Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class="list-bullets"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer TAW</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p>
+global.error.badRequest400.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p>Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p>Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class=" govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer TAW</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p>
 
 global.error.pageNotFound404.title=Heb ddod o hyd i’r dudalen
 global.error.pageNotFound404.heading=Heb ddod o hyd i’r dudalen
-global.error.pageNotFound404.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p>Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p class="margin-bottom-0">Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class="list-bullets"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer TAW</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p>
+global.error.pageNotFound404.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p>Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p>Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer TAW</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p>
 
 global.error.InternalServerError500.title=Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
 global.error.InternalServerError500.heading=Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
@@ -124,7 +125,6 @@ contactEmailCheck.title=Ai dyma’r cyfeiriad e-bost yr hoffech ei ddefnyddio ar
 contactEmailCheck.p=Byddwn yn ei ddefnyddio i roi gwybod i chi pan fo’ch cyfrif gwasanaethau asiant wedi’i greu, ac i roi gwybod i chi am statws ceisiadau am awdurdodiad.
 contactEmailCheck.option.yes=Iawn
 contactEmailCheck.option.no=Na – hoffwn ddefnyddio cyfeiriad e-bost gwahanol
-contactEmailCheck.continue.button=Yn eich blaen
 error.contact-email-check.invalid=Dewiswch a hoffech ddefnyddio’r cyfeiriad e-bost a ddangosir neu gyfeiriad e-bost gwahanol
 
 #Contact Email Address
@@ -141,13 +141,11 @@ contactTradingNameCheck.title=Ai dyma’r enw yr hoffech ei ddangos i’ch cleie
 contactTradingNameCheck.p=Bydd cleientiaid yn gweld yr enw hwn wrth dderbyn neu reoli’ch awdurdodiadau.
 contactTradingNameCheck.option.yes=Iawn
 contactTradingNameCheck.option.no=Na
-contactTradingNameCheck.continue.button=Yn eich blaen
 error.contact-trading-name-check.invalid=Dewiswch  ‘Iawn’ os ydych yn masnachu o dan enw gwahanol
 
 #Contact Trading Name
 contactTradingName.title=Beth yw’r enw yr hoffech ei ddangos i’ch cleientiaid?
 contactTradingName.p=Bydd cleientiaid yn gweld yr enw hwn wrth dderbyn neu reoli’ch awdurdodiadau.
-contactTradingName.continue.button=Yn eich blaen
 error.trading-name-name.maxlength=Mae’n rhaid i’r prif enw masnachu gynnwys 40 o gymeriadau neu lai
 error.trading-name.invalid=Mae’n rhaid i’r prif enw masnachu gynnwys y llythrennau a i z, rhifau, comas, atalnodau llawn, collnodau, cysylltnodau, blaenslaesau a bylchau yn unig
 error.trading-name.empty=Nodwch brif enw masnachu eich busnes
@@ -157,7 +155,6 @@ contactTradingAddressCheck.title=Ai dyma’r cyfeiriad yr hoffech ei ddefnyddio 
 contactTradingAddressCheck.p=Dyma’r cyfeiriad y byddwn yn ei ddefnyddio er mwyn gwirio pwy ydych os byddwch yn ein ffonio. Efallai y byddwn yn anfon rhywfaint o ohebiaeth i’r cyfeiriad hwn.
 contactTradingAddressCheck.option.yes=Iawn
 contactTradingAddressCheck.option.no=Na – hoffwn nodi cyfeiriad gwahanol
-contactTradingAddressCheck.continue.button=Yn eich blaen
 error.contact-trading-address-check.invalid=Dewiswch ‘Iawn’ os mai dyma'r prif gyfeiriad masnachu yr ydych am ei ddefnyddio ar gyfer gohebiaeth eich cyfrif gwasanaethau asiant
 
 ##Modifying address
@@ -172,7 +169,7 @@ address.form.with-errors.button.confirm_address=Cadarnhewch y cyfeiriad
 
 ##Confirm business
 confirmBusiness.title=Ai dyma’ch busnes?
-confirmBusiness.content.utr=Dyma’r manylion sydd gennym ar gyfer Cyfeirnod Unigryw y Trethdalwr (UTR) <strong class="bold">{0}</strong>. Byddwch yn gallu newid y manylion hyn cyn i chi orffen creu cyfrif gwasanaethau asiant.
+confirmBusiness.content.utr=Dyma’r manylion sydd gennym ar gyfer Cyfeirnod Unigryw y Trethdalwr (UTR) <strong class="govuk-!-font-weight-bold">{0}</strong>. Byddwch yn gallu newid y manylion hyn cyn i chi orffen creu cyfrif gwasanaethau asiant.
 confirmBusiness.option.yes=Iawn
 confirmBusiness.option.no=Na – hoffwn nodi UTR gwahanol
 confirmBusiness.error.no-radio-selected=Dewiswch ‘Iawn’ os mai dyma’ch busnes
@@ -212,6 +209,8 @@ task-list.5.number=5.
 task-list.checkAnswersTask.header=Gwiriwch eich atebion a chrëwch eich cyfrif
 task-list.checkAnswersSubTask=Gallwch wirio’ch atebion ar ôl i chi gwblhau’r adrannau eraill.
 task-list.completed=WEDI’I CHWBLHAU
+task-list.not-started=HEB DDECHRAU
+task-list.cannot-start-yet=METHU DECHRAU ETO
 
 #Saved Progress
 saved-progress.title=Cedwir eich cynnydd am 30 diwrnod
@@ -301,8 +300,6 @@ date-of-birth.must.be.later.than.1900=Rhaid i’r dyddiad geni fod yn hwyrach na
 
 #Registered for VAT page
 registered-for-vat.title=A yw’ch busnes wedi’i gofrestru ar gyfer TAW?
-registered-for-vat.option.yes=Iawn
-registered-for-vat.option.no=Na
 registered-for-vat.error.no-radio-selected=Dewiswch ‘Iawn’ os yw’ch busnes wedi’i gofrestru ar gyfer TAW
 
 #Vat Details page
@@ -352,7 +349,7 @@ businessDetails.label.postcode.hint=Dyma god post cyfeiriad cofrestredig eich bu
 
 #Not subscribed
 notSubscribed.title=Gallwch greu cyfrif gwasanaethau asiant
-notSubscribed.p1=Rydym wedi gwirio <strong class = "bold"> {0} </strong> ac nid oes ganddo gyfrif gwasanaethau asiant.
+notSubscribed.p1=Rydym wedi gwirio <strong class = "govuk-!-font-weight-bold"> {0} </strong> ac nid oes ganddo gyfrif gwasanaethau asiant.
 
 #Invalid address
 invalidAddress.title=Cyfeiriad annilys
@@ -388,8 +385,8 @@ linkClients.error.no-radio-selected=Dewiswch ‘Iawn’ os hoffech gysylltu’ch
 subscriptionComplete.title=Cyfrif gwasanaethau asiant wedi’i greu
 subscriptionComplete.h1=Cyfrif gwasanaethau asiant wedi’i greu
 subscriptionComplete.accountName=Rydych wedi creu cyfrif ar gyfer
-subscriptionComplete.copiedAcross=Rydych hefyd wedi copïo ar draws <strong class="bold">{0}</strong> o gleientiaid i’ch cyfrif gwasanaethau asiant newydd.
-subscriptionComplete.p1=Gwnewch nodyn o gyfeirnod eich cyfrif <strong class="bold">{0}</strong>. Gwnewch yn siŵr bod gennych chi hyn os ydych yn cysylltu â ni ynglŷn â’ch cyfrif gwasanaethau asiant
+subscriptionComplete.copiedAcross=Rydych hefyd wedi copïo ar draws <strong class="govuk-!-font-weight-bold">{0}</strong> o gleientiaid i’ch cyfrif gwasanaethau asiant newydd.
+subscriptionComplete.p1=Gwnewch nodyn o gyfeirnod eich cyfrif <strong class="govuk-!-font-weight-bold">{0}</strong>. Gwnewch yn siŵr bod gennych chi hyn os ydych yn cysylltu â ni ynglŷn â’ch cyfrif gwasanaethau asiant
 subscriptionComplete.p2=Rydym wedi anfon e-bost i {0} i gadarnhau’r manylion hyn.
 subscriptionComplete.nextStepsMTD.header=Camau nesaf ar gyfer y cynllun Troi Treth yn Ddigidol fel asiant
 subscriptionComplete.nextStepsMTD.p=Os gwnaethoch gopïo ar draws cleientiaid sydd angen dilyn rheolau’r cynllun Troi Treth yn Ddigidol, mae angen i chi nawr gofrestru’ch cleientiaid ar gyfer Troi Treth yn Ddigidol ar gyfer TAW.
@@ -398,7 +395,7 @@ subscriptionComplete.nextStepsTERS.p=Gallwch nawr fynd yn eich blaen i gofrestru
 subscriptionComplete.button.continueToASAccount=Ewch i’ch cyfrif gwasanaethau asiant
 
 #Common
-button.startAgain=Rhoi cynnig arall arni
+button.tryAgain=Rhoi cynnig arall arni
 button.continue=Yn eich blaen
 button.saveContinue=Cadw ac yn eich blaen
 button.saveComeBackLater=Cadw ar ffurf drafft
@@ -413,7 +410,8 @@ button.signIn=Mewngofnodi
 #Setup Incomplete
 setupIncomplete.title=Nid oeddem yn gallu cadarnhau pwy ydych
 setupIncomplete.p1=Cyn i chi allu creu cyfrif gwasanaethau asiant, mae angen i ni fod yn siŵr bod cleient wedi’ch awdurdodi i ddelio â CThEM.
-setupIncomplete.p2=<a href="{0}">Mewngofnodwch gyda Dynodydd Defnyddiwr (ID) gwahanol ar gyfer Porth y Llywodraeth</a> rydych yn ei ddefnyddio ar gyfer cleient sydd wedi’ch awdurdodi.
+setupIncomplete.a=Mewngofnodwch gyda Dynodydd Defnyddiwr (ID) gwahanol ar gyfer Porth y Llywodraeth
+setupIncomplete.p2= rydych yn ei ddefnyddio ar gyfer cleient sydd wedi’ch awdurdodi.
 #Invasive check
 invasive.title.saCode=A oes gennych god asiant Hunanasesiad?
 invasive.title.option=Manylion cleient
@@ -462,7 +460,6 @@ moneyLaunderingCompliance.expiry.hint=Er enghraifft, 31 03 2019
 moneyLaunderingCompliance.expiry.day.title=Diwrnod
 moneyLaunderingCompliance.expiry.month.title=Mis
 moneyLaunderingCompliance.expiry.year.title=Blwyddyn
-moneyLaunderingCompliance.continue=Yn eich blaen
 
 # Amls Not Found
 amls-details-not-found.title=Ni allwn ddod o hyd i fanylion eich aelodaeth
@@ -510,11 +507,9 @@ businessName.title=Beth yw enw eich busnes?
 businessName.updated.title=Diweddaru enw eich busnes
 businessName.updated.p1=Sicrhewch fod enw eich busnes dim ond yn cynnwys y llythrennau a-z, rhifau, comas, atalnodau llawn, collnodau, cysylltnodau, blaenslaesau, a bylchau.
 businessName.description=Ni chaiff enw eich busnes ei ddiweddaru ar gyfer gwasanaethau eraill y llywodraeth.
-businessName.continue.button=Yn eich blaen
 
 businessEmail.title=Beth yw cyfeiriad e-bost eich busnes?
 businessEmail.description=Ni chaiff cyfeiriad e-bost eich busnes ei ddiweddaru ar gyfer gwasanaethau eraill y llywodraeth.
-businessEmail.continue.button=Yn eich blaen
 
 updateBusinessAddress.title=Diweddaru cyfeiriad eich busnes
 updateBusinessAddress.p1=Sicrhewch fod cyfeiriad eich busnes dim ond yn cynnwys y llythrennau a-z, rhifau, comas, symbolau ampersand, dyfynodau sengl, atalnodau llawn, collnodau, cysylltnodau, blaenslaesau, a bylchau.
@@ -524,7 +519,6 @@ updateBusinessAddress.address_line_2.title =Llinell cyfeiriad 2 (dewisol)
 updateBusinessAddress.address_line_3.title =Llinell cyfeiriad 3 (dewisol)
 updateBusinessAddress.address_line_4.title =Llinell cyfeiriad 4 (dewisol)
 updateBusinessAddress.postcode.title =Cod post
-updateBusinessAddress.continue =Yn eich blaen
 
 postcodeNotAllowed.title=Ni allwch ddefnyddio’r cod post hwn
 postcodeNotAllowed.p1=Ni allwch ddefnyddio’r cod post hwn i greu cyfrif gwasanaethau asiant.

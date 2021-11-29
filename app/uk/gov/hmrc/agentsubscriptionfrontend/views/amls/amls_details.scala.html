@@ -17,22 +17,25 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.AMLSForm
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers._
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
-
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{InputDate, InputSelect, InputText, SubmitOrSaveButtonGroup}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-inputTemplate: uk.gov.hmrc.play.views.html.helpers.Input,
-        uiDateFieldsCustom: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.date_input_custom,
-errorPrefixTemplate: error_prefix,
-    amlsDropdownTemplate: amls_dropdown
+    mainTemplate: uk.gov.hmrc.agentsubscriptionfrontend.views.html.MainTemplate,
+    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+    errorSummary: GovukErrorSummary,
+    inputText: InputText,
+    inputSelect: InputSelect,
+    inputDate: InputDate,
+    submitOrSaveButtonGroup: SubmitOrSaveButtonGroup,
+    formHelper: FormWithCSRF
 )
 
 @(amlsForm: Form[AMLSForm], amlsBodies: Map[String, String], mayBeGoBackUrl: Option[String] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+@*TODO review date validation*@
 
 @DayFieldError = @{
     if(amlsForm("expiry.day").hasErrors)
@@ -53,73 +56,50 @@ errorPrefixTemplate: error_prefix,
     if(amlsForm("expiry").hasErrors && !amlsForm("expiry.day").hasErrors && !amlsForm("expiry.month").hasErrors && !amlsForm("expiry.year").hasErrors)
         "date-field-errors-all"
 }
-    @dateFormWithRefinedErrors = @{
-        amlsForm.copy(errors = amlsForm.errors.filterNot(error => error.message == "" || error.key.contains("expiry.day")
-        || error.key.contains("expiry.month") || error.key.contains("expiry.year")))
+
+@dateFormWithRefinedErrors = @{
+    amlsForm.copy(errors = amlsForm.errors.filterNot(error => error.message == "" || error.key.contains("expiry.day")
+    || error.key.contains("expiry.month") || error.key.contains("expiry.year")))
+}
+
+@mainTemplate(title = errorPrefix(amlsForm) + Messages("moneyLaunderingCompliance.title"),
+backLinkHref = Some(mayBeGoBackUrl.getOrElse(routes.AMLSController.showAmlsRegisteredPage.url))
+) {
+
+    @if(dateFormWithRefinedErrors.hasErrors) {
+        @errorSummary(ErrorSummary().withFormErrorsAsText(dateFormWithRefinedErrors, mapping = Map("expiry" -> "expiry.day")))
     }
 
-@value = @{ amlsForm("amlsCode").value.getOrElse("")}
+    <h1 class="govuk-heading-xl">@Messages("moneyLaunderingCompliance.title")</h1>
 
+    <p class="govuk-hint">@Messages("moneyLaunderingCompliance.p1")</p>
 
-@mainTemplate(appConfig, title =  errorPrefixTemplate(amlsForm) + Messages("moneyLaunderingCompliance.title"), bodyClasses = None) {
+    @formHelper(action = routes.AMLSController.submitAmlsDetailsForm(), 'id -> "dropForm") {
 
-<a href="@mayBeGoBackUrl.getOrElse(routes.AMLSController.showAmlsRegisteredPage.url)" class="link-back">@Messages("button.back")</a>
+        @inputSelect(
+            field = amlsForm("amlsCode"),
+            label = Messages("moneyLaunderingCompliance.amls.title"),
+            labelAsHeading = false,
+            hint = Some(Messages("moneyLaunderingCompliance.amls.hint")),
+            options = amlsBodies.toSeq,
+        )
 
-    @if(amlsForm.hasErrors) {
-        @uiErrorSummary(Messages("error.summary.heading"), dateFormWithRefinedErrors, Seq.empty, Some("money-laundering-compliance"))
-    }
-    <h1 class="heading-xlarge">@Messages("moneyLaunderingCompliance.title")</h1>
+        @inputText(
+            field = amlsForm("membershipNumber"),
+            label = Messages("moneyLaunderingCompliance.membershipNumber.title"),
+            labelClass = Some("govuk-label--s"),
+        )
 
-    <p class="hint-text">@Messages("moneyLaunderingCompliance.p1")</p>
+        @inputDate(
+        field = dateFormWithRefinedErrors("expiry"),
+        legend = Messages("moneyLaunderingCompliance.expiry.title"),
+        hint = Some(Messages("moneyLaunderingCompliance.expiry.hint")),
+        )
 
-    @formHelper(action = routes.AMLSController.submitAmlsDetailsForm(), 'class -> "form js-form", 'id -> "dropForm") {
+        @submitOrSaveButtonGroup(
+            submitId = "amls-details-continue",
+            saveId = "amls-details-save"
+        )
 
-      <div class="form-group @if(amlsForm.error("amlsCode").isDefined){form-field--error soft--ends}">
-          <label class="form-element-bold" for="amls-auto-complete">@Messages("moneyLaunderingCompliance.amls.title")</label>
-          <span class="hint-text">@Messages("moneyLaunderingCompliance.amls.hint")</span>
-          @amlsForm.error("amlsCode").map { formError => <span class="error-notification">
-              <span class="visuallyhidden">@Messages("error.prefix")</span>
-              @Messages(formError.message)
-          </span>
-          }
-        <div class="autocomplete-wrapper" id="amlsCode">
-            <select id="amls-auto-complete" name="amlsCode">
-                <option value=""></option>
-                @for(option <- amlsBodies.toSeq) {
-                    <option
-                    id="amlsCode-@option._1"
-                    value="@option._1"
-                        @if(value==option._1){selected="selected"}>@option._2</option>
-                }
-            </select>
-        </div>
-      </div>
-
-        <div class="form-group">
-            @inputTemplate(
-            amlsForm("membershipNumber"),
-            '_label -> Messages("moneyLaunderingCompliance.membershipNumber.title"),
-            '_inputClass -> "form-control input--cleared",
-            '_labelClass -> "form-element-bold soft--ends",
-            '_dataAttributes -> Html("""data-uppercase="true""""),
-            '_errorPrefix -> Messages("error.prefix")
-            )
-        </div>
-
-
-            @uiDateFieldsCustom(
-            dateFormWithRefinedErrors.copy(errors = dateFormWithRefinedErrors.errors.filterNot(error => error.key.contains("membershipNumber") || error.key.contains("amlsCode"))),
-            "expiry",
-            '_legend -> Messages("moneyLaunderingCompliance.expiry.title"),
-            '_inputHint -> Messages("moneyLaunderingCompliance.expiry.hint"),
-            '_legendSpanClass -> "form-element-bold",
-            '_legendClass -> "flush--ends",
-            '_hintId -> "dates")
-
-
-        <div class="form-field">
-            <button type="submit" class="button margin-bottom-10 margin-right-5" id="amls-details-continue" name="submit" value="continue">@Messages("button.saveContinue")</button>
-            <button type="submit" class="button--secondary" id="amls-details-save" name="submit" value="save">@Messages("button.saveComeBackLater")</button>
-        </div>
     }
 }

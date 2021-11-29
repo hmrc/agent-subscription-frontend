@@ -15,65 +15,70 @@
  *@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-@import uk.gov.hmrc.play.views.html.helpers._
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SignedOutController
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputRadios}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorSummary, ErrorMessage, FormWithCSRF, GovukDetails}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{Text, HtmlContent, RadioItem, Details}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-errorPrefixTemplate: error_prefix,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-uiInputRadioGroupCustom: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.input_radio_group_custom,
-formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+    mainTemplate: MainTemplate,
+    errorPrefixTemplate: error_prefix,
+    errorSummary: GovukErrorSummary,
+    govukDetails: GovukDetails,
+    inputRadio: InputRadios,
+    formHelper: FormWithCSRF,
+    submitButton: SubmitButton
 )
 
 @(businessTypeRadioForm: Form[BusinessType])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@headerTitle = {
-    <h1 class="heading-xlarge @if(businessTypeRadioForm.hasErrors){push--top}">
-        @Messages("businessType.title")
-    </h1>
+@detailsContent = {
+<p>@Messages("businessType.progressive.content.p1")</p>
+<a href="@SignedOutController.signOutWithContinueUrl" id="sign-out">@Messages("businessType.progressive.content.link")</a>
 }
 
-@mainTemplate(appConfig, title = errorPrefixTemplate(businessTypeRadioForm) + Messages("businessType.title"), bodyClasses = None) {
+@mainTemplate(title = errorPrefixTemplate(businessTypeRadioForm) + Messages("businessType.title")) {
+
     @if(businessTypeRadioForm.hasErrors) {
-        @uiErrorSummary(Messages("error.summary.heading"), businessTypeRadioForm, Seq.empty, Some("business-type"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(businessTypeRadioForm))
     }
 
-    @formHelper(
-        action = routes.BusinessTypeController.submitBusinessTypeForm(),
-        'class -> "form js-form") {
+    @formHelper(action = routes.BusinessTypeController.submitBusinessTypeForm()) {
 
-
-        @uiInputRadioGroupCustom(
-            businessTypeRadioForm("businessType"),
-            Seq(
-                "limited_company" -> Messages("businessType.option.limited-company"),
-                "sole_trader" -> Messages("businessType.option.sole-trader"),
-                "partnership" -> Messages("businessType.option.partnership"),
-                "llp" -> Messages("businessType.option.partnership-llp")
-            ),
-            '_legend -> headerTitle,
-          '_groupDivClass -> "form-group",
-            '_fieldsetAttributes -> Html("""id='businessType'""")
+        @inputRadio(
+            field = businessTypeRadioForm("businessType"),
+            legend = Messages("businessType.title"),
+            headingIsLegend = true,
+            inputs = Seq(
+                RadioItem(
+                    content = Text(Messages("businessType.option.limited-company")),
+                    value = Some("limited_company")
+                ),
+                RadioItem(
+                    content = Text(Messages("businessType.option.sole-trader")),
+                    value = Some("sole_trader")
+                ),
+                RadioItem(
+                    content = Text(Messages("businessType.option.partnership")),
+                    value = Some("partnership")
+                ),
+                RadioItem(
+                    content = Text(Messages("businessType.option.partnership-llp")),
+                    value = Some("llp")
+                )
+            )
         )
 
+        @govukDetails(Details(
+            summary = Text(Messages("businessType.progressive.title")),
+            content = HtmlContent(detailsContent)
+        ))
 
-        <div class="form-group">
-            <details class="govuk-details">
-                <summary class="govuk-details__summary">
-                    <span class="summary govuk-details__summary-text">@Messages("businessType.progressive.title")</span>
-                </summary>
-                <div class="panel panel-border-narro govuk-details__text">
-                    <p>@Messages("businessType.progressive.content.p1")</p>
-                    <a href="@SignedOutController.signOutWithContinueUrl" id="sign-out">@Messages("businessType.progressive.content.link")</a>
-                </div>
-            </details>
-        </div>
-
-        <div class="form-group">
-            <button class="button" type="submit" id="continue">@Messages("button.continue")</button>
-        </div>
+        @submitButton(id = "continue", messageKey = "button.continue")
     }
 }

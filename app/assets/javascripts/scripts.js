@@ -25,6 +25,13 @@ $(function() {
     var showHideContent = new GOVUK.ShowHideContent();
     showHideContent.init();
 
+ //======================================================
+    // GOV.UK country lookup
+    // https://alphagov.github.io/accessible-autocomplete/#progressive-enhancement
+    //======================================================
+    // auto complete country lookup, progressive enhancement
+    // need to invoke new enhanceSelectElement()
+    //======================================================
     var selectEl = document.querySelector('#amls-auto-complete');
       if(selectEl){
           accessibleAutocomplete.enhanceSelectElement({

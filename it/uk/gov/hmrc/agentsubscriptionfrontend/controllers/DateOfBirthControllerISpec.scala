@@ -1,7 +1,6 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import java.time.LocalDate
-
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Llp, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, CompanyRegistrationNumber, DateOfBirth}
@@ -71,9 +70,9 @@ class DateOfBirthControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
       val result = await(controller.showDateOfBirthForm()(request))
 
-      result should containInputElement("dob.day", "tel", Some("1"))
-      result should containInputElement("dob.month", "tel", Some("1"))
-      result should containInputElement("dob.year", "tel", Some("2010"))
+      result should containInputElement("dob.day", "text", Some("1"))
+      result should containInputElement("dob.month", "text", Some("1"))
+      result should containInputElement("dob.year", "text", Some("2010"))
     }
   }
 

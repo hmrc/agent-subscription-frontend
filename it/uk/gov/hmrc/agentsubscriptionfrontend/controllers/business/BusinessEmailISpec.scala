@@ -26,11 +26,11 @@ class BusinessEmailISpec extends BaseISpec {
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
       val result = await(controller.showBusinessEmailForm(request))
-      result should containMessages("businessEmail.title", "businessEmail.description", "businessEmail.continue.button")
+      result should containMessages("businessEmail.title", "businessEmail.description", "button.continue")
       val doc = Jsoup.parse(bodyOf(result))
       doc.getElementById("email").`val` shouldBe "test@gmail.com"
 
-      val backLink = doc.getElementsByClass("link-back")
+      val backLink = doc.getElementsByClass("govuk-back-link")
       backLink.attr("href") shouldBe routes.SubscriptionController.showCheckAnswers().url
 
       val form = doc.select("form").first()
@@ -47,7 +47,7 @@ class BusinessEmailISpec extends BaseISpec {
           registration = Some(testRegistration.copy(emailAddress = None))))
 
       val result = await(controller.showBusinessEmailForm(request))
-      result should containMessages("businessEmail.title", "businessEmail.description", "businessEmail.continue.button")
+      result should containMessages("businessEmail.title", "businessEmail.description", "button.continue")
       val doc = Jsoup.parse(bodyOf(result))
       doc.getElementById("email").`val` shouldBe ""
 

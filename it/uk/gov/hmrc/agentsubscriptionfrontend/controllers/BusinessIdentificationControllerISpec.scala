@@ -84,7 +84,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
     "display the no agency found page if the current user is logged in and has affinity group = Agent" in new TestSetupNoJourneyRecord{
       val result = await(controller.showNoMatchFound(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
-      result should containMessages("noAgencyFound.title", "noAgencyFound.p1", "noAgencyFound.p2", "button.startAgain")
+      result should containMessages("noAgencyFound.title", "noAgencyFound.p1", "noAgencyFound.p2", "button.tryAgain")
     }
   }
 

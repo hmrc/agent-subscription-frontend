@@ -1,4 +1,5 @@
 #Common
+service.name=Create an agent services account
 app.name=Create an agent services account
 servicename.titleSuffix=- Create an agent services account - GOV.UK
 
@@ -21,11 +22,11 @@ global.error.403.message=Check you have permission to access this page.</p><p><a
 
 global.error.badRequest400.title=Page not found
 global.error.badRequest400.heading=Page not found
-global.error.badRequest400.message=If you typed the web address, check it is correct.</p><p>If you pasted the web address, check you copied the entire address.</p><p class="margin-bottom-0">If the web address is correct or you selected a link or button:</p><ul class="list-bullets"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with Making Tax Digital for VAT</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p>
+global.error.badRequest400.message=If you typed the web address, check it is correct.</p><p>If you pasted the web address, check you copied the entire address.</p><p>If the web address is correct or you selected a link or button:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with Making Tax Digital for VAT</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p>
 
 global.error.pageNotFound404.title=Page not found
 global.error.pageNotFound404.heading=Page not found
-global.error.pageNotFound404.message=If you typed the web address, check it is correct.</p><p>If you pasted the web address, check you copied the entire address.</p><p class="margin-bottom-0">If the web address is correct or you selected a link or button:</p><ul class="list-bullets"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with Making Tax Digital for VAT</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p>
+global.error.pageNotFound404.message=If you typed the web address, check it is correct.</p><p>If you pasted the web address, check you copied the entire address.</p><p>If the web address is correct or you selected a link or button:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with Making Tax Digital for VAT</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p>
 
 global.error.InternalServerError500.title=Sorry, there is a problem with the service
 global.error.InternalServerError500.heading=Sorry, there is a problem with the service
@@ -124,7 +125,6 @@ contactEmailCheck.title=Is this the email address you want to use for your agent
 contactEmailCheck.p=We will use it to tell you when your agent services account has been created and to let you know the status of authorisation requests.
 contactEmailCheck.option.yes=Yes
 contactEmailCheck.option.no=No - I want to use a different email address
-contactEmailCheck.continue.button=Continue
 error.contact-email-check.invalid=Select if you want to use the email address displayed or a different email address
 
 #Contact Email Address
@@ -141,13 +141,11 @@ contactTradingNameCheck.title=Is this the name you want to show to your clients?
 contactTradingNameCheck.p=Clients will see this name when they accept or manage your authorisations.
 contactTradingNameCheck.option.yes=Yes
 contactTradingNameCheck.option.no=No
-contactTradingNameCheck.continue.button=Continue
 error.contact-trading-name-check.invalid=Select yes if you trade under a different name
 
 #Contact Trading Name
 contactTradingName.title=What is the name you want to show to your clients?
 contactTradingName.p=Clients will see this name when they accept or manage your authorisations.
-contactTradingName.continue.button=Continue
 error.trading-name-name.maxlength=Main trading name must be 40 characters or fewer
 error.trading-name.invalid=Main trading name must only include letters a to z, numbers, commas, full stops, apostrophes, hyphens, forward slashes and spaces
 error.trading-name.empty=Enter the main trading name of your business
@@ -157,7 +155,6 @@ contactTradingAddressCheck.title=Is this the address you want to use for your ag
 contactTradingAddressCheck.p=This is the address we will use to check your identity if you call us. We may send some correspondence to this address.
 contactTradingAddressCheck.option.yes=Yes
 contactTradingAddressCheck.option.no=No - I want to enter a different address
-contactTradingAddressCheck.continue.button=Continue
 error.contact-trading-address-check.invalid=Select yes if this is the main trading address you want to use for your agent services account correspondence
 
 #Modifying address
@@ -172,7 +169,7 @@ address.form.with-errors.button.confirm_address= Confirm address
 
 ##Confirm business
 confirmBusiness.title=Is this your business?
-confirmBusiness.content.utr=These are the details we hold for Unique Taxpayer Reference (UTR) <strong class="bold">{0}</strong>. You will be able to change these details before you finish creating an agent services account.
+confirmBusiness.content.utr=These are the details we hold for Unique Taxpayer Reference (UTR) <strong class="govuk-!-font-weight-bold">{0}</strong>. You will be able to change these details before you finish creating an agent services account.
 confirmBusiness.option.yes=Yes
 confirmBusiness.option.no=No - I want to enter a different UTR
 confirmBusiness.error.no-radio-selected=Select yes if this is your business
@@ -212,6 +209,8 @@ task-list.5.number=5.
 task-list.checkAnswersTask.header=Check your answers and create your account
 task-list.checkAnswersSubTask=You can check your answers once you have completed the other sections.
 task-list.completed=COMPLETED
+task-list.not-started=NOT STARTED
+task-list.cannot-start-yet=CANNOT START YET
 
 #Saved Progress
 saved-progress.title=Your progress has been saved for 30 days
@@ -301,8 +300,6 @@ date-of-birth.must.be.later.than.1900=Date of birth must be later than 1 January
 
 #Registered for VAT page
 registered-for-vat.title=Is your business registered for VAT?
-registered-for-vat.option.yes=Yes
-registered-for-vat.option.no=No
 registered-for-vat.error.no-radio-selected=Select yes if your business is registered for VAT
 
 #Vat Details page
@@ -352,7 +349,7 @@ businessDetails.label.postcode.hint=This is the postcode of your registered busi
 
 #Not subscribed
 notSubscribed.title=You can create an agent services account
-notSubscribed.p1=We’ve checked <strong class="bold">{0}</strong> and it doesn’t have an agent services account.
+notSubscribed.p1=We’ve checked <strong class="govuk-!-font-weight-bold">{0}</strong> and it doesn’t have an agent services account.
 
 #Invalid address
 invalidAddress.title=Invalid address
@@ -388,8 +385,8 @@ linkClients.error.no-radio-selected= Select yes if you want to link your clients
 subscriptionComplete.title=Agent services account created
 subscriptionComplete.h1=Agent services account created
 subscriptionComplete.accountName=You created an account for
-subscriptionComplete.copiedAcross=You have also copied across <strong class="bold">{0}</strong> clients to your new agent services account.
-subscriptionComplete.p1=Make a note of your account reference number <strong class="bold">{0}</strong>. Make sure you have this with you if you contact us about your agent services account.
+subscriptionComplete.copiedAcross=You have also copied across <strong class="govuk-!-font-weight-bold">{0}</strong> clients to your new agent services account.
+subscriptionComplete.p1=Make a note of your account reference number <strong class="govuk-!-font-weight-bold">{0}</strong>. Make sure you have this with you if you contact us about your agent services account.
 subscriptionComplete.p2=We have sent an email to {0} confirming these details.
 subscriptionComplete.nextStepsMTD.header=Next steps for Making Tax Digital as an agent
 subscriptionComplete.nextStepsMTD.p=If you copied across clients who need to follow the rules for Making Tax Digital, you now need to sign your clients up for Making Tax Digital for VAT.
@@ -398,7 +395,7 @@ subscriptionComplete.nextStepsTERS.p=You can now continue with registering a cli
 subscriptionComplete.button.continueToASAccount=Go to your agent services account
 
 #Common
-button.startAgain=Try again
+button.tryAgain=Try again
 button.continue=Continue
 button.saveContinue=Save and continue
 button.saveComeBackLater=Save as draft
@@ -413,7 +410,8 @@ button.signIn=Sign in
 #Setup Incomplete
 setupIncomplete.title=We could not confirm your identity
 setupIncomplete.p1=Before you can create an agent services account, we need to be sure that a client has authorised you to deal with HMRC.
-setupIncomplete.p2=<a href="{0}">Sign in with a different Government Gateway user ID</a> that you use for a client that has authorised you.
+setupIncomplete.a=Sign in with a different Government Gateway user ID
+setupIncomplete.p2= that you use for a client that has authorised you.
 #Invasive check
 invasive.title.saCode=Do you have a Self Assessment agent code?
 invasive.title.option=Client details
@@ -462,7 +460,6 @@ moneyLaunderingCompliance.expiry.hint=For example, 31 03 2019
 moneyLaunderingCompliance.expiry.day.title=Day
 moneyLaunderingCompliance.expiry.month.title=Month
 moneyLaunderingCompliance.expiry.year.title=Year
-moneyLaunderingCompliance.continue=Continue
 
 # Amls Not Found
 amls-details-not-found.title=We cannot find your membership details
@@ -506,11 +503,9 @@ businessName.title=What is your business name?
 businessName.updated.title=Update your business name
 businessName.updated.p1=Make sure your business name only includes letters a to z, numbers, commas, full stops, apostrophes, hyphens, forward slashes, and spaces.
 businessName.description=Your business name will only be updated in your agent services account.
-businessName.continue.button=Continue
 
 businessEmail.title=What is your business email address?
 businessEmail.description=We will only use this to send you a confirmation email. Your business email address will only be updated in your agent services account.
-businessEmail.continue.button=Continue
 
 updateBusinessAddress.title=Update your business address
 updateBusinessAddress.p1=Make sure your business address only includes letters a to z, numbers, commas, ampersands, single quotation marks, full stops, apostrophes, hyphens, forward slashes, and spaces.
@@ -520,7 +515,7 @@ updateBusinessAddress.address_line_2.title = Address line 2 (Optional)
 updateBusinessAddress.address_line_3.title = Address line 3 (Optional)
 updateBusinessAddress.address_line_4.title = Address line 4 (Optional)
 updateBusinessAddress.postcode.title = Postcode
-updateBusinessAddress.continue = Continue
+
 
 postcodeNotAllowed.title=You cannot use this postcode
 postcodeNotAllowed.p1=You cannot use this postcode to create an agent services account.

@@ -16,21 +16,18 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html
 
-@this(
-mainTemplate: main_template
-)
+@this(mainTemplate: MainTemplate)
 
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@mainTemplate(appConfig, title = Messages("postcodeNotAllowed.title"), bodyClasses = None) {
+@mainTemplate(title = Messages("postcodeNotAllowed.title")) {
 
-    <h1 class="heading-xlarge">@Messages("postcodeNotAllowed.title")</h1>
+    <h1 class="govuk-heading-xl">@Messages("postcodeNotAllowed.title")</h1>
 
     <p>@Messages("postcodeNotAllowed.p1")</p>
 
     <p>@Messages("postcodeNotAllowed.p2")</p>
 
-     <a class="button" id="start" href="@routes.BusinessIdentificationController.showUpdateBusinessAddressForm()" draggable="false" role="button">@Messages("postcodeNotAllowed.button")</a>
+    <a class="govuk-button" id="start" href="@routes.BusinessIdentificationController.showUpdateBusinessAddressForm()" draggable="false" role="button">@Messages("button.tryAgain")</a>
 }

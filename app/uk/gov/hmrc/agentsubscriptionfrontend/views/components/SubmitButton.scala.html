@@ -14,12 +14,19 @@
  * limitations under the License.
  *@
 
-@this()
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
+@import uk.gov.hmrc.govukfrontend.views.html.components.{Text, Button}
 
-@(content: Html,
-        includeGridWrapper: Boolean = false,
-        articleClasses: Option[String] = None)
+@this(
+button: GovukButton,
+)
 
-<div class="content__body@if( includeGridWrapper ){ grid-wrapper}@if(articleClasses.isDefined){ @articleClasses.get }">
-@content
-</div>
+@(id: String, messageKey: String, submitClass: Option[String] = None)(implicit messages: Messages)
+
+
+@button(Button(
+    attributes = Map("id" -> s"${id}"),
+    classes = s"${submitClass.getOrElse("")}",
+    inputType = Some("submit"),
+    content = Text(messages(messageKey))
+))

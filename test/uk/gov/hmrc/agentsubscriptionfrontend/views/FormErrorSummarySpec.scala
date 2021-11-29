@@ -22,6 +22,8 @@ import play.api.i18n.{DefaultMessagesApi, Messages}
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.govukfrontend.views.Aliases.ErrorSummary
+import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 class FormErrorSummarySpec extends UnitSpec {
 
@@ -47,8 +49,8 @@ class FormErrorSummarySpec extends UnitSpec {
     "display error messages.en including arguments" in {
 
       val formWithError = testForm.bind(Map("name" -> "too long too long"))
-      val errorView = new uk.gov.hmrc.play.views.html.helpers.ErrorSummary
-      errorView("heading", formWithError).toString should include(htmlEscapedMessage("error.maxLength", maxLength))
+      val errorView = new uk.gov.hmrc.govukfrontend.views.html.components.GovukErrorSummary
+      errorView(ErrorSummary().withFormErrorsAsText(formWithError)).toString should include(htmlEscapedMessage("error.maxLength", maxLength))
     }
   }
 

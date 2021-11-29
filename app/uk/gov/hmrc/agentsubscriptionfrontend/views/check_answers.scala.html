@@ -16,73 +16,56 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.view.CheckYourAnswers
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.view.AnswerRow
-
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.main_template
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukSummaryList
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, CheckAnswersRow}
 
 @this(
-mainTemplate: main_template,
-uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+    mainTemplate: MainTemplate,
+    submitButton: SubmitButton,
+    formHelper: uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF,
+    checkAnswersRow: CheckAnswersRow
 )
 
 @(checkYourAnswers: CheckYourAnswers)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@checkAnswerBlock(id: String, answerRow: AnswerRow) = {
-    <dl class="app-check-your-answers app-check-your-answers--long margin-top-30 margin-bottom-20">
-    <div class="app-check-your-answers__contents">
-        <dt class="app-check-your-answers__question">@answerRow.question</dt>
-        <dd class="app-check-your-answers__answer" id="@id">
-          @for(line <- answerRow.answerLines) { @line<br> }
-        </dd>
-        <dd class="app-check-your-answers__change">
-            <a href="@answerRow.changeLink">
-                @answerRow.buttonText<span class="visuallyhidden"> @answerRow.question</span>
-            </a>
-        </dd>
-    </div>
-    </dl>
-}
+@mainTemplate(title = Messages("checkAnswers.title")) {
 
-@mainTemplate(appConfig, title = Messages("checkAnswers.title"), bodyClasses = None) {
+    <h1 class="govuk-heading-xl govuk-!-margin-bottom-6">@Messages("checkAnswers.title")</h1>
 
-    <h1 class="heading-xlarge margin-bottom-20">@Messages("checkAnswers.title")</h1>
+        @for(amlsRow <- checkYourAnswers.maybeAmlsDataRow) {
+            <h2 class="govuk-heading-m govuk-!-margin-top-6">@Messages("checkAnswers.amls.h2")</h2>
+            <dl class="govuk-summary-list">
+            @checkAnswersRow("amls", amlsRow)
+            </dl>
+        }
+
+        <h2 class="govuk-heading-m govuk-!-margin-top-6">@Messages("checkAnswers.contactDetails.h2")</h2>
+        <dl class="govuk-summary-list">
+            @checkAnswersRow("email", checkYourAnswers.contactEmailRow)
+            @checkAnswersRow("tradingName", checkYourAnswers.contactTradingNameRow)
+            @checkAnswersRow("tradingAddress", checkYourAnswers.contactTradingAddressRow)
+        </dl>
 
 
-                @for(amlsRow <- checkYourAnswers.maybeAmlsDataRow) {
+        @for(mappingClientNumberRow <- checkYourAnswers.maybeMappingClientNumberRow) {
+        <h2 class="govuk-heading-m govuk-!-margin-top-6">@Messages("checkAnswers.mapping.h2")</h2>
+            <dl class="govuk-summary-list">
+            @checkAnswersRow("mappings", mappingClientNumberRow)
+            </dl>
+        }
 
-                    <h2 class="govuk-heading-m margin-top-30">@Messages("checkAnswers.amls.h2")</h2>
-                    @checkAnswerBlock("amls", amlsRow)
-                }
-
-                <h2 class="govuk-heading-m margin-top-30">@Messages("checkAnswers.contactDetails.h2")</h2>
-                @checkAnswerBlock("email", checkYourAnswers.contactEmailRow)
-
-                @checkAnswerBlock("tradingName", checkYourAnswers.contactTradingNameRow)
-
-                @checkAnswerBlock("tradingAddress", checkYourAnswers.contactTradingAddressRow)
-
-
-                @for(mappingClientNumberRow <- checkYourAnswers.maybeMappingClientNumberRow) {
-                    <h2 class="govuk-heading-m margin-top-30">@Messages("checkAnswers.mapping.h2")</h2>
-                    @checkAnswerBlock("mappings", mappingClientNumberRow)
-                }
-
-                @for(mappingGGIdRow <- checkYourAnswers.maybeMappingGGIdsRow) {
-                  @checkAnswerBlock("ggIds", mappingGGIdRow)
-                }
-
-
+        @for(mappingGGIdRow <- checkYourAnswers.maybeMappingGGIdsRow) {
+            <dl class="govuk-summary-list">
+                @checkAnswersRow("ggIds", mappingGGIdRow)
+            </dl>
+        }
 
     <p>@Messages("checkAnswers.description.p3")</p>
 
-    @uiFormHelper(
-        action = routes.SubscriptionController.submitCheckAnswers(),
-        'class -> "form js-form") {
-
-        <div class="form-group">
-            <button class="button" type="submit" id="continue" >@Messages("checkAnswers.confirm.button")</button>
-        </div>
+    @formHelper(action = routes.SubscriptionController.submitCheckAnswers()) {
+        @submitButton(id = "continue", messageKey = "checkAnswers.confirm.button")
     }
+
 }

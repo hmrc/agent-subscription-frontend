@@ -25,7 +25,7 @@ import play.api.mvc.{Request, RequestHeader, Result}
 import play.api.{Configuration, Environment, Logging, Mode}
 import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{error_template, error_template_5xx}
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{ErrorTemplate, ErrorTemplate5xx}
 import uk.gov.hmrc.auth.core.{InsufficientEnrolments, NoActiveSession}
 import uk.gov.hmrc.http.{JsValidationException, NotFoundException}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -40,8 +40,8 @@ class ErrorHandler @Inject()(
   val env: Environment,
   val messagesApi: MessagesApi,
   val auditConnector: AuditConnector,
-  errorTemplate: error_template,
-  errorTemplate5xx: error_template_5xx,
+  errorTemplate: ErrorTemplate,
+  errorTemplate5xx: ErrorTemplate5xx,
   @Named("appName") val appName: String)(implicit val config: Configuration, ec: ExecutionContext, appConfig: AppConfig)
     extends FrontendErrorHandler with AuthRedirects with ErrorAuditing with Logging {
 

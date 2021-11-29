@@ -17,62 +17,62 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessEmail
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, SubmitOrSaveButtonGroup}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorSummary, ErrorMessage, FormWithCSRF, GovukInsetText, GovukInput}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{Text, Hint, Label, HtmlContent, Input, InsetText}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-errorPrefix: error_prefix,
-formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-inputTemplate: uk.gov.hmrc.play.views.html.helpers.Input,
-errorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary
+    mainTemplate: MainTemplate,
+    errorPrefix: error_prefix,
+    formHelper: FormWithCSRF,
+    govukInputText: GovukInput,
+    govukInsetText: GovukInsetText,
+    errorSummary: GovukErrorSummary,
+    submitOrSaveButtonGroup: SubmitOrSaveButtonGroup,
+    submitButton: SubmitButton
 )
 
 @(businessEmailForm: Form[BusinessEmail], invalidDesEmail: Boolean, isChange: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+@hint = {
+    @govukInsetText(InsetText(
+        content = Text(Messages("businessEmail.description"))
+    ))
+}
 
-@mainTemplate(appConfig, title =  errorPrefix(businessEmailForm) +  Messages("businessEmail.title"), bodyClasses = None) {
-   @if(!invalidDesEmail) {
-       <a href="@routes.SubscriptionController.showCheckAnswers()" class="link-back">@Messages("button.back")</a>
-   }
+@mainTemplate(title = errorPrefix(businessEmailForm) + Messages("businessEmail.title"),
+backLinkHref = if(!invalidDesEmail) Some(routes.SubscriptionController.showCheckAnswers().url) else None
+) {
 
     @if(businessEmailForm.hasErrors) {
-        @errorSummary(Messages("error.summary.heading"), businessEmailForm, Seq.empty, Some("business-email"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(businessEmailForm))
     }
 
-    @formHelper(
-        action = if(isChange) routes.BusinessIdentificationController.submitChangeBusinessEmail else routes.BusinessIdentificationController.submitBusinessEmailForm(),
-        'class -> "form js-form") {
+    @formHelper(action = if(isChange) routes.BusinessIdentificationController.submitChangeBusinessEmail else routes.BusinessIdentificationController.submitBusinessEmailForm()) {
 
-        <div class="form-group @if(businessEmailForm.hasErrors) {form-field--error soft--ends}">
-            <h1>
-                <label for="email" class="heading-xlarge">@Messages("businessEmail.title")</label>
-            </h1>
-        <p class="panel panel-border-wide" id="email-panel">@Messages("businessEmail.description")</p>
+        @govukInputText(
+            Input(
+                label = Label(
+                isPageHeading = true,
+                content = Text(Messages("businessEmail.title"))
+            ),
+            autocomplete = Some("email"),
+            hint = Some(Hint(content = HtmlContent(hint))),
+            spellcheck = Some(false),
+            ).withFormField(businessEmailForm("email"))
+        )
 
-            @businessEmailForm.error("email").map { formError => <span class="error-message" id="email-error">
-                <span class="visuallyhidden">@Messages("error.prefix")</span>
-                @Messages(formError.message)
-            </span>
-            }
-
-            <input
-            type="text"
-            class="form-control input--cleared"
-            name="email"
-            id="email"
-            spellcheck="false"
-            @businessEmailForm.data.get("email").map { v => value="@v"}
-            aria-describedby="@if(businessEmailForm.hasErrors){email-error} else {email-panel}"
-            >
-            </div>
-
-        <div class="form-field">
         @if(isChange) {
-            <button type="submit" class="button margin-bottom-10 margin-right-5" id="business-email-change-continue" name="submit" value="continue">@Messages("button.saveContinue")</button>
-            <button type="submit" class="button--secondary" id="business-email-change-save" name="submit" value="save">@Messages("button.saveComeBackLater")</button>
+            @submitOrSaveButtonGroup(
+                submitId = "business-email-change-continue",
+                saveId = "business-email-change-save"
+            )
         } else {
-            <button class="button" type="submit" id="submit-email">@Messages("businessEmail.continue.button")</button>
+            @submitButton(id = "submit-email", messageKey = "button.continue")
         }
-        </div>
+
     }
 }

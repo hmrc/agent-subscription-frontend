@@ -391,7 +391,7 @@ class AMLSControllerISpec extends BaseISpec {
 
       val doc = Jsoup.parse(bodyOf(result))
 
-      val elAmlsSelect = doc.getElementById("amls-auto-complete")
+      val elAmlsSelect = doc.getElementById("amlsCode")
       elAmlsSelect should not be null
       elAmlsSelect.tagName() shouldBe "select"
 
@@ -480,8 +480,8 @@ class AMLSControllerISpec extends BaseISpec {
       val result = await(controller.showAmlsDetailsForm(authenticatedRequest))
 
       contentAsString(result) should (include(
-        """<a href="/agent-subscription/check-money-laundering-compliance" class="link-back">Back</a>""")
-        and include("""selected="selected">Insolvency Practitioners Association (IPA)</option>""")
+        """<a href="/agent-subscription/check-money-laundering-compliance" class="govuk-back-link">Back</a>""")
+        and include("""selected id="amlsCode-IPA">Insolvency Practitioners Association (IPA)</option>""")
         and include("""value="123456789"""")
         and include(s"""value="${LocalDate.now().getYear.toString}""""))
     }
@@ -833,7 +833,7 @@ class AMLSControllerISpec extends BaseISpec {
       result should containMessages(
         "amls-not-applied.title",
         "amls-not-applied.p1",
-        "amls-not-applied.finish"
+        "button.finishSignOut"
       )
 
       result should containSubstrings(

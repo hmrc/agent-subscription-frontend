@@ -17,63 +17,65 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessName
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, SubmitOrSaveButtonGroup}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorSummary, ErrorMessage, FormWithCSRF, GovukInsetText, GovukInput}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{Text, Hint, Label, HtmlContent, Input, InsetText}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
-mainTemplate: main_template,
-uiErrorSummary: uk.gov.hmrc.play.views.html.helpers.ErrorSummary,
-uiFormHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-uiInput: uk.gov.hmrc.play.views.html.helpers.Input,
-errorPrefix: error_prefix
+    mainTemplate: MainTemplate,
+    errorPrefix: error_prefix,
+    formHelper: FormWithCSRF,
+    govukInputText: GovukInput,
+    govukInsetText: GovukInsetText,
+    errorSummary: GovukErrorSummary,
+    submitOrSaveButtonGroup: SubmitOrSaveButtonGroup,
+    submitButton: SubmitButton
 )
 
 @(businessNameForm: Form[BusinessName], desErrorExists: Boolean = false, isChange: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+@hint = {
+    @if(desErrorExists){<p class="govuk-hint" id="business-name-hint">@Messages("businessName.updated.p1")</p>}
+
+    @govukInsetText(InsetText(
+        content = Text(Messages("businessName.description"))
+    ))
+}
+
 @title = @{ if(desErrorExists) Messages("businessName.updated.title") else Messages("businessName.title") }
 
-
-@mainTemplate(appConfig, title =  errorPrefix(businessNameForm) + title, bodyClasses = None) {
-    @if(!desErrorExists) {
-        <a href="@routes.SubscriptionController.showCheckAnswers()" class="link-back">@Messages("button.back")</a>
-    }
+@mainTemplate(title = errorPrefix(businessNameForm) + title,
+backLinkHref = if(!desErrorExists) Some(routes.SubscriptionController.showCheckAnswers().url) else None) {
 
     @if(businessNameForm.hasErrors) {
-        @uiErrorSummary(Messages("error.summary.heading"), businessNameForm, Seq.empty, Some("business-name"))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(businessNameForm))
     }
 
-    @uiFormHelper(
-        action = if(isChange) routes.BusinessIdentificationController.submitChangeBusinessName else routes.BusinessIdentificationController.submitBusinessNameForm(),
-        'class -> "form js-form") {
+    @formHelper(action = if(isChange) routes.BusinessIdentificationController.submitChangeBusinessName else routes.BusinessIdentificationController.submitBusinessNameForm()) {
 
-        <div class="form-group @if(businessNameForm.hasErrors) {form-field--error soft--ends}">
-            <h1>
-                <label class="heading-xlarge" for="name">@title</label>
-            </h1>
-            @if(desErrorExists){<p class="hint-text" id="business-name-hint">@Messages("businessName.updated.p1")</p>}
-            <p class="panel panel-border-wide" id="business-name-panel">@Messages("businessName.description")</p>
+        @govukInputText(
+            Input(
+                label = Label(
+                isPageHeading = true,
+                content = Text(title)
+            ),
+            autocomplete = Some("organization"),
+            hint = Some(Hint(content = HtmlContent(hint))),
+            spellcheck = Some(false),
+            ).withFormField(businessNameForm("name"))
+        )
 
-            @businessNameForm.error("name").map { formError => <span class="error-message" id="business-name-error">
-                <span class="visuallyhidden">@Messages("error.prefix")</span>
-                @Messages(formError.message)</span>
-            }
-            <input
-            type="text"
-            class="form-control input--cleared"
-            name="name"
-            id="name"
-            @businessNameForm.data.get("name").map { v => value="@v"}
-            spellcheck="false"
-            aria-describedby="@if(businessNameForm.hasErrors) {business-name-error} else {business-name-hint business-name-panel}"
-            >
-        </div>
+        @if(isChange) {
+            @submitOrSaveButtonGroup(
+                submitId = "business-name-change-continue",
+                saveId = "business-name-change-save"
+            )
+        } else {
+            @submitButton(id = "submit-businessName", messageKey = "button.continue")
+        }
 
-        <div class="form-field">
-            @if(isChange){
-              <button type="submit" class="button margin-bottom-10 margin-right-5" id="business-name-change-continue" name="submit" value="continue">@Messages("button.saveContinue")</button>
-              <button type="submit" class="button--secondary" id="business-name-change-save" name="submit" value="save">@Messages("button.saveComeBackLater")</button>
-            } else {
-              <button class="button" type="submit" id="submit-businessName">@Messages("businessName.continue.button")</button>
-            }
-        </div>
     }
 }
