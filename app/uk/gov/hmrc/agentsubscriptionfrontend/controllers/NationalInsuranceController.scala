@@ -86,10 +86,11 @@ class NationalInsuranceController @Inject()(
                 Ok(nationalInsuranceNumberTemplate(formWithErrors, businessType, backUrl))
               },
               validNino => {
-                def ninosMatched = agent.authNino.flatMap(normalizeNino) == normalizeNino(validNino.value)
+                val normalizedNino = normalizeNino(validNino.value)
+                def ninosMatched = agent.authNino.flatMap(normalizeNino) == normalizedNino
                 if (ninosMatched || businessType == Llp) {
                   subscriptionService
-                    .getDesignatoryDetails(validNino)
+                    .getDesignatoryDetails(normalizedNino.getOrElse(throw new RuntimeException("Unexpected error on submitNinoForm")))
                     .map(_.person)
                     .flatMap {
                       case Some(Person(_, None)) if businessType != Llp =>
@@ -102,13 +103,13 @@ class NationalInsuranceController @Inject()(
                         updateSessionAndRedirect(existingSession
                           .copy(nino = Some(validNino), dateOfBirthFromCid = Some(dateOfBirth), lastNameFromCid = Some(lastName)))(
                           routes.DateOfBirthController.showDateOfBirthForm())
-                      case _ => {
+                      case _ =>
                         logger.warn(s"business type $businessType no lastName and or no dob from CiD")
                         if (businessType != Llp)
                           Redirect(routes.VatDetailsController.showRegisteredForVatForm())
                         else
                           Redirect(routes.BusinessIdentificationController.showNoMatchFound())
-                      }
+
                     }
                 } else {
                   logger.warn(s"Auth Nino did not match ValidNino for businessType $businessType")
