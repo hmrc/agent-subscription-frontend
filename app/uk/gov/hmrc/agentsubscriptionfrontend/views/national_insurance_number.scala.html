@@ -46,7 +46,6 @@ backLinkHref = Some(s"${backUrl.getOrElse(routes.PostcodeController.showPostcode
 
     @formHelper(action = routes.NationalInsuranceController.submitNationalInsuranceNumberForm()) {
 
-    if(businessType == Llp){Messages("nino.hint-llp")} else {Messages("nino.hint")}
         @inputText(
             field = ninoForm("nino"),
             label = Messages("nino.title"),

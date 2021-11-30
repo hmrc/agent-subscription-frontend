@@ -71,7 +71,7 @@ package object controllers extends Logging {
 
     def ninoForm: Form[Nino] =
       Form[Nino](
-        mapping("nino" -> clientDetailsNino)(input => Nino(input))(nino => Some(nino.value))
+        mapping("nino" -> clientDetailsNino)(input => Nino(input.trim))(nino => Some(nino.value))
       )
 
     val confirmBusinessForm: Form[ConfirmBusiness] =
