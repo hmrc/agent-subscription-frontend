@@ -70,9 +70,9 @@ package object controllers extends Logging {
       )
 
     def ninoForm: Form[Nino] =
-      Form[Nino](
-        mapping("nino" -> clientDetailsNino)(input => Nino(input.trim))(nino => Some(nino.value))
-      )
+      Form[Nino](mapping("nino" -> text.transform[String](normaliseNino, _.toString).verifying(ninoConstraint))(Nino.apply)(Nino.unapply))
+
+    private def normaliseNino(ninoStr: String): String = ninoStr.replaceAll("\\s", "").toUpperCase
 
     val confirmBusinessForm: Form[ConfirmBusiness] =
       Form[ConfirmBusiness](
