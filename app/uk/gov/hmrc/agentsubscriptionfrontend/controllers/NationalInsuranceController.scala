@@ -86,11 +86,10 @@ class NationalInsuranceController @Inject()(
                 Ok(nationalInsuranceNumberTemplate(formWithErrors, businessType, backUrl))
               },
               validNino => {
-                val normalizedNino = normalizeNino(validNino.value)
-                def ninosMatched = agent.authNino.flatMap(normalizeNino) == normalizedNino
+                def ninosMatched = agent.authNino.flatMap(normalizeNino) == normalizeNino(validNino.value)
                 if (ninosMatched || businessType == Llp) {
                   subscriptionService
-                    .getDesignatoryDetails(normalizedNino.getOrElse(throw new RuntimeException("Unexpected error on submitNinoForm")))
+                    .getDesignatoryDetails(validNino)
                     .map(_.person)
                     .flatMap {
                       case Some(Person(_, None)) if businessType != Llp =>

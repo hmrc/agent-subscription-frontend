@@ -321,7 +321,7 @@ object CommonValidators {
     }
   }
 
-  private val ninoConstraint: Constraint[String] = Constraint[String] { fieldValue: String =>
+  val ninoConstraint: Constraint[String] = Constraint[String] { fieldValue: String =>
     val formattedField = fieldValue.replaceAll("\\s", "").toUpperCase
 
     Constraints.nonEmpty.apply(formattedField) match {
