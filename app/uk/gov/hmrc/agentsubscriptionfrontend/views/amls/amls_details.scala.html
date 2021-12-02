@@ -82,18 +82,20 @@ backLinkHref = Some(mayBeGoBackUrl.getOrElse(routes.AMLSController.showAmlsRegis
             labelAsHeading = false,
             hint = Some(Messages("moneyLaunderingCompliance.amls.hint")),
             options = amlsBodies.toSeq,
+            inputClass = Some("govuk-input--width-20")
         )
 
         @inputText(
             field = amlsForm("membershipNumber"),
             label = Messages("moneyLaunderingCompliance.membershipNumber.title"),
             labelClass = Some("govuk-label--s"),
+            inputClass = Some("govuk-input--width-20")
         )
 
         @inputDate(
         field = dateFormWithRefinedErrors("expiry"),
         legend = Messages("moneyLaunderingCompliance.expiry.title"),
-        hint = Some(Messages("moneyLaunderingCompliance.expiry.hint")),
+        hint = Some(Messages("moneyLaunderingCompliance.expiry.hint"))
         )
 
         @submitOrSaveButtonGroup(
