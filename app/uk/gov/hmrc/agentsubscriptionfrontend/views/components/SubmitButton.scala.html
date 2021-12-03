@@ -21,7 +21,7 @@
 button: GovukButton,
 )
 
-@(id: String, messageKey: String, submitClass: Option[String] = None)(implicit messages: Messages)
+@(id: String = "continue", messageKey: String = "button.continue", submitClass: Option[String] = None)(implicit messages: Messages)
 
 
 @button(Button(

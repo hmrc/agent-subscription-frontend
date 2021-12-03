@@ -29,7 +29,7 @@ button: GovukButton,
  name: String = "submit"
 )(implicit messages: Messages)
 
-<div class="govuk-button-group">
+<div class="govuk-button-group govuk-!-margin-bottom-7">
 @button(Button(
     attributes = Map("id" -> s"${submitId}"),
     content = Text(messages("button.saveContinue")),

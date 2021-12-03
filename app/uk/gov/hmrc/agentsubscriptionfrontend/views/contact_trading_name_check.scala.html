@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.ContactTradingNameCheck
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputRadios}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputYesNoRadios}
 @import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, RadioItem, Text}
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
@@ -27,7 +27,7 @@
     errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
     formHelper: FormWithCSRF,
     errorSummary: GovukErrorSummary,
-    inputRadio: InputRadios,
+    inputYesNoRadio: InputYesNoRadios,
     submitButton: SubmitButton
 )
 
@@ -53,25 +53,15 @@ backLinkHref = Some(backLinkCall.toString)
             <p>@Messages("contactTradingNameCheck.p")</p>
             <p>@Messages(s"$businessName")</p>
 
-            @inputRadio(
+            @inputYesNoRadio(
                 field = contactTradingNameCheckForm("check"),
                 legend = Messages("contactTradingNameCheck.title"),
                 legendClass = Some("govuk-visually-hidden"),
-                headingIsLegend = false,
-                inputs = Seq(
-                    RadioItem(
-                        content = Text(Messages("contactTradingNameCheck.option.yes")),
-                        value = Some("yes")
-                    ),
-                    RadioItem(
-                        content = Text(Messages("contactTradingNameCheck.option.no")),
-                        value = Some("no")
-                    )
-                )
+                headingIsLegend = false
             )
         </div>
 
-        @submitButton(id = "continue", messageKey = "button.continue")
+        @submitButton()
 
     }
 }

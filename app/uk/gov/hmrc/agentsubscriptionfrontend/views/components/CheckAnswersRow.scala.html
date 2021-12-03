@@ -31,9 +31,14 @@
         @for(line <- answerRow.answerLines) { @line<br> }
     </dd>
     <dd class="govuk-summary-list__actions">
+        @if(answerRow.buttonText != None) {
         <a class="govuk-link" href="@answerRow.changeLink" id="@id">
             @answerRow.buttonText<span class="govuk-visually-hidden"> @answerRow.question</span>
         </a>
+        } else {
+        @* Add dummy column to extend border *@
+        <span></span>
+        }
     </dd>
 </div>
 
