@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{header, head}
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.{En, Cy}
 @import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcStandardFooter, HmrcScripts, HmrcReportTechnicalIssueHelper}
 @import views.html.helper.CSPNonce
@@ -48,7 +49,7 @@
 
 @beforeContent = {
     @govukPhaseBanner(standardBetaBanner(url = appConfig.betaFeedbackUrl))
-    @hmrcBanner(Banner())
+    @hmrcBanner(Banner(language = if(messages.lang.code == "cy") Cy else En))
     @if(backLinkHref.nonEmpty){
         <nav aria-label="Back Link">
             @backLinkHref.map(url =>
