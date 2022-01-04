@@ -83,7 +83,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
   protected lazy val redirectUrl = "https://www.gov.uk/"
 
-  val amlsDetails = AmlsDetails("supervisory", Right(RegisteredDetails("123456789", LocalDate.now().plusDays(10))))
+  val amlsDetails = AmlsDetails("supervisory", Right(RegisteredDetails("123456789", Some(LocalDate.now().plusDays(10)))))
 
   val agentSession = Some(
     AgentSession(

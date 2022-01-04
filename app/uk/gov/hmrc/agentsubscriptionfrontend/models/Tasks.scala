@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,8 @@ final case class AmlsSubTask(amlsData: Option[AmlsData]) extends SubTask {
   override val showLink: Boolean = true
   override val isComplete: Boolean =
     amlsData.fold(false) {
-      case AmlsData(true, _, Some(_))           => true // registered (with details)
+      case AmlsData(true, _, Some(AmlsDetails(_, Right(RegisteredDetails(_, Some(_), _, _))))) =>
+        true // registered (with details including nonempty renewal date)
       case AmlsData(false, Some(true), Some(_)) => true // not registered, but applied for (with details)
       case _                                    => false
     }

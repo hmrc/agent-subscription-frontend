@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,9 @@ object CheckYourAnswers {
             List(
               amlsDetails.supervisoryBody,
               membershipNumber,
-              membershipExpiresOn.format(DateTimeFormatter.ofPattern("dd MM yyyy"))
+              membershipExpiresOn
+                .getOrElse(throw new Exception("ExpiresOn date is mandatory for AMLS registered agents."))
+                .format(DateTimeFormatter.ofPattern("dd MM yyyy"))
             )
         }
       case None => throw new Exception("AMLS details incomplete")
