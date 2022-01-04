@@ -114,7 +114,7 @@ object TestData {
         Some(
           AmlsDetails(
             "supervisory",
-            Right(RegisteredDetails("123456789", LocalDate.now().plusDays(10))))))),
+            Right(RegisteredDetails("123456789", Some(LocalDate.now().plusDays(10)))))))),
     cleanCredsAuthProviderId = Some(id),
     contactEmailData = Some(ContactEmailData(false, Some("email@email.com"))),
     contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),

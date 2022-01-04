@@ -382,7 +382,7 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
         email = "agency@example.com"
       ),
       Some(Lang("en")),
-      amlsDetails = Some(AmlsDetails("supervisory", Right(RegisteredDetails("123456789", LocalDate.now()))))
+      amlsDetails = Some(AmlsDetails("supervisory", Right(RegisteredDetails("123456789", Some(LocalDate.now())))))
     )
 
   private val partialSubscriptionRequest =

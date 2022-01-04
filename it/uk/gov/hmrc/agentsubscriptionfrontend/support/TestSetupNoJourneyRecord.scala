@@ -38,7 +38,7 @@ trait TestSetupWithCompleteJourneyRecord {
         AmlsData(
           amlsRegistered = true,
           Some(false),
-          Some(AmlsDetails("supervisory", Right(RegisteredDetails("memNumber", LocalDate.now())))))),
+          Some(AmlsDetails("supervisory", Right(RegisteredDetails("memNumber", Some(LocalDate.now()))))))),
       cleanCredsAuthProviderId = Some(AuthProviderId("1234-creds")),
       contactEmailData = Some(ContactEmailData(true, Some("abc@xyz.com"))),
       contactTradingNameData = Some(ContactTradingNameData(false, None)),

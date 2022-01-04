@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,9 +153,9 @@ class AMLSController @Inject()(
               val form: Map[String, String] = Map(
                 "amlsCode"         -> amlsBodies.find(_._2 == amlsDetails.supervisoryBody).map(_._1).getOrElse(""),
                 "membershipNumber" -> membershipNumber,
-                "expiry.day"       -> membershipExpiresOn.getDayOfMonth.toString,
-                "expiry.month"     -> membershipExpiresOn.getMonthValue.toString,
-                "expiry.year"      -> membershipExpiresOn.getYear.toString
+                "expiry.day"       -> membershipExpiresOn.fold("")(_.getDayOfMonth.toString),
+                "expiry.month"     -> membershipExpiresOn.fold("")(_.getMonthValue.toString),
+                "expiry.year"      -> membershipExpiresOn.fold("")(_.getYear.toString)
               )
               Ok(amlsDetailsTemplate(amlsForm(amlsBodies.keySet).bind(form), amlsBodies))
           }
@@ -190,7 +190,7 @@ class AMLSController @Inject()(
                         supervisoryBodyData,
                         Right(RegisteredDetails(
                           membershipNumber = validForm.membershipNumber,
-                          membershipExpiresOn = validForm.expiry,
+                          membershipExpiresOn = Some(validForm.expiry),
                           amlsSafeId = safeId,
                           agentBPRSafeId = agent.getMandatorySubscriptionRecord.businessDetails.registration.flatMap(_.safeId)
                         ))

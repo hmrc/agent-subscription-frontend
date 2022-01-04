@@ -338,7 +338,7 @@ object AgentSubscriptionStub {
                                           s""","amlsDetails" : {
                                           |     "supervisoryBody" : "${request.amlsDetails.get.supervisoryBody}",
                                           |     "membershipNumber" : "${registeredDetails.membershipNumber}",
-                                          |     "membershipExpiresOn" : "${registeredDetails.membershipExpiresOn}"
+                                          |     "membershipExpiresOn" : "${registeredDetails.membershipExpiresOn.getOrElse("")}"
                                           |   }"""
                                         case Left(pendingDetails) =>
                                           s""","amlsDetails" : {

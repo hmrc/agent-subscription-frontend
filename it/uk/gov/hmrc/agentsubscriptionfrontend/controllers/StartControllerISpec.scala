@@ -28,7 +28,7 @@ class StartControllerISpec extends BaseISpec {
 
   object FixturesForReturnAfterGGCredsCreated {
 
-    val amlsSDetails: AmlsDetails = AmlsDetails("supervisory", Right(RegisteredDetails("123456789", LocalDate.now())))
+    val amlsSDetails: AmlsDetails = AmlsDetails("supervisory", Right(RegisteredDetails("123456789", Some(LocalDate.now()))))
 
     val agentSession: AgentSession =
       AgentSession(

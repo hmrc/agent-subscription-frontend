@@ -152,7 +152,7 @@ class AMLSControllerISpec extends BaseISpec {
       val completeAmlsData = AmlsData(
         false,
         None,
-        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", LocalDate.now())))))
+        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", Some(LocalDate.now()))))))
 
       givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
       givenSubscriptionRecordCreated(
@@ -171,7 +171,7 @@ class AMLSControllerISpec extends BaseISpec {
       val completeAmlsData = AmlsData(
         amlsRegistered = false,
         None,
-        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", LocalDate.now())))))
+        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", Some(LocalDate.now()))))))
 
       givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
       givenSubscriptionRecordCreated(
@@ -189,7 +189,7 @@ class AMLSControllerISpec extends BaseISpec {
       val completeAmlsData = AmlsData(
         amlsRegistered = true,
         None,
-        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", LocalDate.now())))))
+        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", Some(LocalDate.now()))))))
 
       givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(completeAmlsData)))
@@ -471,7 +471,7 @@ class AMLSControllerISpec extends BaseISpec {
             AmlsData(
               amlsRegistered = true,
               None,
-              Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", LocalDate.now())))))))
+              Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", Some(LocalDate.now()))))))))
 
       givenSubscriptionJourneyRecordExists(id, minimalSubscriptionJourneyRecordWithAmls(id))
 
@@ -503,7 +503,7 @@ class AMLSControllerISpec extends BaseISpec {
         id,
         record.copy(
           amlsData = Some(AmlsData.registeredUserNoDataEntered
-            .copy(amlsDetails = Some(AmlsDetails(amlsBody, Right(RegisteredDetails("12345", expiryDate))))))))
+            .copy(amlsDetails = Some(AmlsDetails(amlsBody, Right(RegisteredDetails("12345", Some(expiryDate)))))))))
 
       implicit val request = authenticatedRequest.withFormUrlEncodedBody(
         "amlsCode"         -> "AAT",
@@ -528,7 +528,7 @@ class AMLSControllerISpec extends BaseISpec {
         id,
         record.copy(
           amlsData = Some(AmlsData.registeredUserNoDataEntered
-            .copy(amlsDetails = Some(AmlsDetails(amlsBody, Right(RegisteredDetails(validAmlsRegistrationNumber, expiryDate))))))))
+            .copy(amlsDetails = Some(AmlsDetails(amlsBody, Right(RegisteredDetails(validAmlsRegistrationNumber, Some(expiryDate)))))))))
 
       implicit val request = authenticatedRequest.withFormUrlEncodedBody(
         "amlsCode"         -> "HMRC",
@@ -634,7 +634,7 @@ class AMLSControllerISpec extends BaseISpec {
         id,
         record.copy(
           amlsData = Some(AmlsData.registeredUserNoDataEntered
-            .copy(amlsDetails = Some(AmlsDetails(amlsBody, Right(RegisteredDetails("12345", expiryDate))))))))
+            .copy(amlsDetails = Some(AmlsDetails(amlsBody, Right(RegisteredDetails("12345", Some(expiryDate)))))))))
 
       implicit val request = authenticatedRequest.withFormUrlEncodedBody(
         "amlsCode"         -> "AAT",

@@ -22,6 +22,7 @@ class TaskListControllerISpec extends BaseISpec {
 
     "contain page titles and header content when the user is subscribing" in {
       givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAmlsDataIsNotFound(validUtr.value)
 
       givenSubscriptionJourneyRecordExists(
         AuthProviderId("12345-credId"),
@@ -55,6 +56,7 @@ class TaskListControllerISpec extends BaseISpec {
     "contain CONTINUE tag when a task has been completed" in {
 
       givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAmlsDataIsNotFound(validUtr.value)
 
       givenSubscriptionJourneyRecordExists(
         AuthProviderId("12345-credId"),
@@ -64,7 +66,7 @@ class TaskListControllerISpec extends BaseISpec {
             amlsRegistered = true,
             amlsAppliedFor = Some(false),
             amlsDetails =
-              Some(AmlsDetails("supervisory body", Right(RegisteredDetails("123", LocalDate.now().plusDays(10)))))
+              Some(AmlsDetails("supervisory body", Right(RegisteredDetails("123", Some(LocalDate.now().plusDays(10))))))
           )))
       )
 
@@ -77,6 +79,7 @@ class TaskListControllerISpec extends BaseISpec {
     "contain a CONTINUE tag when amls task has been completed and allow agent to re-click link when they are not manually assured" in {
 
       givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAmlsDataIsNotFound(validUtr.value)
 
       givenSubscriptionJourneyRecordExists(
         AuthProviderId("12345-credId"),
@@ -88,7 +91,7 @@ class TaskListControllerISpec extends BaseISpec {
                 amlsRegistered = true,
                 amlsAppliedFor = Some(false),
                 amlsDetails =
-                  Some(AmlsDetails("supervisory body", Right(RegisteredDetails("123", LocalDate.now().plusDays(10)))))
+                  Some(AmlsDetails("supervisory body", Right(RegisteredDetails("123", Some(LocalDate.now().plusDays(10))))))
               )))
       )
 
@@ -100,13 +103,33 @@ class TaskListControllerISpec extends BaseISpec {
       result should containLink("task-list.amlsSubTask", routes.AMLSController.showAmlsRegisteredPage().url)
     }
 
-    "contain a url to the contact details email check task when user has completed amls" in {
+    "contain a url to the contact details email check task when user has completed amls (pending details)" in {
       givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAmlsDataIsNotFound(validUtr.value)
+      givenSubscriptionJourneyRecordExists(
+        AuthProviderId("12345-credId"),
+        TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
+          .copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true),
+            Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id")))
+
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+
+      val result = await(controller.showTaskList(request))
+      status(result) shouldBe 200
+
+      result should containLink("task-list.contactDetailsEmailSubTask", routes.ContactDetailsController.showContactEmailCheck().url)
+    }
+
+    "contain a url to the contact details email check task when user has completed amls (registered details)" in {
+      givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAmlsDataIsNotFound(validUtr.value)
       givenSubscriptionJourneyRecordExists(
         AuthProviderId("12345-credId"),
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
           .copy(amlsData = Some(AmlsData(amlsRegistered = true, None,
-            Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id")))
+            Some(AmlsDetails("supervisory",Right(RegisteredDetails("1234", Some(LocalDate.now().plusDays(30)),None, None)))))),
+        continueId = Some("continue-id"))
+      )
 
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
@@ -118,10 +141,11 @@ class TaskListControllerISpec extends BaseISpec {
 
     "contain a url to the contact details trading name sub-task when user has completed email-subtask" in {
       givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAmlsDataIsNotFound(validUtr.value)
       givenSubscriptionJourneyRecordExists(
         AuthProviderId("12345-credId"),
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
-          .copy(amlsData = Some(AmlsData(amlsRegistered = true, None,
+          .copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true),
             Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id"),
             contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))))
       )
@@ -136,10 +160,11 @@ class TaskListControllerISpec extends BaseISpec {
 
     "contain a url to the contact details trading address sub-task when user has completed trading-name-subtask" in {
       givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAmlsDataIsNotFound(validUtr.value)
       givenSubscriptionJourneyRecordExists(
         AuthProviderId("12345-credId"),
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
-          .copy(amlsData = Some(AmlsData(amlsRegistered = true, None,
+          .copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true),
             Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id"),
             contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
             contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))))
@@ -156,10 +181,11 @@ class TaskListControllerISpec extends BaseISpec {
 
     "contain a url to the mapping journey when user has completed contact details" in {
       givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAmlsDataIsNotFound(validUtr.value)
       givenSubscriptionJourneyRecordExists(
         AuthProviderId("12345-credId"),
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
-          .copy(amlsData = Some(AmlsData(amlsRegistered = true, None,
+          .copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true),
             Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id"),
             contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
             contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),
@@ -175,6 +201,7 @@ class TaskListControllerISpec extends BaseISpec {
 
     "redirect to business type if there is no record for this agents auth provider id" in {
       givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAmlsDataIsNotFound(validUtr.value)
       givenNoSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"))
 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
