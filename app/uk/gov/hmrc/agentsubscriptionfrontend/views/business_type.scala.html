@@ -20,9 +20,8 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputRadios}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorSummary, ErrorMessage, FormWithCSRF, GovukDetails}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorSummary, FormWithCSRF, GovukDetails}
 @import uk.gov.hmrc.govukfrontend.views.html.components.{Text, HtmlContent, RadioItem, Details}
-@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
@@ -35,14 +34,14 @@
     submitButton: SubmitButton
 )
 
-@(businessTypeRadioForm: Form[BusinessType])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(businessTypeRadioForm: Form[BusinessType])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @detailsContent = {
-<p>@Messages("businessType.progressive.content.p1")</p>
-<a href="@SignedOutController.signOutWithContinueUrl" id="sign-out">@Messages("businessType.progressive.content.link")</a>
+<p>@msgs("businessType.progressive.content.p1")</p>
+<a href="@SignedOutController.signOutWithContinueUrl" id="sign-out">@msgs("businessType.progressive.content.link")</a>
 }
 
-@mainTemplate(title = errorPrefixTemplate(businessTypeRadioForm) + Messages("businessType.title")) {
+@mainTemplate(title = errorPrefixTemplate(businessTypeRadioForm) + msgs("businessType.title")) {
 
     @if(businessTypeRadioForm.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(businessTypeRadioForm))
@@ -52,30 +51,30 @@
 
         @inputRadio(
             field = businessTypeRadioForm("businessType"),
-            legend = Messages("businessType.title"),
+            legend = msgs("businessType.title"),
             headingIsLegend = true,
             inputs = Seq(
                 RadioItem(
-                    content = Text(Messages("businessType.option.limited-company")),
+                    content = Text(msgs("businessType.option.limited-company")),
                     value = Some("limited_company")
                 ),
                 RadioItem(
-                    content = Text(Messages("businessType.option.sole-trader")),
+                    content = Text(msgs("businessType.option.sole-trader")),
                     value = Some("sole_trader")
                 ),
                 RadioItem(
-                    content = Text(Messages("businessType.option.partnership")),
+                    content = Text(msgs("businessType.option.partnership")),
                     value = Some("partnership")
                 ),
                 RadioItem(
-                    content = Text(Messages("businessType.option.partnership-llp")),
+                    content = Text(msgs("businessType.option.partnership-llp")),
                     value = Some("llp")
                 )
             )
         )
 
         @govukDetails(Details(
-            summary = Text(Messages("businessType.progressive.title")),
+            summary = Text(msgs("businessType.progressive.title")),
             content = HtmlContent(detailsContent)
         ))
 

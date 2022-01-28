@@ -61,7 +61,7 @@ class ViewsSpec extends UnitSpec with GuiceOneAppPerSuite {
         backLinkHref = Some("href"),
         mainContent = Html("mainContent"),
         request = FakeRequest(),
-        messages = messages,
+        msgs = messages,
         appConfig = appConfig
       )
 
