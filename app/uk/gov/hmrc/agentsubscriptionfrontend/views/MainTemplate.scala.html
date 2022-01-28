@@ -35,9 +35,6 @@
     backLinkHref: Option[String] = None
 )(mainContent: Html)(implicit request : Request[_], msgs: Messages, appConfig: AppConfig)
 
-@beforeContent = {
-    @govukPhaseBanner(standardBetaBanner(url = appConfig.betaFeedbackUrl))
-}
 
 @mainContentWithTechIssueHelper = {
     @mainContent
