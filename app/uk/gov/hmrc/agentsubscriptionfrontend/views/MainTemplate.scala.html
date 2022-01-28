@@ -14,27 +14,15 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukLayout, GovukBackLink, GovukPhaseBanner}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{BackLink, Text}
-@import uk.gov.hmrc.hmrcfrontend.views.html.components.{HmrcBanner, Banner}
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{header, head}
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.{En, Cy}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.head
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukPhaseBanner
 @import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcStandardFooter, HmrcScripts, HmrcReportTechnicalIssueHelper}
-@import views.html.helper.CSPNonce
-@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcLayout, HmrcReportTechnicalIssueHelper}
 
 @this(
     head: head,
-    header: header,
-    govukLayout: GovukLayout,
-    govukBackLink: GovukBackLink,
-    hmrcStandardFooter: HmrcStandardFooter,
-    hmrcScripts: HmrcScripts,
-    hmrcBanner : HmrcBanner,
+    hmrcLayout: HmrcLayout,
     govukPhaseBanner: GovukPhaseBanner,
     standardBetaBanner: StandardBetaBanner,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
@@ -45,21 +33,10 @@
     userIsLoggedIn: Boolean = true,
     hasTimeout: Boolean = true,
     backLinkHref: Option[String] = None
-)(mainContent: Html)(implicit request : Request[_], messages: Messages, appConfig: AppConfig)
+)(mainContent: Html)(implicit request : Request[_], msgs: Messages, appConfig: AppConfig)
 
-@beforeContent = {
-    @govukPhaseBanner(standardBetaBanner(url = appConfig.betaFeedbackUrl))
-    @hmrcBanner(Banner(language = if(messages.lang.code == "cy") Cy else En))
-    @if(backLinkHref.nonEmpty){
-        <nav aria-label="Back Link">
-            @backLinkHref.map(url =>
-                govukBackLink(BackLink(href = url, content = Text(messages("button.back"))))
-            )
-        </nav>
-    }
-}
 
-@mainContentWithHelpLink = {
+@mainContentWithTechIssueHelper = {
     @mainContent
     <div class="govuk-!-margin-bottom-9">
         @hmrcReportTechnicalIssueHelper()
@@ -68,16 +45,19 @@
 
 @additionalScripts = {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-<script src="@controllers.routes.Assets.versioned("javascripts/accessible-autocomplete.min.js")" type="text/javascript"></script>
-<script src="@controllers.routes.Assets.versioned("javascripts/agent-subscription.js")" type="text/javascript"></script>
+<script src="@controllers.routes.Assets.versioned("javascripts/accessible-autocomplete.min.js")" ></script>
+<script src="@controllers.routes.Assets.versioned("javascripts/agent-subscription.js")" ></script>
 }
 
-@govukLayout(
-    pageTitle = Some(title + " " + messages("servicename.titleSuffix")),
-    headBlock = Some(head(hasTimeout)),
-    headerBlock = Some(header()),
-    scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(additionalScripts))),
-    beforeContentBlock = Some(beforeContent),
-    footerBlock = Some(hmrcStandardFooter()),
-    assetPath = None
-)(mainContentWithHelpLink)
+@hmrcLayout(
+    pageTitle = Some(title + " " + msgs("servicename.titleSuffix")),
+    serviceName = Some(msgs("service.name")),
+    phaseBanner = Some(standardBetaBanner(appConfig.betaFeedbackUrl)),
+    isWelshTranslationAvailable = true,
+    displayHmrcBanner = true,
+    serviceUrl = None,
+    signOutUrl = None,
+    additionalHeadBlock = Some(head(hasTimeout)),
+    additionalScriptsBlock = Some(additionalScripts),
+    backLinkUrl = backLinkHref,
+)(mainContentWithTechIssueHelper)

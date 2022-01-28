@@ -16,13 +16,12 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-@import uk.gov.hmrc.domain.Nino
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.Llp
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputText}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, Text}
-@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.MainTemplate
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{InputText, SubmitButton}
+@import uk.gov.hmrc.domain.Nino
+@import uk.gov.hmrc.govukfrontend.views.html.components.{ErrorSummary, FormWithCSRF, GovukErrorSummary}
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
@@ -34,7 +33,11 @@
     submitButton: SubmitButton
 )
 
-@(ninoForm: Form[Nino], businessType: BusinessType, backUrl: Option[String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(
+    ninoForm: Form[Nino],
+    businessType: BusinessType,
+    backUrl: Option[String]
+)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = errorPrefix(ninoForm) + Messages("nino.title"),
 backLinkHref = Some(s"${backUrl.getOrElse(routes.PostcodeController.showPostcodeForm().url)}")
@@ -48,7 +51,7 @@ backLinkHref = Some(s"${backUrl.getOrElse(routes.PostcodeController.showPostcode
 
         @inputText(
             field = ninoForm("nino"),
-            label = Messages("nino.title"),
+            label = msgs("nino.title"),
             labelAsHeading = true,
             labelClass = Some("govuk-label--xl"),
             hint = Some(if(businessType == Llp){Messages("nino.hint-llp")} else {Messages("nino.hint")}),
