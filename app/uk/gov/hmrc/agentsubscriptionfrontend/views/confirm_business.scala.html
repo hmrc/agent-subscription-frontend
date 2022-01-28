@@ -32,9 +32,9 @@
     inputRadio: InputRadios
 )
 
-@(confirmBusinessRadioForm: Form[ConfirmBusiness], registrationName: String, utr: String, businessAddress: BusinessAddress, backLink: Call)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(confirmBusinessRadioForm: Form[ConfirmBusiness], registrationName: String, utr: String, businessAddress: BusinessAddress, backLink: Call)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = errorPrefix(confirmBusinessRadioForm) + Messages("confirmBusiness.title"),
+@mainTemplate(title = errorPrefix(confirmBusinessRadioForm) + msgs("confirmBusiness.title"),
 backLinkHref = Some(backLink.toString)) {
 
     @if(confirmBusinessRadioForm.hasErrors) {
@@ -44,9 +44,9 @@ backLinkHref = Some(backLink.toString)) {
     @formHelper(action = routes.BusinessIdentificationController.submitConfirmBusinessForm()) {
 
         <div class="govuk-form-group @if(confirmBusinessRadioForm.hasErrors){govuk-form-group--error}">
-        <h1 class="govuk-heading-xl">@Messages("confirmBusiness.title")</h1>
+        <h1 class="govuk-heading-xl">@msgs("confirmBusiness.title")</h1>
 
-        <p>@Html(Messages("confirmBusiness.content.utr", utr))</p>
+        <p>@Html(msgs("confirmBusiness.content.utr", utr))</p>
 
         <div class="govuk-!-margin-bottom-6">
         <h2 class="govuk-heading-m">@registrationName</h2>
@@ -61,16 +61,16 @@ backLinkHref = Some(backLink.toString)) {
 
         @inputRadio(
             field = confirmBusinessRadioForm("confirmBusiness"),
-            legend = Messages("confirmBusiness.title"),
+            legend = msgs("confirmBusiness.title"),
             legendClass = Some("govuk-visually-hidden"),
             headingIsLegend = false,
             inputs = Seq(
                 RadioItem(
-                    content = Text(Messages("confirmBusiness.option.yes")),
+                    content = Text(msgs("confirmBusiness.option.yes")),
                     value = Some("yes")
                 ),
                 RadioItem(
-                    content = Text(Messages("confirmBusiness.option.no")),
+                    content = Text(msgs("confirmBusiness.option.no")),
                     value = Some("no")
                 )
             )

@@ -32,12 +32,14 @@
     submitButton: SubmitButton,
 )
 
-@(contactEmailCheckForm: Form[ContactEmailCheck], businessEmail: String, isChanging: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(contactEmailCheckForm: Form[ContactEmailCheck], businessEmail: String, isChanging: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @backLinkCall = @{if(isChanging){routes.SubscriptionController.showCheckAnswers()} else {routes.TaskListController.showTaskList()}}
 
-@mainTemplate(title = errorPrefix(contactEmailCheckForm) + Messages("contactEmailCheck.title"),
-backLinkHref = Some(backLinkCall.toString)) {
+@mainTemplate(
+    title = errorPrefix(contactEmailCheckForm) + msgs("contactEmailCheck.title"),
+    backLinkHref = Some(backLinkCall.toString)
+) {
 
     @if(contactEmailCheckForm.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(contactEmailCheckForm))
@@ -46,23 +48,23 @@ backLinkHref = Some(backLinkCall.toString)) {
     @formHelper(action = routes.ContactDetailsController.submitContactEmailCheck) {
 
         <div class="govuk-form-group @if(contactEmailCheckForm.hasErrors){govuk-form-group--error}">
-        <h1 class="govuk-heading-xl">@Messages("contactEmailCheck.title")</h1>
+        <h1 class="govuk-heading-xl">@msgs("contactEmailCheck.title")</h1>
 
-        <p>@Messages("contactEmailCheck.p")</p>
-        <p>@Messages(s"$businessEmail")</p>
+        <p>@msgs("contactEmailCheck.p")</p>
+        <p>@msgs(s"$businessEmail")</p>
 
         @inputRadio(
             field = contactEmailCheckForm("check"),
-            legend = Messages("contactEmailCheck.title"),
+            legend = msgs("contactEmailCheck.title"),
             legendClass = Some("govuk-visually-hidden"),
             headingIsLegend = false,
             inputs = Seq(
                 RadioItem(
-                    content = Text(Messages("contactEmailCheck.option.yes")),
+                    content = Text(msgs("contactEmailCheck.option.yes")),
                     value = Some("yes")
                 ),
                 RadioItem(
-                    content = Text(Messages("contactEmailCheck.option.no")),
+                    content = Text(msgs("contactEmailCheck.option.no")),
                     value = Some("no")
                 )
             )

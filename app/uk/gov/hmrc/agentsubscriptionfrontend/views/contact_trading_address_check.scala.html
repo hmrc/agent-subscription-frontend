@@ -31,12 +31,13 @@
     submitButton: SubmitButton
 )
 
-@(contactTradingAddressCheckForm: Form[ContactTradingAddressCheck], businessAddress: List[String], isChange: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(contactTradingAddressCheckForm: Form[ContactTradingAddressCheck], businessAddress: List[String], isChange: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @backLinkCall = @{if(isChange){routes.SubscriptionController.showCheckAnswers()} else {routes.TaskListController.showTaskList()}}
 
-@mainTemplate(title = errorPrefix(contactTradingAddressCheckForm) + Messages("contactTradingAddressCheck.title"),
-backLinkHref = Some(backLinkCall.toString)
+@mainTemplate(
+    title = errorPrefix(contactTradingAddressCheckForm) + msgs("contactTradingAddressCheck.title"),
+    backLinkHref = Some(backLinkCall.toString)
 ) {
 
     @if(contactTradingAddressCheckForm.hasErrors) {
@@ -46,9 +47,9 @@ backLinkHref = Some(backLinkCall.toString)
     @formHelper(action = routes.ContactDetailsController.submitCheckMainTradingAddress()) {
 
     <div class="govuk-form-group @if(contactTradingAddressCheckForm.hasErrors){govuk-form-group--error}">
-        <h1 class="govuk-heading-xl">@Messages("contactTradingAddressCheck.title")</h1>
+        <h1 class="govuk-heading-xl">@msgs("contactTradingAddressCheck.title")</h1>
 
-        <p>@Messages("contactTradingAddressCheck.p")</p>
+        <p>@msgs("contactTradingAddressCheck.p")</p>
 
         <div class="govuk-!-margin-bottom-6">
             @for(line <- businessAddress){
@@ -58,16 +59,16 @@ backLinkHref = Some(backLinkCall.toString)
 
         @inputRadio(
             field = contactTradingAddressCheckForm("check"),
-            legend = Messages("contactTradingAddressCheck.title"),
+            legend = msgs("contactTradingAddressCheck.title"),
             legendClass = Some("govuk-visually-hidden"),
             headingIsLegend = false,
             inputs = Seq(
                 RadioItem(
-                    content = Text(Messages("contactTradingAddressCheck.option.yes")),
+                    content = Text(msgs("contactTradingAddressCheck.option.yes")),
                     value = Some("yes")
                 ),
                 RadioItem(
-                    content = Text(Messages("contactTradingAddressCheck.option.no")),
+                    content = Text(msgs("contactTradingAddressCheck.option.no")),
                     value = Some("no")
                 )
             )

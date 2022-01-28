@@ -23,7 +23,7 @@
 @this(hmrcTimeoutDialog: HmrcTimeoutDialog, hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet)
 
 
-@(hasTimeout: Boolean)(implicit appConfig: AppConfig, messages: Messages)
+@(hasTimeout: Boolean)(implicit appConfig: AppConfig, msgs: Messages)
 
 @hmrcTrackingConsentSnippet()
 
@@ -36,6 +36,6 @@
   keepAliveUrl = Some(routes.SignedOutController.keepAlive().url),
   signOutUrl = Some(routes.SignedOutController.signOut().url),
   timeoutUrl = Some(routes.SignedOutController.timedOut().url),
-  language = Some(messages.lang.code)
+  language = Some(msgs.lang.code)
  ))
 }

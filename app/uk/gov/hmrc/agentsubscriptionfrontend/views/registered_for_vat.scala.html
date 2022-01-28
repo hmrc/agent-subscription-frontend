@@ -31,10 +31,11 @@
     submitButton: SubmitButton
 )
 
-@(rfvForm: Form[RegisteredForVat], backLink: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(rfvForm: Form[RegisteredForVat], backLink: String)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = errorPrefix(rfvForm) + Messages("registered-for-vat.title"),
-backLinkHref = Some(backLink)
+@mainTemplate(
+    title = errorPrefix(rfvForm) + msgs("registered-for-vat.title"),
+    backLinkHref = Some(backLink)
 ) {
 
     @if(rfvForm.hasErrors) {
@@ -45,7 +46,7 @@ backLinkHref = Some(backLink)
 
         @inputYesNoRadio(
             field = rfvForm("registeredForVat"),
-            legend = Messages("registered-for-vat.title"),
+            legend = msgs("registered-for-vat.title"),
             headingIsLegend = true
         )
 

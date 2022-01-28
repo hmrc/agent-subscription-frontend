@@ -30,10 +30,10 @@
     submitOrSaveButtonGroup: uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.SubmitOrSaveButtonGroup,
     formHelper: uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF)
 
-@(amlsAppliedForForm: Form[RadioInputAnswer])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(amlsAppliedForForm: Form[RadioInputAnswer])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
-title = errorPrefix(amlsAppliedForForm) + Messages("amlsAppliedFor.title"),
+title = errorPrefix(amlsAppliedForForm) + msgs("amlsAppliedFor.title"),
 backLinkHref = Some(routes.AMLSController.showAmlsRegisteredPage().url)
 ) {
 
@@ -45,7 +45,7 @@ backLinkHref = Some(routes.AMLSController.showAmlsRegisteredPage().url)
 
         @inputYesNoRadio(
             field = amlsAppliedForForm("amlsAppliedFor"),
-            legend = Messages("amlsAppliedFor.title"),
+            legend = msgs("amlsAppliedFor.title"),
             headingIsLegend = true
         )
 

@@ -21,12 +21,12 @@
 button: GovukButton,
 )
 
-@(id: String = "continue", messageKey: String = "button.continue", submitClass: Option[String] = None)(implicit messages: Messages)
+@(id: String = "continue", messageKey: String = "button.continue", submitClass: Option[String] = None)(implicit msgs: Messages)
 
 
 @button(Button(
     attributes = Map("id" -> s"${id}"),
     classes = s"${submitClass.getOrElse("")}",
     inputType = Some("submit"),
-    content = Text(messages(messageKey))
+    content = Text(msgs(messageKey))
 ))

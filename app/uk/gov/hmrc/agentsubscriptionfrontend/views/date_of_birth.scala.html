@@ -33,7 +33,7 @@
     submitButton: SubmitButton
 )
 
-@(dobForm: Form[DateOfBirth], businessType: BusinessType)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(dobForm: Form[DateOfBirth], businessType: BusinessType)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
     @DayFieldError = @{
         if(dobForm("dob.day").hasErrors)
@@ -60,11 +60,12 @@
     }
 
 @dobHint = {
-@if(businessType == Llp){ @Messages("date-of-birth.hint-llp")}else{@Messages("date-of-birth.hint")}
+@if(businessType == Llp){ @msgs("date-of-birth.hint-llp")}else{@msgs("date-of-birth.hint")}
 }
 
-@mainTemplate(title =  errorPrefix(dobForm) + Messages("date-of-birth.title"),
-backLinkHref = Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
+@mainTemplate(
+    title =  errorPrefix(dobForm) + msgs("date-of-birth.title"),
+    backLinkHref = Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
 ) {
 
     @if(dobForm.hasErrors) {
@@ -75,7 +76,7 @@ backLinkHref = Some(routes.NationalInsuranceController.showNationalInsuranceNumb
 
         @inputDate(
             field = dateFormWithRefinedErrors("dob"),
-            legend = Messages("date-of-birth.title"),
+            legend = msgs("date-of-birth.title"),
             legendAsHeading = true,
             legendClass = "govuk-fieldset__legend--xl",
             hint = Some(dobHint.toString),

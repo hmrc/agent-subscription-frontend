@@ -34,10 +34,11 @@
     submitOrSaveButtonGroup: SubmitOrSaveButtonGroup
 )
 
-@(checkAmlsForm: Form[RadioInputAnswer], isChange: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(checkAmlsForm: Form[RadioInputAnswer], isChange: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title =  errorPrefix(checkAmlsForm) + Messages("check-amls.title"),
-backLinkHref = if(isChange) Some(routes.SubscriptionController.showCheckAnswers().url) else Some(routes.TaskListController.showTaskList().url)
+@mainTemplate(
+    title =  errorPrefix(checkAmlsForm) + msgs("check-amls.title"),
+    backLinkHref = if(isChange) Some(routes.SubscriptionController.showCheckAnswers().url) else Some(routes.TaskListController.showTaskList().url)
 ) {
 
     @if(checkAmlsForm.hasErrors) {
@@ -48,7 +49,7 @@ backLinkHref = if(isChange) Some(routes.SubscriptionController.showCheckAnswers(
 
         @inputYesNoRadio(
             field = checkAmlsForm("registeredAmls"),
-            legend = Messages("check-amls.title"),
+            legend = msgs("check-amls.title"),
             headingIsLegend = true
         )
 

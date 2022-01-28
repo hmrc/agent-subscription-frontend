@@ -23,28 +23,28 @@
 govukPanel: GovukPanel
 )
 
-@(arn: String, agencyName: String, agencyEmail: String, copiedAcross: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(arn: String, agencyName: String, agencyEmail: String, copiedAcross: Int)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @panelContent = {
-@Messages("subscriptionComplete.accountName")
+@msgs("subscriptionComplete.accountName")
 <br><strong>@agencyName</strong>
 }
-@mainTemplate(title = Messages("subscriptionComplete.title")) {
+@mainTemplate(title = msgs("subscriptionComplete.title")) {
 
     @govukPanel(Panel(
-        title = Text(Messages("subscriptionComplete.h1")),
+        title = Text(msgs("subscriptionComplete.h1")),
         content = HtmlContent(s"$panelContent")
     ))
 
-    <p>@Html(Messages("subscriptionComplete.copiedAcross", copiedAcross))</p>
-    <p>@Html(Messages("subscriptionComplete.p1", s"$arn"))</p>
-    <p>@Messages("subscriptionComplete.p2", s"$agencyEmail")</p>
+    <p>@Html(msgs("subscriptionComplete.copiedAcross", copiedAcross))</p>
+    <p>@Html(msgs("subscriptionComplete.p1", s"$arn"))</p>
+    <p>@msgs("subscriptionComplete.p2", s"$agencyEmail")</p>
 
-    <h2>@Messages("subscriptionComplete.nextStepsMTD.header")</h2>
-    <p>@Messages("subscriptionComplete.nextStepsMTD.p")</p>
+    <h2>@msgs("subscriptionComplete.nextStepsMTD.header")</h2>
+    <p>@msgs("subscriptionComplete.nextStepsMTD.p")</p>
 
-    <h2>@Messages("subscriptionComplete.nextStepsTERS.header")</h2>
-    <p>@Messages("subscriptionComplete.nextStepsTERS.p")</p>
+    <h2>@msgs("subscriptionComplete.nextStepsTERS.header")</h2>
+    <p>@msgs("subscriptionComplete.nextStepsTERS.p")</p>
 
-    <a href="@appConfig.agentServicesAccountUrl" class="govuk-button govuk-!-margin-bottom-9" id="continue" role="button">@Messages("subscriptionComplete.button.continueToASAccount")</a>
+    <a href="@appConfig.agentServicesAccountUrl" class="govuk-button govuk-!-margin-bottom-9" id="continue" role="button">@msgs("subscriptionComplete.button.continueToASAccount")</a>
 }

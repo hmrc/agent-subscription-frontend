@@ -31,10 +31,11 @@
     inputText: InputText
 )
 
-@(contactTradingNameForm: Form[BusinessName])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(contactTradingNameForm: Form[BusinessName])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = errorPrefix(contactTradingNameForm) + Messages("contactTradingName.title"),
-backLinkHref = Some(routes.ContactDetailsController.showTradingNameCheck().url)
+@mainTemplate(
+    title = errorPrefix(contactTradingNameForm) + msgs("contactTradingName.title"),
+    backLinkHref = Some(routes.ContactDetailsController.showTradingNameCheck().url)
 ) {
 
     @if(contactTradingNameForm.hasErrors) {
@@ -45,10 +46,10 @@ backLinkHref = Some(routes.ContactDetailsController.showTradingNameCheck().url)
 
     @inputText(
         field = contactTradingNameForm("name"),
-        label = Messages("contactTradingName.title"),
+        label = msgs("contactTradingName.title"),
         labelAsHeading = true,
         labelClass = Some("govuk-label--xl"),
-        hint = Some(Messages("contactTradingName.p"))
+        hint = Some(msgs("contactTradingName.p"))
     )
 
     @submitButton()

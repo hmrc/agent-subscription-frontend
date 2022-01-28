@@ -28,20 +28,20 @@
     checkAnswersRow: CheckAnswersRow
 )
 
-@(checkYourAnswers: CheckYourAnswers)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(checkYourAnswers: CheckYourAnswers)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = Messages("checkAnswers.title")) {
+@mainTemplate(title = msgs("checkAnswers.title")) {
 
-    <h1 class="govuk-heading-xl govuk-!-margin-bottom-6">@Messages("checkAnswers.title")</h1>
+    <h1 class="govuk-heading-xl govuk-!-margin-bottom-6">@msgs("checkAnswers.title")</h1>
 
         @for(amlsRow <- checkYourAnswers.maybeAmlsDataRow) {
-            <h2 class="govuk-heading-m govuk-!-margin-top-6">@Messages("checkAnswers.amls.h2")</h2>
+            <h2 class="govuk-heading-m govuk-!-margin-top-6">@msgs("checkAnswers.amls.h2")</h2>
             <dl class="govuk-summary-list">
             @checkAnswersRow("amls", amlsRow)
             </dl>
         }
 
-        <h2 class="govuk-heading-m govuk-!-margin-top-6">@Messages("checkAnswers.contactDetails.h2")</h2>
+        <h2 class="govuk-heading-m govuk-!-margin-top-6">@msgs("checkAnswers.contactDetails.h2")</h2>
         <dl class="govuk-summary-list">
             @checkAnswersRow("email", checkYourAnswers.contactEmailRow)
             @checkAnswersRow("tradingName", checkYourAnswers.contactTradingNameRow)
@@ -50,7 +50,7 @@
 
 
         @for(mappingClientNumberRow <- checkYourAnswers.maybeMappingClientNumberRow) {
-        <h2 class="govuk-heading-m govuk-!-margin-top-6">@Messages("checkAnswers.mapping.h2")</h2>
+        <h2 class="govuk-heading-m govuk-!-margin-top-6">@msgs("checkAnswers.mapping.h2")</h2>
             <dl class="govuk-summary-list">
             @checkAnswersRow("mappings", mappingClientNumberRow)
             </dl>
@@ -62,7 +62,7 @@
             </dl>
         }
 
-    <p>@Messages("checkAnswers.description.p3")</p>
+    <p>@msgs("checkAnswers.description.p3")</p>
 
     @formHelper(action = routes.SubscriptionController.submitCheckAnswers()) {
         @submitButton(id = "continue", messageKey = "checkAnswers.confirm.button")

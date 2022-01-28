@@ -32,30 +32,30 @@
     submitButton: SubmitButton
 )
 
-@(addressForm: Form[UpdateBusinessAddressForm])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(addressForm: Form[UpdateBusinessAddressForm])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = errorPrefix(addressForm) + Messages("updateBusinessAddress.title")) {
+@mainTemplate(title = errorPrefix(addressForm) + msgs("updateBusinessAddress.title")) {
 
     @if(addressForm.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(addressForm))
     }
-    <h1 class="govuk-heading-xl">@Messages("updateBusinessAddress.title")</h1>
+    <h1 class="govuk-heading-xl">@msgs("updateBusinessAddress.title")</h1>
 
-    <p class="govuk-hint">@Messages("updateBusinessAddress.p1")</p>
+    <p class="govuk-hint">@msgs("updateBusinessAddress.p1")</p>
 
     @govukInsetText(InsetText(
-        content = Text(Messages("updateBusinessAddress.p2"))
+        content = Text(msgs("updateBusinessAddress.p2"))
     ))
 
     @formHelper(action = routes.BusinessIdentificationController.submitUpdateBusinessAddressForm()) {
 
         @ukAddress(
             form = addressForm,
-            legend = Messages("address.form.with-errors.heading"),
-            line1 = Messages("updateBusinessAddress.address_line_1.title"),
-            line2 = Messages("updateBusinessAddress.address_line_2.title"),
-            line3 = Messages("updateBusinessAddress.address_line_3.title"),
-            line4 = Messages("updateBusinessAddress.address_line_4.title")
+            legend = msgs("address.form.with-errors.heading"),
+            line1 = msgs("updateBusinessAddress.address_line_1.title"),
+            line2 = msgs("updateBusinessAddress.address_line_2.title"),
+            line3 = msgs("updateBusinessAddress.address_line_3.title"),
+            line4 = msgs("updateBusinessAddress.address_line_4.title")
         )
 
         <div class="govuk-button-group">

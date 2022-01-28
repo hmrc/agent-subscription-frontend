@@ -33,7 +33,7 @@
     submitOrSaveButtonGroup: SubmitOrSaveButtonGroup
 )
 
-@(amlsPendingForm: Form[AmlsPendingForm], maybeGoBackUrl: Option[String] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(amlsPendingForm: Form[AmlsPendingForm], maybeGoBackUrl: Option[String] = None)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @DayFieldError = @{
     if(amlsPendingForm("appliedOn.day").hasErrors)
@@ -68,7 +68,7 @@
 }
 
 @mainTemplate(
-title = errorPrefix(amlsPendingForm) + Messages("amls.pending.appliedOn.title"),
+title = errorPrefix(amlsPendingForm) + msgs("amls.pending.appliedOn.title"),
 backLinkHref = backLink
 ) {
 
@@ -82,8 +82,8 @@ backLinkHref = backLink
 
         @inputDate(
             field = dateFormWithRefinedErrors("appliedOn"),
-            legend = Messages("amls.pending.appliedOn.title"),
-            hint = Some(Messages("moneyLaunderingCompliance.expiry.hint")),
+            legend = msgs("amls.pending.appliedOn.title"),
+            hint = Some(msgs("moneyLaunderingCompliance.expiry.hint")),
             legendClass = "govuk-fieldset__legend--xl",
             legendAsHeading = true
         )

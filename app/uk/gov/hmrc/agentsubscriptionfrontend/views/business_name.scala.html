@@ -35,20 +35,22 @@
     submitButton: SubmitButton
 )
 
-@(businessNameForm: Form[BusinessName], desErrorExists: Boolean = false, isChange: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(businessNameForm: Form[BusinessName], desErrorExists: Boolean = false, isChange: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @hint = {
-    @if(desErrorExists){<p class="govuk-hint" id="business-name-hint">@Messages("businessName.updated.p1")</p>}
+    @if(desErrorExists){<p class="govuk-hint" id="business-name-hint">@msgs("businessName.updated.p1")</p>}
 
     @govukInsetText(InsetText(
-        content = Text(Messages("businessName.description"))
+        content = Text(msgs("businessName.description"))
     ))
 }
 
-@title = @{ if(desErrorExists) Messages("businessName.updated.title") else Messages("businessName.title") }
+@title = @{ if(desErrorExists) msgs("businessName.updated.title") else msgs("businessName.title") }
 
-@mainTemplate(title = errorPrefix(businessNameForm) + title,
-backLinkHref = if(!desErrorExists) Some(routes.SubscriptionController.showCheckAnswers().url) else None) {
+@mainTemplate(
+    title = errorPrefix(businessNameForm) + title,
+    backLinkHref = if(!desErrorExists) Some(routes.SubscriptionController.showCheckAnswers().url) else None
+) {
 
     @if(businessNameForm.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(businessNameForm))
