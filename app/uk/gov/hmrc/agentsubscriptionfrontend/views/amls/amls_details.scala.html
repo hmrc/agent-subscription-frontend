@@ -33,7 +33,7 @@
     formHelper: FormWithCSRF
 )
 
-@(amlsForm: Form[AMLSForm], amlsBodies: Map[String, String], mayBeGoBackUrl: Option[String] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(amlsForm: Form[AMLSForm], amlsBodies: Map[String, String], mayBeGoBackUrl: Option[String] = None)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @*TODO review date validation*@
 
@@ -62,40 +62,41 @@
     || error.key.contains("expiry.month") || error.key.contains("expiry.year")))
 }
 
-@mainTemplate(title = errorPrefix(amlsForm) + Messages("moneyLaunderingCompliance.title"),
-backLinkHref = Some(mayBeGoBackUrl.getOrElse(routes.AMLSController.showAmlsRegisteredPage.url))
+@mainTemplate(
+    title = errorPrefix(amlsForm) + msgs("moneyLaunderingCompliance.title"),
+    backLinkHref = Some(mayBeGoBackUrl.getOrElse(routes.AMLSController.showAmlsRegisteredPage.url))
 ) {
 
     @if(dateFormWithRefinedErrors.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(dateFormWithRefinedErrors, mapping = Map("expiry" -> "expiry.day")))
     }
 
-    <h1 class="govuk-heading-xl">@Messages("moneyLaunderingCompliance.title")</h1>
+    <h1 class="govuk-heading-xl">@msgs("moneyLaunderingCompliance.title")</h1>
 
-    <p class="govuk-hint">@Messages("moneyLaunderingCompliance.p1")</p>
+    <p class="govuk-hint">@msgs("moneyLaunderingCompliance.p1")</p>
 
     @formHelper(action = routes.AMLSController.submitAmlsDetailsForm(), 'id -> "dropForm") {
 
         @inputSelect(
             field = amlsForm("amlsCode"),
-            label = Messages("moneyLaunderingCompliance.amls.title"),
+            label = msgs("moneyLaunderingCompliance.amls.title"),
             labelAsHeading = false,
-            hint = Some(Messages("moneyLaunderingCompliance.amls.hint")),
+            hint = Some(msgs("moneyLaunderingCompliance.amls.hint")),
             options = amlsBodies.toSeq,
             inputClass = Some("govuk-input--width-20")
         )
 
         @inputText(
             field = amlsForm("membershipNumber"),
-            label = Messages("moneyLaunderingCompliance.membershipNumber.title"),
+            label = msgs("moneyLaunderingCompliance.membershipNumber.title"),
             labelClass = Some("govuk-label--s"),
             inputClass = Some("govuk-input--width-10")
         )
 
         @inputDate(
         field = dateFormWithRefinedErrors("expiry"),
-        legend = Messages("moneyLaunderingCompliance.expiry.title"),
-        hint = Some(Messages("moneyLaunderingCompliance.expiry.hint"))
+        legend = msgs("moneyLaunderingCompliance.expiry.title"),
+        hint = Some(msgs("moneyLaunderingCompliance.expiry.hint"))
         )
 
         @submitOrSaveButtonGroup(

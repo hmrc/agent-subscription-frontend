@@ -18,11 +18,11 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 
 @this(mainTemplate: MainTemplate)
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = Messages("nonAgent.title")) {
+@mainTemplate(title = msgs("nonAgent.title")) {
 
-    <h1 class="govuk-heading-xl">@Messages("nonAgent.title")</h1>
-    <p>@Html(Messages("nonAgent.p1", routes.SignedOutController.redirectToBusinessTypeForm))</p>
-    <p>@Html(Messages("nonAgent.p2", routes.SignedOutController.redirectToCreateCleanCreds))</p>
+    <h1 class="govuk-heading-xl">@msgs("nonAgent.title")</h1>
+    <p>@Html(msgs("nonAgent.p1", routes.SignedOutController.redirectToBusinessTypeForm))</p>
+    <p>@Html(msgs("nonAgent.p2", routes.SignedOutController.redirectToCreateCleanCreds))</p>
 }

@@ -19,12 +19,12 @@
 
 @this(mainTemplate: MainTemplate)
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = Messages("sign-in-check.header")) {
+@mainTemplate(title = msgs("sign-in-check.header")) {
 
-    <h1 class="govuk-heading-xl">@Messages("sign-in-check.header")</h1>
+    <h1 class="govuk-heading-xl">@msgs("sign-in-check.header")</h1>
 
-    <p>@Messages("sign-in-check.p1.start")&nbsp;<a href='@routes.SignedOutController.signOut()'>@Messages("sign-in-check.sign-out.link")</a> @Messages("sign-in-check.p1.end")</p>
-    <p>@Messages("sign-in-check.p2")&nbsp;<a href='@routes.BusinessTypeController.showBusinessTypeForm()'>@Messages("sign-in-check.create.link")</a></p>
+    <p>@msgs("sign-in-check.p1.start")&nbsp;<a href='@routes.SignedOutController.signOut()'>@msgs("sign-in-check.sign-out.link")</a> @msgs("sign-in-check.p1.end")</p>
+    <p>@msgs("sign-in-check.p2")&nbsp;<a href='@routes.BusinessTypeController.showBusinessTypeForm()'>@msgs("sign-in-check.create.link")</a></p>
 }

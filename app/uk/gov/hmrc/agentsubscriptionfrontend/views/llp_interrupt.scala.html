@@ -19,19 +19,19 @@
 
 @this(mainTemplate: MainTemplate)
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title =  Messages("llp-interrupt.title"),
+@mainTemplate(title =  msgs("llp-interrupt.title"),
 backLinkHref = Some(routes.CompanyRegistrationController.showCompanyRegNumberForm().url)
 ) {
 
-    <h1 class="govuk-heading-xl">@Messages(s"llp-interrupt.title")</h1>
+    <h1 class="govuk-heading-xl">@msgs(s"llp-interrupt.title")</h1>
 
-    <p>@Messages("llp-interrupt.p1")</p>
-    <p>@Messages("llp-interrupt.p2")</p>
-    @Html(Messages("llp-interrupt.link", appConfig.companiesHouseUrl))
+    <p>@msgs("llp-interrupt.p1")</p>
+    <p>@msgs("llp-interrupt.p2")</p>
+    @Html(msgs("llp-interrupt.link", appConfig.companiesHouseUrl))
 
-    <a class="govuk-button govuk-!-margin-top-6" role="button" href='@routes.NationalInsuranceController.showNationalInsuranceNumberForm().url'>@Messages("button.continue")</a>
+    <a class="govuk-button govuk-!-margin-top-6" role="button" href='@routes.NationalInsuranceController.showNationalInsuranceNumberForm().url'>@msgs("button.continue")</a>
 
 
 }

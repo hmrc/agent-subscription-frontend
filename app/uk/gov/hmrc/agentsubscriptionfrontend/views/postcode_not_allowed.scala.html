@@ -19,15 +19,15 @@
 
 @this(mainTemplate: MainTemplate)
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = Messages("postcodeNotAllowed.title")) {
+@mainTemplate(title = msgs("postcodeNotAllowed.title")) {
 
-    <h1 class="govuk-heading-xl">@Messages("postcodeNotAllowed.title")</h1>
+    <h1 class="govuk-heading-xl">@msgs("postcodeNotAllowed.title")</h1>
 
-    <p>@Messages("postcodeNotAllowed.p1")</p>
+    <p>@msgs("postcodeNotAllowed.p1")</p>
 
-    <p>@Messages("postcodeNotAllowed.p2")</p>
+    <p>@msgs("postcodeNotAllowed.p2")</p>
 
-    <a class="govuk-button" id="start" href="@routes.BusinessIdentificationController.showUpdateBusinessAddressForm()" draggable="false" role="button">@Messages("button.tryAgain")</a>
+    <a class="govuk-button" id="start" href="@routes.BusinessIdentificationController.showUpdateBusinessAddressForm()" draggable="false" role="button">@msgs("button.tryAgain")</a>
 }

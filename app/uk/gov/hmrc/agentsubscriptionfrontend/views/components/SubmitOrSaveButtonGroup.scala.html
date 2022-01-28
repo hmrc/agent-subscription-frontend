@@ -27,12 +27,12 @@ button: GovukButton,
  saveId: String,
  saveValue: String = "save",
  name: String = "submit"
-)(implicit messages: Messages)
+)(implicit msgs: Messages)
 
 <div class="govuk-button-group govuk-!-margin-bottom-7">
 @button(Button(
     attributes = Map("id" -> s"${submitId}"),
-    content = Text(messages("button.saveContinue")),
+    content = Text(msgs("button.saveContinue")),
     inputType = Some("submit"),
     name = Some(name),
     value = Some(submitValue)
@@ -40,7 +40,7 @@ button: GovukButton,
 @button(Button(
     attributes = Map("id" -> s"${saveId}"),
     classes = "govuk-button--secondary",
-    content = Text(messages("button.saveComeBackLater")),
+    content = Text(msgs("button.saveComeBackLater")),
     inputType = Some("submit"),
     name = Some(name),
     value = Some(saveValue)

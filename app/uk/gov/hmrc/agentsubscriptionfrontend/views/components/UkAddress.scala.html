@@ -31,7 +31,7 @@
  line3: String,
  line4: String,
  hiddenCountryCode: Boolean = false
-)(implicit messages: Messages)
+)(implicit msgs: Messages)
 
 
 <fieldset class="govuk-fieldset">
@@ -69,7 +69,7 @@
 
   @input_text(
     field = form("postcode"),
-    label = messages("address.form.with-errors.postcode"),
+    label = msgs("address.form.with-errors.postcode"),
     labelClass= Some("govuk-!-font-weight-bold"),
     autocomplete = Some("postal-code"),
     inputClass = Some("govuk-input--width-10")

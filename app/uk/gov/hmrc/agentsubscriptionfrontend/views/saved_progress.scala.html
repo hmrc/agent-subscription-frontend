@@ -25,21 +25,21 @@ mainTemplate: MainTemplate,
 govukPanel: GovukPanel
 )
 
-@(backLink: Option[String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(backLink: Option[String])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title =  Messages("saved-progress.title")) {
+@mainTemplate(title =  msgs("saved-progress.title")) {
 
     @govukPanel(Panel(
-        title = Text(Messages("saved-progress.title"))
+        title = Text(msgs("saved-progress.title"))
     ))
 
-    <h2>@Messages("saved-progress.p1")</h2>
-    <p>@Messages("saved-progress.p2")</p>
+    <h2>@msgs("saved-progress.p1")</h2>
+    <p>@msgs("saved-progress.p2")</p>
 
-    <p>@Html(s"${Messages("saved-progress.p3",s"<a href='https://www.gov.uk/guidance/get-an-hmrc-agent-services-account' target='_blank' rel='noopener noreferrer'>${Messages("saved-progress.link")}</a>")}")</p>
-    <p>@Messages("saved-progress.p4")</p>
-    <p><a href="@backLink.getOrElse(routes.TaskListController.showTaskList().url)">@Messages("saved-progress.continue")</a></p>
-    <p><a href="@routes.SignedOutController.startSurvey()">@Messages("saved-progress.finish")</a></p>
+    <p>@Html(s"${msgs("saved-progress.p3",s"<a href='https://www.gov.uk/guidance/get-an-hmrc-agent-services-account' target='_blank' rel='noopener noreferrer'>${msgs("saved-progress.link")}</a>")}")</p>
+    <p>@msgs("saved-progress.p4")</p>
+    <p><a href="@backLink.getOrElse(routes.TaskListController.showTaskList().url)">@msgs("saved-progress.continue")</a></p>
+    <p><a href="@routes.SignedOutController.startSurvey()">@msgs("saved-progress.finish")</a></p>
 
 
 

@@ -20,12 +20,12 @@
 
 @this(mainTemplate: MainTemplate)
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = Messages("setupIncomplete.title")) {
+@mainTemplate(title = msgs("setupIncomplete.title")) {
 
-    <h1 class="govuk-heading-xl">@Messages("setupIncomplete.title")</h1>
-    <p>@Messages("setupIncomplete.p1")</p>
-    <p><a href="@routes.SignedOutController.redirectToBusinessTypeForm">@Messages("setupIncomplete.a")</a> @Messages("setupIncomplete.p2")</p>
+    <h1 class="govuk-heading-xl">@msgs("setupIncomplete.title")</h1>
+    <p>@msgs("setupIncomplete.p1")</p>
+    <p><a href="@routes.SignedOutController.redirectToBusinessTypeForm">@msgs("setupIncomplete.a")</a> @msgs("setupIncomplete.p2")</p>
 
 }

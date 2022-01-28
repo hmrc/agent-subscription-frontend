@@ -22,16 +22,16 @@
 
 @this(mainTemplate: MainTemplate)
 
-@(tasks: List[Task])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(tasks: List[Task])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @progressTag(isComplete: Boolean, canStart: Boolean, id: String) = {
     @if(isComplete){
-    <strong class="govuk-tag app-task-list__tag" id="@id">@Messages("task-list.completed")</strong>
+    <strong class="govuk-tag app-task-list__tag" id="@id">@msgs("task-list.completed")</strong>
     } else {
         @if(canStart) {
-        <strong class="govuk-tag govuk-tag--grey app-task-list__tag" id="@id">@Messages("task-list.not-started")</strong>
+        <strong class="govuk-tag govuk-tag--grey app-task-list__tag" id="@id">@msgs("task-list.not-started")</strong>
         } else {
-        <strong class="govuk-tag govuk-tag--grey app-task-list__tag" id="@id">@Messages("task-list.cannot-start-yet")</strong>
+        <strong class="govuk-tag govuk-tag--grey app-task-list__tag" id="@id">@msgs("task-list.cannot-start-yet")</strong>
         }
     }
 }
@@ -39,7 +39,7 @@
 @listItem(number: Int, task: Task) = {
     <li>
         <h2 class="app-task-list__section">
-            <span class="app-task-list__section-number">@Messages(s"task-list.$number.number")</span>@Messages(s"task-list.${task.taskKey}.header")
+            <span class="app-task-list__section-number">@msgs(s"task-list.$number.number")</span>@msgs(s"task-list.${task.taskKey}.header")
         </h2>
 
             <ul class="app-task-list__items">
@@ -47,9 +47,9 @@
                 <li class="app-task-list__item">
                     <span class="app-task-list__task-name">
                     @if(subTask.showLink) {
-                        <a href="@subTask.link" aria-describedby="@subTask.taskKey">@Messages(s"task-list.${subTask.taskKey}")</a>
+                        <a href="@subTask.link" aria-describedby="@subTask.taskKey">@msgs(s"task-list.${subTask.taskKey}")</a>
                     } else {
-                        <span aria-describedby="@subTask.taskKey">@Messages(s"task-list.${subTask.taskKey}")</span>
+                        <span aria-describedby="@subTask.taskKey">@msgs(s"task-list.${subTask.taskKey}")</span>
                     }
                     </span>
                     @progressTag(subTask.isComplete, subTask.showLink, subTask.taskKey)
@@ -59,11 +59,11 @@
     </li>
 }
 
-@mainTemplate(title = Messages("task-list.header")) {
+@mainTemplate(title = msgs("task-list.header")) {
 
-    <h1 class="govuk-heading-xl govuk-!-margin-bottom-6">@Messages("task-list.header")</h1>
+    <h1 class="govuk-heading-xl govuk-!-margin-bottom-6">@msgs("task-list.header")</h1>
 
-    <p>@Messages("task-list.subheader")</p>
+    <p>@msgs("task-list.subheader")</p>
 
     <ol class="govuk-list">
     @for((task, number) <- tasks.zip(Stream from 1)) {

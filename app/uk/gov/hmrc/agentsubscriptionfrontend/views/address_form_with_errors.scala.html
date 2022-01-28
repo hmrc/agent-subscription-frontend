@@ -31,7 +31,7 @@
     ukAddress: UkAddress,
     submitButton: SubmitButton
 )
-@(detailsForm: Form[DesAddress], isTradingAddress: Boolean = false)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(detailsForm: Form[DesAddress], isTradingAddress: Boolean = false)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @submitCall = @{
     if(isTradingAddress){
@@ -39,25 +39,25 @@
     } else routes.SubscriptionController.submitModifiedAddress()
 }
 
-@mainTemplate(title = errorPrefix(detailsForm) + Messages("subscriptionDetails.title")) {
+@mainTemplate(title = errorPrefix(detailsForm) + msgs("subscriptionDetails.title")) {
 
     @if(detailsForm.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(detailsForm))
     }
 
-    <h1 class="govuk-heading-xl">@Messages("invalidAddress.title")</h1>
+    <h1 class="govuk-heading-xl">@msgs("invalidAddress.title")</h1>
 
-    <p>@Messages("invalidAddress.p1")</p>
+    <p>@msgs("invalidAddress.p1")</p>
 
     @formHelper(action = submitCall) {
 
         @ukAddress(
             form = detailsForm,
-            legend = Messages("address.form.with-errors.heading"),
-            line1 = Messages("address.form.with-errors.address_line_1"),
-            line2 = Messages("address.form.with-errors.address_line_2"),
-            line3 = Messages("address.form.with-errors.address_line_3"),
-            line4 = Messages("address.form.with-errors.town"),
+            legend = msgs("address.form.with-errors.heading"),
+            line1 = msgs("address.form.with-errors.address_line_1"),
+            line2 = msgs("address.form.with-errors.address_line_2"),
+            line3 = msgs("address.form.with-errors.address_line_3"),
+            line4 = msgs("address.form.with-errors.town"),
             hiddenCountryCode = true
         )
 

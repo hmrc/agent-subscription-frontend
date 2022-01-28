@@ -35,16 +35,17 @@
     submitButton: SubmitButton
 )
 
-@(businessEmailForm: Form[BusinessEmail], invalidDesEmail: Boolean, isChange: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(businessEmailForm: Form[BusinessEmail], invalidDesEmail: Boolean, isChange: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @hint = {
     @govukInsetText(InsetText(
-        content = Text(Messages("businessEmail.description"))
+        content = Text(msgs("businessEmail.description"))
     ))
 }
 
-@mainTemplate(title = errorPrefix(businessEmailForm) + Messages("businessEmail.title"),
-backLinkHref = if(!invalidDesEmail) Some(routes.SubscriptionController.showCheckAnswers().url) else None
+@mainTemplate(
+    title = errorPrefix(businessEmailForm) + msgs("businessEmail.title"),
+    backLinkHref = if(!invalidDesEmail) Some(routes.SubscriptionController.showCheckAnswers().url) else None
 ) {
 
     @if(businessEmailForm.hasErrors) {
@@ -57,7 +58,7 @@ backLinkHref = if(!invalidDesEmail) Some(routes.SubscriptionController.showCheck
             Input(
                 label = Label(
                 isPageHeading = true,
-                content = Text(Messages("businessEmail.title"))
+                content = Text(msgs("businessEmail.title"))
             ),
             autocomplete = Some("email"),
             hint = Some(Hint(content = HtmlContent(hint))),

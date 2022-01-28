@@ -33,17 +33,17 @@
     submitButton: SubmitButton
 )
 
-@(radioResponseForm: Form[RadioInvasiveStartSaAgentCode])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(radioResponseForm: Form[RadioInvasiveStartSaAgentCode])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @textSaCode = {
     @inputText(
         field = radioResponseForm("saAgentCode"),
-        label = Messages("invasive.radioResponse.hidden.input.label.sa"),
-        hint = Some(Messages("invasive.radioResponse.helper.text.sa"))
+        label = msgs("invasive.radioResponse.hidden.input.label.sa"),
+        hint = Some(msgs("invasive.radioResponse.helper.text.sa"))
     )
 }
 
-@mainTemplate(title = errorPrefix(radioResponseForm) + Messages("invasive.title.saCode")) {
+@mainTemplate(title = errorPrefix(radioResponseForm) + msgs("invasive.title.saCode")) {
 
     @if(radioResponseForm.hasErrors) {
         @errorSummary(ErrorSummary().withFormErrorsAsText(radioResponseForm))
@@ -51,31 +51,31 @@
 
     @formHelper(action = routes.AssuranceChecksController.invasiveSaAgentCodePost()) {
 
-        <h1 class="govuk-heading-xl">@Messages("invasive.title.saCode")</h1>
+        <h1 class="govuk-heading-xl">@msgs("invasive.title.saCode")</h1>
 
-        <p>@Messages("invasive.check.p1")</p>
+        <p>@msgs("invasive.check.p1")</p>
 
         @govukDetails(Details(
-            summary = Text(Messages("invasive.expandable.p1")),
-            content = Text(Messages("invasive.expandable.p1.open"))
+            summary = Text(msgs("invasive.expandable.p1")),
+            content = Text(msgs("invasive.expandable.p1.open"))
         ))
 
         @govukRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
-                content = Text(Messages("invasive.title.saCode")),
+                content = Text(msgs("invasive.title.saCode")),
                 classes = "govuk-visually-hidden",
                 isPageHeading = false
             ))
         )),
         items = Seq(
             RadioItem(
-                content = Text(Messages("button.yes")),
+                content = Text(msgs("button.yes")),
                 value = Some("true"),
                 conditionalHtml = Some(textSaCode)
             ),
             RadioItem(
-                content = Text(Messages("button.no")),
+                content = Text(msgs("button.no")),
                 value = Some("false")
             )
         )

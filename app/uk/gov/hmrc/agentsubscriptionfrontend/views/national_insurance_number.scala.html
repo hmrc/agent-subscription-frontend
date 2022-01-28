@@ -39,8 +39,9 @@
     backUrl: Option[String]
 )(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = errorPrefix(ninoForm) + Messages("nino.title"),
-backLinkHref = Some(s"${backUrl.getOrElse(routes.PostcodeController.showPostcodeForm().url)}")
+@mainTemplate(
+    title = errorPrefix(ninoForm) + msgs("nino.title"),
+    backLinkHref = Some(s"${backUrl.getOrElse(routes.PostcodeController.showPostcodeForm().url)}")
 ) {
 
     @if(ninoForm.hasErrors) {
@@ -54,7 +55,7 @@ backLinkHref = Some(s"${backUrl.getOrElse(routes.PostcodeController.showPostcode
             label = msgs("nino.title"),
             labelAsHeading = true,
             labelClass = Some("govuk-label--xl"),
-            hint = Some(if(businessType == Llp){Messages("nino.hint-llp")} else {Messages("nino.hint")}),
+            hint = Some(if(businessType == Llp){msgs("nino.hint-llp")} else {msgs("nino.hint")}),
             inputClass = Some("govuk-input--width-10")
         )
 

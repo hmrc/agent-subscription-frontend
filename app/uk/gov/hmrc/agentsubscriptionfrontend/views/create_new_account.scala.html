@@ -20,16 +20,16 @@
 
 @this(mainTemplate: MainTemplate)
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = Messages("createNewAccount.title")) {
+@mainTemplate(title = msgs("createNewAccount.title")) {
 
-    <h1 class="govuk-heading-xl">@Messages("createNewAccount.title")</h1>
+    <h1 class="govuk-heading-xl">@msgs("createNewAccount.title")</h1>
 
-    <p>@Messages("createNewAccount.p1")</p>
+    <p>@msgs("createNewAccount.p1")</p>
 
     <div class="govuk-button-group">
-     <a class="govuk-button" href="@SignedOutController.redirectAgentToCreateCleanCreds" draggable="false" role="button" id="buttonGoToGg">@Messages("button.register")</a>
-     <a class="govuk-button govuk-button--secondary" href="@routes.TaskListController.savedProgress(Some(routes.BusinessIdentificationController.showCreateNewAccount().url))" draggable="false" role="button">@Messages("button.saveComeBackLater")</a>
+     <a class="govuk-button" href="@SignedOutController.redirectAgentToCreateCleanCreds" draggable="false" role="button" id="buttonGoToGg">@msgs("button.register")</a>
+     <a class="govuk-button govuk-button--secondary" href="@routes.TaskListController.savedProgress(Some(routes.BusinessIdentificationController.showCreateNewAccount().url))" draggable="false" role="button">@msgs("button.saveComeBackLater")</a>
     </div>
 }

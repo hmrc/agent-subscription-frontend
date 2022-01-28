@@ -18,14 +18,14 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 
 @this(mainTemplate: MainTemplate)
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = Messages("noAgencyFound.title")) {
+@mainTemplate(title = msgs("noAgencyFound.title")) {
 
-    <h1 class="govuk-heading-xl">@Messages("noAgencyFound.title")</h1>
+    <h1 class="govuk-heading-xl">@msgs("noAgencyFound.title")</h1>
 
-    <p>@Messages("noAgencyFound.p1")</p>
-    <p>@Messages("noAgencyFound.p2")</p>
+    <p>@msgs("noAgencyFound.p1")</p>
+    <p>@msgs("noAgencyFound.p2")</p>
 
-    <p><a href="@routes.BusinessTypeController.showBusinessTypeForm" class="govuk-button" role="button">@Messages("button.tryAgain")</a></p>
+    <p><a href="@routes.BusinessTypeController.showBusinessTypeForm" class="govuk-button" role="button">@msgs("button.tryAgain")</a></p>
 }
