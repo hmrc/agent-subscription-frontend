@@ -32,7 +32,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{SubscriptionJourneyRecord, UserMapping}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{HttpError, MongoDBSessionStoreService, SubscriptionJourneyService, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.{toFuture, valueOps}
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{address_form_with_errors, check_answers, sign_in_new_id, subscription_complete}
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{address_form_with_errors, check_answers, sign_in_new_id, subscription_complete, cannot_verify_email}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -56,7 +56,9 @@ class SubscriptionController @Inject()(
                                         checkAnswersTemplate: check_answers,
                                         addressFormWithErrorsTemplate: address_form_with_errors,
                                         subscriptionCompleteTemplate: subscription_complete,
-                                        signInNewIdTemplate: sign_in_new_id)(
+                                        signInNewIdTemplate: sign_in_new_id,
+                                        cannotVerifyEmailTemplate: cannot_verify_email
+                                      )(
   implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc)
     with SessionBehaviour with AuthActions with Logging {
@@ -248,6 +250,14 @@ class SubscriptionController @Inject()(
       } yield Ok(
         subscriptionCompleteTemplate(
           arn.value, name, email, clientCount))
+    }
+  }
+
+  def showCannotVerifyEmail: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      withValidSession { (_, existingSession) =>
+        Ok(cannotVerifyEmailTemplate(routes.BusinessIdentificationController.changeBusinessEmail()))
+      }
     }
   }
 

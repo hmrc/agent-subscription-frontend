@@ -93,6 +93,12 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
 
   def subscriptionJourneyService: SubscriptionJourneyService
 
+  def retrieveCredentials[A](implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[Credentials]] =
+    authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
+      .retrieve(credentials) { creds =>
+        Future.successful(creds)
+      }
+
   /**
     * For a user logged in as a subscribed agent (finished journey)
     **/

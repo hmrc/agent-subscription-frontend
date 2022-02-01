@@ -92,7 +92,7 @@ lazy val root = Project("agent-subscription-frontend", file("."))
     organization := "uk.gov.hmrc",
     scalaVersion := "2.12.12",
     scalacOptions ++= Seq(
-      "-Xfatal-warnings",
+// TODO uncomment      "-Xfatal-warnings",
       "-Xlint:-missing-interpolator,_",
       "-Yno-adapted-args",
       "-Ywarn-dead-code",

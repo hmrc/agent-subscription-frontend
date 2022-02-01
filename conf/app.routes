@@ -123,6 +123,8 @@ POST        /change-business-email                         uk.gov.hmrc.agentsubs
 
 GET         /business-address                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showBusinessAddressForm
 
+GET         /verify-email                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.EmailVerificationController.verifyEmail
+GET         /cannot-verify-email                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCannotVerifyEmail
 
 GET         /return-from-address-lookup                    uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.returnFromAddressLookup(id: String ?= "")
 POST        /submit-modified-address                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.submitModifiedAddress
