@@ -1,16 +1,20 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
+import org.jsoup.Jsoup
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, Postcode}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub._
+import uk.gov.hmrc.agentsubscriptionfrontend.support.Css.{errorForField, errorSummaryForField, labelFor}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestSetupNoJourneyRecord}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDataMissingSpec {
 
@@ -31,9 +35,11 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
       val result = await(controller.showPostcodeForm()(request))
 
       status(result) shouldBe 200
-      checkHtmlResultWithBodyText(result,
-        "What is the postcode of the address you registered with HMRC for Self Assessment?",
-      "This could be a home address.")
+
+      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      html.title() shouldBe "What is the postcode of the address you registered with HMRC for Self Assessment? - Create an agent services account - GOV.UK"
+      html.select("label[for=postcode]").text() shouldBe "What is the postcode of the address you registered with HMRC for Self Assessment?"
+      html.select("#postcode-hint").text() shouldBe "This could be a home address."
     }
 
     "display the postcode page with content tailored to the business type - Limited Company" in new TestSetupNoJourneyRecord {
@@ -42,9 +48,10 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
       val result = await(controller.showPostcodeForm()(request))
 
       status(result) shouldBe 200
-      checkHtmlResultWithBodyText(result,
-        "What is the postcode of your registered office?",
-        "The registered office address is an address you submitted to Companies House when you registered your LLP or limited company.")
+
+      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      html.select("label[for=postcode]").text() shouldBe "What is the postcode of your registered office?"
+      html.select("#postcode-hint").text() shouldBe "The registered office address is an address you submitted to Companies House when you registered your limited liability partnership (LLP) or limited company."
     }
 
     "display the postcode page with content tailored to the business type - Limited Liability Partnership" in new TestSetupNoJourneyRecord {
@@ -53,9 +60,11 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
       val result = await(controller.showPostcodeForm()(request))
 
       status(result) shouldBe 200
-      checkHtmlResultWithBodyText(result,
-        "What is the postcode of your registered office?",
-        "The registered office address is an address you submitted to Companies House when you registered your LLP or limited company.")
+
+      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      html.title() shouldBe "What is the postcode of your registered office? - Create an agent services account - GOV.UK"
+      html.select("label[for=postcode]").text() shouldBe "What is the postcode of your registered office?"
+      html.select("#postcode-hint").text() shouldBe "The registered office address is an address you submitted to Companies House when you registered your limited liability partnership (LLP) or limited company."
     }
 
     "display the postcode page with content tailored to the business type - Partnership" in new TestSetupNoJourneyRecord {
@@ -64,9 +73,12 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
       val result = await(controller.showPostcodeForm()(request))
 
       status(result) shouldBe 200
-      checkHtmlResultWithBodyText(result,
-        "What is the postcode of the address you registered with HMRC for Self Assessment?",
-        "This could be a home address.")
+
+      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      html.title() shouldBe "What is the postcode of the address you registered with HMRC for Self Assessment? - " +
+        "Create an agent services account - GOV.UK"
+      html.select("label[for=postcode]").text() shouldBe "What is the postcode of the address you registered with HMRC for Self Assessment?"
+      html.select("#postcode-hint").text() shouldBe "This could be a home address."
     }
   }
 
@@ -269,10 +281,13 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
 
       status(result) shouldBe 200
 
-      result should containMessages(
-        "postcode.sole_trader.title",
-        "error.postcode.invalid"
-      )
+      private val content: String = Helpers.contentAsString(Future.successful(result))
+      val html = Jsoup.parse(content)
+      html.title() shouldBe "Error: What is the postcode of the address you registered with HMRC for Self Assessment? - Create an agent services account - GOV.UK"
+      html.select("#postcode-hint").text() shouldBe "This could be a home address."
+      html.select(labelFor("postcode")).text() shouldBe "What is the postcode of the address you registered with HMRC for Self Assessment?"
+      html.select(errorForField("postcode")).text() shouldBe "Error: Enter a valid postcode, for example AA1 1AA"
+      html.select(errorSummaryForField("postcode")).text() shouldBe "Enter a valid postcode, for example AA1 1AA"
     }
   }
 }
