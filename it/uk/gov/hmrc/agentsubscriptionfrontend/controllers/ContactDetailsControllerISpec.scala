@@ -136,7 +136,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
   "submitContactEmailCheck (POST /contact-email-check) " should {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.showContactEmailCheck(_))
 
-    "303 redirect to /task-list when same as business email selected" in {
+    "303 redirect to /verify-email when same as business email selected" in {
 
       val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
         businessDetails = BusinessDetails(SoleTrader,
@@ -150,7 +150,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
             Some("email@email.com"),
             Some("safeId"))
           )
-        ))
+        ),
+        verifiedEmails = Set.empty)
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
@@ -164,8 +165,9 @@ class ContactDetailsControllerISpec extends BaseISpec {
         await(controller.submitContactEmailCheck(request.withFormUrlEncodedBody("check" -> "yes")))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.TaskListController.showTaskList().url)
+      redirectLocation(result) shouldBe Some(routes.EmailVerificationController.verifyEmail().url)
     }
+
 
     "303 redirect to /contact-email-address when a different business email is selected" in {
 
@@ -312,7 +314,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
   "submitContactEmailAddress (POST /contact-email-address) " should {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.showContactEmailCheck(_))
 
-  "303 redirect to /task-list when submit with valid email address" in {
+  "303 redirect to /verify-email when submit with valid email address (which had not already been verified)" in {
     val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
       businessDetails = BusinessDetails(SoleTrader,
         validUtr,
@@ -350,7 +352,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
       await(controller.submitContactEmailAddress(request.withFormUrlEncodedBody("email" -> "new@email.com")))
 
     status(result) shouldBe 303
-    redirectLocation(result) shouldBe Some(routes.TaskListController.showTaskList().url)
+    redirectLocation(result) shouldBe Some(routes.EmailVerificationController.verifyEmail().url)
   }
 
     "200 OK with error message with empty submission" in {

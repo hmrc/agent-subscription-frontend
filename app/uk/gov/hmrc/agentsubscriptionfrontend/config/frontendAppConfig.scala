@@ -56,6 +56,9 @@ trait AppConfig {
   val signinUrl: String
   val loginContinueUrl: String
   val amlsGuidanceLink: String
+  val emailVerificationBaseUrl: String
+  val emailVerificationFrontendBaseUrl: String
+  val disableEmailVerification: Boolean
 }
 
 @Singleton
@@ -122,5 +125,8 @@ class FrontendAppConfig @Inject()(servicesConfig: ServicesConfig) extends AppCon
   override val loginContinueUrl: String = servicesConfig.getString("login.continue")
 
   override val amlsGuidanceLink: String = "https://www.gov.uk/guidance/money-laundering-regulations-appeals-and-penalties"
-
+  override val emailVerificationBaseUrl: String = servicesConfig.baseUrl("email-verification")
+  override val emailVerificationFrontendBaseUrl: String =
+    servicesConfig.getString("microservice.services.email-verification-frontend.external-url")
+  override val disableEmailVerification: Boolean = servicesConfig.getBoolean("disable-email-verification")
 }
