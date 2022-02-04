@@ -244,7 +244,7 @@ businessType.error.invalid-choice = Select what type of business you are
 
 #LLP Interrupt
 llp-interrupt.title=We need more information to check your identity
-llp-interrupt.p1=You must be a registered member of the Limited Liability Partnership to proceed.
+llp-interrupt.p1=You must be a registered member of the limited liability partnership to proceed.
 llp-interrupt.p2=We need to ask you for some additional information to confirm this.
 llp-interrupt.link=<a href={0} target='_blank'>If you’re not sure if you’re a registered member or if your registration is up to date, check the Companies House website (opens in new tab).</a>
 
@@ -272,21 +272,21 @@ crn.hint=For example, 01234567 or SC123456
 postcode.sole_trader.title=What is the postcode of the address you registered with HMRC for Self Assessment?
 postcode.sole_trader.hint=This could be a home address.
 postcode.limited_company.title=What is the postcode of your registered office?
-postcode.limited_company.hint=The registered office address is an address you submitted to Companies House when you registered your LLP or limited company.
+postcode.limited_company.hint=The registered office address is an address you submitted to Companies House when you registered your limited liability partnership (LLP) or limited company.
 postcode.partnership.title=What is the postcode of the address you registered with HMRC for Self Assessment?
 postcode.partnership.hint=This could be a home address.
 postcode.llp.title=What is the postcode of your registered office?
-postcode.llp.hint=The registered office address is an address you submitted to Companies House when you registered your LLP or limited company.
+postcode.llp.hint=The registered office address is an address you submitted to Companies House when you registered your limited liability partnership (LLP) or limited company.
 
 #Nino page
 nino.title=What is your National Insurance number?
 nino.hint=It’s on your National Insurance card, benefit letter, payslip or P60. For example, ‘QQ 12 34 56 C’.
-nino.hint-llp=We only need your National Insurance number to confirm your identity as a registered member of the Limited Liability Partnership. It will not be stored on the agent services account.
+nino.hint-llp=We only need your National Insurance number to confirm your identity as a registered member of the limited liability partnership (LLP). It will not be stored on the agent services account.
 
 #Date of Birth page
 date-of-birth.title=What is your date of birth?
 date-of-birth.hint=For example, 31 3 1980
-date-of-birth.hint-llp=We only need your date of birth to confirm your identity as a registered member of the Limited Liability Partnership. It will not be stored on the agent services account.
+date-of-birth.hint-llp=We only need your date of birth to confirm your identity as a registered member of the limited liability partnership (LLP). It will not be stored on the agent services account.
 date-of-birth.empty=Enter your date of birth
 date-of-birth.invalid=Enter a real date of birth
 date-of-birth.day.invalid=Date of birth must include a valid day
