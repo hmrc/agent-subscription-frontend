@@ -525,6 +525,11 @@ postcodeNotAllowed.p1=Ni allwch ddefnyddio’r cod post hwn i greu cyfrif gwasan
 postcodeNotAllowed.p2=Defnyddiwch god post gwahanol a rhowch gynnig arall arni.
 postcodeNotAllowed.button=Rhoi cynnig arall arni
 
+#Cannot verify email
+cannotVerifyEmail.title=We could not verify your email address
+cannotVerifyEmail.p1=Before you can create an agent services account, we need to verify your email address.
+cannotVerifyEmail.p2=<a href="{0}">Try again</a> with a different email address.
+
 #sign in with a new ID error page
 sign-in-new-id.header=Mewngofnodi gyda’ch Dynodydd Defnyddiwr (ID) newydd
 sign-in-new-id.p1=Nid ydych wedi gorffen creu eich cyfrif gwasanaethau asiant.

@@ -522,6 +522,11 @@ postcodeNotAllowed.p1=You cannot use this postcode to create an agent services a
 postcodeNotAllowed.p2=Use a different postcode and try again.
 postcodeNotAllowed.button=Try Again
 
+#Cannot verify email
+cannotVerifyEmail.title=We could not verify your email address
+cannotVerifyEmail.p1=Before you can create an agent services account, we need to verify your email address.
+cannotVerifyEmail.p2=<a href="{0}">Try again</a> with a different email address.
+
 #sign in with a new ID error page
 sign-in-new-id.header=Sign in with your new user ID
 sign-in-new-id.p1=You have not finished creating your agent services account.
