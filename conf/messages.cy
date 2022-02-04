@@ -74,7 +74,7 @@ error.companyutr.invalid=Rhaid i Gyfeirnod Unigryw y Trethdalwr (UTR) eich cwmni
 error.partnershiputr.blank=Nodwch Gyfeirnod Unigryw y Trethdalwr (UTR) eich partneriaeth
 error.partnershiputr.invalid=Rhaid i Gyfeirnod Unigryw y Trethdalwr (UTR) eich partneriaeth fod yn 10 rhif
 error.llputr.blank=Nodwch Gyfeirnod Unigryw y Trethdalwr (UTR) eich partneriaeth
-error.llputr.invalid=Rhaid i Gyfeirnod Unigryw y Trethdalwr (UTR) eich partneriaeth atebolrwydd cyfyngedig fod yn 10 rhif
+error.llputr.invalid=Rhaid i Gyfeirnod Unigryw y Trethdalwr (UTR) eich partneriaeth atebolrwydd cyfyngedig (PAC) fod yn 10 rhif
 error.client.sautr.blank=Nodwch Gyfeirnod Unigryw y Trethdalwr (UTR) y cleient ar gyfer Hunanasesiad
 error.client.sautr.invalid=Rhaid i Gyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad fod yn 10 rhif
 error.crn.empty=Nodwch rif cofrestru cwmni eich busnes
@@ -253,7 +253,7 @@ utr.title=Beth yw Cyfeirnod Unigryw y Trethdalwr (UTR) eich cwmni?
 utr.header.sole_trader=Beth yw’ch Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad?
 utr.header.limited_company=Beth yw’ch Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Treth Gorfforaeth?
 utr.header.partnership=Beth yw Cyfeirnod Unigryw y Trethdalwr (UTR) eich partneriaeth?
-utr.header.llp=Beth yw Cyfeirnod Unigryw y Trethdalwr (UTR) eich partneriaeth atebolrwydd cyfyngedig?
+utr.header.llp=Beth yw Cyfeirnod Unigryw y Trethdalwr (UTR) eich partneriaeth atebolrwydd cyfyngedig (PAC)?
 
 utr.description.start=Rhif 10 digid yw hwn, er enghraifft 1234567890. Bydd hwn i’w weld ar Ffurflenni Treth a llythyrau eraill
 utr.description.about.sole_trader=ynglŷn â Hunanasesiad.
@@ -272,11 +272,11 @@ crn.hint=Er enghraifft, 01234567 neu SC123456
 postcode.sole_trader.title=Beth yw cod post y cyfeiriad wnaethoch ei gofrestru â CThEM ar gyfer Hunanasesiad?
 postcode.sole_trader.hint=Gallai hyn fod yn gyfeiriad cartref.
 postcode.limited_company.title=Beth yw cod post eich swyddfa gofrestredig?
-postcode.limited_company.hint=Mae cyfeiriad y swyddfa gofrestredig yn gyfeiriad a gyflwynwyd gennych i Dŷ'r Cwmnïau pan wnaethoch chi gofrestru’ch PAC neu'ch cwmni cyfyngedig.
+postcode.limited_company.hint=Mae cyfeiriad y swyddfa gofrestredig yn gyfeiriad a gyflwynwyd gennych i Dŷ'r Cwmnïau pan wnaethoch chi gofrestru’ch partneriaeth atebolrwydd cyfyngedig (PAC) neu'ch cwmni cyfyngedig.
 postcode.partnership.title=Beth yw cod post y cyfeiriad wnaethoch ei gofrestru â CThEM ar gyfer Hunanasesiad?
 postcode.partnership.hint=Gallai hyn fod yn gyfeiriad cartref.
 postcode.llp.title=Beth yw cod post eich swyddfa gofrestredig?
-postcode.llp.hint=Mae cyfeiriad y swyddfa gofrestredig yn gyfeiriad a gyflwynwyd gennych i Dŷ'r Cwmnïau pan wnaethoch chi gofrestru’ch PAC neu'ch cwmni cyfyngedig. 
+postcode.llp.hint=Mae cyfeiriad y swyddfa gofrestredig yn gyfeiriad a gyflwynwyd gennych i Dŷ'r Cwmnïau pan wnaethoch chi gofrestru’ch partneriaeth atebolrwydd cyfyngedig (PAC) neu'ch cwmni cyfyngedig. 
 
 #Nino page
 nino.title=Beth yw’ch rhif Yswiriant Gwladol?
