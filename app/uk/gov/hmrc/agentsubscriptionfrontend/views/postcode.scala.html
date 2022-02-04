@@ -50,10 +50,7 @@
             labelAsHeading = true,
             labelClass = Some("govuk-label--xl"),
             hint = Some(msgs(s"postcode.${businessType.key}.hint")),
-            hintId = Some("postcode-hint"),
-            inputClass = Some("govuk-input--width-10"),
-            id = "postcode"
-        )
+            inputClass = Some("govuk-input--width-10"))
 
         @submitButton(id = "submit-postcode", messageKey = "button.continue")
 
