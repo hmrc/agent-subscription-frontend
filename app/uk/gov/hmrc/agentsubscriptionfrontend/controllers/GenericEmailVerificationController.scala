@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import play.api.i18n.I18nSupport
 import play.api.mvc._
-import play.api.{Environment, Mode}
+import play.api.Environment
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.EmailVerificationService
 import uk.gov.hmrc.http.HeaderCarrier
