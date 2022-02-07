@@ -22,15 +22,12 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Call, MessagesControllerComponents, RequestHeader}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.controllers.GenericEmailVerificationController
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SubscriptionJourneyService
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.hmrcfrontend.config.AccessibilityStatementConfig
-//import uk.gov.hmrc.agentsubscriptionfrontend.controllers.auth.ApplicationAuth
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{EmailVerificationService, MongoDBSessionStoreService}
-//import uk.gov.hmrc.hmrcfrontend.config.AccessibilityStatementConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.{Inject, Singleton}
