@@ -43,10 +43,10 @@ global.error.500.sa_helpline=if you need help with Making Tax Digital for Income
 
 ##Errors that override Play default messages.en
 error.maxLength = You must not enter more than {0} figures
-error.email= Enter a valid email address, like yourname@example.com
+error.email= Enter an email address in the correct format, like name@example.com
 
 ##Errors
-error.email.invalidchars=Business email address must only contain letters a to z, numbers, full stops, hyphens, underscores and @ signs
+error.email.invalidchars=Enter a email address in the correct format, like name@example.com
 error.email.maxlength=Business email address must be 132 characters or less
 error.postcode.invalid=Enter a valid postcode, for example AA1 1AA
 error.postcode.invalidchars=Postcode must only include letters a to z, numbers and spaces, like AA1 1AA
@@ -131,10 +131,10 @@ error.contact-email-check.invalid=Select if you want to use the email address di
 contactEmailAddress.title=What is the email address you want to use for your agent services account?
 contactEmailAddress.p=We will use it to tell you when your agent services account has been created and to let you know the status of authorisation requests.
 contactEmailAddress.button=Continue
-error.contact-email.empty=Enter an email address
+error.contact-email.empty=Enter an email address, like name@example.com
 error.contact-email.maxLength=Email address must be 132 characters or fewer
 error.contact-email.missingSeparator=Enter an email address in the correct format, like name@example.com
-error.contact-email.invalidChar=Email address must only contain letters a to z, numbers, full stops, hyphens, underscores and @ signs
+error.contact-email.invalidChar=Enter an email address in the correct format, like name@example.com
 
 #Contact Trading Name Check
 contactTradingNameCheck.title=Is this the name you want to show to your clients?
