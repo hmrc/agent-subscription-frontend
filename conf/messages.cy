@@ -43,11 +43,12 @@ global.error.500.sa_helpline=os oes angen cymorth arnoch gyda’r cynllun Troi T
 
 ##Errors that override Play default messages
 error.maxLength =Ni ddylech nodi mwy na {0} o ffigurau
-error.email=Nodwch gyfeiriad e-bost dilys, megis eichenw@enghraifft.com
+error.email=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
 
 ##Errors
-error.email.invalidchars=Rhaid i gyfeiriad e-bost y busnes gynnwys dim ond y llythrennau a i z, rhifau, atalnodau llawn, cysylltnodau, tanlinellau a’r symbol @
+error.email.invalidchars=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
 error.email.maxlength=Rhaid i gyfeiriad e-bost y busnes fod yn 132 o gymeriadau neu lai
+error.business-email.empty=Nodwch gyfeiriad e-bost eich busnes, megis enw@enghraifft.com
 error.postcode.invalid=Nodwch god post dilys, er enghraifft AA1 1AA
 error.postcode.invalidchars=Rhaid i’r cod post gynnwys dim ond y llythrennau a i z, rhifau a bylchau, megis AA1 1AA
 error.postcode.blacklisted=Ni allwch ddefnyddio’r cod post a nodwyd gennych
@@ -82,7 +83,6 @@ error.crn.invalid=Rhaid i’r rhif cofrestru cwmni fod yn 8 rhif, neu’n 2 lyth
 error.business-name.empty =Nodwch enw eich busnes
 error.business-name.invalid = Nodwch enw eich busnes yn y fformat cywir
 error.business-name.maxlength =Rhaid i enw’r busnes fod yn 40 o gymeriadau neu lai
-error.business-email.empty=Nodwch gyfeiriad e-bost eich busnes
 error.confirm-business-value.invalid=Dewiswch ‘Iawn’ os mai’ch busnes chi yw hwn
 error.summary.heading=Mae problem wedi codi
 error.prefix=Gwall:
@@ -131,10 +131,10 @@ error.contact-email-check.invalid=Dewiswch a hoffech ddefnyddio’r cyfeiriad e-
 contactEmailAddress.title=Beth yw’r cyfeiriad e-bost yr hoffech ei ddefnyddio ar gyfer eich cyfrif gwasanaethau asiant?
 contactEmailAddress.p=Byddwn yn ei ddefnyddio i roi gwybod i chi pan fo’ch cyfrif gwasanaethau asiant wedi’i greu, ac i roi gwybod i chi am statws ceisiadau am awdurdodiad.
 contactEmailAddress.button=Yn eich blaen
-error.contact-email.empty=Nodwch gyfeiriad e-bost
+error.contact-email.empty=Nodwch gyfeiriad e-bost, megis enw@enghraifft.com
 error.contact-email.maxLength=Mae’n rhaid i’r cyfeiriad e-bost gynnwys 132 o gymeriadau neu lai
 error.contact-email.missingSeparator=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
-error.contact-email.invalidChar=Mae’n rhaid i’r cyfeiriad e-bost gynnwys y llythrennau a i z, rhifau, atalnodau llawn, cysylltnodau, tanlinellau a’r symbol @ yn unig
+error.contact-email.invalidChar=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
 
 #Contact Trading Name Check
 contactTradingNameCheck.title=Ai dyma’r enw yr hoffech ei ddangos i’ch cleientiaid?
