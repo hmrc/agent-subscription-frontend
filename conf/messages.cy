@@ -48,6 +48,7 @@ error.email=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
 ##Errors
 error.email.invalidchars=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
 error.email.maxlength=Rhaid i gyfeiriad e-bost y busnes fod yn 132 o gymeriadau neu lai
+error.business-email.empty=Nodwch gyfeiriad e-bost eich busnes, megis enw@enghraifft.com
 error.postcode.invalid=Nodwch god post dilys, er enghraifft AA1 1AA
 error.postcode.invalidchars=Rhaid i’r cod post gynnwys dim ond y llythrennau a i z, rhifau a bylchau, megis AA1 1AA
 error.postcode.blacklisted=Ni allwch ddefnyddio’r cod post a nodwyd gennych
@@ -82,7 +83,6 @@ error.crn.invalid=Rhaid i’r rhif cofrestru cwmni fod yn 8 rhif, neu’n 2 lyth
 error.business-name.empty =Nodwch enw eich busnes
 error.business-name.invalid = Nodwch enw eich busnes yn y fformat cywir
 error.business-name.maxlength =Rhaid i enw’r busnes fod yn 40 o gymeriadau neu lai
-error.business-email.empty=Nodwch gyfeiriad e-bost eich busnes
 error.confirm-business-value.invalid=Dewiswch ‘Iawn’ os mai’ch busnes chi yw hwn
 error.summary.heading=Mae problem wedi codi
 error.prefix=Gwall:

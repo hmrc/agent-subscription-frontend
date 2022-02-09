@@ -48,6 +48,7 @@ error.email= Enter an email address in the correct format, like name@example.com
 ##Errors
 error.email.invalidchars=Enter a email address in the correct format, like name@example.com
 error.email.maxlength=Business email address must be 132 characters or less
+error.business-email.empty=Enter your business email address, like name@example.com
 error.postcode.invalid=Enter a valid postcode, for example AA1 1AA
 error.postcode.invalidchars=Postcode must only include letters a to z, numbers and spaces, like AA1 1AA
 error.postcode.blacklisted=You can’t use the postcode you’ve entered
@@ -82,7 +83,6 @@ error.crn.invalid=Company registration number must be 8 numbers, or 2 letters fo
 error.business-name.empty = Enter your business name
 error.business-name.invalid = Enter your business name in the correct format
 error.business-name.maxlength = Business name must be 40 characters or less
-error.business-email.empty=Enter your business email address
 error.confirm-business-value.invalid=Select yes if this is your business
 error.summary.heading=There is a problem
 error.prefix=Error:
