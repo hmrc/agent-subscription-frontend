@@ -46,14 +46,16 @@ error.maxLength =Ni ddylech nodi mwy na {0} o ffigurau
 error.email=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
 
 ##Errors
-error.email.invalidchars=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
-error.email.maxlength=Rhaid i gyfeiriad e-bost y busnes fod yn 132 o gymeriadau neu lai
+error.business-email.format=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
+error.business-email.maxlength=Rhaid i gyfeiriad e-bost y busnes fod yn 132 o gymeriadau neu lai
 error.business-email.empty=Nodwch gyfeiriad e-bost eich busnes, megis enw@enghraifft.com
+
 error.postcode.invalid=Nodwch god post dilys, er enghraifft AA1 1AA
 error.postcode.invalidchars=Rhaid i’r cod post gynnwys dim ond y llythrennau a i z, rhifau a bylchau, megis AA1 1AA
 error.postcode.blacklisted=Ni allwch ddefnyddio’r cod post a nodwyd gennych
 error.postcode.empty=Nodwch god post dilys, megis AA1 1AA
 error.postcode.maxlength=Rhaid i’r cod post fod yn 8 o gymeriadau neu lai
+
 error.addressline.1.empty =Nodwch linell cyfeiriad 1
 error.addressline.1.maxlength =Rhaid i linell cyfeiriad 1 fod yn 35 cymeriad neu lai
 error.addressline.1.invalid =Rhaid i linell cyfeiriad 1 gynnwys dim ond y llythrennau a-z, rhifau, comas, symbolau ampersand, dyfynodau sengl, atalnodau llawn, collnodau, cysylltnodau, blaenslaesau, a bylchau
@@ -66,6 +68,7 @@ error.addressline.3.invalid =Rhaid i linell cyfeiriad 3 gynnwys dim ond y llythr
 error.addressline.4.empty =Nodwch linell cyfeiriad 4
 error.addressline.4.maxlength =Rhaid i linell cyfeiriad 4 fod yn 35 cymeriad neu lai
 error.addressline.4.invalid =Rhaid i linell cyfeiriad 4 gynnwys dim ond y llythrennau a-z, rhifau, comas, symbolau ampersand, dyfynodau sengl, atalnodau llawn, collnodau, cysylltnodau, blaenslaesau, a bylchau
+
 error.utr.blank=Nodwch Gyfeirnod Unigryw y Trethdalwr (UTR) eich busnes
 error.utr.invalid =Rhaid i Gyfeirnod Unigryw y Trethdalwr (UTR) fod yn 10 rhif
 error.sautr.blank=Nodwch y Cyfeirnod Unigryw y Trethdalwr (UTR) rydych yn ei ddefnyddio ar gyfer Hunanasesiad
@@ -133,8 +136,7 @@ contactEmailAddress.p=Byddwn yn ei ddefnyddio i roi gwybod i chi pan fo’ch cyf
 contactEmailAddress.button=Yn eich blaen
 error.contact-email.empty=Nodwch gyfeiriad e-bost, megis enw@enghraifft.com
 error.contact-email.maxLength=Mae’n rhaid i’r cyfeiriad e-bost gynnwys 132 o gymeriadau neu lai
-error.contact-email.missingSeparator=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
-error.contact-email.invalidChar=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
+error.contact-email.format=Nodwch gyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com
 
 #Contact Trading Name Check
 contactTradingNameCheck.title=Ai dyma’r enw yr hoffech ei ddangos i’ch cleientiaid?
