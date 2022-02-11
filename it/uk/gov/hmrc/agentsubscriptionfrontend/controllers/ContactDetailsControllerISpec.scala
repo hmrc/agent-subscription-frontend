@@ -1,6 +1,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import org.jsoup.Jsoup
+import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
@@ -8,10 +9,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.Business
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.Css.ERROR_SUMMARY_LINK
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{businessAddress, registrationName, validPostcode, validUtr}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData}
 import uk.gov.hmrc.http.BadRequestException
+
+import scala.concurrent.Future
 
 
 class ContactDetailsControllerISpec extends BaseISpec {
@@ -83,7 +87,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 Some("test@gmail.com"),
                 Some("safeId")))
             ),
-            contactEmailData = Some(ContactEmailData(true, Some("test@gmail.com")))
+            contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("test@gmail.com")))
           ))
 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
@@ -156,7 +160,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
       givenSubscriptionJourneyRecordExists(id, sjr)
 
       givenSubscriptionRecordCreated(id, sjr.copy(
-        contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))))
+        contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("email@email.com"))))
       )
 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
@@ -186,7 +190,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
 
       givenSubscriptionJourneyRecordExists(id, sjr)
       givenSubscriptionRecordCreated(id, sjr.copy(
-        contactEmailData = Some(ContactEmailData(false, None))
+        contactEmailData = Some(ContactEmailData(useBusinessEmail = false, None))
       ))
 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
@@ -268,7 +272,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
             Some("safeId")
           )
           )),
-        contactEmailData = Some(ContactEmailData(true, None))))
+        contactEmailData = Some(ContactEmailData(useBusinessEmail = true, None))))
 
     val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
@@ -328,7 +332,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
           Some("safeId")
         )
         )),
-      contactEmailData = Some(ContactEmailData(true, None)))
+      contactEmailData = Some(ContactEmailData(useBusinessEmail = true, None)))
 
     givenSubscriptionJourneyRecordExists(id, sjr)
     givenSubscriptionRecordCreated(id, sjr.copy(
@@ -344,7 +348,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
           Some("safeId")
         )
         )),
-      contactEmailData = Some(ContactEmailData(true, Some("new@email.com"))))
+      contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("new@email.com"))))
     )
     val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
@@ -369,7 +373,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
             Some("safeId")
           )
           )),
-        contactEmailData = Some(ContactEmailData(true, None)))
+        contactEmailData = Some(ContactEmailData(useBusinessEmail = true, None)))
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
@@ -398,7 +402,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
             Some("safeId")
           )
           )),
-        contactEmailData = Some(ContactEmailData(true, None)))
+        contactEmailData = Some(ContactEmailData(useBusinessEmail = true, None)))
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
@@ -408,6 +412,11 @@ class ContactDetailsControllerISpec extends BaseISpec {
         await(controller.submitContactEmailAddress(request.withFormUrlEncodedBody("email" -> TestData.emailTooLong)))
 
       status(result) shouldBe 200
+
+      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+
+      html.title() shouldBe "Error: What is the email address you want to use for your agent services account? - Create an agent services account - GOV.UK"
+      html.select(ERROR_SUMMARY_LINK).text() shouldBe "Email address must be 132 characters or fewer"
 
       result should containMessages("contactEmailAddress.title",
         "error.contact-email.maxLength")
@@ -427,7 +436,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
             Some("safeId")
           )
           )),
-        contactEmailData = Some(ContactEmailData(true, None)))
+        contactEmailData = Some(ContactEmailData(useBusinessEmail = true, None)))
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
@@ -439,7 +448,12 @@ class ContactDetailsControllerISpec extends BaseISpec {
       status(result) shouldBe 200
 
       result should containMessages("contactEmailAddress.title",
-        "error.contact-email.invalidChar")
+        "error.contact-email.format")
+
+      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+
+      html.title() shouldBe "Error: What is the email address you want to use for your agent services account? - Create an agent services account - GOV.UK"
+      html.select(ERROR_SUMMARY_LINK).text() shouldBe "Enter an email address in the correct format, like name@example.com"
     }
   }
 
@@ -502,8 +516,8 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 Some("test@gmail.com"),
                 Some("safeId")))
             ),
-            contactEmailData = Some(ContactEmailData(true, Some("test@gmail.com"))),
-            contactTradingNameData = Some(ContactTradingNameData(true, Some(registrationName)))
+            contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("test@gmail.com"))),
+            contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(registrationName)))
           ))
 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
@@ -574,7 +588,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
       givenSubscriptionJourneyRecordExists(id, sjr)
 
       givenSubscriptionRecordCreated(id, sjr.copy(
-        contactTradingNameData = Some(ContactTradingNameData(false, None)))
+        contactTradingNameData = Some(ContactTradingNameData(hasTradingName = false, None)))
       )
 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
@@ -603,7 +617,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
 
       givenSubscriptionJourneyRecordExists(id, sjr)
       givenSubscriptionRecordCreated(id, sjr.copy(
-        contactTradingNameData = Some(ContactTradingNameData(true, None))
+        contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, None))
       ))
 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
@@ -725,9 +739,9 @@ class ContactDetailsControllerISpec extends BaseISpec {
                 Some("test@gmail.com"),
                 Some("safeId")))
             ),
-            contactEmailData = Some(ContactEmailData(true, Some("test@gmail.com"))),
-            contactTradingNameData = Some(ContactTradingNameData(true, Some(registrationName))),
-            contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
+            contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("test@gmail.com"))),
+            contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(registrationName))),
+            contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(businessAddress)))
           ))
 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
@@ -792,7 +806,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
       givenSubscriptionJourneyRecordExists(id, sjr)
 
       givenSubscriptionRecordCreated(id, sjr.copy(
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))))
+        contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(businessAddress))))
       )
 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
@@ -821,7 +835,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
 
       givenSubscriptionJourneyRecordExists(id, sjr)
       givenSubscriptionRecordCreated(id, sjr.copy(
-        contactTradingAddressData = Some(ContactTradingAddressData(false, None))
+        contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = false, None))
       ))
 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
@@ -905,7 +919,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenAddressLookupReturnsAddress("address-id")
       givenSubscriptionRecordCreated(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(
+        contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(
          BusinessAddress("10 Other Place", Some("Some District"), Some("Line 3"), Some("Sometown"), Some("AA1 1AA"), "GB")
           )
         ))

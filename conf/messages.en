@@ -46,14 +46,16 @@ error.maxLength = You must not enter more than {0} figures
 error.email= Enter an email address in the correct format, like name@example.com
 
 ##Errors
-error.email.invalidchars=Enter an email address in the correct format, like name@example.com
-error.email.maxlength=Business email address must be 132 characters or less
+error.business-email.format=Enter an email address in the correct format, like name@example.com
+error.business-email.maxlength=Business email address must be 132 characters or less
 error.business-email.empty=Enter your business email address, like name@example.com
+
 error.postcode.invalid=Enter a valid postcode, for example AA1 1AA
 error.postcode.invalidchars=Postcode must only include letters a to z, numbers and spaces, like AA1 1AA
 error.postcode.blacklisted=You can’t use the postcode you’ve entered
 error.postcode.empty=Enter a valid postcode, like AA1 1AA
 error.postcode.maxlength=Postcode must be 8 characters or less
+
 error.addressline.1.empty = Enter address line 1
 error.addressline.1.maxlength = Address line 1 must be 35 characters or less
 error.addressline.1.invalid = Address line 1 must only include letters a to z, numbers, commas, ampersands, single quotation marks, full stops, apostrophes, hyphens, forward slashes, and spaces
@@ -66,6 +68,7 @@ error.addressline.3.invalid = Address line 3 must only include letters a to z, n
 error.addressline.4.empty = Enter address line 4
 error.addressline.4.maxlength = Address line 4 must be 35 characters or less
 error.addressline.4.invalid = Address line 4 must only include letters a to z, numbers, commas, ampersands, single quotation marks, full stops, apostrophes, hyphens, forward slashes, and spaces
+
 error.utr.blank= Enter your business’s Unique Taxpayer Reference (UTR)
 error.utr.invalid = Unique Taxpayer Reference (UTR) must be 10 numbers
 error.sautr.blank=Enter the Unique Taxpayer Reference (UTR) you use for Self Assessment
@@ -80,6 +83,7 @@ error.client.sautr.blank=Enter the client’s Self Assessment Unique Taxpayer Re
 error.client.sautr.invalid=Self Assessment Unique Taxpayer Reference (UTR) must be 10 numbers
 error.crn.empty=Enter the company registration number of your business
 error.crn.invalid=Company registration number must be 8 numbers, or 2 letters followed by 6 numbers
+
 error.business-name.empty = Enter your business name
 error.business-name.invalid = Enter your business name in the correct format
 error.business-name.maxlength = Business name must be 40 characters or less
@@ -133,8 +137,7 @@ contactEmailAddress.p=We will use it to tell you when your agent services accoun
 contactEmailAddress.button=Continue
 error.contact-email.empty=Enter an email address, like name@example.com
 error.contact-email.maxLength=Email address must be 132 characters or fewer
-error.contact-email.missingSeparator=Enter an email address in the correct format, like name@example.com
-error.contact-email.invalidChar=Enter an email address in the correct format, like name@example.com
+error.contact-email.format=Enter an email address in the correct format, like name@example.com
 
 #Contact Trading Name Check
 contactTradingNameCheck.title=Is this the name you want to show to your clients?

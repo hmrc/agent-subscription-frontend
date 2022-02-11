@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.validators
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import play.api.data.Forms.{of, text}
+import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.validation._
 import play.api.data.{FormError, Mapping}
@@ -87,15 +87,10 @@ object CommonValidators {
 
   def emailAddress: Mapping[String] =
     text
-      .verifying(validEmailAddress())
+      .verifying(validEmailAddress(s"error.business-email.empty", "error.business-email.maxlength", "error.business-email.format"))
 
   def contactEmailAddress: Mapping[String] =
-    text.verifying(
-      validEmailAddress(
-        "error.contact-email.empty",
-        "error.contact-email.maxLength",
-        "error.contact-email.invalidChar",
-        "error.contact-email.missingSeparator"))
+    text.verifying(validEmailAddress())
 
   def businessName: Mapping[String] =
     text
@@ -123,13 +118,11 @@ object CommonValidators {
 
   def membershipNumber: Mapping[String] = nonEmptyTextWithMsg("error.moneyLaunderingCompliance.membershipNumber.empty")
 
-  import play.api.data.Forms._
-
   def expiryDate: Mapping[LocalDate] =
     tuple(
-      "year"  -> text.verifying("year", y => !y.trim.isEmpty || y.matches("^[0-9]{1,4}$")),
-      "month" -> text.verifying("month", y => !y.trim.isEmpty || y.matches("^[0-9]{1,2}$")),
-      "day"   -> text.verifying("day", d => !d.trim.isEmpty || d.matches("^[0-9]{1,2}$"))
+      "year"  -> text.verifying("year", y => y.trim.nonEmpty || y.matches("^[0-9]{1,4}$")),
+      "month" -> text.verifying("month", y => y.trim.nonEmpty || y.matches("^[0-9]{1,2}$")),
+      "day"   -> text.verifying("day", d => d.trim.nonEmpty || d.matches("^[0-9]{1,2}$"))
     ).verifying(checkOneAtATime(Seq(invalidDateConstraint, pastExpiryDateConstraint, within13MonthsExpiryDateConstraint)))
       .transform(
         { case (y, m, d) => LocalDate.of(y.trim.toInt, m.trim.toInt, d.trim.toInt) },
@@ -138,9 +131,9 @@ object CommonValidators {
 
   def appliedOnDate(implicit messages: Messages): Mapping[LocalDate] =
     tuple(
-      "year"  -> text.verifying("year", y => !y.trim.isEmpty || y.matches("^[0-9]{1,4}$")),
-      "month" -> text.verifying("month", y => !y.trim.isEmpty || y.matches("^[0-9]{1,2}$")),
-      "day"   -> text.verifying("day", d => !d.trim.isEmpty || d.matches("^[0-9]{1,2}$"))
+      "year"  -> text.verifying("year", y => y.trim.nonEmpty || y.matches("^[0-9]{1,4}$")),
+      "month" -> text.verifying("month", y => y.trim.nonEmpty || y.matches("^[0-9]{1,2}$")),
+      "day"   -> text.verifying("day", d => d.trim.nonEmpty || d.matches("^[0-9]{1,2}$"))
     ).verifying(checkOneAtATime(Seq(invalidDateConstraint, within6MonthsPastDateConstraint, futureApplicationConstraint)))
       .transform(
         { case (y, m, d) => LocalDate.of(y.trim.toInt, m.trim.toInt, d.trim.toInt) },
@@ -201,23 +194,21 @@ object CommonValidators {
   }
 
   private def validEmailAddress(
-    nonEmptyMessageKey: String = "error.business-email.empty",
-    maxLengthMessageKey: String = "error.email.maxlength",
-    invalidCharMessageKey: String = "error.email.invalidchars",
-    missingEmailPartSeperatorMessageKey: String = "error.email.invalidchars") = Constraint { fieldValue: String =>
+    nonEmptyMessageKey: String = "error.contact-email.empty",
+    maxLengthMessageKey: String = "error.contact-email.maxLength",
+    wrongFormatMessageKey: String = "error.contact-email.format") = Constraint { fieldValue: String =>
     nonEmptyWithMessage(nonEmptyMessageKey)(fieldValue) match {
       case i: Invalid => i
-      case Valid => {
-        if (fieldValue.size > EmailMaxLength) {
+      case Valid =>
+        if (fieldValue.length > EmailMaxLength) {
           Invalid(ValidationError(maxLengthMessageKey))
         } else if (fieldValue.contains('@')) {
           val email = fieldValue.split('@')
           if (!email(0).matches(EmailLocalPartRegex) || !email(1).matches(EmailDomainRegex)) {
-            Invalid(ValidationError(invalidCharMessageKey))
+            Invalid(ValidationError(wrongFormatMessageKey))
           } else Constraints.emailAddress(fieldValue)
         } else
-          Invalid(ValidationError(missingEmailPartSeperatorMessageKey))
-      }
+          Invalid(ValidationError(wrongFormatMessageKey))
     }
   }
 

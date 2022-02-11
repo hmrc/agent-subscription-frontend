@@ -91,7 +91,7 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
     behave like aUtrValidatingMapping("clientDetails")(fieldValue => clientDetailsUtr.withPrefix("testKey").bind(Map("testKey" -> fieldValue)))
   }
 
-  def aUtrValidatingMapping(errorMessageFor: String)(bind: String => Either[Seq[FormError], String]) = {
+  def aUtrValidatingMapping(errorMessageFor: String)(bind: String => Either[Seq[FormError], String]): Unit = {
     val (blank, invalid) = errorMessageFor match {
       case "sole_trader" =>
         ("error.sautr.blank", "error.sautr.invalid")
@@ -281,12 +281,12 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
 
     def shouldRejectFieldValueAsInvalid(fieldValue: String): Assertion =
       bind(fieldValue) should matchPattern {
-        case Left(List(FormError("testKey", List("error.email.invalidchars"), _))) =>
+        case Left(List(FormError("testKey", List("error.business-email.format"), _))) =>
       }
 
     def shouldRejectFieldValueAsInvalidChars(fieldValue: String): Assertion =
       bind(fieldValue) should matchPattern {
-        case Left(List(FormError("testKey", List("error.email.invalidchars"), _))) =>
+        case Left(List(FormError("testKey", List("error.business-email.format"), _))) =>
       }
 
     def shouldAcceptFieldValue(fieldValue: String): Assertion =
@@ -302,7 +302,9 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
       }
 
       "input has length more than 132 characters" in {
-        bind(s"${Random.alphanumeric.take(132).mkString}@example.com").left.value should contain only FormError("testKey", "error.email.maxlength")
+        bind(s"${Random.alphanumeric.take(132).mkString}@example.com").left.value should contain only FormError(
+          "testKey",
+          "error.business-email.maxlength")
       }
 
       "input is only whitespace" in {
