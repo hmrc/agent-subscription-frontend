@@ -223,7 +223,6 @@ saved-progress.p3=To complete this form later, go to the {0} on GOV.UK and sign 
 saved-progress.link=guidance page about creating an agent services account (opens in a new tab)
 saved-progress.p4=You will need to sign in with the same Government Gateway user ID you used when you started filling out this form.
 saved-progress.continue=Continue where you left off
-saved-progress.finish=Finish and sign out
 
 #Sign in check
 sign-in-check.header=You have signed in with your HMRC online services for agents user ID
@@ -242,7 +241,6 @@ businessType.option.partnership-llp=Limited liability partnership (LLP)
 businessType.option.invalid=None of these types of business
 businessType.progressive.title=My business type is not listed here
 businessType.progressive.content.p1=You can only get an agent services account if your business is a sole trader, limited company, partnership or limited liability partnership.
-businessType.progressive.content.link=Finish and sign out
 businessType.error.invalid-choice = Select what type of business you are
 
 #LLP Interrupt
@@ -407,7 +405,7 @@ button.no=No
 button.createAccount=Create account
 button.register=Continue
 button.back=Back
-button.finishSignOut=Finish and sign out
+link.finishSignOut=Finish and sign out
 button.signIn=Sign in
 
 #Setup Incomplete
@@ -446,7 +444,6 @@ amls-not-applied.p1=You can only create an agent account if your business has ei
 amls-not-applied.p1.bullet1=registered with a money laundering supervisory body
 amls-not-applied.p1.bullet2=applied to register for money laundering supervision with HMRC and not yet received the decision
 amls-not-applied.p2=To find details of supervisory bodies, see <a href="https://www.gov.uk/anti-money-laundering-registration" target="_blank" rel="noopener noreferrer">anti-money laundering registration (opens in a new tab).</a>
-amls-not-applied.finish=Finish and sign out
 
 # AMLS applied for
 

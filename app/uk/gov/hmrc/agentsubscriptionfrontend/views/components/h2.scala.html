@@ -14,21 +14,15 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components._
+@this()
 
-@this(mainTemplate:MainTemplate, p:p, a:a, h1:h1)
+@(
+  key: String,
+  size:String = "m",
+  classes: Option[String] = None,
+  id: Option[String] = None
+)(implicit msgs: Messages)
 
-@(continueUrl: String)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@cls = @{s"govuk-heading-$size ".concat(classes.getOrElse(""))}
 
-@mainTemplate(title = msgs("alreadySubscribed.title")) {
-
-    @h1("alreadySubscribed.title")
-
-    @p("alreadySubscribed.p1")
-
-    <p>
-      @a(href = continueUrl, key = "link.finishSignOut", id=Some("finishSignOut"))
-    </p>
-
-}
+<h2 class ="@cls" @id.map(i => { s"id =${i}"})>@msgs(key)</h2>

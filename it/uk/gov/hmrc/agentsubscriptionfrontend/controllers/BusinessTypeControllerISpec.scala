@@ -1,5 +1,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import org.jsoup.Jsoup
+import org.jsoup.select.Elements
+import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AuthProviderId}
@@ -10,6 +12,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.validBusinessTypes
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData, TestSetupNoJourneyRecord}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
@@ -59,7 +62,13 @@ class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       val result = await(controller.showBusinessTypeForm(request))
 
-      result should containLink("businessType.progressive.content.link",  routes.SignedOutController.signOutWithContinueUrl.url)
+      status(result) shouldBe 200
+
+      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      html.title() shouldBe "What type of business are you? - Create an agent services account - GOV.UK"
+      private val signOutLink: Elements = html.select("a#sign-out")
+      signOutLink.text() shouldBe "Finish and sign out"
+      signOutLink.attr("href") shouldBe routes.SignedOutController.signOutWithContinueUrl.url
     }
 
     "pre-populate the business type if one is already stored in the session" in new TestSetupNoJourneyRecord{

@@ -16,29 +16,22 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentsubscriptionfrontend.models._
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components._
 
-
-@this(mainTemplate: MainTemplate)
+@this(mainTemplate: MainTemplate, p: p, a: a, h1: h1, ul: ul)
 
 @()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
-  title = msgs("amls-not-applied.title"),
-  backLinkHref = Some(routes.AMLSController.showCheckAmlsAlreadyAppliedForm().url)
+    title = msgs("amls-not-applied.title"),
+    backLinkHref = Some(routes.AMLSController.showCheckAmlsAlreadyAppliedForm.url)
 ) {
 
-<h1 class="govuk-heading-xl">@msgs(s"amls-not-applied.title")</h1>
-
-<p>@msgs(s"amls-not-applied.p1")</p>
-<ul class="govuk-list govuk-list--bullet">
- <li>@msgs("amls-not-applied.p1.bullet1")</li>
- <li>@msgs("amls-not-applied.p1.bullet2")</li>
-</ul>
-
-<p>@Html(msgs(s"amls-not-applied.p2"))</p>
-
-<a href="@routes.SignedOutController.signOutWithContinueUrl">@msgs(s"button.finishSignOut")</a>
-
+    @h1(s"amls-not-applied.title")
+    @p(s"amls-not-applied.p1")
+    @ul(items = Seq("amls-not-applied.p1.bullet1", "amls-not-applied.p1.bullet2"))
+    @p(html = Some(Html(msgs(s"amls-not-applied.p2"))))
+    @a(href = routes.SignedOutController.signOutWithContinueUrl.url,
+        key = "link.finishSignOut")
 }

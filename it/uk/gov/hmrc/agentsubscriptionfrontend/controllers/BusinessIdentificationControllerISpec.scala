@@ -104,7 +104,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
       val result = await(controller.showAlreadySubscribed(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
       result should containMessages("alreadySubscribed.title")
-      result should containLink("button.finishSignOut", "/someContinueUrl")
+      result should containLink("link.finishSignOut", "/someContinueUrl")
     }
 
     "display the already subscribed page with href to showBusinessTypeForm if the current user is logged" +
@@ -113,7 +113,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
       val result = await(controller.showAlreadySubscribed(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
       result should containMessages("alreadySubscribed.title")
-      result should containLink("button.finishSignOut", routes.SignedOutController.redirectToBusinessTypeForm().url)
+      result should containLink("link.finishSignOut", routes.SignedOutController.redirectToBusinessTypeForm().url)
 
     }
   }
