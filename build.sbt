@@ -63,6 +63,11 @@ lazy val wartRemoverSettings = {
   )
 }
 
+TwirlKeys.templateImports ++= Seq(
+  "uk.gov.hmrc.agentsubscriptionfrontend.views.html.MainTemplate",
+  "uk.gov.hmrc.agentsubscriptionfrontend.views.html.components._",
+)
+
 lazy val compileDeps = Seq(
   "uk.gov.hmrc"   %% "bootstrap-frontend-play-28"    % "5.16.0",
   "uk.gov.hmrc"   %% "play-frontend-hmrc"            % "1.25.0-play-28",

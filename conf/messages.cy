@@ -222,7 +222,6 @@ saved-progress.p3=I gwblhau’r ffurflen hon yn nes ymlaen, ewch i’r {0} ar GO
 saved-progress.link=tudalen arweiniad ynglŷn â chreu cyfrif gwasanaethau asiant (yn agor ffenestr neu dab newydd)
 saved-progress.p4=Bydd angen i chi fewngofnodi gyda’r un Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth a ddefnyddioch wrth ddechrau llenwi’r ffurflen hon.
 saved-progress.continue=Ailgydio ynddi o ble’r oeddech y tro diwethaf
-saved-progress.finish=Gorffen ac allgofnodi
 
 #Sign in check
 sign-in-check.header=Rydych wedi mewngofnodi gyda’ch Dynodydd Defnyddiwr (ID) gwasanaethau ar-lein CThEM ar gyfer asiantau
@@ -241,7 +240,6 @@ businessType.option.partnership-llp=Partneriaeth Atebolrwydd Cyfyngedig (PAC)
 businessType.option.invalid=Dim un o’r mathau hyn o fusnes
 businessType.progressive.title=Nid yw fy math o fusnes wedi’i restru yma
 businessType.progressive.content.p1=Dim ond os yw’ch busnes yn unig fasnachwr, yn gwmni cyfyngedig, yn bartneriaeth neu’n bartneriaeth atebolrwydd cyfyngedig y gallwch gael cyfrif gwasanaethau asiant.
-businessType.progressive.content.link=Gorffen ac allgofnodi
 businessType.error.invalid-choice=Dewiswch pa fath o fusnes ydych chi
 
 #LLP Interrupt
@@ -406,7 +404,7 @@ button.no=Na
 button.createAccount=Creu cyfrif
 button.register=Yn eich blaen
 button.back=Yn ôl
-button.finishSignOut=Gorffen ac allgofnodi
+link.finishSignOut=Gorffen ac allgofnodi
 button.signIn=Mewngofnodi
 
 #Setup Incomplete
@@ -445,7 +443,6 @@ amls-not-applied.p1=Gallwch ond creu cyfrif asiant os yw’ch busnes naill ai:
 amls-not-applied.p1.bullet1=wedi cofrestru gyda chorff goruchwylio gwyngalchu arian
 amls-not-applied.p1.bullet2=wedi gwneud cais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian, a heb gael y penderfyniad eto
 amls-not-applied.p2=I ddod o hyd i fanylion cyrff goruchwylio, gweler y dudalen sy’n trafod <a href="https://www.gov.uk/anti-money-laundering-registration" target="_blank" rel="noopener noreferrer">cofrestriadau gwrth-wyngalchu arian (yn agor ffenestr neu dab newydd).</a>
-amls-not-applied.finish=Gorffen ac allgofnodi
 
 # AMLS applied for
 

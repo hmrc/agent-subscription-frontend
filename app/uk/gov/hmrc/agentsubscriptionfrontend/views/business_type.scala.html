@@ -16,14 +16,12 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SignedOutController
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputRadios}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorSummary, FormWithCSRF, GovukDetails}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{Text, HtmlContent, RadioItem, Details}
-@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.MainTemplate
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
+
 
 @this(
     mainTemplate: MainTemplate,
@@ -32,14 +30,16 @@
     govukDetails: GovukDetails,
     inputRadio: InputRadios,
     formHelper: FormWithCSRF,
-    submitButton: SubmitButton
+    submitButton: SubmitButton,
+    p:p,
+    a:a
 )
 
 @(businessTypeRadioForm: Form[BusinessType])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 @detailsContent = {
-<p>@msgs("businessType.progressive.content.p1")</p>
-<a href="@SignedOutController.signOutWithContinueUrl" id="sign-out">@msgs("businessType.progressive.content.link")</a>
+    @p("businessType.progressive.content.p1")
+    @a(href=routes.SignedOutController.signOutWithContinueUrl.url, id=Some("sign-out"), key="link.finishSignOut")
 }
 
 @mainTemplate(title = errorPrefixTemplate(businessTypeRadioForm) + msgs("businessType.title")) {

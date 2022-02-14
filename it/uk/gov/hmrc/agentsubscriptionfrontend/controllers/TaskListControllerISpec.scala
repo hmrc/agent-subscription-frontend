@@ -1,8 +1,9 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
-import java.time.LocalDate
+import org.jsoup.Jsoup
 
+import java.time.LocalDate
 import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
@@ -11,7 +12,9 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenNoSubscriptionJourneyRecordExists, givenSubscriptionJourneyRecordExists}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, Css, TestData}
+
+import scala.concurrent.Future
 
 class TaskListControllerISpec extends BaseISpec {
   lazy val controller: TaskListController = app.injector.instanceOf[TaskListController]
@@ -220,22 +223,20 @@ class TaskListControllerISpec extends BaseISpec {
 
       status(result) shouldBe 200
 
-      result should containMessages(
-        "saved-progress.title",
-        "saved-progress.p1",
-        "saved-progress.p2",
-        "saved-progress.link",
-        "saved-progress.continue"
-      )
+      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      html.title() shouldBe "Your progress has been saved for 30 days - Create an agent services account - GOV.UK"
+      html.select(Css.H2).text() shouldBe "What you need to do next"
+      val paragraphs = html.select(Css.paragraphs)
+      paragraphs.get(0).text() shouldBe "You need to come back and complete this form within 30 days."
+      paragraphs.get(1).text() shouldBe "To complete this form later, go to the guidance page about " +
+        "creating an agent services account (opens in a new tab) on GOV.UK and sign in to this service again."
+      paragraphs.get(2).text() shouldBe "You will need to sign in with the same Government Gateway user ID you used when you started filling out this form."
 
-      result should containSubstrings(
-        "To complete this form later, go to the",
-        "guidance page about creating an agent services account (opens in a new tab)",
-        "on GOV.UK and sign in to this service again."
-      )
-
-      result should containLink("saved-progress.continue", routes.TaskListController.showTaskList().url)
-      result should containLink("saved-progress.finish", routes.SignedOutController.startSurvey().url)
+      html.select("a#finish-signout").text() shouldBe "Finish and sign out"
+      html.select("a#finish-signout").attr("href") shouldBe routes.SignedOutController.startSurvey().url
+      html.select("a#continue-saved-progress").text() shouldBe "Continue where you left off"
+      html.select("a#continue-saved-progress").attr("href") shouldBe routes.TaskListController.showTaskList().url
+      
     }
   }
 }

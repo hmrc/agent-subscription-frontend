@@ -17,15 +17,20 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.govukfrontend.views.html.components.{GovukPanel, Panel, Text}
-@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
-@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components._
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.MainTemplate
 
-@this(
-mainTemplate: MainTemplate,
-govukPanel: GovukPanel
-)
+@this(mainTemplate: MainTemplate, govukPanel: GovukPanel,p:p, a:a, h1:h1, h2:h2)
 
 @(backLink: Option[String])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+
+@savedProgressLink = @{
+    a(href = "https://www.gov.uk/guidance/get-an-hmrc-agent-services-account",
+        key = "saved-progress.link",
+        target = Some("_blank"),
+        rel=Some("noopener noreferrer")
+    )
+}
 
 @mainTemplate(title =  msgs("saved-progress.title")) {
 
@@ -33,13 +38,21 @@ govukPanel: GovukPanel
         title = Text(msgs("saved-progress.title"))
     ))
 
-    <h2>@msgs("saved-progress.p1")</h2>
-    <p>@msgs("saved-progress.p2")</p>
+    @h2("saved-progress.p1")
+    @p("saved-progress.p2")
+    @p(html= Some(Html(msgs("saved-progress.p3", savedProgressLink))))
+    @p("saved-progress.p4")
 
-    <p>@Html(s"${msgs("saved-progress.p3",s"<a href='https://www.gov.uk/guidance/get-an-hmrc-agent-services-account' target='_blank' rel='noopener noreferrer'>${msgs("saved-progress.link")}</a>")}")</p>
-    <p>@msgs("saved-progress.p4")</p>
-    <p><a href="@backLink.getOrElse(routes.TaskListController.showTaskList().url)">@msgs("saved-progress.continue")</a></p>
-    <p><a href="@routes.SignedOutController.startSurvey()">@msgs("saved-progress.finish")</a></p>
+    <p>
+        @a(href = backLink.getOrElse(routes.TaskListController.showTaskList.url),
+            id = Some("continue-saved-progress"),
+            key = "saved-progress.continue")
+    </p>
+    <p>
+        @a(href = routes.SignedOutController.startSurvey.url,
+            id = Some("finish-signout"),
+            key = "link.finishSignOut" )
+    </p>
 
 
 
