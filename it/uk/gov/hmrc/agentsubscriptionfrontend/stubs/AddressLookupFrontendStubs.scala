@@ -30,9 +30,9 @@ object AddressLookupFrontendStubs {
              |{
              |  "version": 2,
              |  "options": {
-             |    "continueUrl": "http://localhost:9437$callbackUrl",
+             |    "continueUrl": "$callbackUrl",
              |    "includeHMRCBranding": true,
-             |     "signOutHref": "http://tax.service.gov.uk/agent-subscription/finish-sign-out",
+             |     "signOutHref": "/agent-subscription/finish-sign-out",
              |    "selectPageConfig": {
              |      "proposedListLimit": 30,
              |      "showSearchLinkAgain": true
@@ -48,7 +48,7 @@ object AddressLookupFrontendStubs {
              |    },
              |     "timeoutConfig": {
              |      "timeoutAmount": 900,
-             |      "timeoutUrl": "http://tax.service.gov.uk/agent-subscription/timed-out"
+             |      "timeoutUrl": "/agent-subscription/timed-out"
              |    }
              |  },
              |  "labels": {

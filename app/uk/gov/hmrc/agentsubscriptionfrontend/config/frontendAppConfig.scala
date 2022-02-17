@@ -33,7 +33,6 @@ trait AppConfig {
   val agentServicesAccountUrl: String
   val agentAssuranceBaseUrl: String
   val agentAssuranceRun: Boolean
-  val addressLookupContinueUrl: String
   val surveyRedirectUrl: String
   val companyAuthSignInUrl: String
   val chainedSessionDetailsTtl: Int
@@ -81,8 +80,6 @@ class FrontendAppConfig @Inject()(servicesConfig: ServicesConfig) extends AppCon
   override val agentServicesAccountUrl: String = s"$servicesAccountUrl$servicesAccountPath"
   override lazy val agentAssuranceBaseUrl = servicesConfig.baseUrl("agent-assurance")
   override val agentAssuranceRun: Boolean = servicesConfig.getBoolean("features.agent-assurance-run")
-  override val addressLookupContinueUrl: String =
-    getConf("microservice.services.address-lookup-frontend.new-address-callback.url")
   override val surveyRedirectUrl: String = getConf("surveyRedirectUrl")
   override val agentSubscriptionFrontendExternalUrl: String = getConf("microservice.services.agent-subscription-frontend.external-url")
 

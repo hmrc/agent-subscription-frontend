@@ -30,9 +30,9 @@ class AddressLookupConfig @Inject()(appConfig: AppConfig, messagesApi: MessagesA
     val v2Config = s"""{
   "version": 2,
   "options": {
-    "continueUrl": "$continueUrl",
+    "continueUrl": "${appConfig.agentSubscriptionFrontendExternalUrl}$continueUrl",
     "includeHMRCBranding": true,
-     "signOutHref": "http://tax.service.gov.uk${routes.SignedOutController.signOut().url}",
+     "signOutHref": "${appConfig.agentSubscriptionFrontendExternalUrl}${routes.SignedOutController.signOut().url}",
     "selectPageConfig": {
       "proposedListLimit": 30,
       "showSearchLinkAgain": true
@@ -48,7 +48,7 @@ class AddressLookupConfig @Inject()(appConfig: AppConfig, messagesApi: MessagesA
     },
      "timeoutConfig": {
       "timeoutAmount": ${appConfig.timeout},
-      "timeoutUrl": "http://tax.service.gov.uk${routes.SignedOutController.timedOut().url}"
+      "timeoutUrl": "${appConfig.agentSubscriptionFrontendExternalUrl}${routes.SignedOutController.timedOut().url}"
     }
   },
   "labels": {
