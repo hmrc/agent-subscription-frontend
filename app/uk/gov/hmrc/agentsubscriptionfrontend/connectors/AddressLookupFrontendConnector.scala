@@ -46,7 +46,7 @@ class AddressLookupFrontendConnector @Inject()(
   def initJourney(call: Call)(implicit hc: HeaderCarrier, ec: ExecutionContext, lang: Lang): Future[String] =
     monitor(s"ConsumedAPI-Address-Lookup-Frontend-initJourney-POST") {
 
-      val addressConfig = Json.toJson(addressLookupConfig.config(s"${appConfig.addressLookupContinueUrl}${call.url}"))
+      val addressConfig = Json.toJson(addressLookupConfig.config(s"${call.url}"))
 
       http.POST[JsValue, HttpResponse](initJourneyUrl, addressConfig) map { resp =>
         resp.header(LOCATION).getOrElse {
