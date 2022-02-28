@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukPhaseBanner
 @import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcLayout, HmrcReportTechnicalIssueHelper}
+@import views.html.helper.CSPNonce
 
 @this(
     head: head,
@@ -44,9 +45,9 @@
 }
 
 @additionalScripts = {
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-<script src="@controllers.routes.Assets.versioned("javascripts/accessible-autocomplete.min.js")" ></script>
-<script src="@controllers.routes.Assets.versioned("javascripts/agent-subscription.js")" ></script>
+    <script @{CSPNonce.attr} src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script @{CSPNonce.attr} src="@controllers.routes.Assets.versioned("javascripts/accessible-autocomplete.min.js")" ></script>
+    <script @{CSPNonce.attr} src="@controllers.routes.Assets.versioned("javascripts/agent-subscription.js")" type="text/j" ></script>
 }
 
 @hmrcLayout(
@@ -60,4 +61,5 @@
     additionalHeadBlock = Some(head(hasTimeout)),
     additionalScriptsBlock = Some(additionalScripts),
     backLinkUrl = backLinkHref,
+    nonce = CSPNonce.get
 )(mainContentWithTechIssueHelper)
