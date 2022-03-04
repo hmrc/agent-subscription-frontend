@@ -17,7 +17,6 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import java.time.LocalDate
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.ScalaFutures
 import play.api.i18n.Lang
@@ -164,8 +163,6 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       noMetricExpectedAtThisPoint()
     }
 
-
-
     "show subscription answers page if user has not already subscribed and has clean creds and also cache the goBack url" in
       new TestSetupWithCompleteJourneyRecord {
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
@@ -241,6 +238,21 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       intercept[RuntimeException] {
         await(controller.showCheckAnswers(request))
       }.getMessage shouldBe "no continueId found in record"
+    }
+
+    "redirect to email verification if the email is not verified" in new TestSetupWithCompleteJourneyRecord {
+      givenSubscriptionJourneyRecordExists(
+        AuthProviderId("12345-credId"),
+        completeJourneyRecordNoMappings.copy(
+          contactEmailData = Some(ContactEmailData(useBusinessEmail = false, contactEmail = Some("email@email.com"))),
+          verifiedEmails = Set.empty
+        )
+      )
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+
+      val result = await(controller.showCheckAnswers(request))
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.EmailVerificationController.verifyEmail().url)
     }
   }
 
@@ -656,6 +668,25 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         verifySubscriptionRequestSent(subscriptionRequestWithNoEdit())
         metricShouldExistAndBeUpdated("Count-Subscription-Failed-Agent_Terminated")
       }
+    }
+
+    "redirect to email verification if the email is not verified" in new TestSetupWithCompleteJourneyRecordAndCreate {
+      AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
+
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withCookies(Cookie("PLAY_LANG", "en"))
+      sessionStoreService.currentSession.continueUrl = Some("/some/url")
+
+      givenSubscriptionJourneyRecordExists(
+        AuthProviderId("12345-credId"),
+        completeJourneyRecordNoMappings.copy(
+          contactEmailData = Some(ContactEmailData(useBusinessEmail = false, contactEmail = Some("email@email.com"))),
+          verifiedEmails = Set.empty
+        )
+      )
+
+      val result = await(controller.submitCheckAnswers(request))
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.EmailVerificationController.verifyEmail().url)
     }
   }
 

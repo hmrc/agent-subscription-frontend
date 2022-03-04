@@ -41,7 +41,14 @@ final case class SubscriptionJourneyRecord(
   contactTradingNameData: Option[ContactTradingNameData] = None,
   contactTradingAddressData: Option[ContactTradingAddressData] = None,
   verifiedEmails: Set[String] = Set.empty
-)
+) {
+  def effectiveEmail: Option[String] = contactEmailData match {
+    case None                               => None
+    case Some(ced) if ced.useBusinessEmail  => businessDetails.registration.flatMap(_.emailAddress)
+    case Some(ced) if !ced.useBusinessEmail => ced.contactEmail
+  }
+  def emailNeedsVerifying = effectiveEmail.exists(email => !verifiedEmails.contains(email))
+}
 
 object SubscriptionJourneyRecord {
 

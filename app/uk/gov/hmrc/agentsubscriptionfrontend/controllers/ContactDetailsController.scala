@@ -112,7 +112,8 @@ class ContactDetailsController @Inject()(
 
                     val call: Call =
                       if (!useBusinessEmail) routes.ContactDetailsController.showContactEmailAddress()
-                      else routes.EmailVerificationController.verifyEmail()
+                      else if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
+                      else routes.TaskListController.showTaskList()
 
                     subscriptionJourneyService
                       .saveJourneyRecord(sjr.copy(contactEmailData = Some(ContactEmailData(check, mayBeEmail))))
@@ -148,22 +149,28 @@ class ContactDetailsController @Inject()(
 
   def submitContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
-      contactEmailAddressForm.bindFromRequest
-        .fold(
-          formWithErrors => {
-            Ok(contactEmailAddressTemplate(formWithErrors))
-          },
-          validForm => {
-            val sjr = agent.getMandatorySubscriptionRecord
-            val emailData: Option[ContactEmailData] =
-              sjr.contactEmailData
-                .map(data => ContactEmailData(data.useBusinessEmail, Some(validForm.email)))
+      sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
+        contactEmailAddressForm.bindFromRequest
+          .fold(
+            formWithErrors => {
+              Ok(contactEmailAddressTemplate(formWithErrors))
+            },
+            validForm => {
+              val sjr = agent.getMandatorySubscriptionRecord
+              val emailData: Option[ContactEmailData] =
+                sjr.contactEmailData
+                  .map(data => ContactEmailData(data.useBusinessEmail, Some(validForm.email)))
 
-            subscriptionJourneyService
-              .saveJourneyRecord(sjr.copy(contactEmailData = emailData))
-              .map(_ => Redirect(routes.EmailVerificationController.verifyEmail()))
-          }
-        )
+              val redirectCall =
+                if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
+                else routes.TaskListController.showTaskList()
+
+              subscriptionJourneyService
+                .saveJourneyRecord(sjr.copy(contactEmailData = emailData))
+                .map(_ => Redirect(redirectCall))
+            }
+          )
+      }
     }
   }
 

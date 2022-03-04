@@ -124,7 +124,8 @@ POST        /change-business-email                         uk.gov.hmrc.agentsubs
 GET         /business-address                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showBusinessAddressForm
 
 GET         /verify-email                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.EmailVerificationController.verifyEmail
-GET         /cannot-verify-email                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCannotVerifyEmail
+GET         /email-locked                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCannotVerifyEmailLocked
+GET         /email-technical-error                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCannotVerifyEmailTechnicalError
 
 GET         /return-from-address-lookup                    uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.returnFromAddressLookup(id: String ?= "")
 POST        /submit-modified-address                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.submitModifiedAddress

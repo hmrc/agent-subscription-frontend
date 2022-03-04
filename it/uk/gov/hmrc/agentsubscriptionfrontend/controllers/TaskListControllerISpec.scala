@@ -16,7 +16,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, Css, TestData}
 
 import scala.concurrent.Future
 
-class TaskListControllerISpec extends BaseISpec {
+class TaskListControllerISpec extends BaseISpec with EmailVerificationBehaviours {
   lazy val controller: TaskListController = app.injector.instanceOf[TaskListController]
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
@@ -212,6 +212,12 @@ class TaskListControllerISpec extends BaseISpec {
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
+    }
+
+    behave like checksIfEmailIsVerified(TestData.couldBePartiallySubscribedJourneyRecord, isExpectedResult = status(_) == 200) { () =>
+      givenAgentIsNotManuallyAssured(utr.value)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      controller.showTaskList(request)
     }
   }
 

@@ -133,6 +133,20 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
     * User is half way through a setup/onboarding journey
     **/
   def withSubscribingAgent[A](body: Agent => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+    withSubscribingAgent(requireEmailVerification = false)(body)
+
+  /**
+    * User is half way through a setup/onboarding journey and their email is verified
+    **/
+  def withSubscribingEmailVerifiedAgent[A](
+    body: Agent => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+    withSubscribingAgent(requireEmailVerification = true)(body)
+
+  /**
+    * User is half way through a setup/onboarding journey. Optionally, check that the email (if any) is verified and redirect to email verification if not.
+    **/
+  def withSubscribingAgent[A](requireEmailVerification: Boolean)(
+    body: Agent => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
       .retrieve(allEnrolments and credentials and nino) {
         case enrolments ~ creds ~ mayBeNino =>
@@ -149,7 +163,11 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
             val authProviderId = AuthProviderId(creds.fold("unknown")(_.providerId))
             subscriptionJourneyService
               .getJourneyRecord(authProviderId)
-              .flatMap(maybeSjr => body(new Agent(enrolments.enrolments, creds, maybeSjr, mayBeNino)))
+              .flatMap(
+                maybeSjr =>
+                  if (requireEmailVerification && maybeSjr.exists(_.emailNeedsVerifying))
+                    Redirect(routes.EmailVerificationController.verifyEmail())
+                  else body(new Agent(enrolments.enrolments, creds, maybeSjr, mayBeNino)))
             // check what we should do when AuthProviderId not available!
           }
       }

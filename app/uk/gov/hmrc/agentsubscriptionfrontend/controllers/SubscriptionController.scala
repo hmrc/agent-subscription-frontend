@@ -32,7 +32,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{SubscriptionJourneyRecord, UserMapping}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{HttpError, MongoDBSessionStoreService, SubscriptionJourneyService, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.{toFuture, valueOps}
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{address_form_with_errors, check_answers, sign_in_new_id, subscription_complete, cannot_verify_email}
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{address_form_with_errors, check_answers, sign_in_new_id, subscription_complete, cannot_verify_email_locked, cannot_verify_email_technical}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -57,8 +57,8 @@ class SubscriptionController @Inject()(
                                         addressFormWithErrorsTemplate: address_form_with_errors,
                                         subscriptionCompleteTemplate: subscription_complete,
                                         signInNewIdTemplate: sign_in_new_id,
-                                        cannotVerifyEmailTemplate: cannot_verify_email
-                                      )(
+                                        cannotVerifyEmailLockedTemplate: cannot_verify_email_locked,
+                                        cannotVerifyEmailTechnicalTemplate: cannot_verify_email_technical                                      )(
   implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc)
     with SessionBehaviour with AuthActions with Logging {
@@ -68,7 +68,7 @@ class SubscriptionController @Inject()(
   val desAddressForm = new DesAddressForm(logger, blacklistedPostCodes)
 
   def showCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
+    withSubscribingEmailVerifiedAgent { agent =>
       agent.withCleanCredsOrSignIn {
         val sjr = agent.getMandatorySubscriptionRecord
         agentAssuranceConnector.isManuallyAssuredAgent(sjr.businessDetails.utr).flatMap { isMAAgent =>
@@ -134,7 +134,7 @@ class SubscriptionController @Inject()(
   }
 
   def submitCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
+    withSubscribingEmailVerifiedAgent { agent =>
       agent.withCleanCredsOrSignIn {
         val sjr = agent.getMandatorySubscriptionRecord
         (sjr.businessDetails.utr,
@@ -253,12 +253,12 @@ class SubscriptionController @Inject()(
     }
   }
 
-  def showCannotVerifyEmail: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { _ =>
-      withValidSession { (_, existingSession) =>
-        Ok(cannotVerifyEmailTemplate(routes.BusinessIdentificationController.changeBusinessEmail()))
-      }
-    }
+  def showCannotVerifyEmailLocked: Action[AnyContent] = Action.async { implicit request =>
+    Ok(cannotVerifyEmailLockedTemplate(routes.ContactDetailsController.showContactEmailCheck()))
+  }
+
+  def showCannotVerifyEmailTechnicalError: Action[AnyContent] = Action.async { implicit request =>
+    Ok(cannotVerifyEmailTechnicalTemplate())
   }
 
   private def agencyNameAndEmailClientCount(maybeSjr: Option[SubscriptionJourneyRecord])(implicit hc: HeaderCarrier): Future[(String, String, Int)] = {
