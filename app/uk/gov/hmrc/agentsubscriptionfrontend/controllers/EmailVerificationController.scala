@@ -67,7 +67,7 @@ class EmailVerificationController @Inject()(
     } yield (RelevantState(subscriptionJourneyRecord, isChangingAnswers), authProviderId.providerId)
 
   override def getEmailToVerify(session: RelevantState): String =
-    session.subscriptionJourneyRecord.contactEmailData.flatMap(_.contactEmail).getOrElse {
+    session.subscriptionJourneyRecord.effectiveEmail.getOrElse {
       throw new IllegalStateException("A verify email call has been made but no email to verify is present.")
     }
 
@@ -83,8 +83,8 @@ class EmailVerificationController @Inject()(
   override def redirectUrlIfVerified(session: RelevantState): Call =
     if (session.isChangingAnswers.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
     else routes.TaskListController.showTaskList()
-  override def redirectUrlIfLocked(session: RelevantState): Call = routes.SubscriptionController.showCannotVerifyEmail()
-  override def redirectUrlIfError(session: RelevantState): Call = routes.SubscriptionController.showCannotVerifyEmail()
+  override def redirectUrlIfLocked(session: RelevantState): Call = routes.SubscriptionController.showCannotVerifyEmailLocked()
+  override def redirectUrlIfError(session: RelevantState): Call = routes.SubscriptionController.showCannotVerifyEmailTechnicalError()
   override def backLinkUrl(session: RelevantState): Option[Call] = Some(routes.ContactDetailsController.showContactEmailCheck())
   override def enterEmailUrl(session: RelevantState): Call = routes.ContactDetailsController.showContactEmailCheck()
 }

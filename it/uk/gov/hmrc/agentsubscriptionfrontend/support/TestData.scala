@@ -118,7 +118,8 @@ object TestData {
     cleanCredsAuthProviderId = Some(id),
     contactEmailData = Some(ContactEmailData(false, Some("email@email.com"))),
     contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),
-    contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
+    contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+    verifiedEmails = Set("email@email.com")
   )
 
   val completeJourneyRecordWithMappings: SubscriptionJourneyRecord = completeJourneyRecordNoMappings

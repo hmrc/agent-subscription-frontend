@@ -45,7 +45,7 @@ class TaskListController @Inject()(
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def showTaskList: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
+    withSubscribingEmailVerifiedAgent { agent =>
       agent.subscriptionJourneyRecord match {
         case Some(record) => taskListService.createTasks(record).map(tasks => (Ok(taskListTemplate(tasks))))
         case None         => Future.successful(Redirect(routes.BusinessTypeController.showBusinessTypeForm()))

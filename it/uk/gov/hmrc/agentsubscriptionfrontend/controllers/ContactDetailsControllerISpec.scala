@@ -140,7 +140,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
   "submitContactEmailCheck (POST /contact-email-check) " should {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.showContactEmailCheck(_))
 
-    "303 redirect to /verify-email when same as business email selected" in {
+    "303 redirect to /task-list when same as business email selected" in {
 
       val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
         businessDetails = BusinessDetails(SoleTrader,
@@ -154,8 +154,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
             Some("email@email.com"),
             Some("safeId"))
           )
-        ),
-        verifiedEmails = Set.empty)
+        ))
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
@@ -169,7 +168,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
         await(controller.submitContactEmailCheck(request.withFormUrlEncodedBody("check" -> "yes")))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EmailVerificationController.verifyEmail().url)
+      redirectLocation(result) shouldBe Some(routes.TaskListController.showTaskList().url)
     }
 
 
@@ -313,51 +312,51 @@ class ContactDetailsControllerISpec extends BaseISpec {
       status(result) shouldBe 303
      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck().url)
     }
-}
+  }
 
   "submitContactEmailAddress (POST /contact-email-address) " should {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.showContactEmailCheck(_))
 
-  "303 redirect to /verify-email when submit with valid email address (which had not already been verified)" in {
-    val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
-      businessDetails = BusinessDetails(SoleTrader,
-        validUtr,
-        Postcode(validPostcode),
-        registration = Some(Registration(
-          Some(registrationName),
-          isSubscribedToAgentServices = false,
-          isSubscribedToETMP = true,
-          businessAddress,
-          Some("email@email.com"),
-          Some("safeId")
+    "303 redirect to /task-list when submit with valid email address" in {
+      val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+        businessDetails = BusinessDetails(SoleTrader,
+          validUtr,
+          Postcode(validPostcode),
+          registration = Some(Registration(
+            Some(registrationName),
+            isSubscribedToAgentServices = false,
+            isSubscribedToETMP = true,
+            businessAddress,
+            Some("email@email.com"),
+            Some("safeId")
+            )
+          )),
+        contactEmailData = Some(ContactEmailData(useBusinessEmail = true, None)))
+
+      givenSubscriptionJourneyRecordExists(id, sjr)
+      givenSubscriptionRecordCreated(id, sjr.copy(
+        businessDetails = BusinessDetails(SoleTrader,
+          validUtr,
+          Postcode(validPostcode),
+          registration = Some(Registration(
+            Some(registrationName),
+            isSubscribedToAgentServices = false,
+            isSubscribedToETMP = true,
+            businessAddress,
+            Some("email@email.com"),
+            Some("safeId")
+            )
+          )),
+          contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("new@email.com"))))
         )
-        )),
-      contactEmailData = Some(ContactEmailData(useBusinessEmail = true, None)))
+        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
-    givenSubscriptionJourneyRecordExists(id, sjr)
-    givenSubscriptionRecordCreated(id, sjr.copy(
-      businessDetails = BusinessDetails(SoleTrader,
-        validUtr,
-        Postcode(validPostcode),
-        registration = Some(Registration(
-          Some(registrationName),
-          isSubscribedToAgentServices = false,
-          isSubscribedToETMP = true,
-          businessAddress,
-          Some("email@email.com"),
-          Some("safeId")
-        )
-        )),
-      contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("new@email.com"))))
-    )
-    val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        val result =
+          await(controller.submitContactEmailAddress(request.withFormUrlEncodedBody("email" -> "new@email.com")))
 
-    val result =
-      await(controller.submitContactEmailAddress(request.withFormUrlEncodedBody("email" -> "new@email.com")))
-
-    status(result) shouldBe 303
-    redirectLocation(result) shouldBe Some(routes.EmailVerificationController.verifyEmail().url)
-  }
+        status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.TaskListController.showTaskList().url)
+    }
 
     "200 OK with error message with empty submission" in {
       val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(

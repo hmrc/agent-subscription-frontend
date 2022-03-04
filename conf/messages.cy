@@ -525,9 +525,18 @@ postcodeNotAllowed.p2=Defnyddiwch god post gwahanol a rhowch gynnig arall arni.
 postcodeNotAllowed.button=Rhoi cynnig arall arni
 
 #Cannot verify email
-cannotVerifyEmail.title=We could not verify your email address
-cannotVerifyEmail.p1=Before you can create an agent services account, we need to verify your email address.
-cannotVerifyEmail.p2=<a href="{0}">Try again</a> with a different email address.
+cannotVerifyEmail.locked.title=Nid oedd modd i ni gadarnhau pwy ydych
+cannotVerifyEmail.locked.p1=Ni allwn wirio pwy ydych oherwydd rydych wedi nodi cod dilysu anghywir gormod o weithiau.
+cannotVerifyEmail.locked.p2=Cafodd y cod dilysu ei e-bostio atoch.
+cannotVerifyEmail.locked.h2=Beth i’w wneud nesaf
+cannotVerifyEmail.locked.p3=Gallwch roi cynnig arall arni ymhen 24 awr.
+cannotVerifyEmail.locked.p4=Os hoffech drio eto gyda chyfeiriad e-bost gwahanol, <a href="{0}">gallwch newid y cyfeiriad e-bost a nodwyd gennych (yn agor tab newydd)</a>.
+
+#Cannot verify email
+cannotVerifyEmail.technical.title=Nid oedd modd i ni gadarnhau pwy ydych
+cannotVerifyEmail.technical.p1=We cannot check your identity because there is a temporary problem with our service.
+cannotVerifyEmail.technical.h2=Beth i’w wneud nesaf
+cannotVerifyEmail.technical.p2=Gallwch roi cynnig arall arni ymhen 24 awr.
 
 #sign in with a new ID error page
 sign-in-new-id.header=Mewngofnodi gyda’ch Dynodydd Defnyddiwr (ID) newydd
