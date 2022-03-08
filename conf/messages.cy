@@ -534,7 +534,7 @@ cannotVerifyEmail.locked.p4=Os hoffech drio eto gyda chyfeiriad e-bost gwahanol,
 
 #Cannot verify email
 cannotVerifyEmail.technical.title=Nid oedd modd i ni gadarnhau pwy ydych
-cannotVerifyEmail.technical.p1=We cannot check your identity because there is a temporary problem with our service.
+cannotVerifyEmail.technical.p1=Ni allwn wirio pwy ydych oherwydd bod problem dros dro gyda’n gwasanaeth.
 cannotVerifyEmail.technical.h2=Beth i’w wneud nesaf
 cannotVerifyEmail.technical.p2=Gallwch roi cynnig arall arni ymhen 24 awr.
 
