@@ -99,16 +99,16 @@ error.moneyLaunderingCompliance.amlscode.empty=Select the name of your money lau
 error.moneyLaunderingCompliance.amlscode.invalid=Select the name of your money laundering supervisory body from the list
 error.moneyLaunderingCompliance.membershipNumber.empty=Enter your membership number
 error.moneyLaunderingCompliance.membershipNumber.invalid=Enter a membership number in the correct format
-error.moneyLaunderingCompliance.date.empty=Enter the date your membership expires
-error.moneyLaunderingCompliance.day.empty=The date your membership expires must include a day
-error.moneyLaunderingCompliance.day.month.empty=The date your membership expires must include a day and a month
-error.moneyLaunderingCompliance.day.year.empty=The date your membership expires must include a day and a year
-error.moneyLaunderingCompliance.month.year.empty=The date your membership expires must include a month and a year
-error.moneyLaunderingCompliance.month.empty=The date your membership expires must include a month
-error.moneyLaunderingCompliance.year.empty=The date your membership expires must include a year
+error.moneyLaunderingCompliance.date.empty=Enter your next membership renewal date
+error.moneyLaunderingCompliance.day.empty=Your next membership renewal date must include a day
+error.moneyLaunderingCompliance.day.month.empty=Your next membership renewal date must include a day and a month
+error.moneyLaunderingCompliance.day.year.empty=Your next membership renewal date must include a day and a year
+error.moneyLaunderingCompliance.month.year.empty=Your next membership renewal date must include a month and a year
+error.moneyLaunderingCompliance.month.empty=Your next membership renewal date must include a month
+error.moneyLaunderingCompliance.year.empty=Your next membership renewal date must include a year
 error.moneyLaunderingCompliance.date.invalid=Enter a real date
-error.moneyLaunderingCompliance.date.past=The date your membership expires must be in the future
-error.moneyLaunderingCompliance.date.before=The date your membership expires must be within 13 months of today
+error.moneyLaunderingCompliance.date.past=Your next membership renewal date must be in the future
+error.moneyLaunderingCompliance.date.before=Your next membership renewal date must be within 13 months of today
 
 error.check-amls-value.invalid=Select yes if you are registered with a money laundering supervisory body
 error.check-amlsAppliedFor-value.invalid=Select yes if you are applied to register for money laundering supervision with HMRC
@@ -450,12 +450,12 @@ amls-not-applied.p2=To find details of supervisory bodies, see <a href="https://
 amlsAppliedFor.title=Have you applied to register for money laundering supervision with HMRC?
 
 # Money laundering compliance page
-moneyLaunderingCompliance.title=Money laundering compliance details
+moneyLaunderingCompliance.title=What are your money laundering supervision registration details?
 moneyLaunderingCompliance.p1=You must be registered with a money laundering supervisory body before you can create an agent services account.
 moneyLaunderingCompliance.amls.title=Name of money laundering supervisory body
 moneyLaunderingCompliance.amls.hint=Start typing and select your supervisory body from the list
-moneyLaunderingCompliance.membershipNumber.title=Membership number
-moneyLaunderingCompliance.expiry.title=When is your next membership renewal date?
+moneyLaunderingCompliance.membershipNumber.title=Your membership number
+moneyLaunderingCompliance.expiry.title=Your next membership renewal date
 moneyLaunderingCompliance.expiry.hint=For example, 31 03 2019
 moneyLaunderingCompliance.expiry.day.title=Day
 moneyLaunderingCompliance.expiry.month.title=Month
