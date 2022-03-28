@@ -39,8 +39,8 @@ class EmailVerificationService @Inject()(emailVerificationConnector: EmailVerifi
                                VerifyEmailRequest(
                                  credId = credId,
                                  continueUrl = continueUrl,
-                                 origin = "agent-overseas",
-                                 deskproServiceName = Some("agent-overseas"),
+                                 origin = "agent-subscription",
+                                 deskproServiceName = Some("agent-subscription"),
                                  accessibilityStatementUrl = accessibilityStatementUrl,
                                  email = mEmail,
                                  lang = Some(lang),
