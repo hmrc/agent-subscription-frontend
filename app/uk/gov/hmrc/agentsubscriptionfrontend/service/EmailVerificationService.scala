@@ -39,8 +39,8 @@ class EmailVerificationService @Inject()(emailVerificationConnector: EmailVerifi
                                VerifyEmailRequest(
                                  credId = credId,
                                  continueUrl = continueUrl,
-                                 origin = "agent-subscription",
-                                 deskproServiceName = Some("agent-subscription"),
+                                 origin = if (lang == "cy") "Gwasanaethau Asiant CThEM" else "HMRC Agent Services",
+                                 deskproServiceName = None,
                                  accessibilityStatementUrl = accessibilityStatementUrl,
                                  email = mEmail,
                                  lang = Some(lang),
