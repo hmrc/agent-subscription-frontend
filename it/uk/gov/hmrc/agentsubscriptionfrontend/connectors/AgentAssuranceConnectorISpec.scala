@@ -9,6 +9,7 @@ import uk.gov.hmrc.domain.{Nino, SaAgentReference}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpClient
 import play.api.test.Helpers._
+import uk.gov.hmrc.agentsubscriptionfrontend.models.PendingDetails
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -108,14 +109,20 @@ class AgentAssuranceConnectorISpec extends BaseISpec with MetricTestSupport {
 
     "return AMLS data when agent-assurance responds with 200" in {
       givenAmlsDataIsFound(utr.value)
-      val amlsDetails = await(connector.getAmlsData(utr))
-      amlsDetails.isDefined shouldBe true
+      val maybeAmlsDetails = await(connector.getAmlsData(utr))
+      maybeAmlsDetails.isDefined shouldBe true
+    }
+
+    "return AMLS data when agent-assurance responds with 200 without appliedOn" in {
+      givenAmlsDataIsFoundWithoutAppliedOn(utr.value)
+      val maybeAmlsDetails = await(connector.getAmlsData(utr))
+      maybeAmlsDetails.get.details shouldBe Left(PendingDetails(None))
     }
 
     "return None when agent-assurance response with 400" in {
       givenAmlsDataIsNotFound(utr.value)
-      val amlsDetails = await(connector.getAmlsData(utr))
-      amlsDetails.isDefined shouldBe false
+      val maybeAmlsDetails = await(connector.getAmlsData(utr))
+      maybeAmlsDetails.isDefined shouldBe false
     }
   }
 

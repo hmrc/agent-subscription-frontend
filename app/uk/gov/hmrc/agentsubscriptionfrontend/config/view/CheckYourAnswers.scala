@@ -98,8 +98,8 @@ object CheckYourAnswers {
     data.amlsDetails match {
       case Some(amlsDetails) =>
         amlsDetails.details match {
-          case Left(PendingDetails(appliedOn)) =>
-            List(appliedOn.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))
+          case Left(PendingDetails(maybeAppliedOn)) =>
+            maybeAppliedOn.fold(List.empty[String])(appliedOn => List(appliedOn.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))))
           case Right(RegisteredDetails(membershipNumber, membershipExpiresOn, _, _)) =>
             List(
               amlsDetails.supervisoryBody,

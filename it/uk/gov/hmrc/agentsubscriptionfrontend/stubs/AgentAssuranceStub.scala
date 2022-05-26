@@ -64,6 +64,18 @@ object AgentAssuranceStub {
             |""".stripMargin)
         .withStatus(200)))
 
+  def givenAmlsDataIsFoundWithoutAppliedOn(utr: String): StubMapping =
+  stubFor(
+    get(retrieveAmlsDataUrl(utr))
+      .willReturn(aResponse()
+        .withBody(
+          """
+            |{
+            | "supervisoryBody": "HM Revenue and Customs (HMRC)"
+            |}
+            |""".stripMargin)
+        .withStatus(200)))
+
   def givenAmlsDataIsNotFound(utr: String): StubMapping =
     stubFor(
       get(retrieveAmlsDataUrl(utr))
