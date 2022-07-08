@@ -113,7 +113,7 @@ class TaskListControllerISpec extends BaseISpec with EmailVerificationBehaviours
         AuthProviderId("12345-credId"),
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
           .copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true),
-            Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id")))
+            Some(AmlsDetails("supervisory", Left(PendingDetails(Some(LocalDate.now().minusDays(20)))))))), continueId = Some("continue-id")))
 
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
@@ -149,7 +149,7 @@ class TaskListControllerISpec extends BaseISpec with EmailVerificationBehaviours
         AuthProviderId("12345-credId"),
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
           .copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true),
-            Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id"),
+            Some(AmlsDetails("supervisory", Left(PendingDetails(Some(LocalDate.now().minusDays(20)))))))), continueId = Some("continue-id"),
             contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))))
       )
 
@@ -168,7 +168,7 @@ class TaskListControllerISpec extends BaseISpec with EmailVerificationBehaviours
         AuthProviderId("12345-credId"),
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
           .copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true),
-            Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id"),
+            Some(AmlsDetails("supervisory", Left(PendingDetails(Some(LocalDate.now().minusDays(20)))))))), continueId = Some("continue-id"),
             contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
             contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))))
       )
@@ -189,7 +189,7 @@ class TaskListControllerISpec extends BaseISpec with EmailVerificationBehaviours
         AuthProviderId("12345-credId"),
         TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
           .copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true),
-            Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(20))))))), continueId = Some("continue-id"),
+            Some(AmlsDetails("supervisory", Left(PendingDetails(Some(LocalDate.now().minusDays(20)))))))), continueId = Some("continue-id"),
             contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
             contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),
             contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))))

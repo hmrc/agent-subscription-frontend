@@ -229,13 +229,17 @@ class AMLSController @Inject()(
       agent.getMandatoryAmlsData.amlsDetails match {
         case Some(amlsDetails) =>
           amlsDetails.details match {
-            case Left(PendingDetails(appliedOn)) =>
-              val form: Map[String, String] = Map(
-                "amlsCode"        -> "HMRC",
-                "appliedOn.day"   -> appliedOn.getDayOfMonth.toString,
-                "appliedOn.month" -> appliedOn.getMonthValue.toString,
-                "appliedOn.year"  -> appliedOn.getYear.toString
-              )
+            case Left(PendingDetails(maybeAppliedOn)) =>
+              val form: Map[String, String] = maybeAppliedOn match {
+                case None => Map("amlsCode" -> "HMRC")
+                case Some(appliedOn) =>
+                  Map(
+                    "amlsCode"        -> "HMRC",
+                    "appliedOn.day"   -> appliedOn.getDayOfMonth.toString,
+                    "appliedOn.month" -> appliedOn.getMonthValue.toString,
+                    "appliedOn.year"  -> appliedOn.getYear.toString
+                  )
+              }
               Ok(amlsPendingDetailsTemplate(amlsPendingForm.bind(form)))
             case Right(RegisteredDetails(_, _, _, _)) => Ok(amlsPendingDetailsTemplate(amlsPendingForm))
           }
@@ -261,7 +265,8 @@ class AMLSController @Inject()(
               val continue = toTaskListOrCheckYourAnswers(isChanging)
               updateAmlsJourneyRecord(
                 agent,
-                amlsData => Some(amlsData.copy(amlsDetails = Some(AmlsDetails(supervisoryBodyData, Left(PendingDetails(validForm.appliedOn))))))
+                amlsData =>
+                  Some(amlsData.copy(amlsDetails = Some(AmlsDetails(supervisoryBodyData, Left(PendingDetails(Option(validForm.appliedOn)))))))
               ).map(
                 _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsApplicationDatePage()))
               )

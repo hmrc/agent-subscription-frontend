@@ -862,7 +862,7 @@ class AMLSControllerISpec extends BaseISpec {
 
     "display and pre-populate page when this information is in the store" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecord(id).copy(amlsData =
-        Some(AmlsData(false, Some(true), Some(AmlsDetails("supervisory", Left(PendingDetails(LocalDate.now().minusDays(5)))))))))
+        Some(AmlsData(false, Some(true), Some(AmlsDetails("supervisory", Left(PendingDetails(Some(LocalDate.now().minusDays(5))))))))))
 
       val result = await(controller.showAmlsApplicationDatePage(authenticatedRequest))
 
@@ -890,7 +890,7 @@ class AMLSControllerISpec extends BaseISpec {
         record.copy(
           amlsData = Some(
             AmlsData.registeredUserNoDataEntered.copy(
-              amlsDetails = Some(AmlsDetails("Association of AccountingTechnicians (AAT)", Left(PendingDetails(appliedOnDate)))))))
+              amlsDetails = Some(AmlsDetails("Association of AccountingTechnicians (AAT)", Left(PendingDetails(Some(appliedOnDate))))))))
       )
       implicit val request = authenticatedRequest.withFormUrlEncodedBody(
         "amlsCode"        -> "AAT",
@@ -913,7 +913,7 @@ class AMLSControllerISpec extends BaseISpec {
         record.copy(
           amlsData = Some(
             AmlsData.registeredUserNoDataEntered.copy(
-              amlsDetails = Some(AmlsDetails("Association of AccountingTechnicians (AAT)", Left(PendingDetails(appliedOnDate)))))))
+              amlsDetails = Some(AmlsDetails("Association of AccountingTechnicians (AAT)", Left(PendingDetails(Some(appliedOnDate))))))))
       )
       implicit val request = authenticatedRequest.withFormUrlEncodedBody(
         "amlsCode"        -> "AAT",
