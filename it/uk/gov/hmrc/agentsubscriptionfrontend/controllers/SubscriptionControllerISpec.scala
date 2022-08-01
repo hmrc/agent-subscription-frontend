@@ -311,10 +311,6 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         "subscriptionComplete.title",
         "subscriptionComplete.h1",
         "subscriptionComplete.accountName",
-        "subscriptionComplete.nextStepsMTD.header",
-        "subscriptionComplete.nextStepsMTD.p",
-        "subscriptionComplete.nextStepsTERS.header",
-        "subscriptionComplete.nextStepsTERS.p",
         "subscriptionComplete.button.continueToASAccount"
       )
       bodyOf(result) should include(hasMessage("subscriptionComplete.p1", "AARN0000001"))
@@ -331,10 +327,6 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         "subscriptionComplete.title",
         "subscriptionComplete.h1",
         "subscriptionComplete.accountName",
-        "subscriptionComplete.nextStepsMTD.header",
-        "subscriptionComplete.nextStepsMTD.p",
-        "subscriptionComplete.nextStepsTERS.header",
-        "subscriptionComplete.nextStepsTERS.p",
         "subscriptionComplete.button.continueToASAccount"
       )
       bodyOf(result) should include(hasMessage("subscriptionComplete.p1", "AARN0000001"))
