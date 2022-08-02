@@ -18,26 +18,26 @@ startpage.l2.4=pryd i ddefnyddio’ch cyfrif gwasanaethau asiant
 
 global.error.403.title=Ni allwch gael at y dudalen hon
 global.error.403.heading=Ni allwch gael at y dudalen hon
-global.error.403.message=Gwiriwch fod gennych ganiatâd i gael at y dudalen hon. </p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">Ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer TAW.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a>i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.
+global.error.403.message=Gwiriwch fod gennych ganiatâd i gael at y dudalen hon. </p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">Ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a>i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.
 
 global.error.badRequest400.title=Heb ddod o hyd i’r dudalen
 global.error.badRequest400.heading=Heb ddod o hyd i’r dudalen
-global.error.badRequest400.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p>Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p>Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class=" govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer TAW</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p>
+global.error.badRequest400.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p>Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p>Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class=" govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p>
 
 global.error.pageNotFound404.title=Heb ddod o hyd i’r dudalen
 global.error.pageNotFound404.heading=Heb ddod o hyd i’r dudalen
-global.error.pageNotFound404.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p>Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p>Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer TAW</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p>
+global.error.pageNotFound404.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p>Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p>Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p>
 
 global.error.InternalServerError500.title=Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
 global.error.InternalServerError500.heading=Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
-global.error.InternalServerError500.message=Rhowch gynnig arall arni yn nes ymlaen.</p><p><a href=”https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers”>Ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer TAW.</p><p><a href=”https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines”>Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.
+global.error.InternalServerError500.message=Rhowch gynnig arall arni yn nes ymlaen.</p><p><a href=”https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers”>Ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW.</p><p><a href=”https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines”>Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.
 
 global.error.500.title=Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth – 500
 global.error.500.heading=Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
 global.error.500.message=Rhowch gynnig arall arni yn nes ymlaen.
 global.error.500.p2=Efallai nad ydym wedi cadw’ch atebion. Pan fydd y gwasanaeth ar gael, efallai y bydd yn rhaid i chi ddechrau eto.
 global.error.500.vat_helpline.link=Ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM
-global.error.500.vat_helpline=os oes angen cymorth arnoch gyda’r cynllun Troi Treth yn Ddigidol ar gyfer TAW.
+global.error.500.vat_helpline=os oes angen cymorth arnoch gyda’r cynllun TAW.
 global.error.500.sa_helpline.link=Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM
 global.error.500.sa_helpline=os oes angen cymorth arnoch gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.
 
@@ -388,10 +388,6 @@ subscriptionComplete.accountName=Rydych wedi creu cyfrif ar gyfer
 subscriptionComplete.copiedAcross=Rydych hefyd wedi copïo ar draws <strong class="govuk-!-font-weight-bold">{0}</strong> o gleientiaid i’ch cyfrif gwasanaethau asiant newydd.
 subscriptionComplete.p1=Gwnewch nodyn o gyfeirnod eich cyfrif <strong class="govuk-!-font-weight-bold">{0}</strong>. Gwnewch yn siŵr bod gennych chi hyn os ydych yn cysylltu â ni ynglŷn â’ch cyfrif gwasanaethau asiant
 subscriptionComplete.p2=Rydym wedi anfon e-bost i {0} i gadarnhau’r manylion hyn.
-subscriptionComplete.nextStepsMTD.header=Camau nesaf ar gyfer y cynllun Troi Treth yn Ddigidol fel asiant
-subscriptionComplete.nextStepsMTD.p=Os gwnaethoch gopïo ar draws cleientiaid sydd angen dilyn rheolau’r cynllun Troi Treth yn Ddigidol, mae angen i chi nawr gofrestru’ch cleientiaid ar gyfer Troi Treth yn Ddigidol ar gyfer TAW.
-subscriptionComplete.nextStepsTERS.header=Camau nesaf ar gyfer ymddiriedolaethau neu ystadau
-subscriptionComplete.nextStepsTERS.p=Gallwch nawr fynd yn eich blaen i gofrestru ymddiriedolaeth neu ystâd cleient
 subscriptionComplete.button.continueToASAccount=Ewch i’ch cyfrif gwasanaethau asiant
 
 #Common

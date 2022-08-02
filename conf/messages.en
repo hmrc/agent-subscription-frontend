@@ -18,26 +18,26 @@ startpage.l2.4=when to use your agent services account
 
 global.error.403.title=You cannot access this page
 global.error.403.heading=You cannot access this page
-global.error.403.message=Check you have permission to access this page.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">Call the VAT online services helpline</a> for help with Making Tax Digital for VAT.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">Call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.
+global.error.403.message=Check you have permission to access this page.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">Call the VAT online services helpline</a> for help with VAT.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">Call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.
 
 global.error.badRequest400.title=Page not found
 global.error.badRequest400.heading=Page not found
-global.error.badRequest400.message=If you typed the web address, check it is correct.</p><p>If you pasted the web address, check you copied the entire address.</p><p>If the web address is correct or you selected a link or button:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with Making Tax Digital for VAT</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p>
+global.error.badRequest400.message=If you typed the web address, check it is correct.</p><p>If you pasted the web address, check you copied the entire address.</p><p>If the web address is correct or you selected a link or button:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with VAT</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p>
 
 global.error.pageNotFound404.title=Page not found
 global.error.pageNotFound404.heading=Page not found
-global.error.pageNotFound404.message=If you typed the web address, check it is correct.</p><p>If you pasted the web address, check you copied the entire address.</p><p>If the web address is correct or you selected a link or button:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with Making Tax Digital for VAT</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p>
+global.error.pageNotFound404.message=If you typed the web address, check it is correct.</p><p>If you pasted the web address, check you copied the entire address.</p><p>If the web address is correct or you selected a link or button:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with VAT</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p>
 
 global.error.InternalServerError500.title=Sorry, there is a problem with the service
 global.error.InternalServerError500.heading=Sorry, there is a problem with the service
-global.error.InternalServerError500.message=Try again later.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">Call the VAT online services helpline</a> for help with Making Tax Digital for VAT.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">Call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.
+global.error.InternalServerError500.message=Try again later.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">Call the VAT online services helpline</a> for help with VAT.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">Call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.
 
 global.error.500.title=Sorry, there is a problem with the service - 500
 global.error.500.heading=Sorry, there is a problem with the service
 global.error.500.message=Try again later.
 global.error.500.p2=We may not have saved your answers. When the service is available, you may have to start again.
 global.error.500.vat_helpline.link=Call the VAT online services helpline
-global.error.500.vat_helpline=if you need help with Making Tax Digital for VAT.
+global.error.500.vat_helpline=if you need help with VAT.
 global.error.500.sa_helpline.link=Call the HMRC Self Assessment online services helpline
 global.error.500.sa_helpline=if you need help with Making Tax Digital for Income Tax.
 
@@ -389,10 +389,6 @@ subscriptionComplete.accountName=You created an account for
 subscriptionComplete.copiedAcross=You have also copied across <strong class="govuk-!-font-weight-bold">{0}</strong> clients to your new agent services account.
 subscriptionComplete.p1=Make a note of your account reference number <strong class="govuk-!-font-weight-bold">{0}</strong>. Make sure you have this with you if you contact us about your agent services account.
 subscriptionComplete.p2=We have sent an email to {0} confirming these details.
-subscriptionComplete.nextStepsMTD.header=Next steps for Making Tax Digital as an agent
-subscriptionComplete.nextStepsMTD.p=If you copied across clients who need to follow the rules for Making Tax Digital, you now need to sign your clients up for Making Tax Digital for VAT.
-subscriptionComplete.nextStepsTERS.header=Next steps for trusts or estates
-subscriptionComplete.nextStepsTERS.p=You can now continue with registering a client's trust or estate.
 subscriptionComplete.button.continueToASAccount=Go to your agent services account
 
 #Common

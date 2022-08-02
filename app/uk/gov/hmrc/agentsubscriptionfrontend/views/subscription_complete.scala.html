@@ -40,12 +40,6 @@ govukPanel: GovukPanel
     <p>@Html(msgs("subscriptionComplete.p1", s"$arn"))</p>
     <p>@msgs("subscriptionComplete.p2", s"$agencyEmail")</p>
 
-    <h2>@msgs("subscriptionComplete.nextStepsMTD.header")</h2>
-    <p>@msgs("subscriptionComplete.nextStepsMTD.p")</p>
-
-    <h2>@msgs("subscriptionComplete.nextStepsTERS.header")</h2>
-    <p>@msgs("subscriptionComplete.nextStepsTERS.p")</p>
-
     <a href="@appConfig.agentServicesAccountUrl"
     class="govuk-link govuk-!-margin-bottom-9" id="continue">@msgs("subscriptionComplete.button.continueToASAccount")</a>
 }
