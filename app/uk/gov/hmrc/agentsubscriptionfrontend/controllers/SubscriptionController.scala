@@ -67,7 +67,7 @@ class SubscriptionController @Inject()(
 
   val desAddressForm = new DesAddressForm(logger, blacklistedPostCodes)
 
-  def showCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
+  def showCheckAnswers(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingEmailVerifiedAgent { agent =>
       agent.withCleanCredsOrSignIn {
         val sjr = agent.getMandatorySubscriptionRecord
@@ -133,7 +133,7 @@ class SubscriptionController @Inject()(
       agencyEmail.getOrElse(throw new Exception("contact email address should be defined"))))
   }
 
-  def submitCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
+  def submitCheckAnswers(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingEmailVerifiedAgent { agent =>
       agent.withCleanCredsOrSignIn {
         val sjr = agent.getMandatorySubscriptionRecord
@@ -171,7 +171,7 @@ class SubscriptionController @Inject()(
     }
   }
 
-  def showBusinessAddressForm: Action[AnyContent] = Action.async { implicit request =>
+  def showBusinessAddressForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       mark("Count-Subscription-AddressLookup-Start")
       implicit val language: Lang = mcc.messagesApi.preferred(request).lang
@@ -218,7 +218,7 @@ class SubscriptionController @Inject()(
     }
   }
 
-  def submitModifiedAddress: Action[AnyContent] = Action.async { implicit request =>
+  def submitModifiedAddress(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         desAddressForm.form
@@ -241,7 +241,7 @@ class SubscriptionController @Inject()(
   }
 
 
-  def showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>
+  def showSubscriptionComplete(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribedAgent { (arn: Arn, sjrOpt: Option[SubscriptionJourneyRecord]) =>
       for{
         maybeContinueUrl <- getMaybeContinueUrl
@@ -253,11 +253,11 @@ class SubscriptionController @Inject()(
     }
   }
 
-  def showCannotVerifyEmailLocked: Action[AnyContent] = Action.async { implicit request =>
+  def showCannotVerifyEmailLocked(): Action[AnyContent] = Action.async { implicit request =>
     Ok(cannotVerifyEmailLockedTemplate(routes.ContactDetailsController.showContactEmailCheck()))
   }
 
-  def showCannotVerifyEmailTechnicalError: Action[AnyContent] = Action.async { implicit request =>
+  def showCannotVerifyEmailTechnicalError(): Action[AnyContent] = Action.async { implicit request =>
     Ok(cannotVerifyEmailTechnicalTemplate())
   }
 
@@ -307,7 +307,7 @@ class SubscriptionController @Inject()(
   }
 
 
-  def showSignInWithNewID: Action[AnyContent] = Action.async { implicit request =>
+  def showSignInWithNewID(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(signInNewIdTemplate())
     }

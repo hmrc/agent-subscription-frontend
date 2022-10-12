@@ -85,11 +85,10 @@ class DateOfBirthController @Inject()(
               validDob => {
                 if (existingSession.dateOfBirthFromCid.contains(validDob)) {
                   companiesHouseKnownFactCheck(existingSession) {
-                    updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(
-                      routes.VatDetailsController.showRegisteredForVatForm())
+                    updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(routes.VatDetailsController.showRegisteredForVatForm)
                   }
                 } else {
-                  Redirect(routes.BusinessIdentificationController.showNoMatchFound())
+                  Redirect(routes.BusinessIdentificationController.showNoMatchFound)
                 }
               }
             )

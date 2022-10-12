@@ -16,7 +16,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.minimalSubscriptionJourneyRecord
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestSetupNoJourneyRecord}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, SessionKeys}
 
 import scala.concurrent.Future
 
@@ -26,7 +26,7 @@ class AuthActionsSpec extends BaseISpec with MockitoSugar {
 
   object TestController extends AuthActions {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier(authorization = Some(Authorization("Bearer XYZ")))
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
     import scala.concurrent.ExecutionContext.Implicits.global
     val env = app.injector.instanceOf[Environment]

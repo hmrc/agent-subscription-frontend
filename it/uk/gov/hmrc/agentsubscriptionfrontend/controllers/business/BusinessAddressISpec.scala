@@ -93,7 +93,7 @@ class BusinessAddressISpec extends BaseISpec {
 
       givenAgentIsNotManuallyAssured(validUtr.value)
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
           "addressLine1" -> "new addressline 1",
           "addressLine2" -> "new addressline 2",
           "addressLine3" -> "new addressline 3",
@@ -118,7 +118,7 @@ class BusinessAddressISpec extends BaseISpec {
 
     "show validation error when the form is submitted with empty address line 1" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
           "addressLine1" -> " ",
           "addressLine2" -> "new addressline 2",
           "addressLine3" -> "new addressline 3",
@@ -135,7 +135,7 @@ class BusinessAddressISpec extends BaseISpec {
 
     "show validation error when the form is submitted with invalid address line 3" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
           "addressLine1" -> "address line 1",
           "addressLine2" -> "new addressline 2",
           "addressLine3" -> "new addressline **!",
@@ -153,7 +153,7 @@ class BusinessAddressISpec extends BaseISpec {
 
     "show validation error when the form is submitted with invalid address line 1" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
           "addressLine1" -> "address line 1**",
           "addressLine2" -> "new addressline 2",
           "addressLine3" -> "new addressline 3",
@@ -170,7 +170,7 @@ class BusinessAddressISpec extends BaseISpec {
 
     "show validation error when the form is submitted with postcode which exceed max length" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
           "addressLine1" -> "address line 1",
           "addressLine2" -> "new addressline 2",
           "addressLine3" -> "new addressline 3",
@@ -189,7 +189,7 @@ class BusinessAddressISpec extends BaseISpec {
     "redirect to postcode-not-allowed page" when {
       "postcode entered is blacklisted" in new TestSetupNoJourneyRecord {
         implicit val request =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
             "addressLine1" -> "address line 1",
             "addressLine2" -> "new addressline 2",
             "addressLine3" -> "new addressline 3",
@@ -207,7 +207,7 @@ class BusinessAddressISpec extends BaseISpec {
 
       "postcode entered is BFPO" in new TestSetupNoJourneyRecord {
         implicit val request =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
             "addressLine1" -> "address line 1",
             "addressLine2" -> "new addressline 2",
             "addressLine3" -> "new addressline 3",
@@ -225,7 +225,7 @@ class BusinessAddressISpec extends BaseISpec {
 
       "postcode starts with BFPO" in new TestSetupNoJourneyRecord {
         implicit val request =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
             "addressLine1" -> "address line 1",
             "addressLine2" -> "new addressline 2",
             "addressLine3" -> "new addressline 3",

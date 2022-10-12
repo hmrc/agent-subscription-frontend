@@ -53,7 +53,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
       def testSaAgentCodeCheck(sageAgentCode: String): Assertion = {
 
         implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody(("hasSaAgentCode", "true"), ("saAgentCode", sageAgentCode))
         sessionStoreService.currentSession.agentSession = Some(agentSession)
 
@@ -68,7 +68,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
     "redirect to /cannot-create account if selected No" in new TestSetupNoJourneyRecord {
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("hasSaAgentCode", "false"))
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
@@ -84,7 +84,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
       "it contains invalid characters" in new TestSetupNoJourneyRecord {
 
         implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody(("hasSaAgentCode", "true"), ("saAgentCode", "SA601*2AAAA"))
         sessionStoreService.currentSession.agentSession = Some(agentSession)
 
@@ -98,7 +98,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
       "it contains wrong max length" in new TestSetupNoJourneyRecord {
 
         implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody(("hasSaAgentCode", "true"), ("saAgentCode", "SA6012AAAA"))
         sessionStoreService.currentSession.agentSession = Some(agentSession)
 
@@ -112,7 +112,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
       "it contains wrong min length" in new TestSetupNoJourneyRecord {
 
         implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody(("hasSaAgentCode", "true"), ("saAgentCode", "SA"))
         sessionStoreService.currentSession.agentSession = Some(agentSession)
 
@@ -126,7 +126,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
       "contains empty SaAgentCode" in new TestSetupNoJourneyRecord {
 
         implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody(("hasSaAgentCode", "true"), ("saAgentCode", ""))
         sessionStoreService.currentSession.agentSession = Some(agentSession)
 
@@ -183,7 +183,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
           saAgentReference = "SA6012")
 
         implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody(("variant", "nino"), ("nino", nino))
           .withSession("saAgentReferenceToCheck" -> "SA6012")
 
@@ -219,7 +219,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
         saAgentReference = "SA6012")
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", "nino"), ("nino", "AA123456A"))
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration.copy(emailAddress = None))))
@@ -238,7 +238,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
         saAgentReference = "SA6012")
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", "nino"), ("nino", "AA123456A"))
         .withSession("saAgentReferenceToCheck" -> "SA6012")
       sessionStoreService.currentSession.agentSession =
@@ -265,7 +265,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
     "clientDetails no variant selected" in new TestSetupNoJourneyRecord {
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", ""))
 
       sessionStoreService.currentSession.agentSession = Some(agentSession)
@@ -278,7 +278,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
 
     "nino invalid send back 200 with error page" in new TestSetupNoJourneyRecord {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", "nino"), ("nino", "AA123"))
 
       sessionStoreService.currentSession.agentSession = Some(agentSession)
@@ -292,7 +292,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
     "nino empty send back 200 with error page" in new TestSetupNoJourneyRecord {
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", "nino"), ("nino", ""))
 
       sessionStoreService.currentSession.agentSession = Some(agentSession)
@@ -310,7 +310,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
         valueOfNinoOrUtr = "4000000009",
         saAgentReference = "SA6012")
 
-      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", "utr"), ("utr", "4000000009"))
         .withSession("saAgentReferenceToCheck" -> "SA6012")
 
@@ -338,7 +338,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
         saAgentReference = "SA6012")
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", "utr"), ("utr", "   40000      00     009  "))
         .withSession("saAgentReferenceToCheck" -> "SA6012")
       sessionStoreService.currentSession.agentSession = Some(
@@ -371,7 +371,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
           saAgentReference = "SA6012")
 
         implicit val request: FakeRequest[AnyContentAsEmpty.type] =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         sessionStoreService.currentSession.agentSession =
           Some(AgentSession(
             Some(BusinessType.SoleTrader),
@@ -405,7 +405,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
           saAgentReference = "SA6012")
 
         implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-          authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody(("variant", "cannotProvide"))
           .withSession("saAgentReferenceToCheck" -> "SA6012")
         sessionStoreService.currentSession.agentSession = Some(agentSession)
@@ -422,7 +422,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
     "utr blank invasiveCheck" in new TestSetupNoJourneyRecord {
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", "utr"), ("utr", ""))
         .withSession("saAgentReferenceToCheck" -> "SA6012")
       sessionStoreService.currentSession.agentSession = Some(agentSession)
@@ -436,7 +436,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
     "utr invalid send back 200 with error page" in new TestSetupNoJourneyRecord {
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", "utr"), ("utr", "4ABC000009"))
         .withSession("saAgentReferenceToCheck" -> "SA6012")
       sessionStoreService.currentSession.agentSession = Some(agentSession)
@@ -449,7 +449,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
 
     "utr wrong length" in new TestSetupNoJourneyRecord {
 
-      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", "utr"), ("utr", "40000000090000000"))
         .withSession("saAgentReferenceToCheck" -> "SA6012")
       sessionStoreService.currentSession.agentSession = Some(agentSession)
@@ -463,7 +463,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
     "return 200 error when submitting without selected radio option" in new TestSetupNoJourneyRecord {
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody()
         .withSession("saAgentReferenceToCheck" -> "SA6012")
       sessionStoreService.currentSession.agentSession = Some(agentSession)

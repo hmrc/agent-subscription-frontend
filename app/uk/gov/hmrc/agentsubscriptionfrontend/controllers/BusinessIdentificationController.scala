@@ -78,25 +78,25 @@ class BusinessIdentificationController @Inject()(
 
   import BusinessIdentificationForms._
 
-  def showCreateNewAccount: Action[AnyContent] = Action.async { implicit request =>
+  def showCreateNewAccount(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(createNewAccountTemplate()).toFuture
     }
   }
 
-  def showNoMatchFound: Action[AnyContent] = Action.async { implicit request =>
+  def showNoMatchFound(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(noMatchFoundTemplate()).toFuture
     }
   }
 
-  def setupIncomplete: Action[AnyContent] = Action.async { implicit request =>
+  def setupIncomplete(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(cannotCreateAccountTemplate()).toFuture
     }
   }
 
-  def showConfirmBusinessForm: Action[AnyContent] = Action.async { implicit request =>
+  def showConfirmBusinessForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         getConfirmBusinessPage(existingSession).toFuture
@@ -142,7 +142,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def submitConfirmBusinessForm: Action[AnyContent] = Action.async { implicit request =>
+  def submitConfirmBusinessForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         confirmBusinessForm
@@ -201,7 +201,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def changeBusinessEmail: Action[AnyContent] = Action.async { implicit request =>
+  def changeBusinessEmail(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       val sjr = agent.getMandatorySubscriptionRecord
       Ok(
@@ -215,7 +215,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def submitChangeBusinessEmail: Action[AnyContent] = Action.async { implicit request =>
+  def submitChangeBusinessEmail(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       val currentSjr = agent.getMandatorySubscriptionRecord
       businessEmailForm
@@ -247,7 +247,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def submitBusinessEmailForm: Action[AnyContent] = Action.async { implicit request =>
+  def submitBusinessEmailForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         businessEmailForm
@@ -269,7 +269,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def showBusinessNameForm: Action[AnyContent] = Action.async { implicit request =>
+  def showBusinessNameForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         Ok(
@@ -282,7 +282,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def changeBusinessName: Action[AnyContent] = Action.async { implicit request =>
+  def changeBusinessName(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       val sjr = agent.getMandatorySubscriptionRecord
       Ok(
@@ -294,7 +294,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def submitChangeBusinessName: Action[AnyContent] = Action.async { implicit request =>
+  def submitChangeBusinessName(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       val currentSjr = agent.getMandatorySubscriptionRecord
       businessNameForm
@@ -326,7 +326,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def submitBusinessNameForm: Action[AnyContent] = Action.async { implicit request =>
+  def submitBusinessNameForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         businessNameForm
@@ -367,7 +367,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def showUpdateBusinessAddressForm: Action[AnyContent] = Action.async { implicit request =>
+  def showUpdateBusinessAddressForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         existingSession.registration match {
@@ -381,7 +381,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def submitUpdateBusinessAddressForm: Action[AnyContent] = Action.async { implicit request =>
+  def submitUpdateBusinessAddressForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       withValidSession { (_, existingSession) =>
         updateBusinessAddressForm
@@ -415,13 +415,13 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def showPostcodeNotAllowed: Action[AnyContent] = Action.async { implicit request =>
+  def showPostcodeNotAllowed(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(postcodeNotAllowedTemplate())
     }
   }
 
-  def showAlreadySubscribed: Action[AnyContent] = Action.async { implicit request =>
+  def showAlreadySubscribed(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       for {
         agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
@@ -433,7 +433,7 @@ class BusinessIdentificationController @Inject()(
     }
   }
 
-  def showExistingJourneyFound: Action[AnyContent] = Action.async { implicit request =>
+  def showExistingJourneyFound(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(existingJourneyFoundTemplate())
     }

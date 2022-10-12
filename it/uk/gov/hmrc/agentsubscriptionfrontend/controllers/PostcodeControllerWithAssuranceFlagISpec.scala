@@ -100,7 +100,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
         List(SoleTrader, Partnership).foreach { businessType =>
           stubs()
           implicit val request =
-            authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C"))).withFormUrlEncodedBody("postcode" -> validPostcode)
+            authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST).withFormUrlEncodedBody("postcode" -> validPostcode)
 
           sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(businessType), postcode = None, nino = None))
 
@@ -125,7 +125,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
         List(SoleTrader, Partnership).foreach { businessType =>
           stubs()
           implicit val request =
-            authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> validPostcode)
+            authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
 
           sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(businessType), postcode = None, nino = None))
 
@@ -153,7 +153,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
 
          stubs()
           implicit val request =
-            authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> validPostcode)
+            authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
           sessionStoreService.currentSession.agentSession =
             Some(agentSession.copy(businessType = Some(LimitedCompany), postcode = None, nino = None))
 
@@ -173,7 +173,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
       "redirect to /confirm-business when the agent is on the manually assured list" in new TestSetupNoJourneyRecord {
         stubs(true)
         implicit val request =
-          authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> validPostcode)
+          authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
         sessionStoreService.currentSession.agentSession =
           Some(agentSession.copy(businessType = Some(Llp), postcode = None, nino = None))
 
@@ -191,7 +191,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
       "redirect to /company-registration-number when the agent is not on the manually assured list" in new TestSetupNoJourneyRecord {
         stubs(false)
         implicit val request =
-          authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> validPostcode)
+          authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
         sessionStoreService.currentSession.agentSession =
           Some(agentSession.copy(businessType = Some(Llp), postcode = None, nino = None))
 
@@ -216,7 +216,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
       givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
       givenAgentIsNotManuallyAssured(validUtr.value)
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("postcode" -> validPostcode)
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
@@ -235,7 +235,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
 
     "redirect to /business-type if businessType is not found in session" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> "AA12 1JN")
+        authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> "AA12 1JN")
 
       val result = await(controller.submitPostcodeForm()(request))
 
@@ -246,7 +246,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
 
     "redirect to /utr if there is no utr in the session" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> "AA12 1JN")
+        authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> "AA12 1JN")
       sessionStoreService.currentSession.agentSession =
         Some(agentSession.copy(postcode = None, nino = None, utr = None))
 
@@ -262,7 +262,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
       withMatchingUtrAndPostcode(validUtr, validPostcode)
 
       implicit val request =
-        authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> validPostcode)
+        authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(postcode = None, nino = None))
 
       val result = await(controller.submitPostcodeForm()(request))
@@ -274,7 +274,7 @@ class PostcodeControllerWithAssuranceFlagISpec extends BaseISpec with SessionDat
 
     "handle for with invalid postcodes" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("postcode" -> "sdsds")
+        authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> "sdsds")
       await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader))))
 
       val result = await(controller.submitPostcodeForm()(request))

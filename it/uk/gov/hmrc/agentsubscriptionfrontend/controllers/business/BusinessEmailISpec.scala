@@ -85,7 +85,7 @@ class BusinessEmailISpec extends BaseISpec {
 
       givenSubscriptionRecordCreated(AuthProviderId("12345-credId"), newsjr)
 
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
         "email" -> "newagent@example.com")
       sessionStoreService.currentSession.agentSession = Some(agentSession)
       sessionStoreService.currentSession.continueUrl = Some("/continue/url")
@@ -99,7 +99,7 @@ class BusinessEmailISpec extends BaseISpec {
     }
 
     "update business email after submission and redirect to /check-answers if user is changing answers" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
         "email" -> "newagent@example.com")
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
@@ -114,7 +114,7 @@ class BusinessEmailISpec extends BaseISpec {
 
     "show validation error when the form is submitted with empty email" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("email" -> "")
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("email" -> "")
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 

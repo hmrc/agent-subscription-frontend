@@ -77,7 +77,7 @@ class NationalInsuranceControllerISpec extends BaseISpec with SessionDataMissing
   "submit /national-insurance-number form" should {
     "read the form and redirect to /date-of-birth page if dob exists but lastName doesn't in /citizen-details" in new TestSetupNoJourneyRecord {
       AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456C"), None, DateOfBirth(LocalDate.now()))
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C"))).withFormUrlEncodedBody("nino" -> "AE123456C")
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST).withFormUrlEncodedBody("nino" -> "AE123456C")
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
       val result = await(controller.submitNationalInsuranceNumberForm()(request))
@@ -94,7 +94,7 @@ class NationalInsuranceControllerISpec extends BaseISpec with SessionDataMissing
       "and businessType is LLP" in new TestSetupNoJourneyRecord {
       AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456C"), Some("Matchmaker"), DateOfBirth(LocalDate.now()))
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD
-        .copy(nino = Some("AE123456C"))).withFormUrlEncodedBody("nino" -> "AE123456C")
+        .copy(nino = Some("AE123456C")), POST).withFormUrlEncodedBody("nino" -> "AE123456C")
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Llp)))
 
       val result = await(controller.submitNationalInsuranceNumberForm()(request))
@@ -112,7 +112,7 @@ class NationalInsuranceControllerISpec extends BaseISpec with SessionDataMissing
       "read the form and redirect to /no match page if name or dob is missing in /citizen-details and businessType is LLP" in new TestSetupNoJourneyRecord {
         AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456C"), None, DateOfBirth(LocalDate.now()))
         implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD
-          .copy(nino = Some("AE123456C"))).withFormUrlEncodedBody("nino" -> "AE123456C")
+          .copy(nino = Some("AE123456C")), POST).withFormUrlEncodedBody("nino" -> "AE123456C")
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Llp)))
 
         val result = await(controller.submitNationalInsuranceNumberForm()(request))
@@ -128,7 +128,7 @@ class NationalInsuranceControllerISpec extends BaseISpec with SessionDataMissing
 
       "read the form and redirect to /registered-for-vat page if dob doesn't exist in /citizen-details" in new TestSetupNoJourneyRecord {
         AgentSubscriptionStub.givenDesignatoryDetailsReturnsStatus(Nino("AE123456C"), 404)
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C"))).withFormUrlEncodedBody("nino" -> "AE123456C")
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST).withFormUrlEncodedBody("nino" -> "AE123456C")
         sessionStoreService.currentSession.agentSession = Some(agentSession)
         val result = await(controller.submitNationalInsuranceNumberForm()(request))
         status(result) shouldBe 303
@@ -141,7 +141,7 @@ class NationalInsuranceControllerISpec extends BaseISpec with SessionDataMissing
 
       "redirect to /no-match-found page if nino from auth and nino from user input do not match" in new TestSetupNoJourneyRecord {
         AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456C"), Some("Matchmaker"), DateOfBirth(LocalDate.now()))
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C"))).withFormUrlEncodedBody("nino" -> "AE123456D")
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST).withFormUrlEncodedBody("nino" -> "AE123456D")
         sessionStoreService.currentSession.agentSession = Some(agentSession)
 
         val result = await(controller.submitNationalInsuranceNumberForm()(request))
@@ -155,7 +155,7 @@ class NationalInsuranceControllerISpec extends BaseISpec with SessionDataMissing
       "redirect to /date-of-birth if nino from auth and nino from user input do not match " +
         "and businessType is LLP (although we do not expect a auth nino for LLP)" in new TestSetupNoJourneyRecord {
         AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456D"), Some("Matchmaker"), DateOfBirth(LocalDate.now()))
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C"))).withFormUrlEncodedBody("nino" -> "AE123456D")
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST).withFormUrlEncodedBody("nino" -> "AE123456D")
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Llp)))
 
         val result = await(controller.submitNationalInsuranceNumberForm()(request))
@@ -167,7 +167,7 @@ class NationalInsuranceControllerISpec extends BaseISpec with SessionDataMissing
       }
 
       "handle forms with invalid nino" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("nino" -> "AE123456C_BLAH")
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("nino" -> "AE123456C_BLAH")
         sessionStoreService.currentSession.agentSession = Some(agentSession)
         val result = await(controller.submitNationalInsuranceNumberForm()(request))
 

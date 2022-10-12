@@ -31,7 +31,9 @@ backLinkHref = Some(routes.CompanyRegistrationController.showCompanyRegNumberFor
     <p>@msgs("llp-interrupt.p2")</p>
     @Html(msgs("llp-interrupt.link", appConfig.companiesHouseUrl))
 
-    <a class="govuk-button govuk-!-margin-top-6" role="button" href='@routes.NationalInsuranceController.showNationalInsuranceNumberForm().url'>@msgs("button.continue")</a>
 
+    <div class="govuk-button-group">
+    <a class="govuk-button govuk-!-margin-top-6" role="button" href='@routes.NationalInsuranceController.showNationalInsuranceNumberForm().url'>@msgs("button.continue")</a>
+    </div>
 
 }

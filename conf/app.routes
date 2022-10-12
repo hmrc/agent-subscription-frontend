@@ -4,145 +4,145 @@
 
 GET         /assets/*file                                  controllers.Assets.versioned(path="/public", file)
 
-GET         /                                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.root
-GET         /start                                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.start
-GET         /not-agent                                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.showNotAgent
+GET         /                                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.root()
+GET         /start                                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.start()
+GET         /not-agent                                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.showNotAgent()
 GET         /return-after-gg-creds-created                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.returnAfterGGCredsCreated(id: Option[String] ?= None)
-GET         /return-after-mapping                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.returnAfterMapping
-GET         /sign-in-check                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.signInCheck
+GET         /return-after-mapping                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.returnAfterMapping()
+GET         /sign-in-check                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.signInCheck()
 
-GET         /task-list                                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.TaskListController.showTaskList
+GET         /task-list                                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.TaskListController.showTaskList()
 GET         /progress-saved                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.TaskListController.savedProgress(backLink: Option[String] ?= None)
 
-GET         /business-type                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessTypeController.showBusinessTypeForm
-POST        /business-type                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessTypeController.submitBusinessTypeForm
+GET         /business-type                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessTypeController.showBusinessTypeForm()
+POST        /business-type                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessTypeController.submitBusinessTypeForm()
 
 GET         /unique-taxpayer-reference                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.UtrController.showUtrForm()
 POST        /unique-taxpayer-reference                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.UtrController.submitUtrForm()
 
-GET         /postcode                                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.PostcodeController.showPostcodeForm
-POST        /postcode                                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.PostcodeController.submitPostcodeForm
+GET         /postcode                                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.PostcodeController.showPostcodeForm()
+POST        /postcode                                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.PostcodeController.submitPostcodeForm()
 
 GET         /interrupt                                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.CompanyRegistrationController.showLlpInterrupt()
 
-GET         /national-insurance-number                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.NationalInsuranceController.showNationalInsuranceNumberForm
-POST        /national-insurance-number                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.NationalInsuranceController.submitNationalInsuranceNumberForm
+GET         /national-insurance-number                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.NationalInsuranceController.showNationalInsuranceNumberForm()
+POST        /national-insurance-number                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.NationalInsuranceController.submitNationalInsuranceNumberForm()
 
-GET         /company-registration-number                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.CompanyRegistrationController.showCompanyRegNumberForm
-POST        /company-registration-number                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.CompanyRegistrationController.submitCompanyRegNumberForm
+GET         /company-registration-number                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.CompanyRegistrationController.showCompanyRegNumberForm()
+POST        /company-registration-number                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.CompanyRegistrationController.submitCompanyRegNumberForm()
 
-GET         /date-of-birth                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController.showDateOfBirthForm
-POST        /date-of-birth                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController.submitDateOfBirthForm
+GET         /date-of-birth                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController.showDateOfBirthForm()
+POST        /date-of-birth                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController.submitDateOfBirthForm()
 
-GET         /registered-for-vat                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.showRegisteredForVatForm
-POST        /registered-for-vat                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.submitRegisteredForVatForm
+GET         /registered-for-vat                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.showRegisteredForVatForm()
+POST        /registered-for-vat                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.submitRegisteredForVatForm()
 
-GET         /vat-registration-details                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.showVatDetailsForm
-POST        /vat-registration-details                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.submitVatDetailsForm
+GET         /vat-registration-details                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.showVatDetailsForm()
+POST        /vat-registration-details                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.submitVatDetailsForm()
 
-GET         /no-match                                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showNoMatchFound
+GET         /no-match                                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showNoMatchFound()
 
-GET         /confirm-business                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showConfirmBusinessForm
-POST        /confirm-business                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitConfirmBusinessForm
+GET         /confirm-business                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showConfirmBusinessForm()
+POST        /confirm-business                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitConfirmBusinessForm()
 
-GET         /already-subscribed                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showAlreadySubscribed
+GET         /already-subscribed                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showAlreadySubscribed()
 
-GET         /existing-journey-found                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showExistingJourneyFound
+GET         /existing-journey-found                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showExistingJourneyFound()
 
-GET         /change-amls                                    uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.changeAmlsDetails
+GET         /change-amls                                    uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.changeAmlsDetails()
 
-GET         /check-money-laundering-compliance             uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsRegisteredPage
-POST        /check-money-laundering-compliance             uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsRegistered
+GET         /check-money-laundering-compliance             uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsRegisteredPage()
+POST        /check-money-laundering-compliance             uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsRegistered()
 
-GET         /money-laundering-compliance                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsDetailsForm
-POST        /money-laundering-compliance                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsDetailsForm
+GET         /money-laundering-compliance                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsDetailsForm()
+POST        /money-laundering-compliance                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsDetailsForm()
 
-GET         /money-laundering-application-details          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsApplicationDatePage
-POST        /money-laundering-application-details          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsApplicationDatePage
+GET         /money-laundering-application-details          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsApplicationDatePage()
+POST        /money-laundering-application-details          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsApplicationDatePage()
 
-GET         /money-laundering-compliance-incomplete        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsNotAppliedPage
+GET         /money-laundering-compliance-incomplete        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsNotAppliedPage()
 
-GET         /money-laundering-details-not-found            uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsDetailsNotFound
+GET         /money-laundering-details-not-found            uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsDetailsNotFound()
 
-GET         /money-laundering-not-eligible                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsRecordIneligibleStatus
+GET         /money-laundering-not-eligible                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsRecordIneligibleStatus()
 
-GET         /check-money-laundering-application            uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showCheckAmlsAlreadyAppliedForm
-POST        /check-money-laundering-application            uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitCheckAmlsAlreadyAppliedForm
+GET         /check-money-laundering-application            uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showCheckAmlsAlreadyAppliedForm()
+POST        /check-money-laundering-application            uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitCheckAmlsAlreadyAppliedForm()
 
-GET         /create-new-account                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showCreateNewAccount
+GET         /create-new-account                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showCreateNewAccount()
 
 # GET /check-agency-status is deprecated, please use GET /business-type instead
-GET         /check-agency-status                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessTypeController.redirectToBusinessTypeForm
+GET         /check-agency-status                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessTypeController.redirectToBusinessTypeForm()
 # GET /check-business-type is deprecated, please use GET /business-type instead
-GET         /check-business-type                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessTypeController.showBusinessTypeForm
+GET         /check-business-type                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessTypeController.showBusinessTypeForm()
 
-GET         /enter-agent-code                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.AssuranceChecksController.invasiveCheckStart
-POST        /enter-agent-code                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.AssuranceChecksController.invasiveSaAgentCodePost
+GET         /enter-agent-code                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.AssuranceChecksController.invasiveCheckStart()
+POST        /enter-agent-code                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.AssuranceChecksController.invasiveSaAgentCodePost()
 
-GET         /client-details                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.AssuranceChecksController.showClientDetailsForm
-POST        /client-details                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.AssuranceChecksController.submitClientDetailsForm
+GET         /client-details                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.AssuranceChecksController.showClientDetailsForm()
+POST        /client-details                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.AssuranceChecksController.submitClientDetailsForm()
 
-GET         /update-business-address                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showUpdateBusinessAddressForm
-POST        /update-business-address                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitUpdateBusinessAddressForm
-GET         /postcode-not-allowed                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showPostcodeNotAllowed
+GET         /update-business-address                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showUpdateBusinessAddressForm()
+POST        /update-business-address                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitUpdateBusinessAddressForm()
+GET         /postcode-not-allowed                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showPostcodeNotAllowed()
 
-GET         /check-answers                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCheckAnswers
-POST        /check-answers                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.submitCheckAnswers
+GET         /check-answers                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCheckAnswers()
+POST        /check-answers                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.submitCheckAnswers()
 
-GET         /business-name                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showBusinessNameForm
-POST        /business-name                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitBusinessNameForm
-GET         /change-business-name                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.changeBusinessName
-POST        /change-business-name                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitChangeBusinessName
+GET         /business-name                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showBusinessNameForm()
+POST        /business-name                                 uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitBusinessNameForm()
+GET         /change-business-name                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.changeBusinessName()
+POST        /change-business-name                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitChangeBusinessName()
 
-GET         /contact-email-check                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showContactEmailCheck
-POST        /contact-email-check                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitContactEmailCheck
-GET         /change-contact-email-address                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeContactEmailAddress
+GET         /contact-email-check                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showContactEmailCheck()
+POST        /contact-email-check                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitContactEmailCheck()
+GET         /change-contact-email-address                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeContactEmailAddress()
 
-GET         /contact-email-address                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showContactEmailAddress
-POST        /contact-email-address                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitContactEmailAddress
+GET         /contact-email-address                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showContactEmailAddress()
+POST        /contact-email-address                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitContactEmailAddress()
 
 
-GET         /trading-name                                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTradingNameCheck
-POST        /trading-name                                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTradingNameCheck
-GET         /change-main-trading-name                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeTradingName
+GET         /trading-name                                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTradingNameCheck()
+POST        /trading-name                                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTradingNameCheck()
+GET         /change-main-trading-name                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeTradingName()
 
-GET         /main-trading-name                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTradingName
-POST        /main-trading-name                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTradingName
+GET         /main-trading-name                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTradingName()
+POST        /main-trading-name                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTradingName()
 
-GET         /check-main-trading-address                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showCheckMainTradingAddress
-POST        /check-main-trading-address                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitCheckMainTradingAddress
-GET         /change-check-main-trading-address              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeCheckMainTradingAddress
+GET         /check-main-trading-address                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showCheckMainTradingAddress()
+POST        /check-main-trading-address                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitCheckMainTradingAddress()
+GET         /change-check-main-trading-address              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeCheckMainTradingAddress()
 
-GET         /find-main-trading-address                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showMainTradingAddress
+GET         /find-main-trading-address                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showMainTradingAddress()
 GET         /lookup-trading-address                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.returnFromAddressLookup(id: String ?= "")
 
-GET         /business-email                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showBusinessEmailForm
-POST        /business-email                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitBusinessEmailForm
-GET         /change-business-email                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.changeBusinessEmail
-POST        /change-business-email                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitChangeBusinessEmail
+GET         /business-email                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showBusinessEmailForm()
+POST        /business-email                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitBusinessEmailForm()
+GET         /change-business-email                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.changeBusinessEmail()
+POST        /change-business-email                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitChangeBusinessEmail()
 
-GET         /business-address                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showBusinessAddressForm
+GET         /business-address                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showBusinessAddressForm()
 
-GET         /verify-email                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.EmailVerificationController.verifyEmail
-GET         /email-locked                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCannotVerifyEmailLocked
-GET         /email-technical-error                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCannotVerifyEmailTechnicalError
+GET         /verify-email                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.EmailVerificationController.verifyEmail()
+GET         /email-locked                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCannotVerifyEmailLocked()
+GET         /email-technical-error                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showCannotVerifyEmailTechnicalError()
 
 GET         /return-from-address-lookup                    uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.returnFromAddressLookup(id: String ?= "")
-POST        /submit-modified-address                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.submitModifiedAddress
-GET         /complete                                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showSubscriptionComplete
-GET         /sign-in-with-new-user-id                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showSignInWithNewID
+POST        /submit-modified-address                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.submitModifiedAddress()
+GET         /complete                                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showSubscriptionComplete()
+GET         /sign-in-with-new-user-id                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.SubscriptionController.showSignInWithNewID()
 
-GET         /create-clean-creds-agent                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectAgentToCreateCleanCreds
-GET         /create-clean-creds                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToCreateCleanCreds
+GET         /create-clean-creds-agent                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectAgentToCreateCleanCreds()
+GET         /create-clean-creds                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToCreateCleanCreds()
 
-GET         /redirect-to-asaccount                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToASAccountPage
-GET         /start-survey                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.startSurvey
-GET         /sign-out                                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.signOutWithContinueUrl
-GET         /finish-sign-out                               uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.signOut
-GET         /keep-alive                                    uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.keepAlive
-GET         /timed-out                                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.timedOut
-GET         /redirect-to-businesstype                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToBusinessTypeForm
+GET         /redirect-to-asaccount                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToASAccountPage()
+GET         /start-survey                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.startSurvey()
+GET         /sign-out                                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.signOutWithContinueUrl()
+GET         /finish-sign-out                               uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.signOut()
+GET         /keep-alive                                    uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.keepAlive()
+GET         /timed-out                                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.timedOut()
+GET         /redirect-to-businesstype                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.SignedOutController.redirectToBusinessTypeForm()
 
-GET         /cannot-create-account                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.showCannotCreateAccount
+GET         /cannot-create-account                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.StartController.showCannotCreateAccount()
 
 GET         /language/:lang                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.AgentSubscriptionLanguageController.switchToLanguage(lang: String)

@@ -12,7 +12,7 @@ object Css {
   def errorSummaryForField(id: String): String ={
     s".govuk-error-summary__body li a[href=#$id]"
   }
-  def errorForField(id: String): String = s"span#$id-error"
+  def errorForField(id: String): String = s"p#$id-error"
   def labelFor(id: String): String = s"label[for=$id]"
   val SUBMIT_BUTTON = "main form button"
   val currentLanguage = "ul.hmrc-language-select__list li.hmrc-language-select__list-item span[aria-current=true]"
