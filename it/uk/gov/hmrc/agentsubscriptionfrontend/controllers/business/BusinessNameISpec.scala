@@ -87,7 +87,7 @@ class BusinessNameISpec extends BaseISpec {
       givenSubscriptionRecordCreated(AuthProviderId("12345-credId"), newSjr)
       givenAgentIsNotManuallyAssured(validUtr.value)
       implicit val request =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("name" -> "new Agent name")
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("name" -> "new Agent name")
       sessionStoreService.currentSession.agentSession = Some(agentSession)
       sessionStoreService.currentSession.continueUrl = Some("/continue/url")
 
@@ -101,7 +101,7 @@ class BusinessNameISpec extends BaseISpec {
 
     "update business name after submission and redirect to /check-answers if user is changing answers" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("name" -> "new Agent name")
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("name" -> "new Agent name")
       sessionStoreService.currentSession.changingAnswers = Some(true)
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
@@ -113,7 +113,7 @@ class BusinessNameISpec extends BaseISpec {
 
     "show validation error when the form is submitted with empty name" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("name" -> "")
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("name" -> "")
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
       val result = await(controller.submitBusinessNameForm(request))
@@ -123,7 +123,7 @@ class BusinessNameISpec extends BaseISpec {
 
     "show validation error when the form is submitted with non des complaint name after check-answers page" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("name" -> "Some name *")
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("name" -> "Some name *")
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
       val result = await(controller.submitBusinessNameForm(request))
@@ -133,7 +133,7 @@ class BusinessNameISpec extends BaseISpec {
 
     "show validation error when the form is submitted with non des complaint name" in new TestSetupNoJourneyRecord {
       implicit val request =
-        authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("name" -> "Some name *")
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("name" -> "Some name *")
       sessionStoreService.currentSession.agentSession = Some(
         AgentSession(
           Some(BusinessType.SoleTrader),

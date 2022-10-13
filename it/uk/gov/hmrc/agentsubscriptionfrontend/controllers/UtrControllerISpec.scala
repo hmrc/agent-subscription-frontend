@@ -56,7 +56,7 @@ class UtrControllerISpec extends BaseISpec with SessionDataMissingSpec {
     "display the page as expected when the form is valid and redirect to /postcode page" in  new TestSetupNoJourneyRecord{
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("utr" -> validUtr.value)
+        authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("utr" -> validUtr.value)
       sessionStoreService.currentSession.agentSession = Some(AgentSession(Some(BusinessType.SoleTrader)))
 
       private val result = await(controller.submitUtrForm()(request))
@@ -67,7 +67,7 @@ class UtrControllerISpec extends BaseISpec with SessionDataMissingSpec {
 
     "redirect to /business-type if businessType missing in the session" in  new TestSetupNoJourneyRecord {
 
-      private val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("utr" -> validUtr.value)
+      private val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("utr" -> validUtr.value)
       private val result = await(controller.submitUtrForm()(request))
 
       status(result) shouldBe 303
@@ -77,7 +77,7 @@ class UtrControllerISpec extends BaseISpec with SessionDataMissingSpec {
     "handle form with errors and show the same again" in  new TestSetupNoJourneyRecord {
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("utr" -> "invalidUtr")
+        authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("utr" -> "invalidUtr")
       sessionStoreService.currentSession.agentSession = Some(AgentSession(Some(BusinessType.SoleTrader)))
 
       private val result = await(controller.submitUtrForm()(request))

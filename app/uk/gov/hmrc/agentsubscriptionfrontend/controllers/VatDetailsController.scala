@@ -58,7 +58,7 @@ class VatDetailsController @Inject()(
   vatDetailsTemplate: vat_details)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
-  def showRegisteredForVatForm: Action[AnyContent] = Action.async { implicit request =>
+  def showRegisteredForVatForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchAgentSession.flatMap {
         case Some(agentSession) =>
@@ -111,7 +111,7 @@ class VatDetailsController @Inject()(
       case None => Redirect(routes.CompanyRegistrationController.showCompanyRegNumberForm())
     }
 
-  def submitRegisteredForVatForm: Action[AnyContent] = Action.async { implicit request =>
+  def submitRegisteredForVatForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       withValidSession { (businessType, existingSession) =>
         registeredForVatForm
@@ -132,7 +132,7 @@ class VatDetailsController @Inject()(
     }
   }
 
-  def showVatDetailsForm: Action[AnyContent] = Action.async { implicit request =>
+  def showVatDetailsForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         existingSession.vatDetails match {
@@ -144,7 +144,7 @@ class VatDetailsController @Inject()(
     }
   }
 
-  def submitVatDetailsForm: Action[AnyContent] = Action.async { implicit request =>
+  def submitVatDetailsForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, existingSession) =>
         vatDetailsForm

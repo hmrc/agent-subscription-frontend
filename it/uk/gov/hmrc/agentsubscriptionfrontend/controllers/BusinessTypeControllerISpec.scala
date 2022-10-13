@@ -108,7 +108,7 @@ class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
     validBusinessTypes.foreach { validBusinessTypeIdentifier =>
       s"redirect to /business-details when valid businessTypeIdentifier: $validBusinessTypeIdentifier" in new TestSetupNoJourneyRecord{
-        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("businessType" -> validBusinessTypeIdentifier.key)
 
         val result = await(controller.submitBusinessTypeForm(request))
@@ -118,7 +118,7 @@ class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
     "choice is invalid" should {
       "return 200 and redisplay the /business-type page with an error message for invalid choice - the user manipulated the submit value" in new TestSetupNoJourneyRecord{
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD).withFormUrlEncodedBody("businessType" -> "invalid")
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("businessType" -> "invalid")
         val result = await(controller.submitBusinessTypeForm(request))
         result should containMessages("businessType.error.invalid-choice")
       }

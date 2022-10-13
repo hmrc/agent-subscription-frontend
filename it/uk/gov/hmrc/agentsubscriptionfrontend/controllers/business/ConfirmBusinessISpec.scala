@@ -109,7 +109,7 @@ class ConfirmBusinessISpec extends BaseISpec {
 
     "User chooses Yes" should {
       "redirect to showAlreadySubscribed if the user is already subscribed and isSubscribedToAgentServices=true" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes")
         sessionStoreService.currentSession.agentSession = Some(
           AgentSession(
@@ -136,7 +136,7 @@ class ConfirmBusinessISpec extends BaseISpec {
         givenSubscriptionRecordCreated(AuthProviderId("12345-credId"), sjr.copy(continueId = None))
 
         givenAgentIsNotManuallyAssured(utr.value)
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes")
         sessionStoreService.currentSession.agentSession = Some(agentSession)
 
@@ -157,7 +157,7 @@ class ConfirmBusinessISpec extends BaseISpec {
         val sjr = SubscriptionJourneyRecord.fromAgentSession(agentSession, AuthProviderId("12345-credId"))
         givenSubscriptionRecordCreated(AuthProviderId("12345-credId"), sjr.copy(continueId = None))
         givenAgentIsManuallyAssured(utr.value)
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes")
         sessionStoreService.currentSession.agentSession = Some(
           agentSession)
@@ -175,7 +175,7 @@ class ConfirmBusinessISpec extends BaseISpec {
             knownFacts = SubscriptionRequestKnownFacts(testPostcode),
             langForEmail = Some(Lang("en"))))
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes").withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.agentSession = Some(
           AgentSession(
@@ -199,7 +199,7 @@ class ConfirmBusinessISpec extends BaseISpec {
             knownFacts = SubscriptionRequestKnownFacts(testPostcode),
             langForEmail = Some(Lang("en")))
         )
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes").withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.agentSession = Some(
           AgentSession(
@@ -224,7 +224,7 @@ class ConfirmBusinessISpec extends BaseISpec {
         val sjr = SubscriptionJourneyRecord.fromAgentSession(agentSession, AuthProviderId("12345-credId"))
         givenSubscriptionRecordCreated(AuthProviderId("12345-credId"), sjr.copy(continueId = None))
 
-        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes").withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.agentSession = Some(agentSession)
 
@@ -235,7 +235,7 @@ class ConfirmBusinessISpec extends BaseISpec {
 
       "redirect to showBusinessEmailForm if the user has clean creds and isSubscribedToAgentServices=false and ETMP " +
         "record contains empty email" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes")
         sessionStoreService.currentSession.agentSession = Some(
           AgentSession(
@@ -250,7 +250,7 @@ class ConfirmBusinessISpec extends BaseISpec {
 
       "redirect to showBusinessNameForm if the user has clean creds and isSubscribedToAgentServices=false and ETMP " +
         "record contains invalid name" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes")
         sessionStoreService.currentSession.agentSession = Some(
           AgentSession(
@@ -264,7 +264,7 @@ class ConfirmBusinessISpec extends BaseISpec {
 
       "redirect to showUpdateBusinessAddressForm if the user has clean creds and isSubscribedToAgentServices=false " +
         "and ETMP record contains invalid address" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes")
         sessionStoreService.currentSession.agentSession = Some(
           AgentSession(
@@ -284,7 +284,7 @@ class ConfirmBusinessISpec extends BaseISpec {
 
       "redirect to showUpdateBusinessAddressForm if the user has clean creds and isSubscribedToAgentServices=false and" when {
         "ETMP record contains blacklisted postcode" in new TestSetupNoJourneyRecord {
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(
             AgentSession(
@@ -303,7 +303,7 @@ class ConfirmBusinessISpec extends BaseISpec {
         }
 
         "ETMP record contains BFPO postcode starting with BF" in new TestSetupNoJourneyRecord {
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(
             AgentSession(
@@ -322,7 +322,7 @@ class ConfirmBusinessISpec extends BaseISpec {
         }
 
         "ETMP record contains BFPO postcode starting with BFPO" in new TestSetupNoJourneyRecord {
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(
             AgentSession(
@@ -342,7 +342,7 @@ class ConfirmBusinessISpec extends BaseISpec {
 
     "User chooses No" should {
       "redirect to show /unique-taxpayer-reference page" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "no")
 
         sessionStoreService.currentSession.agentSession = Some(
@@ -360,7 +360,7 @@ class ConfirmBusinessISpec extends BaseISpec {
 
     "choice is missing" should {
       "return 200 and redisplay the /confirm-business page with an error message for missing choice" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "")
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(registration = Some(testRegistration)))
 
@@ -372,7 +372,7 @@ class ConfirmBusinessISpec extends BaseISpec {
 
     "form value is invalid" should {
       "result in a BadRequestException" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "INVALID")
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(registration = Some(testRegistration)))
 

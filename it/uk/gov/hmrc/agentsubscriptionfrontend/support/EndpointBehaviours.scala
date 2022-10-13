@@ -1,6 +1,5 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
-import java.net.URLEncoder
 import org.scalatest.Assertion
 import play.api.mvc._
 import play.api.test.FakeRequest
@@ -9,8 +8,10 @@ import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AuthStub, SsoStub}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.individual
+import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
+import java.net.URLEncoder
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -18,7 +19,7 @@ trait EndpointBehaviours {
   me: BaseISpec =>
   type PlayRequest = Request[AnyContent] => Future[Result]
 
-  protected def authenticatedAs(user: SampleUser): FakeRequest[AnyContentAsEmpty.type]
+  protected def authenticatedAs(user: SampleUser, method: String = GET): FakeRequest[AnyContentAsEmpty.type]
 
   protected def anAgentAffinityGroupOnlyEndpoint(doRequest: PlayRequest): Unit = {
     "redirect to the company-auth-frontend sign-in page if the current user is not logged in" in new TestSetupNoJourneyRecord {
@@ -44,7 +45,7 @@ trait EndpointBehaviours {
     }
   }
 
-  protected def aPageWithFeedbackLinks(action: PlayRequest, request: => Request[AnyContent] = FakeRequest("GET", "url")): Unit = {
+  protected def aPageWithFeedbackLinks(action: PlayRequest, request: => Request[AnyContent] = FakeRequest("GET", "url").withSession(SessionKeys.authToken -> "Bearer XYZ")): Unit = {
 
     "have a 'is this page not working properly?' link" in new TestSetupWithCompleteJourneyRecord {
       await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(hc(request), global))

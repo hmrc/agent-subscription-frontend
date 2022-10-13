@@ -74,7 +74,7 @@ class NationalInsuranceController @Inject()(
     }
   }
 
-  def submitNationalInsuranceNumberForm: Action[AnyContent] = Action.async { implicit request =>
+  def submitNationalInsuranceNumberForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       withValidSession { (_, existingSession) =>
         withValidBusinessType(existingSession) { businessType =>

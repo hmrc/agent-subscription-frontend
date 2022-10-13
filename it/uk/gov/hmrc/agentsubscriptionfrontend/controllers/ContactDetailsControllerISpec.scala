@@ -162,7 +162,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
         contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("email@email.com"))))
       )
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitContactEmailCheck(request.withFormUrlEncodedBody("check" -> "yes")))
@@ -192,7 +192,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
         contactEmailData = Some(ContactEmailData(useBusinessEmail = false, None))
       ))
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitContactEmailCheck(request.withFormUrlEncodedBody("check" -> "no")))
@@ -217,7 +217,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitContactEmailCheck(request))
@@ -244,7 +244,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
           )
           ))))
 
-    val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+    val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
     intercept[BadRequestException] {
       await(controller.submitContactEmailCheck(request.withFormUrlEncodedBody("check" -> "INVALID")))
@@ -273,7 +273,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
           )),
         contactEmailData = Some(ContactEmailData(useBusinessEmail = true, None))))
 
-    val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+    val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
     val result =
       await(controller.showContactEmailAddress(request))
@@ -284,7 +284,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
       "contactEmailAddress.p",
       "contactEmailAddress.button")
 
-    result should containLink("button.back",routes.ContactDetailsController.showContactEmailCheck().url)
+    result should containLink("button.back",routes.ContactDetailsController.showContactEmailCheck.url)
   }
 
     "303 Redirect to /contact-email-check when no contact email data found" in {
@@ -304,13 +304,13 @@ class ContactDetailsControllerISpec extends BaseISpec {
             )
             ))))
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.showContactEmailAddress(request))
 
       status(result) shouldBe 303
-     redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck().url)
+     redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck.url)
     }
   }
 
@@ -349,7 +349,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
           )),
           contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("new@email.com"))))
         )
-        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
         val result =
           await(controller.submitContactEmailAddress(request.withFormUrlEncodedBody("email" -> "new@email.com")))
@@ -376,7 +376,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitContactEmailAddress(request.withFormUrlEncodedBody("email" -> "")))
@@ -405,7 +405,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitContactEmailAddress(request.withFormUrlEncodedBody("email" -> TestData.emailTooLong)))
@@ -439,7 +439,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitContactEmailAddress(request.withFormUrlEncodedBody("email" -> "^$$%@email.$$*&com")))
@@ -590,7 +590,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
         contactTradingNameData = Some(ContactTradingNameData(hasTradingName = false, None)))
       )
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitTradingNameCheck(request.withFormUrlEncodedBody("check" -> "no")))
@@ -619,7 +619,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
         contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, None))
       ))
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitTradingNameCheck(request.withFormUrlEncodedBody("check" -> "yes")))
@@ -644,7 +644,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitTradingNameCheck(request))
@@ -671,7 +671,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
             )
             ))))
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       intercept[BadRequestException] {
         await(controller.submitTradingNameCheck(request.withFormUrlEncodedBody("check" -> "INVALID")))
@@ -808,7 +808,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
         contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(businessAddress))))
       )
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitCheckMainTradingAddress(request.withFormUrlEncodedBody("check" -> "yes")))
@@ -837,7 +837,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
         contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = false, None))
       ))
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitCheckMainTradingAddress(request.withFormUrlEncodedBody("check" -> "no")))
@@ -862,7 +862,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
 
       givenSubscriptionJourneyRecordExists(id, sjr)
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result =
         await(controller.submitCheckMainTradingAddress(request))
@@ -889,7 +889,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
             )
             ))))
 
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       intercept[BadRequestException] {
         await(controller.submitCheckMainTradingAddress(request.withFormUrlEncodedBody("check" -> "INVALID")))

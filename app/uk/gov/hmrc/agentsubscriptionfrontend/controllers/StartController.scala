@@ -97,7 +97,7 @@ class StartController @Inject()(
     }
   }
 
-  def returnAfterMapping(): Action[AnyContent] = Action.async { implicit request =>
+  def returnAfterMapping: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       val sjr = agent.getMandatorySubscriptionRecord
       redirectUrlActions.withMaybeRedirectUrlCached {

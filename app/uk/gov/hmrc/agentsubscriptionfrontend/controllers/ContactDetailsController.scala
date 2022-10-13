@@ -128,7 +128,7 @@ class ContactDetailsController @Inject()(
   def showContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       agent.getMandatorySubscriptionRecord.contactEmailData
-        .fold(Redirect(routes.ContactDetailsController.showContactEmailCheck())) { contactEmailData =>
+        .fold(Redirect(routes.ContactDetailsController.showContactEmailCheck)) { contactEmailData =>
           contactEmailData.contactEmail match {
             case Some(email) =>
               Ok(
@@ -144,7 +144,7 @@ class ContactDetailsController @Inject()(
   def changeContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>
     sessionStoreService
       .cacheIsChangingAnswers(changing = true)
-      .map(_ => Redirect(routes.ContactDetailsController.showContactEmailCheck()))
+      .map(_ => Redirect(routes.ContactDetailsController.showContactEmailCheck))
   }
 
   def submitContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>

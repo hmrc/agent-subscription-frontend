@@ -13,6 +13,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionJourneyStub
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{individual, subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData}
+import uk.gov.hmrc.http.SessionKeys
 
 class StartControllerISpec extends BaseISpec {
 
@@ -123,6 +124,7 @@ class StartControllerISpec extends BaseISpec {
 
       "display the sign in check page with correct links" in new SetupUnsubscribed {
         implicit val request = FakeRequest("GET", "/agent-subscription/sign-in-check?continue=/go/somewhere")
+          .withSession(SessionKeys.authToken -> "Bearer XYZ")
         val result: Result = await(controller.signInCheck(request))
 
         status(result) shouldBe OK
@@ -136,6 +138,7 @@ class StartControllerISpec extends BaseISpec {
 
       "redirect to business type if the user has clean creds" in new SetupUnsubscribed {
         implicit val request = FakeRequest("GET", "/agent-subscription/sign-in-check")
+          .withSession(SessionKeys.authToken -> "Bearer XYZ")
         override implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(
           subscribingCleanAgentWithoutEnrolments)
         val result: Result = await(controller.signInCheck(request))
@@ -159,7 +162,7 @@ class StartControllerISpec extends BaseISpec {
     "given a valid subscription journey record" when {
 
       "redirect to the /task-list page and update journey record with new clean creds id" in new SetupUnsubscribed {
-        implicit val request = FakeRequest()
+        implicit val request = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
 
         val result: Result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
 
@@ -169,7 +172,7 @@ class StartControllerISpec extends BaseISpec {
 
       "redirect to the /task-list page when there is no continueId" in new SetupUnsubscribed {
         givenNoSubscriptionJourneyRecordExists(id)
-        implicit val request = FakeRequest()
+        implicit val request = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
 
         val result: Result = await(controller.returnAfterGGCredsCreated()(request))
 
@@ -186,7 +189,7 @@ class StartControllerISpec extends BaseISpec {
           knownFacts = SubscriptionRequestKnownFacts(validPostcode),
           langForEmail = Some(Lang("en"))),
         arn = "TARN00023")
-      implicit val request = FakeRequest().withCookies(Cookie("PLAY_LANG", "en"))
+      implicit val request = FakeRequest().withCookies(Cookie("PLAY_LANG", "en")).withSession(SessionKeys.authToken -> "Bearer XYZ")
 
       val result: Result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
 

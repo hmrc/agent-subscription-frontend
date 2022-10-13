@@ -66,9 +66,9 @@ abstract class BaseISpec
 
   protected implicit val materializer = app.materializer
 
-  protected def authenticatedAs(user: SampleUser): FakeRequest[AnyContentAsEmpty.type] = {
+  protected def authenticatedAs(user: SampleUser, method: String = GET): FakeRequest[AnyContentAsEmpty.type] = {
     val sessionKeys = userIsAuthenticated(user)
-    FakeRequest().withSession(sessionKeys: _*)
+    FakeRequest(method, "/").withSession(sessionKeys: _*)
   }
 
   protected def checkMessageIsDefined(messageKey: String): Assertion = {

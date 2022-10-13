@@ -34,6 +34,7 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -67,10 +68,10 @@ class Agent(
     cleanCredsFold(None: Option[AuthProviderId])(Some(this.authProviderId))
 
   def withCleanCredsOrCreateNewAccount(cleanCredsBody: => Future[Result]): Future[Result] =
-    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.BusinessIdentificationController.showCreateNewAccount())))(isClean = cleanCredsBody)
+    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.BusinessIdentificationController.showCreateNewAccount)))(isClean = cleanCredsBody)
 
   def withCleanCredsOrSignIn(cleanCredsBody: => Future[Result]): Future[Result] =
-    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.SubscriptionController.showSignInWithNewID())))(isClean = cleanCredsBody)
+    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.SubscriptionController.showSignInWithNewID)))(isClean = cleanCredsBody)
 
 }
 
@@ -101,7 +102,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
 
   /**
     * For a user logged in as a subscribed agent (finished journey)
-    **/
+    * */
   def withSubscribedAgent[A](body: (Arn, Option[SubscriptionJourneyRecord]) => Future[Result])(
     implicit request: Request[A],
     hc: HeaderCarrier,
@@ -122,7 +123,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
               }
             case None =>
               logger.warn("User does not have the correct credentials")
-              Redirect(routes.SignedOutController.signOut())
+              Redirect(routes.SignedOutController.signOut)
           }
       }
       .recover {
@@ -131,22 +132,24 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
 
   /**
     * User is half way through a setup/onboarding journey
-    **/
-  def withSubscribingAgent[A](body: Agent => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+    * */
+  def withSubscribingAgent[A](body: Agent => Future[Result])(implicit request: Request[A], ec: ExecutionContext): Future[Result] =
     withSubscribingAgent(requireEmailVerification = false)(body)
 
   /**
     * User is half way through a setup/onboarding journey and their email is verified
-    **/
-  def withSubscribingEmailVerifiedAgent[A](
-    body: Agent => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+    * */
+  def withSubscribingEmailVerifiedAgent[A](body: Agent => Future[Result])(implicit request: Request[A], ec: ExecutionContext): Future[Result] =
     withSubscribingAgent(requireEmailVerification = true)(body)
 
   /**
     * User is half way through a setup/onboarding journey. Optionally, check that the email (if any) is verified and redirect to email verification if not.
-    **/
+    * */
   def withSubscribingAgent[A](requireEmailVerification: Boolean)(
-    body: Agent => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+    body: Agent => Future[Result])(implicit request: Request[A], ec: ExecutionContext): Future[Result] = {
+
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+
     authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
       .retrieve(allEnrolments and credentials and nino) {
         case enrolments ~ creds ~ mayBeNino =>
@@ -174,6 +177,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
       .recover {
         handleException
       }
+  }
 
   def withAuthenticatedUser[A](body: => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     authorised(AuthProviders(GovernmentGateway))(body)

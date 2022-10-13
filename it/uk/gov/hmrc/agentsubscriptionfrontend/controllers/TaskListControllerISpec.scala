@@ -120,7 +120,7 @@ class TaskListControllerISpec extends BaseISpec with EmailVerificationBehaviours
       val result = await(controller.showTaskList(request))
       status(result) shouldBe 200
 
-      result should containLink("task-list.contactDetailsEmailSubTask", routes.ContactDetailsController.showContactEmailCheck().url)
+      result should containLink("task-list.contactDetailsEmailSubTask", routes.ContactDetailsController.showContactEmailCheck.url)
     }
 
     "contain a url to the contact details email check task when user has completed amls (registered details)" in {
@@ -139,7 +139,7 @@ class TaskListControllerISpec extends BaseISpec with EmailVerificationBehaviours
       val result = await(controller.showTaskList(request))
       status(result) shouldBe 200
 
-      result should containLink("task-list.contactDetailsEmailSubTask", routes.ContactDetailsController.showContactEmailCheck().url)
+      result should containLink("task-list.contactDetailsEmailSubTask", routes.ContactDetailsController.showContactEmailCheck.url)
     }
 
     "contain a url to the contact details trading name sub-task when user has completed email-subtask" in {

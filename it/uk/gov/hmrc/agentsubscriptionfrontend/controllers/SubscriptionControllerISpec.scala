@@ -33,6 +33,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, AuthS
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{utr, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestSetupNoJourneyRecord}
+import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -133,7 +134,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
 
-      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck().url)
+      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck.url)
       noMetricExpectedAtThisPoint()
     }
 
@@ -146,7 +147,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
 
-      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showTradingNameCheck().url)
+      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showTradingNameCheck.url)
       noMetricExpectedAtThisPoint()
     }
 
@@ -260,7 +261,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.submitCheckAnswers(request))
 
     "redirect to sign in with a new user id page if user has enrolled in any other services" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
       val result = await(controller.submitCheckAnswers(request))
       status(result) shouldBe 303
@@ -272,7 +273,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       "agency is already subscribed to MTD" in new TestSetupWithCompleteJourneyRecord {
         AgentSubscriptionStub.subscriptionWillConflict(validUtr, subscriptionRequestWithNoEdit())
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withCookies(Cookie("PLAY_LANG", "en"))
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
 
         val result = await(controller.submitCheckAnswers(request))
 
@@ -291,7 +292,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val arn = "AARN0000001"
       AuthStub.authenticatedAgent(arn, "12345-credId")
 
-      implicit val request = FakeRequest()
+      implicit val request = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
     }
     def resultOf(request: Request[AnyContent]) = controller.showSubscriptionComplete(request)
 
@@ -608,7 +609,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       "all fields are supplied" in new TestSetupWithCompleteJourneyRecordAndCreate {
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withCookies(Cookie("PLAY_LANG", "en"))
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.continueUrl = Some("/some/url")
 
         val result = await(controller.submitCheckAnswers(request))
@@ -622,7 +623,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       "some fields are supplied" in new TestSetupWithCompleteJourneyRecordAndCreate {
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withCookies(Cookie("PLAY_LANG", "en"))
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.continueUrl = Some("/some/url")
 
         val result = await(controller.submitCheckAnswers(request))
@@ -636,7 +637,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       "amlsDetails are passed in" in new TestSetupWithCompleteJourneyRecordAndCreate {
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withCookies(Cookie("PLAY_LANG", "en"))
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.continueUrl = Some("/some/url")
         val result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
@@ -651,7 +652,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       "agent has been terminated" in new TestSetupWithCompleteJourneyRecordAndCreate {
         AgentSubscriptionStub.subscriptionWillFailForTerminatedAgent(validUtr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withCookies(Cookie("PLAY_LANG", "en"))
+        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.continueUrl = Some("/some/url")
         val result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
@@ -665,7 +666,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     "redirect to email verification if the email is not verified" in new TestSetupWithCompleteJourneyRecordAndCreate {
       AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
 
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withCookies(Cookie("PLAY_LANG", "en"))
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
       sessionStoreService.currentSession.continueUrl = Some("/some/url")
 
       givenSubscriptionJourneyRecordExists(
@@ -684,7 +685,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
 
   "GET /sign-in-with-new-user-id" should {
     "show the sign in with new user id error page" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
 
       val result = await(controller.showSignInWithNewID(request))
 
@@ -703,7 +704,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     postcode: String = "AA1 1AA",
     keyToRemove: String = "",
     additionalParameters: Seq[(String, String)] = Seq()) =
-    authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+    authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
       Seq(
         "addressLine1" -> addressLine1,
         "addressLine2" -> "Sometown",
@@ -714,7 +715,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       ).filter(_._1 != keyToRemove) ++ additionalParameters: _*)
 
   private def subscriptionDetailsRequest(keyToRemove: String = "", additionalParameters: Seq[(String, String)] = Seq()) =
-    authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+    authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
       Seq(
         "utr"                -> utr.value,
         "knownFactsPostcode" -> knownFactsPostcode,
@@ -767,7 +768,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     )
 
   private def subscriptionDetailsRequest2(keyToRemove: String = "", additionalParameters: Seq[(String, String)] = Seq()) =
-    authenticatedAs(user = subscribing2ndCleanAgentWithoutEnrolments).withFormUrlEncodedBody(
+    authenticatedAs(user = subscribing2ndCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
       Seq("utr" -> utr.value, "knownFactsPostcode" -> "BA1 2AA", "name" -> "My Agency 2", "email" -> "agency2@example.com", "telephone" -> "0123 456 7899")
         .filter(_._1 != keyToRemove) ++ additionalParameters: _*)
 

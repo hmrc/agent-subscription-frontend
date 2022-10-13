@@ -40,7 +40,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
     "read the crn as expected and save it to the session when supplied utr matches with DES utr (retrieved using crn)" in new TestSetupNoJourneyRecord{
       val crn = CompanyRegistrationNumber("12345678")
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "12345678")
 
       AgentSubscriptionStub.withMatchingCtUtrAndCrn(agentSessionForLimitedCompany.utr.get, crn)
@@ -60,7 +60,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
       "when businessType is NOT LLP" in new TestSetupNoJourneyRecord{
       val crn = CompanyRegistrationNumber("12345678")
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "12345678")
 
       AgentSubscriptionStub.withNonMatchingCtUtrAndCrn(agentSessionForLimitedCompany.utr.get, crn)
@@ -79,7 +79,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
       "businessType is Llp" in new TestSetupNoJourneyRecord{
       val crn = CompanyRegistrationNumber("12345678")
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "12345678")
 
       AgentSubscriptionStub.withNonMatchingCtUtrAndCrn(agentSessionForLimitedPartnership.utr.get, crn)
@@ -97,7 +97,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
 
     "redirect to /unique-taxpayer-reference page utr is not available in agent session" in new TestSetupNoJourneyRecord{
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "12345678")
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany.copy(utr = None))
@@ -109,7 +109,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
     }
 
     "handle forms with empty field" in new TestSetupNoJourneyRecord{
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "")
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)
@@ -122,7 +122,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
     }
 
     "handle forms with a crn that's too short" in new TestSetupNoJourneyRecord{
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "1234567")
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)
@@ -135,7 +135,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
     }
 
     "handle forms with a crn that's too long" in new TestSetupNoJourneyRecord{
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "123456789")
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)
@@ -148,7 +148,7 @@ class CompanyRegistrationControllerISpec extends BaseISpec with SessionDataMissi
     }
 
     "handle forms with an invalid crn" in new TestSetupNoJourneyRecord{
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "1AA23456")
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)

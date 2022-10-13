@@ -49,8 +49,8 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
       "GB")
 
   trait Setup {
-    implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(
-      subscribingCleanAgentWithoutEnrolments)
+    implicit def authenticatedRequest(method: String = GET): FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(
+      subscribingCleanAgentWithoutEnrolments, method)
     givenAgentIsNotManuallyAssured(utr.value)
     givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecord(id))
   }
@@ -122,7 +122,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.changeBusinessName(_))
     "contain page with expected content" in new Setup {
 
-      val result = await(controller.changeBusinessName(authenticatedRequest))
+      val result = await(controller.changeBusinessName(authenticatedRequest()))
 
       result should containMessages(
         "businessName.title"
@@ -134,7 +134,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
     "pre-populate the business name data into the form when it is present in the BE store" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.completeJourneyRecordNoMappings)
 
-      val result = await(controller.changeBusinessName(authenticatedRequest))
+      val result = await(controller.changeBusinessName(authenticatedRequest()))
 
       result should containSubstrings("My Agency")
     }
@@ -149,7 +149,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
 
         val result = await(
           controller.submitChangeBusinessName(
-            authenticatedRequest.withFormUrlEncodedBody("name" -> "New Agency Name", "submit" -> "continue")))
+            authenticatedRequest(POST).withFormUrlEncodedBody("name" -> "New Agency Name", "submit" -> "continue")))
 
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.SubscriptionController.showCheckAnswers.url)
@@ -161,7 +161,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
 
         val result = await(
           controller.submitChangeBusinessName(
-            authenticatedRequest.withFormUrlEncodedBody("name" -> "New Agency Name", "submit" -> "save")))
+            authenticatedRequest(POST).withFormUrlEncodedBody("name" -> "New Agency Name", "submit" -> "save")))
 
         status(result) shouldBe 303
 
@@ -175,7 +175,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.changeBusinessEmail(_))
     "contain page with expected content" in new Setup {
 
-      val result = await(controller.changeBusinessEmail(authenticatedRequest))
+      val result = await(controller.changeBusinessEmail(authenticatedRequest()))
 
       result should containMessages(
         "businessEmail.title",
@@ -189,7 +189,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
     "pre-populate the business email data into the form when it is present in the BE store" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.completeJourneyRecordNoMappings)
 
-      val result = await(controller.changeBusinessEmail(authenticatedRequest))
+      val result = await(controller.changeBusinessEmail(authenticatedRequest()))
 
       result should containSubstrings("test@gmail.com")
     }
@@ -204,7 +204,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
 
       val result = await(
         controller.submitChangeBusinessEmail(
-          authenticatedRequest.withFormUrlEncodedBody("email" -> "new@gmail.com", "submit" -> "continue")))
+          authenticatedRequest(POST).withFormUrlEncodedBody("email" -> "new@gmail.com", "submit" -> "continue")))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.SubscriptionController.showCheckAnswers.url)
@@ -216,7 +216,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
 
       val result = await(
         controller.submitChangeBusinessEmail(
-          authenticatedRequest.withFormUrlEncodedBody("email" -> "new@gmail.com", "submit" -> "save")))
+          authenticatedRequest(POST).withFormUrlEncodedBody("email" -> "new@gmail.com", "submit" -> "save")))
 
       status(result) shouldBe 303
 
@@ -229,7 +229,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
   "POST /confirm-business" should {
     "continue to task list when an Agent tries to return to the subscription journey with a different credential" in {
 
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments).withFormUrlEncodedBody("confirmBusiness" -> "yes")
+      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("confirmBusiness" -> "yes")
 
       val existingAuthId = AuthProviderId("67890-credId")
       givenSubscriptionJourneyRecordExists(utr, minimalSubscriptionJourneyRecord(existingAuthId))
