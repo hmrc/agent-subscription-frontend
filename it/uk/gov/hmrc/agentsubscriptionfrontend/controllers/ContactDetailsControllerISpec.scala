@@ -284,7 +284,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
       "contactEmailAddress.p",
       "contactEmailAddress.button")
 
-    result should containLink("button.back",routes.ContactDetailsController.showContactEmailCheck().url)
+    result should containLink("button.back",routes.ContactDetailsController.showContactEmailCheck.url)
   }
 
     "303 Redirect to /contact-email-check when no contact email data found" in {
@@ -310,7 +310,7 @@ class ContactDetailsControllerISpec extends BaseISpec {
         await(controller.showContactEmailAddress(request))
 
       status(result) shouldBe 303
-     redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck().url)
+     redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck.url)
     }
   }
 

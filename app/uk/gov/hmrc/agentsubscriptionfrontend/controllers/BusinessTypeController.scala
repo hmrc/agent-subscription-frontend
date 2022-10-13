@@ -50,7 +50,7 @@ class BusinessTypeController @Inject()(
     Redirect(routes.BusinessTypeController.showBusinessTypeForm())
   }
 
-  def showBusinessTypeForm(): Action[AnyContent] = Action.async { implicit request =>
+  def showBusinessTypeForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       redirectUrlActions.withMaybeRedirectUrlCached {
         agent.subscriptionJourneyRecord match {
@@ -70,7 +70,7 @@ class BusinessTypeController @Inject()(
     }
   }
 
-  def submitBusinessTypeForm(): Action[AnyContent] = Action.async { implicit request =>
+  def submitBusinessTypeForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       businessTypeForm
         .bindFromRequest()

@@ -50,7 +50,7 @@ class AssuranceChecksController @Inject()(
   mcc: MessagesControllerComponents)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
-  def invasiveCheckStart(): Action[AnyContent] = Action.async { implicit request =>
+  def invasiveCheckStart: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, _) =>
         Ok(invasiveCheckStartTemplate(invasiveCheckStartSaAgentCodeForm))
@@ -58,7 +58,7 @@ class AssuranceChecksController @Inject()(
     }
   }
 
-  def invasiveSaAgentCodePost(): Action[AnyContent] = Action.async { implicit request =>
+  def invasiveSaAgentCodePost: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, _) =>
         invasiveCheckStartSaAgentCodeForm
@@ -81,7 +81,7 @@ class AssuranceChecksController @Inject()(
     }
   }
 
-  def showClientDetailsForm(): Action[AnyContent] = Action.async { implicit request =>
+  def showClientDetailsForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       withValidSession { (_, _) =>
         Ok(clientDetailsTemplate(clientDetailsForm))
@@ -89,7 +89,7 @@ class AssuranceChecksController @Inject()(
     }
   }
 
-  def submitClientDetailsForm(): Action[AnyContent] = Action.async { implicit request =>
+  def submitClientDetailsForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       withValidSession { (businessType, _) =>
         clientDetailsForm
@@ -126,7 +126,7 @@ class AssuranceChecksController @Inject()(
               mark("Count-Subscription-InvasiveCheck-Failed")
               Redirect(routes.StartController.showCannotCreateAccount())
           }
-      case None => Redirect(routes.AssuranceChecksController.invasiveCheckStart())
+      case None => Redirect(routes.AssuranceChecksController.invasiveCheckStart)
     }
 
   private def getNextPageAfterInvasiveChecks(businessType: BusinessType) =

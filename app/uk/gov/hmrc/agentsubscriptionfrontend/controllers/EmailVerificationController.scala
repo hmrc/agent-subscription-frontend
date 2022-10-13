@@ -85,6 +85,6 @@ class EmailVerificationController @Inject()(
     else routes.TaskListController.showTaskList()
   override def redirectUrlIfLocked(session: RelevantState): Call = routes.SubscriptionController.showCannotVerifyEmailLocked()
   override def redirectUrlIfError(session: RelevantState): Call = routes.SubscriptionController.showCannotVerifyEmailTechnicalError()
-  override def backLinkUrl(session: RelevantState): Option[Call] = Some(routes.ContactDetailsController.showContactEmailCheck())
-  override def enterEmailUrl(session: RelevantState): Call = routes.ContactDetailsController.showContactEmailCheck()
+  override def backLinkUrl(session: RelevantState): Option[Call] = Some(routes.ContactDetailsController.showContactEmailCheck)
+  override def enterEmailUrl(session: RelevantState): Call = routes.ContactDetailsController.showContactEmailCheck
 }

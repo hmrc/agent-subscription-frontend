@@ -43,7 +43,7 @@ class SignedOutController @Inject()(
   mcc: MessagesControllerComponents)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
-  def redirectAgentToCreateCleanCreds(): Action[AnyContent] = Action.async { implicit request =>
+  def redirectAgentToCreateCleanCreds: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       for {
         agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
@@ -64,7 +64,7 @@ class SignedOutController @Inject()(
     }
   }
 
-  def redirectToCreateCleanCreds(): Action[AnyContent] = Action.async { implicit request =>
+  def redirectToCreateCleanCreds: Action[AnyContent] = Action.async { implicit request =>
     for {
       agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
       redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
@@ -79,7 +79,7 @@ class SignedOutController @Inject()(
     }
   }
 
-  def signOutWithContinueUrl(): Action[AnyContent] = Action.async { implicit request =>
+  def signOutWithContinueUrl: Action[AnyContent] = Action.async { implicit request =>
     val result: Future[Result] = for {
       agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
       redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
@@ -94,23 +94,23 @@ class SignedOutController @Inject()(
     }
   }
 
-  def startSurvey(): Action[AnyContent] = Action {
+  def startSurvey: Action[AnyContent] = Action {
     SeeOther(appConfig.surveyRedirectUrl).withNewSession
   }
 
-  def redirectToASAccountPage(): Action[AnyContent] = Action {
+  def redirectToASAccountPage: Action[AnyContent] = Action {
     SeeOther(appConfig.agentServicesAccountUrl).withNewSession
   }
 
-  def signOut(): Action[AnyContent] = Action {
+  def signOut: Action[AnyContent] = Action {
     startNewSession
   }
 
-  def keepAlive(): Action[AnyContent] = Action.async {
+  def keepAlive: Action[AnyContent] = Action.async {
     Future successful Ok("OK")
   }
 
-  def timedOut(): Action[AnyContent] = Action.async { implicit request =>
+  def timedOut: Action[AnyContent] = Action.async { implicit request =>
     Future successful Forbidden(timedOutTemplate())
   }
 

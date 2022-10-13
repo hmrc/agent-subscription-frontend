@@ -44,7 +44,7 @@ class TaskListController @Inject()(
   taskListTemplate: task_list)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
-  def showTaskList(): Action[AnyContent] = Action.async { implicit request =>
+  def showTaskList: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingEmailVerifiedAgent { agent =>
       agent.subscriptionJourneyRecord match {
         case Some(record) => taskListService.createTasks(record).map(tasks => (Ok(taskListTemplate(tasks))))

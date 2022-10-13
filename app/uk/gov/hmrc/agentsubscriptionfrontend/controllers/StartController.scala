@@ -49,13 +49,13 @@ class StartController @Inject()(
 
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
 
-  def root(): Action[AnyContent] = Action.async { implicit request =>
+  def root: Action[AnyContent] = Action.async { implicit request =>
     redirectUrlActions.withMaybeRedirectUrl { urlOpt =>
       Redirect(routes.StartController.start().toURLWithParams("continue" -> urlOpt))
     }
   }
 
-  def start(): Action[AnyContent] = Action.async { implicit request =>
+  def start: Action[AnyContent] = Action.async { implicit request =>
     redirectUrlActions.withMaybeRedirectUrl { urlOpt =>
       Redirect(
         routes.StartController
@@ -64,13 +64,13 @@ class StartController @Inject()(
     }
   }
 
-  def showNotAgent(): Action[AnyContent] = Action.async { implicit request =>
+  def showNotAgent: Action[AnyContent] = Action.async { implicit request =>
     withAuthenticatedUser {
       Ok(notAgentTemplate())
     }
   }
 
-  def signInCheck(): Action[AnyContent] = Action.async { implicit request =>
+  def signInCheck: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       redirectUrlActions.withMaybeRedirectUrlCached {
         agent match {
@@ -97,7 +97,7 @@ class StartController @Inject()(
     }
   }
 
-  def returnAfterMapping(): Action[AnyContent] = Action.async { implicit request =>
+  def returnAfterMapping: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       val sjr = agent.getMandatorySubscriptionRecord
       redirectUrlActions.withMaybeRedirectUrlCached {
@@ -108,7 +108,7 @@ class StartController @Inject()(
     }
   }
 
-  def showCannotCreateAccount(): Action[AnyContent] = Action { implicit request =>
+  def showCannotCreateAccount: Action[AnyContent] = Action { implicit request =>
     Ok(cannotCreateAccountTemplate())
   }
 

@@ -60,7 +60,7 @@ class ContactDetailsController @Inject()(
 
   val desAddressForm = new DesAddressForm(logger, blacklistedPostCodes)
 
-  def showContactEmailCheck(): Action[AnyContent] = Action.async { implicit request =>
+  def showContactEmailCheck: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
         agent.getMandatorySubscriptionRecord.businessDetails.registration
@@ -85,7 +85,7 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def submitContactEmailCheck(): Action[AnyContent] = Action.async { implicit request =>
+  def submitContactEmailCheck: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
         val sjr = agent.getMandatorySubscriptionRecord
@@ -125,10 +125,10 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def showContactEmailAddress(): Action[AnyContent] = Action.async { implicit request =>
+  def showContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       agent.getMandatorySubscriptionRecord.contactEmailData
-        .fold(Redirect(routes.ContactDetailsController.showContactEmailCheck())) { contactEmailData =>
+        .fold(Redirect(routes.ContactDetailsController.showContactEmailCheck)) { contactEmailData =>
           contactEmailData.contactEmail match {
             case Some(email) =>
               Ok(
@@ -141,13 +141,13 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def changeContactEmailAddress(): Action[AnyContent] = Action.async { implicit request =>
+  def changeContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>
     sessionStoreService
       .cacheIsChangingAnswers(changing = true)
-      .map(_ => Redirect(routes.ContactDetailsController.showContactEmailCheck()))
+      .map(_ => Redirect(routes.ContactDetailsController.showContactEmailCheck))
   }
 
-  def submitContactEmailAddress(): Action[AnyContent] = Action.async { implicit request =>
+  def submitContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
         contactEmailAddressForm.bindFromRequest
@@ -174,7 +174,7 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def showTradingNameCheck(): Action[AnyContent] = Action.async { implicit request =>
+  def showTradingNameCheck: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
         agent.getMandatorySubscriptionRecord.businessDetails.registration
@@ -199,7 +199,7 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def submitTradingNameCheck(): Action[AnyContent] = Action.async { implicit request =>
+  def submitTradingNameCheck: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
         val sjr = agent.getMandatorySubscriptionRecord
@@ -236,7 +236,7 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def showTradingName(): Action[AnyContent] = Action.async { implicit request =>
+  def showTradingName: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       agent.getMandatorySubscriptionRecord.contactTradingNameData
         .fold(Redirect(routes.ContactDetailsController.showTradingNameCheck())) { contactTradingData =>
@@ -252,13 +252,13 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def changeTradingName(): Action[AnyContent] = Action.async { implicit request =>
+  def changeTradingName: Action[AnyContent] = Action.async { implicit request =>
     sessionStoreService
       .cacheIsChangingAnswers(changing = true)
       .map(_ => Redirect(routes.ContactDetailsController.showTradingNameCheck()))
   }
 
-  def submitTradingName(): Action[AnyContent] = Action.async { implicit request =>
+  def submitTradingName: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
         contactTradingNameForm.bindFromRequest
@@ -283,7 +283,7 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def showCheckMainTradingAddress(): Action[AnyContent] = Action.async { implicit request =>
+  def showCheckMainTradingAddress: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
         agent.getMandatorySubscriptionRecord.businessDetails.registration
@@ -312,7 +312,7 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def submitCheckMainTradingAddress(): Action[AnyContent] = Action.async { implicit request =>
+  def submitCheckMainTradingAddress: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
         val sjr = agent.getMandatorySubscriptionRecord
@@ -346,7 +346,7 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def showMainTradingAddress(): Action[AnyContent] = Action.async { implicit request =>
+  def showMainTradingAddress: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       mark("Count-Subscription-AddressLookup-Start")
       implicit val language: Lang = mcc.messagesApi.preferred(request).lang
@@ -356,7 +356,7 @@ class ContactDetailsController @Inject()(
     }
   }
 
-  def changeCheckMainTradingAddress(): Action[AnyContent] = Action.async { implicit request =>
+  def changeCheckMainTradingAddress: Action[AnyContent] = Action.async { implicit request =>
     sessionStoreService
       .cacheIsChangingAnswers(changing = true)
       .map(_ => Redirect(routes.ContactDetailsController.showCheckMainTradingAddress()))

@@ -227,7 +227,7 @@ class AssuranceChecksControllerISpec extends BaseISpec {
       private val result = await(controller.submitClientDetailsForm(request))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.AssuranceChecksController.invasiveCheckStart().url)
+      redirectLocation(result) shouldBe Some(routes.AssuranceChecksController.invasiveCheckStart.url)
     }
 
     "redirect to /cannot-create account page when submitting valid nino with no relationship" in new TestSetupNoJourneyRecord {
