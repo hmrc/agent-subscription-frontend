@@ -2,8 +2,9 @@
 
 !.gitignore
 !.travis.yml
-!.scalafmt.conf
 
+.bloop/
+.bsp/
 .cache
 /.classpath
 db
@@ -20,6 +21,7 @@ lib
 lib_managed
 log
 logs
+.metals/
 modules
 /out
 precompiled

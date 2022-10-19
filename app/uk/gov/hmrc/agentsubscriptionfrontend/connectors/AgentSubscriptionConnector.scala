@@ -152,7 +152,7 @@ class AgentSubscriptionConnector @Inject()(
         }
     }
 
-  def companiesHouseKnownFactCheck(crn: CompanyRegistrationNumber, surname: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def companiesHouseKnownFactCheck(crn: CompanyRegistrationNumber, surname: String)(implicit hc: HeaderCarrier): Future[Int] =
     monitor(s"ConsumedAPI-Agent-Subscription-getCompanyOfficers-GET") {
       val encodedCrn = UriEncoding.encodePathSegment(crn.value, "UTF-8")
       val encodedName = UriEncoding.encodePathSegment(surname.toUpperCase, "UTF-8")
@@ -161,10 +161,8 @@ class AgentSubscriptionConnector @Inject()(
         .GET[HttpResponse](url)
         .map { response =>
           response.status match {
-            case OK            => true
-            case s if is2xx(s) => false
-            case NOT_FOUND     => false
-            case s             => throw UpstreamErrorResponse(response.body, s)
+            case s if Seq(OK, NOT_FOUND, CONFLICT).contains(s) => s
+            case s                                             => throw UpstreamErrorResponse(response.body, s)
           }
         }
     }

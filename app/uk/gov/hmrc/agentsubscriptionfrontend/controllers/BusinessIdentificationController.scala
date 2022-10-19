@@ -63,6 +63,7 @@ class BusinessIdentificationController @Inject()(
                                                   mcc: MessagesControllerComponents,
                                                   createNewAccountTemplate: create_new_account,
                                                   noMatchFoundTemplate: no_match_found,
+                                                  companyNotAllowedTemplate: company_not_allowed,
                                                   cannotCreateAccountTemplate: cannot_create_account,
                                                   confirmBusinessTemplate: confirm_business,
                                                   businessEmailTemplate: business_email,
@@ -87,6 +88,12 @@ class BusinessIdentificationController @Inject()(
   def showNoMatchFound: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(noMatchFoundTemplate()).toFuture
+    }
+  }
+
+  def showCompanyNotAllowed: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Ok(companyNotAllowedTemplate()).toFuture
     }
   }
 
