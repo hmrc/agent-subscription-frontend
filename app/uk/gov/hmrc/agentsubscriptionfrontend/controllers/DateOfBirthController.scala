@@ -53,12 +53,12 @@ class DateOfBirthController @Inject()(
   val subscriptionService: SubscriptionService,
   val subscriptionJourneyService: SubscriptionJourneyService,
   mcc: MessagesControllerComponents,
-  dateOfBirthTemplate: date_of_birth)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  dateOfBirthTemplate: date_of_birth
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
-  /**
-    * In-case of SoleTrader or Partnerships, we should display NI and DOB pages based on if nino and dob exist or not.
-    * We need to force users to go through these pages, hence the below checks
+  /** In-case of SoleTrader or Partnerships, we should display NI and DOB pages based on if nino and dob exist or not. We need to force users to go
+    * through these pages, hence the below checks
     */
   def showDateOfBirthForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
@@ -82,14 +82,13 @@ class DateOfBirthController @Inject()(
             .bindFromRequest()
             .fold(
               formWithErrors => Ok(dateOfBirthTemplate(formWithRefinedErrors(formWithErrors), businessType)),
-              validDob => {
+              validDob =>
                 if (existingSession.dateOfBirthFromCid.contains(validDob)) {
                   companiesHouseKnownFactCheck(existingSession) {
                     updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(routes.VatDetailsController.showRegisteredForVatForm)
                   }
                 } else {
                   Redirect(routes.BusinessIdentificationController.showNoMatchFound)
-                }
               }
             )
         }
@@ -105,10 +104,11 @@ class DateOfBirthController @Inject()(
             case (Some(crn), Some(name)) =>
               subscriptionService
                 .companiesHouseKnownFactCheck(crn, name)
-                .flatMap(
-                  checkResult =>
-                    if (checkResult) f
-                    else Redirect(routes.BusinessIdentificationController.showNoMatchFound()))
+                .flatMap {
+                  case OK        => f
+                  case NOT_FOUND => Redirect(routes.BusinessIdentificationController.showNoMatchFound())
+                  case CONFLICT  => Redirect(routes.BusinessIdentificationController.showCompanyNotAllowed())
+                }
 
             case (None, Some(_)) => Redirect(routes.CompanyRegistrationController.showCompanyRegNumberForm())
             case _               => Redirect(routes.NationalInsuranceController.showNationalInsuranceNumberForm())
@@ -122,20 +122,20 @@ class DateOfBirthController @Inject()(
     case None      => dateOfBirthForm
   }
 
-  private def checkSessionStateAndBusinessType(agentSession: AgentSession, agent: Agent)(result: (BusinessType => Future[Result]))(
-    implicit hc: HeaderCarrier): Future[Result] =
+  private def checkSessionStateAndBusinessType(agentSession: AgentSession, agent: Agent)(
+    result: (BusinessType => Future[Result])
+  )(implicit hc: HeaderCarrier): Future[Result] =
     agentSession.businessType match {
-      case b @ (Some(SoleTrader | Partnership | Llp)) => {
+      case b @ (Some(SoleTrader | Partnership | Llp)) =>
         (agent.authNino, agentSession.nino, agentSession.dateOfBirthFromCid) match {
-          case (None, _, _) if (!b.contains(Llp)) => Redirect(routes.VatDetailsController.showRegisteredForVatForm())
-          case (_, Some(_), Some(_))              => result(b.get)
-          case (_, None, _)                       => Redirect(routes.NationalInsuranceController.showNationalInsuranceNumberForm())
+          case (None, _, _) if !b.contains(Llp) => Redirect(routes.VatDetailsController.showRegisteredForVatForm())
+          case (_, Some(_), Some(_))            => result(b.get)
+          case (_, None, _)                     => Redirect(routes.NationalInsuranceController.showNationalInsuranceNumberForm())
           case (_, _, None) =>
-            if (b.get != Llp) //check this handling
+            if (b.get != Llp) // check this handling
               Redirect(routes.VatDetailsController.showRegisteredForVatForm())
             else Redirect(routes.BusinessIdentificationController.showNoMatchFound())
         }
-      }
       case _ =>
         updateSessionAndRedirect(AgentSession())(routes.BusinessTypeController.showBusinessTypeForm())
     }

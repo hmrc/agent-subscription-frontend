@@ -7,10 +7,10 @@ lazy val scoverageSettings = {
   Seq(
     // Semicolon-separated list of regexs matching classes to exclude
     ScoverageKeys.coverageExcludedPackages := """uk\.gov\.hmrc\.BuildInfo;.*\.Routes;.*\.RoutesPrefix;.*Filters?;MicroserviceAuditConnector;Module;GraphiteStartUp;.*\.Reverse[^.]*""",
-    ScoverageKeys.coverageMinimum := 80.00,
+    ScoverageKeys.coverageMinimumStmtTotal := 80.00,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
-    parallelExecution in Test := false
+    Test / parallelExecution := false
   )
 }
 
@@ -23,7 +23,7 @@ lazy val wartRemoverSettings = {
       Wart.IsInstanceOf
       //Wart.Any
     )
-    wartremoverWarnings in (Compile, compile) ++= warningWarts
+    Compile / compile / wartremoverWarnings ++= warningWarts
   }
 
   val wartRemoverError = {
@@ -48,18 +48,18 @@ lazy val wartRemoverSettings = {
       Wart.Var,
       Wart.While)
 
-    wartremoverErrors in (Compile, compile) ++= errorWarts
+    Compile / compile / wartremoverErrors ++= errorWarts
   }
 
   Seq(
     wartRemoverError,
     wartRemoverWarning,
-    wartremoverErrors in (Test, compile) --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference),
+    Test / compile / wartremoverErrors --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference),
     wartremoverExcluded ++=
-    routes.in(Compile).value ++
-    (baseDirectory.value / "it").get ++
-    (baseDirectory.value / "test").get ++
-    Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
+      (Compile / routes).value ++
+        (baseDirectory.value / "it").get ++
+        (baseDirectory.value / "test").get ++
+        Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
   )
 }
 
@@ -69,7 +69,7 @@ TwirlKeys.templateImports ++= Seq(
 )
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc"   %% "bootstrap-frontend-play-28"    % "7.7.0",
+  "uk.gov.hmrc"   %% "bootstrap-frontend-play-28"    % "7.8.0",
   "uk.gov.hmrc"   %% "play-frontend-hmrc"            % "3.32.0-play-28",
   "uk.gov.hmrc"   %% "play-partials"                 % "8.3.0-play-28",
   "uk.gov.hmrc"   %% "agent-kenshoo-monitoring"      % "4.8.0-play-28",
@@ -121,18 +121,17 @@ libraryDependencies ++= compileDeps ++ testDeps("test") ++ testDeps("it"),
     ),
     publishingSettings,
     scoverageSettings,
-    unmanagedResourceDirectories in Compile += baseDirectory.value / "resources",
-    scalafmtOnCompile in Compile := true,
-    scalafmtOnCompile in Test := true
+    Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
+    Compile / scalafmtOnCompile := true,
+    Test / scalafmtOnCompile := true
   )
   .configs(IntegrationTest)
   .settings(
     majorVersion := 0,
-    Keys.fork in IntegrationTest := true,
+    IntegrationTest / Keys.fork := true,
     Defaults.itSettings,
-    unmanagedSourceDirectories in IntegrationTest += baseDirectory(_ / "it").value,
-    parallelExecution in IntegrationTest := false,
-    scalafmtOnCompile in IntegrationTest := true
+    IntegrationTest / unmanagedSourceDirectories += baseDirectory(_ / "it").value,
+    IntegrationTest / parallelExecution := false
   )
   .settings(wartRemoverSettings: _*)
   .enablePlugins(PlayScala, SbtDistributablesPlugin)

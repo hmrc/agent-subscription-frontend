@@ -182,6 +182,12 @@ noAgencyFound.title=We could not find your business
 noAgencyFound.p1=We could not find a business in our records using the details you gave us.
 noAgencyFound.p2=Check the details and try again.
 
+#Company Not Allowed
+companyNotAllowed.title=We cannot create an account for this company
+companyNotAllowed.p1=We cannot register this company for an agent services account. This is because of the company''s status on the Companies House register.
+companyNotAllowed.p2=To view your company status you can <a href={0} target='_blank'>search the Companies House register (opens in a new tab)</a>. If you believe the status is incorrect, contact Companies House.
+companyNotAllowed.p3=If you''ve entered the incorrect details, you can try again.
+
 #Already subscribed
 alreadySubscribed.title=Your business already has an agent services account
 alreadySubscribed.p1=Contact your administrator to get access to your business’s agent services account.
