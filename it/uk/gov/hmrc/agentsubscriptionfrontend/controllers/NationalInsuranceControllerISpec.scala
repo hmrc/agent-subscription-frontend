@@ -152,6 +152,19 @@ class NationalInsuranceControllerISpec extends BaseISpec with SessionDataMissing
 
       }
 
+      "redirect to /no-match-found page if nino is marked as deceased in citizen details" in new TestSetupNoJourneyRecord {
+        AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456C"), Some("Matchmaker"), DateOfBirth(LocalDate.now()), deceased = true)
+        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST).withFormUrlEncodedBody("nino" -> "AE123456C")
+        sessionStoreService.currentSession.agentSession = Some(agentSession)
+
+        val result = await(controller.submitNationalInsuranceNumberForm()(request))
+
+        status(result) shouldBe 303
+
+        redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNoMatchFound().url)
+
+      }
+
       "redirect to /date-of-birth if nino from auth and nino from user input do not match " +
         "and businessType is LLP (although we do not expect a auth nino for LLP)" in new TestSetupNoJourneyRecord {
         AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456D"), Some("Matchmaker"), DateOfBirth(LocalDate.now()))

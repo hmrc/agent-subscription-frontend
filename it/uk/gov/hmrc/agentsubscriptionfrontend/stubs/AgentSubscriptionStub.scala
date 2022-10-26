@@ -233,7 +233,7 @@ object AgentSubscriptionStub {
         .willReturn(aResponse()
           .withStatus(500)))
 
-  def givenDesignatoryDetailsForNino(nino: Nino, lastName: Option[String], dob: DateOfBirth): StubMapping =
+  def givenDesignatoryDetailsForNino(nino: Nino, lastName: Option[String], dob: DateOfBirth, deceased: Boolean = false): StubMapping =
     stubFor(
       get(
         urlEqualTo(
@@ -251,7 +251,7 @@ object AgentSubscriptionStub {
                        |         "sex" : "M",
                        |         "dateOfBirth" : "${dob.value.toString}",
                        |         "nino" : "TW189213B",
-                       |         "deceased" : false
+                       |         "deceased" : $deceased
                        |       },
                        |       "address" : {
                        |         "line1" : "26 FARADAY DRIVE",
