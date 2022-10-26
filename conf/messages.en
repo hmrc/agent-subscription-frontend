@@ -410,6 +410,12 @@ button.back=Back
 link.finishSignOut=Finish and sign out
 button.signIn=Sign in
 
+#Cannot verify identity (Agent helpline version)
+cannotVerifyIdentity.title=We could not confirm your identity
+cannotVerifyIdentity.p1.agentHelplineVersion=We need more information to confirm your identity. Contact HMRC using the details on <a href="https://www.gov.uk/guidance/dedicated-helplines-and-contacts-for-authorised-agents" target="_blank" rel="noopener noreferrer">Dedicated helplines and contacts for Tax Agents</a>.
+cannotVerifyIdentity.p1.contactHmrcVersion=We need more information to confirm your identity. Get in touch using the details on <a href="https://www.gov.uk/contact-hmrc" target="_blank" rel="noopener noreferrer">Contact HMRC</a>.
+cannotVerifyIdentity.p2=If you’ve entered the incorrect details, you can try again.
+cannotVerifyIdentity.a=Try again
 #Setup Incomplete
 setupIncomplete.title=We could not confirm your identity
 setupIncomplete.p1=Before you can create an agent services account, we need to be sure that a client has authorised you to deal with HMRC.

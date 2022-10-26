@@ -71,7 +71,8 @@ class BusinessIdentificationController @Inject()(
                                                   businessNameTemplate: business_name,
                                                   alreadySubscribedTemplate: already_subscribed,
                                                   updateBusinessAddressTemplate: update_business_address,
-                                                  postcodeNotAllowedTemplate: postcode_not_allowed)(
+                                                  postcodeNotAllowedTemplate: postcode_not_allowed,
+                                                  cannotVerifyIdentity: cannot_verify_identity)(
   implicit val appConfig: AppConfig,
   val ec: ExecutionContext)
     extends FrontendController(mcc) with AuthActions
@@ -443,6 +444,12 @@ class BusinessIdentificationController @Inject()(
   def showExistingJourneyFound: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(existingJourneyFoundTemplate())
+    }
+  }
+
+  def showCannotConfirmIdentity: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Ok(cannotVerifyIdentity(displayAgentHelplineLink = false))
     }
   }
 

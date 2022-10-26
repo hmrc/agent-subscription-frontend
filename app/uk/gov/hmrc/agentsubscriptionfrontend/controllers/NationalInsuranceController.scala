@@ -25,7 +25,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.ninoForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Llp, Partnership, SoleTrader}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.DesignatoryDetails.Person
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters.normalizeNino
@@ -92,15 +91,18 @@ class NationalInsuranceController @Inject()(
                     .getDesignatoryDetails(validNino)
                     .map(_.person)
                     .flatMap {
-                      case Some(Person(_, None)) if businessType != Llp =>
+                      case Some(person) if person.deceased.contains(true) =>
+                        logger.warn(s"Could not register agent as the NINO (${agent.authNino}) is marked as deceased.")
+                        Redirect(routes.BusinessIdentificationController.showCannotConfirmIdentity())
+                      case Some(person) if person.dateOfBirth.isEmpty && businessType != Llp =>
                         logger.warn("no DateOfBirth in the /citizen-details response for logged in agent")
                         updateSessionAndRedirect(existingSession.copy(nino = Some(validNino)))(routes.VatDetailsController.showRegisteredForVatForm())
-                      case Some(Person(_, Some(dateOfBirth))) if businessType != Llp =>
+                      case Some(person) if person.dateOfBirth.nonEmpty && businessType != Llp =>
                         updateSessionAndRedirect(existingSession
-                          .copy(nino = Some(validNino), dateOfBirthFromCid = Some(dateOfBirth)))(routes.DateOfBirthController.showDateOfBirthForm())
-                      case Some(Person(Some(lastName), Some(dateOfBirth))) =>
+                          .copy(nino = Some(validNino), dateOfBirthFromCid = person.dateOfBirth))(routes.DateOfBirthController.showDateOfBirthForm())
+                      case Some(person) if person.lastName.nonEmpty && person.dateOfBirth.nonEmpty =>
                         updateSessionAndRedirect(existingSession
-                          .copy(nino = Some(validNino), dateOfBirthFromCid = Some(dateOfBirth), lastNameFromCid = Some(lastName)))(
+                          .copy(nino = Some(validNino), dateOfBirthFromCid = person.dateOfBirth, lastNameFromCid = person.lastName))(
                           routes.DateOfBirthController.showDateOfBirthForm())
                       case _ =>
                         logger.warn(s"business type $businessType no lastName and or no dob from CiD")

@@ -42,6 +42,7 @@ POST        /vat-registration-details                      uk.gov.hmrc.agentsubs
 
 GET         /no-match                                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showNoMatchFound()
 GET         /company-not-allowed                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showCompanyNotAllowed()
+GET         /cannot-confirm-identity                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showCannotConfirmIdentity()
 
 GET         /confirm-business                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showConfirmBusinessForm()
 POST        /confirm-business                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitConfirmBusinessForm()
