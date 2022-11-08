@@ -310,6 +310,14 @@ object AgentSubscriptionStub {
         )
       ).willReturn(aResponse().withStatus(404)))
 
+  def givenCompaniesHouseStatusCheck(crn: String, statusResponse: Int): StubMapping = {
+    stubFor(
+      get(
+        urlEqualTo(s"/agent-subscription/companies-house-api-proxy/company/$crn/status")
+      ).willReturn(aResponse().withStatus(statusResponse))
+    )
+  }
+
   private def subscriptionRequestFor(utr: Utr, request: SubscriptionRequest) = {
     val agency = request.agency
     val address = agency.address

@@ -73,16 +73,24 @@ class CompanyRegistrationController @Inject()(
                 case Some(utr) =>
                   subscriptionService.matchCorporationTaxUtrWithCrn(utr, validCrn).flatMap {
                     foundMatch =>
-                      if (foundMatch)
-                        updateSessionAndRedirect(existingSession.copy(
-                          companyRegistrationNumber = Some(validCrn),
-                          ctUtrCheckResult = Some(foundMatch),
-                          nino = None, // in case they are LLP and re-entered a new CRN that does match
-                          dateOfBirth = None,
-                          lastNameFromCid = None,
-                          dateOfBirthFromCid = None
-                        ))(routes.VatDetailsController.showRegisteredForVatForm())
-                      else {
+                      if (foundMatch) {
+                        subscriptionService.checkCompanyStatus(validCrn).flatMap {
+                          case OK =>
+                            sessionStoreService
+                              .cacheAgentSession(existingSession.copy(
+                                companyRegistrationNumber = Some(validCrn),
+                                ctUtrCheckResult = Some(foundMatch),
+                                nino = None, // in case they are LLP and re-entered a new CRN that does match
+                                dateOfBirth = None,
+                                lastNameFromCid = None,
+                                dateOfBirthFromCid = None
+                              ))
+                              .map(_ => Redirect(routes.VatDetailsController.showRegisteredForVatForm()))
+                          case CONFLICT  => Redirect(routes.BusinessIdentificationController.showCompanyNotAllowed())
+                          case NOT_FOUND => Redirect(routes.BusinessIdentificationController.showNoMatchFound())
+                        }
+
+                      } else {
                         existingSession.businessType match {
                           case Some(bt) =>
                             if (bt == Llp)

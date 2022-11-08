@@ -211,6 +211,9 @@ class SubscriptionService @Inject()(
   def companiesHouseKnownFactCheck(crn: CompanyRegistrationNumber, name: String)(implicit hc: HeaderCarrier): Future[Int] =
     agentSubscriptionConnector.companiesHouseKnownFactCheck(crn, name)
 
+  def checkCompanyStatus(crn: CompanyRegistrationNumber)(implicit hc: HeaderCarrier): Future[Int] =
+    agentSubscriptionConnector.companiesHouseStatusCheck(crn)
+
   private def extractLangPreferenceFromCookie(implicit request: Request[_]): Option[Lang] =
     request.cookies
       .get("PLAY_LANG")
