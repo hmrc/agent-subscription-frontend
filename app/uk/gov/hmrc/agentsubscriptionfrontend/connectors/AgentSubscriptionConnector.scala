@@ -167,6 +167,20 @@ class AgentSubscriptionConnector @Inject()(
         }
     }
 
+  def companiesHouseStatusCheck(crn: CompanyRegistrationNumber)(implicit hc: HeaderCarrier): Future[Int] =
+    monitor(s"ConsumedAPI-Agent-Subscription-getCompanyStatus-GET") {
+      val encodedCrn = UriEncoding.encodePathSegment(crn.value, "UTF-8")
+      val url = s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/companies-house-api-proxy/company/$encodedCrn/status"
+      http
+        .GET[HttpResponse](url)
+        .map { response =>
+          response.status match {
+            case s if Seq(OK, NOT_FOUND, CONFLICT).contains(s) => s
+            case s                                             => throw UpstreamErrorResponse(response.body, s)
+          }
+        }
+    }
+
   def getAmlsSubscriptionRecord(amlsRegistrationNumber: String)(implicit hc: HeaderCarrier): Future[Option[AmlsSubscriptionRecord]] =
     monitor(s"ConsumedAPI-Agent-Subscription-getAmlsSubscription-GET") {
       val url = s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/amls-subscription/$amlsRegistrationNumber"

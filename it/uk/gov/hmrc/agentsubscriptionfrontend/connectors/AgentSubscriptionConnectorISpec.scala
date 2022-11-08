@@ -366,6 +366,28 @@ class AgentSubscriptionConnectorISpec extends BaseISpec with MetricTestSupport {
     }
   }
 
+  import AgentSubscriptionStub.givenCompaniesHouseStatusCheck
+  "companiesHouseStatusCheck" should {
+    "return OK if the company has active status" in {
+      givenCompaniesHouseStatusCheck(crn.value, OK)
+      await(connector.companiesHouseStatusCheck(crn)) shouldBe OK
+    }
+    "return CONFLICT if the company has inactive status" in {
+      givenCompaniesHouseStatusCheck(crn.value, CONFLICT)
+      await(connector.companiesHouseStatusCheck(crn)) shouldBe CONFLICT
+    }
+    "return NOT_FOUND if the company does not exist" in {
+      givenCompaniesHouseStatusCheck(crn.value, NOT_FOUND)
+      await(connector.companiesHouseStatusCheck(crn)) shouldBe NOT_FOUND
+    }
+    "throw exception if there was a problemn with the service" in {
+      givenCompaniesHouseStatusCheck(crn.value, SERVICE_UNAVAILABLE)
+      intercept[UpstreamErrorResponse]{
+        await(connector.companiesHouseStatusCheck(crn))
+      }
+    }
+  }
+
   private val subscriptionRequest =
     SubscriptionRequest(
       utr = utr,
