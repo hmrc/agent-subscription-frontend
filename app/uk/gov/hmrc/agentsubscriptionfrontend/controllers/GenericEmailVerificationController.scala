@@ -48,7 +48,7 @@ abstract class GenericEmailVerificationController[S](
   /**
     * Returns the session state and the credId of the current logged in user.
     */
-  def getState(implicit hc: HeaderCarrier): Future[(S, String)]
+  def getState(implicit hc: HeaderCarrier, request: Request[_]): Future[(S, String)]
 
   /**
     * Extract the email to be verified from the current session state.

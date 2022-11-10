@@ -16,13 +16,21 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.repository
 
-import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.cache.repository.CacheMongoRepository
+import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.mongo.{MongoComponent, TimestampSupport}
+import uk.gov.hmrc.mongo.cache.{SessionCacheRepository => CacheRepository}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.DurationInt
 
 @Singleton
-class SessionCacheRepository @Inject()(mongo: ReactiveMongoComponent)(implicit ec: ExecutionContext, appConfig: AppConfig)
-    extends CacheMongoRepository("sessions", appConfig.mongoDbExpireAfterSeconds)(mongo.mongoConnector.db, ec)
+class SessionCacheRepository @Inject()(mongo: MongoComponent, timestampSupport: TimestampSupport)(implicit ec: ExecutionContext)
+    extends CacheRepository(
+      mongoComponent = mongo,
+      collectionName = "sessions",
+      replaceIndexes = false,
+      ttl = 15.minutes,
+      timestampSupport = timestampSupport,
+      sessionIdKey = SessionKeys.sessionId
+    )

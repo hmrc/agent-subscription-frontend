@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import com.kenshoo.play.metrics.Metrics
 import play.api.{Configuration, Environment}
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Call, MessagesControllerComponents, RequestHeader}
+import play.api.mvc.{Call, MessagesControllerComponents, Request, RequestHeader}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SubscriptionJourneyService
@@ -56,7 +56,7 @@ class EmailVerificationController @Inject()(
 
   override def accessibilityStatementUrl(implicit request: RequestHeader): String = accessibilityStatementConfig.url.getOrElse("")
 
-  override def getState(implicit hc: HeaderCarrier): Future[(RelevantState, String)] =
+  override def getState(implicit hc: HeaderCarrier, request: Request[_]): Future[(RelevantState, String)] =
     for {
       authProviderId    <- retrieveCredentials.map(_.getOrElse(throw new RuntimeException("Email verification: No credentials could be retrieved")))
       isChangingAnswers <- sessionStoreService.fetchIsChangingAnswers

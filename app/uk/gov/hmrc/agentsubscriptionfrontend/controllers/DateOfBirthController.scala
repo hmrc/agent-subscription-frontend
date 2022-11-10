@@ -17,14 +17,14 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import java.time.LocalDate
-
 import com.kenshoo.play.metrics.Metrics
+
 import javax.inject.{Inject, Singleton}
 import play.api.{Configuration, Environment}
 import play.api.data.Forms.{mapping, text, tuple}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError, Mapping}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController._
@@ -124,7 +124,7 @@ class DateOfBirthController @Inject()(
 
   private def checkSessionStateAndBusinessType(agentSession: AgentSession, agent: Agent)(
     result: (BusinessType => Future[Result])
-  )(implicit hc: HeaderCarrier): Future[Result] =
+  )(implicit request: Request[_]): Future[Result] =
     agentSession.businessType match {
       case b @ (Some(SoleTrader | Partnership | Llp)) =>
         (agent.authNino, agentSession.nino, agentSession.dateOfBirthFromCid) match {

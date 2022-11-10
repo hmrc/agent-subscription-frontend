@@ -17,12 +17,11 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import play.api.libs.json.Json
+import play.api.mvc.Request
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.{SessionCache, SessionCacheRepository}
-import uk.gov.hmrc.cache.repository.CacheRepository
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,49 +33,48 @@ class MongoDBSessionStoreService @Inject()(sessionCache: SessionCacheRepository)
 
   val continueUrlCache: SessionCache[RedirectUrl] = new SessionCache[RedirectUrl] {
     override val sessionName: String = "continueUrl"
-    override val cacheRepository: CacheRepository = sessionCache
+    override val cacheRepository: SessionCacheRepository = sessionCache
   }
 
   val goBackUrlCache: SessionCache[String] = new SessionCache[String] {
     override val sessionName: String = "goBackUrl"
-    override val cacheRepository: CacheRepository = sessionCache
+    override val cacheRepository: SessionCacheRepository = sessionCache
   }
 
   val isChangingAnswersCache: SessionCache[Boolean] = new SessionCache[Boolean] {
     override val sessionName: String = "isChangingAnswers"
-    override val cacheRepository: CacheRepository = sessionCache
+    override val cacheRepository: SessionCacheRepository = sessionCache
   }
 
   val agentSessionCache: SessionCache[AgentSession] = new SessionCache[AgentSession] {
     override val sessionName: String = "agentSession"
-    override val cacheRepository: CacheRepository = sessionCache
+    override val cacheRepository: SessionCacheRepository = sessionCache
   }
 
-  def fetchContinueUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[RedirectUrl]] =
+  def fetchContinueUrl(implicit request: Request[Any], ec: ExecutionContext): Future[Option[RedirectUrl]] =
     continueUrlCache.fetch
 
-  def cacheContinueUrl(url: RedirectUrl)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  def cacheContinueUrl(url: RedirectUrl)(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
     continueUrlCache.save(url).map(_ => ())
 
-  def cacheGoBackUrl(url: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  def cacheGoBackUrl(url: String)(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
     goBackUrlCache.save(url).map(_ => ())
 
-  def fetchGoBackUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[String]] =
+  def fetchGoBackUrl(implicit request: Request[Any], ec: ExecutionContext): Future[Option[String]] =
     goBackUrlCache.fetch
 
-  def cacheIsChangingAnswers(changing: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  def cacheIsChangingAnswers(changing: Boolean)(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
     isChangingAnswersCache.save(changing).map(_ => ())
 
-  def fetchIsChangingAnswers(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[Boolean]] =
+  def fetchIsChangingAnswers(implicit request: Request[Any], ec: ExecutionContext): Future[Option[Boolean]] =
     isChangingAnswersCache.fetch
 
-  def cacheAgentSession(agentSession: AgentSession)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  def cacheAgentSession(agentSession: AgentSession)(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
     agentSessionCache.save(agentSession).map(_ => ())
 
-  def fetchAgentSession(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[AgentSession]] =
+  def fetchAgentSession(implicit request: Request[Any], ec: ExecutionContext): Future[Option[AgentSession]] =
     agentSessionCache.fetch
 
-  def remove()(implicit ec: ExecutionContext): Future[Unit] =
-    sessionCache.removeAll().map(_ => ())
-
+  def remove()(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
+    agentSessionCache.delete().map(_ => ())
 }
