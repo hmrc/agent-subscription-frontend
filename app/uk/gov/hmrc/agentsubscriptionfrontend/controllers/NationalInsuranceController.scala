@@ -17,9 +17,10 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
+
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -32,7 +33,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.national_insurance_number
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -135,7 +135,7 @@ class NationalInsuranceController @Inject()(
     }
 
   private def withValidBusinessType(agentSession: AgentSession)(result: (BusinessType => Future[Result]))(
-    implicit hc: HeaderCarrier): Future[Result] =
+    implicit request: Request[_]): Future[Result] =
     agentSession.businessType match {
       case b @ (Some(SoleTrader | Partnership | Llp)) => result(b.get)
       case _ =>

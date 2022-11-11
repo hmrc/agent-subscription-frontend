@@ -74,21 +74,20 @@ lazy val compileDeps = Seq(
   "uk.gov.hmrc"   %% "play-partials"                 % "8.3.0-play-28",
   "uk.gov.hmrc"   %% "agent-kenshoo-monitoring"      % "4.8.0-play-28",
   "uk.gov.hmrc"   %% "agent-mtd-identifiers"         % "0.47.0-play-27",
-  "uk.gov.hmrc"   %% "mongo-caching"                 % "7.2.0-play-28",
   "uk.gov.hmrc"   %% "play-conditional-form-mapping" % "1.12.0-play-28",
-  "uk.gov.hmrc"   %% "simple-reactivemongo"          % "8.1.0-play-28",
   "uk.gov.hmrc"   %% "play-language"                 % "5.3.0-play-28",
-  "org.typelevel" %% "cats-core"                     % "2.6.1"
+  "org.typelevel" %% "cats-core"                     % "2.6.1",
+  "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"      % "0.73.0"
 )
 
 def testDeps(scope: String) = Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % scope,
   "org.scalatestplus" %% "mockito-3-12" % "3.2.10.0" % scope,
   "com.github.tomakehurst" % "wiremock-jre8" % "2.26.2" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "5.1.0-play-28" % scope,
   "org.scalamock" %% "scalamock" % "4.4.0" % scope,
   "org.jsoup" % "jsoup" % "1.14.2" % scope,
-  "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % scope
+  "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % scope,
+  "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-28" % "0.73.0" % scope
 )
 
 lazy val root = Project("agent-subscription-frontend", file("."))

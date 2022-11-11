@@ -34,7 +34,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgen
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, TestData}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.{givenAmlsRecordFound, givenAmlsRecordNotFound}
-import uk.gov.hmrc.http.HeaderCarrier
 
 class AMLSControllerISpec extends BaseISpec {
 
@@ -477,7 +476,7 @@ class AMLSControllerISpec extends BaseISpec {
 
       givenSubscriptionJourneyRecordExists(id, minimalSubscriptionJourneyRecordWithAmls(id))
 
-        implicit val hc = HeaderCarrier()
+        implicit val req = FakeRequest()
 
       sessionStoreService.currentSession.goBackUrl = Some(routes.SubscriptionController.showCheckAnswers().url)
 

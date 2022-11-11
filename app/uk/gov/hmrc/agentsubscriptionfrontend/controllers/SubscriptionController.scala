@@ -34,7 +34,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{HttpError, MongoDBSessionS
 import uk.gov.hmrc.agentsubscriptionfrontend.util.{toFuture, valueOps}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{address_form_with_errors, check_answers, sign_in_new_id, subscription_complete, cannot_verify_email_locked, cannot_verify_email_technical}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
+import uk.gov.hmrc.http.HttpException
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -115,7 +115,7 @@ class SubscriptionController @Inject()(
   private def updateSessionAndReturnAgencyBeforeSubscribing(registration: Registration)
                                             (emailData: ContactEmailData,
                                              nameData: ContactTradingNameData,
-                                             addressData: ContactTradingAddressData, userMappings: List[UserMapping])(implicit hc: HeaderCarrier) = {
+                                             addressData: ContactTradingAddressData, userMappings: List[UserMapping])(implicit request: Request[_]) = {
     val agencyName = nameData.contactTradingName.orElse(registration.taxpayerName)
     val agencyEmail = emailData.contactEmail
     val agencyAddress: BusinessAddress = addressData.contactTradingAddress.getOrElse(
@@ -261,7 +261,7 @@ class SubscriptionController @Inject()(
     Ok(cannotVerifyEmailTechnicalTemplate())
   }
 
-  private def agencyNameAndEmailClientCount(maybeSjr: Option[SubscriptionJourneyRecord])(implicit hc: HeaderCarrier): Future[(String, String, Int)] = {
+  private def agencyNameAndEmailClientCount(maybeSjr: Option[SubscriptionJourneyRecord])(implicit request: Request[Any]): Future[(String, String, Int)] = {
     maybeSjr match {
       case Some(sjr) => {
 
@@ -292,7 +292,7 @@ class SubscriptionController @Inject()(
     }
   }
 
-  private def getMaybeContinueUrl(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  private def getMaybeContinueUrl(implicit request: Request[_]): Future[Option[String]] = {
 
     def recoverSessionStoreWithNone[T]: PartialFunction[Throwable, Option[T]] = {
       case NonFatal(ex) =>

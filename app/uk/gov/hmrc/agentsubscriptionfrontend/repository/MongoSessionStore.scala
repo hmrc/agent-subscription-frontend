@@ -16,91 +16,45 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.repository
 
+import com.mongodb.MongoWriteException
 import play.api.Logging
 import play.api.libs.json._
-import uk.gov.hmrc.cache.model.Id
-import uk.gov.hmrc.cache.repository.CacheRepository
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.agentsubscriptionfrontend.util.valueOps
+import play.api.mvc.Request
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
+import uk.gov.hmrc.mongo.cache.DataKey
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait MongoSessionStore[T] extends Logging {
 
   val sessionName: String
-  val cacheRepository: CacheRepository
+  val cacheRepository: SessionCacheRepository
 
-  def get(implicit reads: Reads[T], hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Option[T]]] =
-    hc.sessionId.map(_.value) match {
-      case Some(sessionId) ⇒
-        cacheRepository
-          .findById(Id(sessionId))
-          .map(_.flatMap(_.data))
-          .map {
-            case Some(cache) =>
-              (cache \ sessionName).asOpt[JsValue] match {
-                case None => Right(None)
-                case Some(obj) =>
-                  obj.validate[T] match {
-                    case JsSuccess(p, _) => Right(Some(p))
-                    case JsError(errors) =>
-                      val allErrors = errors
-                        .map(_._2.map(_.message).mkString(","))
-                        .mkString(",")
-                      Left(allErrors)
-                  }
-              }
-            case None => Right(None)
-          }
-          .recover {
-            case e ⇒
-              Left(e.getMessage)
-          }
+  def get(implicit reads: Reads[T], request: Request[Any], ec: ExecutionContext): Future[Either[String, Option[T]]] =
+    cacheRepository
+      .getFromSession[T](DataKey[T](sessionName))
+      .map {
+        case Some(agentSession) => Right(Some(agentSession))
+        case None               => Right(None)
+      }
+      .recover {
+        case e ⇒
+          Left(e.getMessage)
+      }
 
-      case None ⇒
-        logger.warn("no sessionId found in the HeaderCarrier to query mongo")
-        Right(None).toFuture
-    }
+  def store(newSession: T)(implicit writes: Writes[T], request: Request[Any], ec: ExecutionContext): Future[Either[String, Unit]] =
+    cacheRepository
+      .putSession[T](DataKey[T](sessionName), newSession)
+      .map(_ => Right(()))
+      .recover {
+        case e: MongoWriteException => Left(e.getError.getMessage)
+      }
 
-  def store(newSession: T)(implicit writes: Writes[T], hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Unit]] =
-    hc.sessionId.map(_.value) match {
-      case Some(sessionId) ⇒
-        cacheRepository
-          .createOrUpdate(Id(sessionId), sessionName, Json.toJson(newSession))
-          .map[Either[String, Unit]] { dbUpdate ⇒
-            if (dbUpdate.writeResult.inError) {
-              Left(dbUpdate.writeResult.errmsg.getOrElse("unknown error during inserting session data in mongo"))
-            } else {
-              Right(())
-            }
-          }
-          .recover {
-            case e ⇒
-              Left(e.getMessage)
-          }
-
-      case None ⇒
-        Left(s"no sessionId found in the HeaderCarrier to store in mongo").toFuture
-    }
-
-  def delete()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Unit]] =
-    hc.sessionId.map(_.value) match {
-      case Some(sessionId) ⇒
-        cacheRepository
-          .removeById(Id(sessionId))
-          .map[Either[String, Unit]] { dbUpdate ⇒
-            if (dbUpdate.writeErrors.nonEmpty) {
-              Left(dbUpdate.writeErrors.map(_.errmsg).mkString(","))
-            } else {
-              Right(())
-            }
-          }
-          .recover {
-            case e ⇒
-              Left(e.getMessage)
-          }
-
-      case None ⇒
-        Right(()).toFuture
-    }
+  def delete()(implicit request: Request[Any], ec: ExecutionContext): Future[Either[String, Unit]] =
+    cacheRepository
+      .deleteFromSession[AgentSession](DataKey[AgentSession]("agentSession"))
+      .map(_ => Right(()))
+      .recover {
+        case e: MongoWriteException => Left(e.getError.getMessage)
+      }
 }
