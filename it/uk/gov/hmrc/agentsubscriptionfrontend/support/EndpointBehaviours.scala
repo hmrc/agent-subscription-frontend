@@ -9,7 +9,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AuthStub, SsoStub}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.individual
 import uk.gov.hmrc.http.SessionKeys
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import java.net.URLEncoder
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -48,21 +47,21 @@ trait EndpointBehaviours {
   protected def aPageWithFeedbackLinks(action: PlayRequest, request: => Request[AnyContent] = FakeRequest("GET", "url").withSession(SessionKeys.authToken -> "Bearer XYZ")): Unit = {
 
     "have a 'is this page not working properly?' link" in new TestSetupWithCompleteJourneyRecord {
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(hc(request), global))
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(request, global))
       val result = action(request)
 
       bodyOf(result.futureValue) should include("Is this page not working properly?")
     }
 
     "have a beta feedback banner" in new TestSetupWithCompleteJourneyRecord {
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(hc(request), global))
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(request, global))
       val result = action(request)
 
       bodyOf(result.futureValue) should include("This is a new service")
     }
 
     "have a beta feedback link" in new TestSetupWithCompleteJourneyRecord {
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(hc(request), global))
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(request, global))
       val result = action(request)
 
       bodyOf(result.futureValue) should include("/contact/beta-feedback")
@@ -162,19 +161,17 @@ trait EndpointBehaviours {
   protected def aPageTakingContinueUrlAndCachingInSessionStore(action: PlayRequest, sessionKeys: => Seq[(String, String)], expectedStatusCode: Int = 200): Unit = {
     aPageTakingContinueUrl(action, sessionKeys, checkContinueUrlIsInCache, checkContinueUrlIsNotInCache)
 
-    def hc(request: Request[AnyContent]) = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-
     def checkContinueUrlIsInCache(request: Request[AnyContent], result: Result, expectedContinueUrl: String) = {
       status(result) shouldBe expectedStatusCode
       withClue("ContinueUrl was not found in session store, actual: ") {
-        sessionStoreService.currentSession(hc(request)).continueUrl shouldBe Some(expectedContinueUrl)
+        sessionStoreService.currentSession(request).continueUrl shouldBe Some(expectedContinueUrl)
       }
     }
 
     def checkContinueUrlIsNotInCache(request: Request[AnyContent], result: Result, expectedContinueUrl: Option[String]) = {
       status(result) shouldBe expectedStatusCode
       withClue("A ContinueUrl was found in session store, it was: ") {
-        sessionStoreService.currentSession(hc(request)).continueUrl shouldBe None
+        sessionStoreService.currentSession(request).continueUrl shouldBe None
       }
     }
   }

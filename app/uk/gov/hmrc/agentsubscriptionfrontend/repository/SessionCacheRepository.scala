@@ -29,7 +29,7 @@ class SessionCacheRepository @Inject()(mongo: MongoComponent, timestampSupport: 
     extends CacheRepository(
       mongoComponent = mongo,
       collectionName = "sessions",
-      replaceIndexes = false,
+      replaceIndexes = true,
       ttl = 15.minutes,
       timestampSupport = timestampSupport,
       sessionIdKey = SessionKeys.sessionId

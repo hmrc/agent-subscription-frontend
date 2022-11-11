@@ -9,9 +9,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpec, SessionLost, TestData}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -121,8 +119,6 @@ class SignOutControllerISpec extends BaseISpec {
 
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession("sessionId" -> "SomeSession")
 
-      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-
       sessionStoreService.cacheContinueUrl(RedirectUrl("/someContinueUrl"))
 
       request.session.get("sessionId") should not be empty
@@ -141,7 +137,6 @@ class SignOutControllerISpec extends BaseISpec {
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession("sessionId" -> "SomeSession")
 
       maybeContinueUrl.map{ continueUrl =>
-        implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
         sessionStoreService.cacheContinueUrl(RedirectUrl(continueUrl))
       }
 

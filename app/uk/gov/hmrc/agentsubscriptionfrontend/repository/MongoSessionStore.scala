@@ -20,6 +20,7 @@ import com.mongodb.MongoWriteException
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.Request
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
 import uk.gov.hmrc.mongo.cache.DataKey
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -28,26 +29,13 @@ trait MongoSessionStore[T] extends Logging {
 
   val sessionName: String
   val cacheRepository: SessionCacheRepository
-  private val AGENT_SESSION = DataKey[JsValue]("agentSession1")
 
   def get(implicit reads: Reads[T], request: Request[Any], ec: ExecutionContext): Future[Either[String, Option[T]]] =
     cacheRepository
-      .getFromSession[JsValue](AGENT_SESSION)
+      .getFromSession[T](DataKey[T](sessionName))
       .map {
-        case Some(agentSession) =>
-          (agentSession \ sessionName).asOpt[JsValue] match {
-            case None => Right(None)
-            case Some(obj) =>
-              obj.validate[T] match {
-                case JsSuccess(p, _) => Right(Some(p))
-                case JsError(errors) =>
-                  val allErrors = errors
-                    .map(_._2.map(_.message).mkString(","))
-                    .mkString(",")
-                  Left(allErrors)
-              }
-          }
-        case None => Right(None)
+        case Some(agentSession) => Right(Some(agentSession))
+        case None               => Right(None)
       }
       .recover {
         case e ⇒
@@ -56,32 +44,17 @@ trait MongoSessionStore[T] extends Logging {
 
   def store(newSession: T)(implicit writes: Writes[T], request: Request[Any], ec: ExecutionContext): Future[Either[String, Unit]] =
     cacheRepository
-      .getFromSession[JsValue](AGENT_SESSION)
-      .map {
-        case Some(agentSession) =>
-          agentSession.transform(
-            (__).json.update(
-              __.read[JsObject]
-                .map(o => o ++ Json.obj(sessionName -> Json.toJson(newSession)))))
-        case None => JsSuccess(Json.obj(sessionName -> Json.toJson(newSession)))
-      }
-      .flatMap {
-        case JsSuccess(session, _) =>
-          cacheRepository
-            .putSession[JsValue](AGENT_SESSION, session)
-            .map(_ => Right(()))
-            .recover {
-              case e: MongoWriteException => Left(e.getError.getMessage)
-            }
-        case JsError(errors) => Future successful Left(s"Error when updating JSON session tree with $newSession: ${errors.mkString}")
-      }
-
-  def delete()(implicit request: Request[Any], ec: ExecutionContext): Future[Either[String, Unit]] =
-    cacheRepository
-      .deleteFromSession[JsValue](AGENT_SESSION)
+      .putSession[T](DataKey[T](sessionName), newSession)
       .map(_ => Right(()))
       .recover {
         case e: MongoWriteException => Left(e.getError.getMessage)
       }
 
+  def delete()(implicit request: Request[Any], ec: ExecutionContext): Future[Either[String, Unit]] =
+    cacheRepository
+      .deleteFromSession[AgentSession](DataKey[AgentSession]("agentSession"))
+      .map(_ => Right(()))
+      .recover {
+        case e: MongoWriteException => Left(e.getError.getMessage)
+      }
 }

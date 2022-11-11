@@ -17,11 +17,12 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import org.scalamock.scalatest.MockFactory
+import play.api.mvc.Request
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, Postcode}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
@@ -34,17 +35,17 @@ class MongoDBSessionStoreServiceSpec extends UnitSpec with MockFactory {
   val testPostcode = "AA1 1AA"
 
   val mockSessionStoreService = mock[MongoDBSessionStoreService]
-  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
+  implicit lazy val req: Request[_] = FakeRequest()
 
   "cacheContinueUrl and fetchContinueUrl" should {
     "cache a continue url and fetch it back" in {
       (mockSessionStoreService
-        .cacheContinueUrl(_: RedirectUrl)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(RedirectUrl("/continue/url"), hc, *)
+        .cacheContinueUrl(_: RedirectUrl)(_: Request[_], _: ExecutionContext))
+        .expects(RedirectUrl("/continue/url"), req, *)
         .returns(Future(()))
       (mockSessionStoreService
-        .fetchContinueUrl(_: HeaderCarrier, _: ExecutionContext))
-        .expects(hc, *)
+        .fetchContinueUrl(_: Request[_], _: ExecutionContext))
+        .expects(req, *)
         .returns(Future(Some(RedirectUrl("/continue/url"))))
 
       mockSessionStoreService.cacheContinueUrl(RedirectUrl("/continue/url"))
@@ -56,12 +57,12 @@ class MongoDBSessionStoreServiceSpec extends UnitSpec with MockFactory {
   "cacheGoBackUrl and fetchGoBackUrl" should {
     "cache a go back url and fetch it back" in {
       (mockSessionStoreService
-        .cacheGoBackUrl(_: String)(_: HeaderCarrier, _: ExecutionContext))
-        .expects("/go/back", hc, *)
+        .cacheGoBackUrl(_: String)(_: Request[_], _: ExecutionContext))
+        .expects("/go/back", req, *)
         .returns(Future(()))
       (mockSessionStoreService
-        .fetchGoBackUrl(_: HeaderCarrier, _: ExecutionContext))
-        .expects(hc, *)
+        .fetchGoBackUrl(_: Request[_], _: ExecutionContext))
+        .expects(req, *)
         .returns(Future(Some("/go/back")))
 
       mockSessionStoreService.cacheGoBackUrl("/go/back")
@@ -73,12 +74,12 @@ class MongoDBSessionStoreServiceSpec extends UnitSpec with MockFactory {
   "cacheIsChangingAnswers and fetchIsChangingAnswers" should {
     "cache whether a user is changing answers and fetch it back" in {
       (mockSessionStoreService
-        .cacheIsChangingAnswers(_: Boolean)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(true, hc, *)
+        .cacheIsChangingAnswers(_: Boolean)(_: Request[_], _: ExecutionContext))
+        .expects(true, req, *)
         .returns(Future(()))
       (mockSessionStoreService
-        .fetchIsChangingAnswers(_: HeaderCarrier, _: ExecutionContext))
-        .expects(hc, *)
+        .fetchIsChangingAnswers(_: Request[_], _: ExecutionContext))
+        .expects(req, *)
         .returns(Future(Some(true)))
 
       mockSessionStoreService.cacheIsChangingAnswers(true)
@@ -92,12 +93,12 @@ class MongoDBSessionStoreServiceSpec extends UnitSpec with MockFactory {
       AgentSession(businessType = Some(SoleTrader), utr = Some(utr), postcode = Some(Postcode(testPostcode)))
     "cache an agent session and fetch it back" in {
       (mockSessionStoreService
-        .cacheAgentSession(_: AgentSession)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(agentSession, hc, *)
+        .cacheAgentSession(_: AgentSession)(_: Request[_], _: ExecutionContext))
+        .expects(agentSession, req, *)
         .returns(Future(()))
       (mockSessionStoreService
-        .fetchAgentSession(_: HeaderCarrier, _: ExecutionContext))
-        .expects(hc, *)
+        .fetchAgentSession(_: Request[_], _: ExecutionContext))
+        .expects(req, *)
         .returns(Future(Some(agentSession)))
 
       mockSessionStoreService.cacheAgentSession(agentSession)
@@ -109,20 +110,20 @@ class MongoDBSessionStoreServiceSpec extends UnitSpec with MockFactory {
   "remove" should {
     "clear the session" in {
       (mockSessionStoreService
-        .cacheContinueUrl(_: RedirectUrl)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(RedirectUrl("/continue/url"), hc, *)
+        .cacheContinueUrl(_: RedirectUrl)(_: Request[_], _: ExecutionContext))
+        .expects(RedirectUrl("/continue/url"), req, *)
         .returns(Future(()))
       (mockSessionStoreService
-        .fetchContinueUrl(_: HeaderCarrier, _: ExecutionContext))
-        .expects(hc, *)
+        .fetchContinueUrl(_: Request[_], _: ExecutionContext))
+        .expects(req, *)
         .returns(Future(Some(RedirectUrl("/continue/url"))))
       (mockSessionStoreService
-        .remove()(_: ExecutionContext))
-        .expects(*)
+        .remove()(_: Request[_], _: ExecutionContext))
+        .expects(*, *)
         .returns(Future(()))
       (mockSessionStoreService
-        .fetchContinueUrl(_: HeaderCarrier, _: ExecutionContext))
-        .expects(hc, *)
+        .fetchContinueUrl(_: Request[_], _: ExecutionContext))
+        .expects(req, *)
         .returns(Future(None))
 
       mockSessionStoreService.cacheContinueUrl(RedirectUrl("/continue/url"))

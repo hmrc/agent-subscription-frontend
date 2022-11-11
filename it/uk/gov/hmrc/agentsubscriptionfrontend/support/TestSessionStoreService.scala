@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
+import play.api.mvc.Request
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
 import uk.gov.hmrc.agentsubscriptionfrontend.service.MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util._
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
 import uk.gov.hmrc.play.bootstrap.binders.{RedirectUrl, UnsafePermitAll}
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,14 +36,14 @@ class TestSessionStoreService extends MongoDBSessionStoreService(null) {
 
   private val sessions = collection.mutable.Map[String, Session]()
 
-  private def sessionKey(implicit hc: HeaderCarrier): String = hc.sessionId match {
+  private def sessionKey(implicit req: Request[_]): String = HeaderCarrierConverter.fromRequestAndSession(req, req.session).sessionId match {
     case None         => "default"
     case Some(sessionId) => sessionId.toString
   }
 
   var currentSessionTest: SessionTest = NormalSession
 
-  def currentSession(implicit hc: HeaderCarrier): Session =
+  def currentSession(implicit req: Request[_]): Session =
     sessions.getOrElseUpdate(sessionKey, new Session())
 
   def clear(): Unit = {
@@ -53,13 +54,13 @@ class TestSessionStoreService extends MongoDBSessionStoreService(null) {
   def allSessionsRemoved: Boolean =
     sessions.isEmpty
 
-  override def fetchContinueUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[RedirectUrl]] =
+  override def fetchContinueUrl(implicit req: Request[Any], ec: ExecutionContext): Future[Option[RedirectUrl]] =
     fetchFromSession(currentSession.continueUrl.map(c => RedirectUrl(c)))
 
-  override def cacheContinueUrl(url: RedirectUrl)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  override def cacheContinueUrl(url: RedirectUrl)(implicit req: Request[Any], ec: ExecutionContext): Future[Unit] =
     Future.successful(currentSession.continueUrl = Some(url.get(UnsafePermitAll).url))
 
-  override def cacheGoBackUrl(url: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  override def cacheGoBackUrl(url: String)(implicit req: Request[Any], ec: ExecutionContext): Future[Unit] =
     (currentSession.goBackUrl = Some(url)).toFuture
 
   private def fetchFromSession[A](property: Option[A]): Future[Option[A]] =
@@ -68,22 +69,22 @@ class TestSessionStoreService extends MongoDBSessionStoreService(null) {
       case SessionLost => Future.failed(new RuntimeException)
     }
 
-  override def fetchGoBackUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[String]] =
+  override def fetchGoBackUrl(implicit req: Request[Any], ec: ExecutionContext): Future[Option[String]] =
     fetchFromSession(currentSession.goBackUrl)
 
-  override def cacheIsChangingAnswers(changing: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  override def cacheIsChangingAnswers(changing: Boolean)(implicit req: Request[Any], ec: ExecutionContext): Future[Unit] =
     (currentSession.changingAnswers = Some(true)).toFuture
 
-  override def fetchIsChangingAnswers(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[Boolean]] =
+  override def fetchIsChangingAnswers(implicit req: Request[Any], ec: ExecutionContext): Future[Option[Boolean]] =
     fetchFromSession(currentSession.changingAnswers)
 
-  override def cacheAgentSession(agentSession: AgentSession)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  override def cacheAgentSession(agentSession: AgentSession)(implicit req: Request[Any], ec: ExecutionContext): Future[Unit] =
     (currentSession.agentSession = Some(agentSession)).toFuture
 
-  override def fetchAgentSession(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[AgentSession]] =
+  override def fetchAgentSession(implicit req: Request[Any], ec: ExecutionContext): Future[Option[AgentSession]] =
     fetchFromSession(currentSession.agentSession)
 
-  override def remove()(implicit ec: ExecutionContext): Future[Unit] = {
+  override def remove()(implicit req: Request[Any], ec: ExecutionContext): Future[Unit] = {
     sessions.clear()
     ().toFuture
   }
