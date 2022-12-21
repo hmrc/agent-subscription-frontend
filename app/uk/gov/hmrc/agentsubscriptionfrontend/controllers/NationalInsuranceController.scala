@@ -91,9 +91,6 @@ class NationalInsuranceController @Inject()(
                     .getDesignatoryDetails(validNino)
                     .map(_.person)
                     .flatMap {
-                      case Some(person) if person.deceased.contains(true) =>
-                        logger.warn(s"Could not register agent as the NINO (${agent.authNino}) is marked as deceased.")
-                        Redirect(routes.BusinessIdentificationController.showNoMatchFound())
                       case Some(person) if person.dateOfBirth.isEmpty && businessType != Llp =>
                         logger.warn("no DateOfBirth in the /citizen-details response for logged in agent")
                         updateSessionAndRedirect(existingSession.copy(nino = Some(validNino)))(routes.VatDetailsController.showRegisteredForVatForm())
