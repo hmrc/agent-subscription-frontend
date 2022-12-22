@@ -155,7 +155,7 @@ error.trading-name.empty=Enter the main trading name of your business
 
 #Contact Trading Address Check
 contactTradingAddressCheck.title=Is this the address you want to use for your agent services account?
-contactTradingAddressCheck.p=This is the address we will use to check your identity if you call us. We may send some correspondence to this address.
+contactTradingAddressCheck.p=This is the address we will use to check your identity if you call us. We will send all agent copies of client correspondence to this address.
 contactTradingAddressCheck.option.yes=Yes
 contactTradingAddressCheck.option.no=No - I want to enter a different address
 error.contact-trading-address-check.invalid=Select yes if this is the main trading address you want to use for your agent services account correspondence

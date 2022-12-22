@@ -154,7 +154,7 @@ error.trading-name.empty=Nodwch brif enw masnachu eich busnes
 
 #Contact Trading Address Check
 contactTradingAddressCheck.title=Ai dyma’r cyfeiriad yr hoffech ei ddefnyddio ar gyfer eich cyfrif gwasanaethau asiant?
-contactTradingAddressCheck.p=Dyma’r cyfeiriad y byddwn yn ei ddefnyddio er mwyn gwirio pwy ydych os byddwch yn ein ffonio. Efallai y byddwn yn anfon rhywfaint o ohebiaeth i’r cyfeiriad hwn.
+contactTradingAddressCheck.p=Dyma’r cyfeiriad y byddwn yn ei ddefnyddio er mwyn gwirio pwy ydych os byddwch yn ein ffonio. Byddwn yn anfon holl gopïau’r asiant, o’r ohebiaeth â’r cleient, i’r cyfeiriad hwn.
 contactTradingAddressCheck.option.yes=Iawn
 contactTradingAddressCheck.option.no=Na – hoffwn nodi cyfeiriad gwahanol
 error.contact-trading-address-check.invalid=Dewiswch ‘Iawn’ os mai dyma'r prif gyfeiriad masnachu yr ydych am ei ddefnyddio ar gyfer gohebiaeth eich cyfrif gwasanaethau asiant
