@@ -65,6 +65,7 @@ class BusinessIdentificationController @Inject()(
                                                   noMatchFoundTemplate: no_match_found,
                                                   companyNotAllowedTemplate: company_not_allowed,
                                                   cannotCreateAccountTemplate: cannot_create_account,
+                                                  cannotConfirmIdentityTemplate: cannot_confirm_identity,
                                                   confirmBusinessTemplate: confirm_business,
                                                   businessEmailTemplate: business_email,
                                                   existingJourneyFoundTemplate: existing_journey_found,
@@ -88,6 +89,12 @@ class BusinessIdentificationController @Inject()(
   def showNoMatchFound: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(noMatchFoundTemplate()).toFuture
+    }
+  }
+
+  def showCannotConfirmIdentity: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Ok(cannotConfirmIdentityTemplate()).toFuture
     }
   }
 
@@ -340,7 +347,7 @@ class BusinessIdentificationController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors =>
-              Ok(businessNameTemplate(formWithErrors, hasInvalidBusinessName(existingSession.registration), false)),
+              Ok(businessNameTemplate(formWithErrors, hasInvalidBusinessName(existingSession.registration), isChange = false)),
             validForm => {
               val updatedReg = existingSession.registration match {
                 case Some(registration) => registration.copy(taxpayerName = Some(validForm.name))
@@ -367,7 +374,7 @@ class BusinessIdentificationController @Inject()(
     result.flatMap[Result] {
       case Some(true) =>
         sessionStoreService
-          .cacheIsChangingAnswers(false)
+          .cacheIsChangingAnswers(changing = false)
           .map(_ => Redirect(routes.SubscriptionController.showCheckAnswers()))
 
       case _ => validatedBusinessDetailsAndRedirect(updatedSession, agent)

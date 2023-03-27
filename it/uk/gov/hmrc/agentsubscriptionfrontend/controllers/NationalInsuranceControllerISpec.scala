@@ -46,7 +46,7 @@ class NationalInsuranceControllerISpec extends BaseISpec with SessionDataMissing
       result should containLink("button.back", routes.CompanyRegistrationController.showLlpInterrupt().url)
     }
 
-    "redirect to /no-match-found page if nino is marked as deceased in citizen details" in new TestSetupNoJourneyRecord {
+    "redirect to /cannot-confirm-identity page if nino is marked as deceased in citizen details" in new TestSetupNoJourneyRecord {
       AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456C"), Some("Matchmaker"), DateOfBirth(LocalDate.now()), deceased = true)
       implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST).withFormUrlEncodedBody("nino" -> "AE123456C")
       sessionStoreService.currentSession.agentSession = Some(agentSession)
@@ -55,7 +55,7 @@ class NationalInsuranceControllerISpec extends BaseISpec with SessionDataMissing
 
       status(result) shouldBe 303
 
-      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNoMatchFound().url)
+      redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showCannotConfirmIdentity().url)
 
     }
 
