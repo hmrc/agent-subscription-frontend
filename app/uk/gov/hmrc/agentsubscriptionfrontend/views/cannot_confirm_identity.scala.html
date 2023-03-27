@@ -14,22 +14,22 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SignedOutController
+@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.MainTemplate
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components._
 
-
-@this(mainTemplate: MainTemplate)
+@this(mainTemplate: MainTemplate, h1: h1, p: p, button_link: link_as_button)
 
 @()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = msgs("error.summary.heading")) {
+@mainTemplate(title = msgs("cannotConfirmIdentity.h1")) {
 
-    <h1 class="govuk-heading-xl">@msgs("error.summary.heading")</h1>
+ @h1("cannotConfirmIdentity.h1")
 
-    <p>@msgs("existingJourneyFound.p1")</p>
-    <p>@msgs("existingJourneyFound.p2")</p>
-    <p>@msgs("existingJourneyFound.p3")</p>
+ @p(html = Some(Html(msgs("cannotVerifyIdentity.p1"))))
+ @p("cannotVerifyIdentity.p2")
 
-    <p><a class="govuk-button" href="@SignedOutController.redirectToBusinessTypeForm" role="button" draggable="false" id="finishSignOut">@msgs("button.signIn")</a></p>
+ @button_link(href = routes.BusinessTypeController.showBusinessTypeForm.url, key = "button.tryAgain")
 
 }

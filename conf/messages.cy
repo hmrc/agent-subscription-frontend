@@ -520,6 +520,10 @@ postcodeNotAllowed.p1=Ni allwch ddefnyddio’r cod post hwn i greu cyfrif gwasan
 postcodeNotAllowed.p2=Defnyddiwch god post gwahanol a rhowch gynnig arall arni.
 postcodeNotAllowed.button=Rhoi cynnig arall arni
 
+cannotConfirmIdentity.h1=Nid oedd modd i ni gadarnhau pwy ydych
+cannotConfirmIdentity.p1=Mae angen mwy o wybodaeth arnom i gadarnhau pwy ydych. Cysylltwch gan ddefnyddio''r manylion ar <a href="https://www.gov.uk/contact-hmrc" target="_blank" rel="noopener noreferrer">Cysylltwch â CThEM</a>.
+cannotConfirmIdentity.p2=Os ydych wedi nodi'r manylion anghywir, gallwch geisio eto.
+
 #Cannot verify email
 cannotVerifyEmail.locked.title=Nid oedd modd i ni gadarnhau pwy ydych
 cannotVerifyEmail.locked.p1=Ni allwn wirio pwy ydych oherwydd rydych wedi nodi cod dilysu anghywir gormod o weithiau.

@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.agentsubscriptionfrontend.models
-import play.api.libs.json.{Format, Json}
+@this()
 
-case class CompanyRegistrationNumber(value: String)
+@(
+  href: String,
+  key: String = "common.continue",
+  id: String = "button-link",
+  classes: Option[String] = None)(implicit msgs: Messages)
 
-object CompanyRegistrationNumber {
-  implicit val format: Format[CompanyRegistrationNumber] = Json.format[CompanyRegistrationNumber]
-}
+@cls = @{classes.getOrElse("").concat(" govuk-button")}
+
+<a id="@id" href="@href" class="@cls"
+draggable="false" role="button" data-module="govuk-button">@msgs(key)</a>

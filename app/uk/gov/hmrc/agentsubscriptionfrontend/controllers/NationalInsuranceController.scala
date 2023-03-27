@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ class NationalInsuranceController @Inject()(
     }
   }
 
+  //noinspection ScalaStyle
   def submitNationalInsuranceNumberForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       withValidSession { (_, existingSession) =>
@@ -85,12 +86,15 @@ class NationalInsuranceController @Inject()(
                 Ok(nationalInsuranceNumberTemplate(formWithErrors, businessType, backUrl))
               },
               validNino => {
-                def ninosMatched = agent.authNino.flatMap(normalizeNino) == normalizeNino(validNino.value)
+                def ninosMatched: Boolean = agent.authNino.flatMap(normalizeNino) == normalizeNino(validNino.value)
                 if (ninosMatched || businessType == Llp) {
                   subscriptionService
                     .getDesignatoryDetails(validNino)
                     .map(_.person)
                     .flatMap {
+                      case Some(person) if person.deceased.contains(true) =>
+                        logger.warn(s"Could not register agent as the NINO (${agent.authNino}) is marked as deceased.")
+                        Redirect(routes.BusinessIdentificationController.showCannotConfirmIdentity())
                       case Some(person) if person.dateOfBirth.isEmpty && businessType != Llp =>
                         logger.warn("no DateOfBirth in the /citizen-details response for logged in agent")
                         updateSessionAndRedirect(existingSession.copy(nino = Some(validNino)))(routes.VatDetailsController.showRegisteredForVatForm())
@@ -107,7 +111,6 @@ class NationalInsuranceController @Inject()(
                           Redirect(routes.VatDetailsController.showRegisteredForVatForm())
                         else
                           Redirect(routes.BusinessIdentificationController.showNoMatchFound())
-
                     }
                 } else {
                   logger.warn(s"Auth Nino did not match ValidNino for businessType $businessType")
