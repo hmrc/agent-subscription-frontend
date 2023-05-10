@@ -24,7 +24,7 @@ import play.api.data.validation._
 import play.api.data.{FormError, Mapping}
 import play.api.i18n.Messages
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.domain.Nino
 
 import scala.annotation.tailrec
@@ -79,9 +79,9 @@ object CommonValidators {
   def postcode: Mapping[String] =
     of[String](stringFormatWithMessage("error.postcode.empty")) verifying nonEmptyPostcode
 
-  def postcodeWithBlacklist(blacklistedPostcodes: Set[String]): Mapping[String] =
+  def postcodeWithDenylist(denylistedPostcodes: Set[String]): Mapping[String] =
     postcode
-      .verifying("error.postcode.blacklisted", x => validateBlacklist(x, blacklistedPostcodes))
+      .verifying("error.postcode.denylisted", x => validateDenylist(x, denylistedPostcodes))
 
   def crn: Mapping[String] = text verifying crnConstraint
 
@@ -255,9 +255,9 @@ object CommonValidators {
       }
     }
 
-  def validateBlacklist(postcode: String, blacklistedPostcodes: Set[String]): Boolean =
+  def validateDenylist(postcode: String, denylistedPostcodes: Set[String]): Boolean =
     PostcodesLoader.formatPostcode(postcode) match {
-      case Some(p) => !blacklistedPostcodes.contains(p)
+      case Some(p) => !denylistedPostcodes.contains(p)
       case None    => false
     }
 
@@ -283,7 +283,7 @@ object CommonValidators {
 
   def checkOneAtATime[A](constraints: Seq[Constraint[A]]): Constraint[A] = Constraint[A] { fieldValue: A =>
     @tailrec
-    def loop(c: Seq[Constraint[A]]): ValidationResult =
+    def loop(c: List[Constraint[A]]): ValidationResult =
       c match {
         case Nil => Valid
         case head :: tail =>
@@ -293,7 +293,7 @@ object CommonValidators {
           }
       }
 
-    loop(constraints)
+    loop(constraints.toList)
   }
 
   private def utrConstraint(errorMessages: UtrErrors = DefaultUtrErrors): Constraint[String] = Constraint[String] { fieldValue: String =>

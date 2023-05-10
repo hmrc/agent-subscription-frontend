@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes
+package uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes
 
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader.PostcodeLoaderException
+import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes.PostcodesLoader.PostcodeLoaderException
 import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
 class PostcodesLoaderSpec extends UnitSpec with MockitoSugar {
@@ -56,7 +56,7 @@ class PostcodesLoaderSpec extends UnitSpec with MockitoSugar {
       }
 
       exception.getMessage should include(
-        "Invalid entries found in the blacklisted postcodes file: AB10 1ZTInvalid-post-code,AB11 6NWInvalid-post-code")
+        "Invalid entries found in the denylisted postcodes file: AB10 1ZTInvalid-post-code,AB11 6NWInvalid-post-code")
     }
   }
 }

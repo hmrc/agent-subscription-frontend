@@ -52,7 +52,7 @@ error.business-email.empty=Nodwch gyfeiriad e-bost eich busnes, megis enw@enghra
 
 error.postcode.invalid=Nodwch god post dilys, er enghraifft AA1 1AA
 error.postcode.invalidchars=Rhaid i’r cod post gynnwys dim ond y llythrennau a i z, rhifau a bylchau, megis AA1 1AA
-error.postcode.blacklisted=Ni allwch ddefnyddio’r cod post a nodwyd gennych
+error.postcode.denylisted=Ni allwch ddefnyddio’r cod post a nodwyd gennych
 error.postcode.empty=Nodwch god post dilys, megis AA1 1AA
 error.postcode.maxlength=Rhaid i’r cod post fod yn 8 o gymeriadau neu lai
 

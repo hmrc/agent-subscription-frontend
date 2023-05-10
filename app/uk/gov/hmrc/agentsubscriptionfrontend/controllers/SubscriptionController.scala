@@ -63,9 +63,9 @@ class SubscriptionController @Inject()(
     extends FrontendController(mcc)
     with SessionBehaviour with AuthActions with Logging {
 
-  private val blacklistedPostCodes: Set[String] = appConfig.blacklistedPostcodes
+  private val denylistedPostCodes: Set[String] = appConfig.denylistedPostcodes
 
-  val desAddressForm = new DesAddressForm(logger, blacklistedPostCodes)
+  val desAddressForm = new DesAddressForm(logger, denylistedPostCodes)
 
   def showCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingEmailVerifiedAgent { agent =>
@@ -98,7 +98,7 @@ class SubscriptionController @Inject()(
 
               case FailedRegistration => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
 
-              case FailedContactEmail => Redirect(routes.ContactDetailsController.showContactEmailCheck)
+              case FailedContactEmail => Redirect(routes.ContactDetailsController.showContactEmailCheck())
 
               case FailedContactTradingName => Redirect(routes.ContactDetailsController.showTradingNameCheck())
 
@@ -254,7 +254,7 @@ class SubscriptionController @Inject()(
   }
 
   def showCannotVerifyEmailLocked: Action[AnyContent] = Action.async { implicit request =>
-    Ok(cannotVerifyEmailLockedTemplate(routes.ContactDetailsController.showContactEmailCheck))
+    Ok(cannotVerifyEmailLockedTemplate(routes.ContactDetailsController.showContactEmailCheck()))
   }
 
   def showCannotVerifyEmailTechnicalError: Action[AnyContent] = Action.async { implicit request =>

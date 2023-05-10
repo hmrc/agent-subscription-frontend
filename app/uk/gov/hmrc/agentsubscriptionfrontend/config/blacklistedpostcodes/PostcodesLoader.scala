@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes
+package uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes
 
 import scala.util.{Failure, Success, Try}
 
@@ -40,7 +40,7 @@ object PostcodesLoader {
         if (invalidPostcodes.isEmpty)
           postcodes
         else
-          throw new PostcodeLoaderException(s"Invalid entries found in the blacklisted postcodes file: ${invalidPostcodes.mkString(",")}")
+          throw new PostcodeLoaderException(s"Invalid entries found in the denylisted postcodes file: ${invalidPostcodes.mkString(",")}")
       case Failure(ex) =>
         throw new PostcodeLoaderException(ex.getMessage)
     }

@@ -126,7 +126,7 @@ class AssuranceChecksController @Inject()(
               mark("Count-Subscription-InvasiveCheck-Failed")
               Redirect(routes.StartController.showCannotCreateAccount())
           }
-      case None => Redirect(routes.AssuranceChecksController.invasiveCheckStart)
+      case None => Redirect(routes.AssuranceChecksController.invasiveCheckStart())
     }
 
   private def getNextPageAfterInvasiveChecks(businessType: BusinessType) =

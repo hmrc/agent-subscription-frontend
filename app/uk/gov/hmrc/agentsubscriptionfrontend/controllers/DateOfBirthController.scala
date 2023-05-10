@@ -35,7 +35,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators.checkOneAtATime
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.date_of_birth
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -85,10 +85,11 @@ class DateOfBirthController @Inject()(
               validDob =>
                 if (existingSession.dateOfBirthFromCid.contains(validDob)) {
                   companiesHouseKnownFactCheck(existingSession) {
-                    updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(routes.VatDetailsController.showRegisteredForVatForm)
+                    updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(
+                      routes.VatDetailsController.showRegisteredForVatForm())
                   }
                 } else {
-                  Redirect(routes.BusinessIdentificationController.showNoMatchFound)
+                  Redirect(routes.BusinessIdentificationController.showNoMatchFound())
               }
             )
         }
@@ -108,6 +109,7 @@ class DateOfBirthController @Inject()(
                   case OK        => f
                   case NOT_FOUND => Redirect(routes.BusinessIdentificationController.showNoMatchFound())
                   case CONFLICT  => Redirect(routes.BusinessIdentificationController.showCompanyNotAllowed())
+                  case status    => throw UpstreamErrorResponse("companiesHouseKnownFactCheck", status)
                 }
 
             case (None, Some(_)) => Redirect(routes.CompanyRegistrationController.showCompanyRegNumberForm())
@@ -161,7 +163,7 @@ object DateOfBirthController {
 
   private val tooOldConstraint: Constraint[(String, String, String)] = Constraint[(String, String, String)] { data: (String, String, String) =>
     val (year, month, day) = data
-    Try {
+    Try[play.api.data.validation.ValidationResult] {
       val dob = LocalDate.of(year.toInt, month.toInt, day.toInt)
       if (dob.isBefore(LocalDate.of(1900, 1, 1)))
         Invalid(ValidationError("date-of-birth.must.be.later.than.1900"))

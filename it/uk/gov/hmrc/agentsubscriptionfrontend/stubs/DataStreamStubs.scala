@@ -64,6 +64,7 @@ trait DataStreamStubs extends Eventually {
     val clientIdentifier = identifier match {
       case nino@Nino(_) => "userEnteredNino" -> nino.value
       case utr@Utr(_) => "userEnteredUtr" -> utr.value
+      case _ => throw new IllegalArgumentException
     }
     val payeAudit = if (aAssurancePayeCheck) Seq("passPayeAgentAssuranceCheck" -> "false") else Seq.empty
 

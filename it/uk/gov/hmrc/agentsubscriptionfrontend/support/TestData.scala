@@ -15,7 +15,7 @@ object TestData {
   val validUtr = Utr("2000000000")
   val validPostcode = "AA1 1AA"
   val invalidPostcode = "11AAAA"
-  val blacklistedPostcode = "AB10 1ZT"
+  val denylistedPostcode = "AB10 1ZT"
 
   val utr = Utr("2000000000")
   val testPostcode = "AA1 1AA"

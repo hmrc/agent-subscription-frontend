@@ -67,17 +67,19 @@ lazy val root = Project("agent-subscription-frontend", file("."))
   .settings(
     name := "agent-subscription-frontend",
     organization := "uk.gov.hmrc",
-    scalaVersion := "2.12.15",
+    scalaVersion := "2.13.8",
     scalacOptions ++= Seq(
       "-Xfatal-warnings",
       "-Xlint:-missing-interpolator,_",
-      "-Yno-adapted-args",
       "-Ywarn-dead-code",
       "-deprecation",
       "-feature",
       "-unchecked",
       "-language:implicitConversions",
-      "-P:silencer:pathFilters=views;routes"),
+      "-Wconf:src=target/.*:s", // silence warnings from compiled files
+      "-Wconf:src=*html:w", // silence html warnings as they are wrong
+      "-Wconf:src=routes/.*:s" // silence warnings from routes
+    ),
     PlayKeys.playDefaultPort := 9437,
     resolvers ++= Seq(
       Resolver.typesafeRepo("releases"),
@@ -86,10 +88,6 @@ lazy val root = Project("agent-subscription-frontend", file("."))
     resolvers += Resolver.url("HMRC-open-artefacts-ivy", url("https://open.artefacts.tax.service.gov.uk/ivy2"))(Resolver.ivyStylePatterns),
 
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
-    libraryDependencies ++= Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.7" cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % "1.7.7" % Provided cross CrossVersion.full
-    ),
     scoverageSettings,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
     Compile / scalafmtOnCompile := true,

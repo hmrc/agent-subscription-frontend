@@ -114,7 +114,7 @@ class PostcodeController @Inject()(
           .flatMap { _ =>
             mark("Count-Subscription-InvasiveCheck-Start")
             updateSessionAndRedirect(agentSession.copy(postcode = Some(postcode), registration = Some(registration)))(
-              routes.AssuranceChecksController.invasiveCheckStart)
+              routes.AssuranceChecksController.invasiveCheckStart())
           }
       case maybeAssured @ (None | ManuallyAssured(_) | CheckedInvisibleAssuranceAndPassed(_)) =>
         maybeAssured match {
@@ -130,6 +130,7 @@ class PostcodeController @Inject()(
             updateSessionAndRedirect(agentSession.copy(postcode = Some(postcode), registration = Some(registration)))(
               getNextPage(agentSession.businessType, maybeAssured))
         }
+      case _ => throw new RuntimeException("match error in checkAssuranceAndUpdateSession")
     }
 
   private def getNextPage(businessType: Option[BusinessType], assuranceResults: Option[AssuranceResults])(implicit agent: Agent) =

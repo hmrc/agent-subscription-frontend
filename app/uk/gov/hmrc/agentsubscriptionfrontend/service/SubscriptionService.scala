@@ -165,13 +165,13 @@ class SubscriptionService @Inject()(
       case Some(reg) if reg.isSubscribedToAgentServices =>
         SubscriptionProcess(SubscribedAndEnrolled, Some(reg))
 
-      case Some(Registration(None, _, _, _, _, _)) =>
+      case Some(reg) if reg.taxpayerName.isEmpty =>
         throw new IllegalStateException(s"The agency with UTR ${utr.value} has a missing organisation/individual name.")
 
       case Some(reg) if !reg.isSubscribedToAgentServices && reg.isSubscribedToETMP =>
         SubscriptionProcess(SubscribedButNotEnrolled, Some(reg))
 
-      case Some(reg) if !reg.isSubscribedToAgentServices && !reg.isSubscribedToETMP =>
+      case Some(reg) =>
         SubscriptionProcess(Unsubscribed, Some(reg))
 
       case None => SubscriptionProcess(NoRegistrationFound, None)

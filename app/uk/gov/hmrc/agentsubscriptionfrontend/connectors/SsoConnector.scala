@@ -33,7 +33,7 @@ class SsoConnector @Inject()(http: HttpClient, metrics: Metrics, appConfig: AppC
     extends HttpAPIMonitor with Logging {
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
-  def getWhitelistedDomains()(implicit hc: HeaderCarrier): Future[Set[String]] =
+  def getAllowlistedDomains()(implicit hc: HeaderCarrier): Future[Set[String]] =
     monitor(s"ConsumedAPI-SSO-getExternalDomains-GET") {
       val url = s"${appConfig.ssoBaseUrl}/sso/domains"
       http
@@ -43,7 +43,7 @@ class SsoConnector @Inject()(http: HttpClient, metrics: Metrics, appConfig: AppC
         })
         .recover {
           case e =>
-            logger.error(s"retrieval of whitelisted domains failed: $e")
+            logger.error(s"retrieval of allowlisted domains failed: $e")
             Set.empty[String]
         }
     }

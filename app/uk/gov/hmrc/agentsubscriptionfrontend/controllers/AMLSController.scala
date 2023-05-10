@@ -128,18 +128,20 @@ class AMLSController @Inject()(
 
   def submitCheckAmlsAlreadyAppliedForm: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
-      appliedForAmlsForm.bindFromRequest.fold(
-        formWithErrors => Ok(amlsAppliedForTemplate(formWithErrors)),
-        validForm => {
-          val continue = validForm match {
-            case Yes => routes.AMLSController.showAmlsApplicationDatePage()
-            case No  => routes.AMLSController.showAmlsNotAppliedPage()
+      appliedForAmlsForm
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Ok(amlsAppliedForTemplate(formWithErrors)),
+          validForm => {
+            val continue = validForm match {
+              case Yes => routes.AMLSController.showAmlsApplicationDatePage()
+              case No  => routes.AMLSController.showAmlsNotAppliedPage()
+            }
+            updateAmlsJourneyRecord(agent, amlsData => Some(amlsData.copy(amlsAppliedFor = Some(RadioInputAnswer.toBoolean(validForm))))).map(
+              _ => Redirect(continueOrStop(continue, routes.AMLSController.showCheckAmlsAlreadyAppliedForm()))
+            )
           }
-          updateAmlsJourneyRecord(agent, amlsData => Some(amlsData.copy(amlsAppliedFor = Some(RadioInputAnswer.toBoolean(validForm))))).map(
-            _ => Redirect(continueOrStop(continue, routes.AMLSController.showCheckAmlsAlreadyAppliedForm()))
-          )
-        }
-      )
+        )
     }
   }
 
@@ -176,8 +178,8 @@ class AMLSController @Inject()(
             },
             validForm => {
               amlsService.validateAmlsSubscription(validForm).flatMap {
-                case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus)
-                case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound)
+                case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
+                case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
                 case ResultOK(safeId) => {
                   val supervisoryBodyData =
                     amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))

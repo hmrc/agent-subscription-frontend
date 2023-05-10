@@ -93,6 +93,7 @@ class AssuranceService @Inject()(
       val (userEnteredNino, userEnteredUtr) = userEnteredNinoOrUtr match {
         case nino @ Nino(_) => (Some(nino), None)
         case utr @ Utr(_)   => (None, Some(utr))
+        case _              => throw new IllegalArgumentException("unexpected tax identifier type: " + userEnteredNinoOrUtr)
       }
 
       for {

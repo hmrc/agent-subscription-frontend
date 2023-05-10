@@ -187,14 +187,14 @@ class BusinessAddressISpec extends BaseISpec {
     }
 
     "redirect to postcode-not-allowed page" when {
-      "postcode entered is blacklisted" in new TestSetupNoJourneyRecord {
+      "postcode entered is denylisted" in new TestSetupNoJourneyRecord {
         implicit val request =
           authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
             "addressLine1" -> "address line 1",
             "addressLine2" -> "new addressline 2",
             "addressLine3" -> "new addressline 3",
             "addressLine4" -> "new addressline 4",
-            "postcode"     -> blacklistedPostcode
+            "postcode"     -> denylistedPostcode
           )
 
         sessionStoreService.currentSession.agentSession =

@@ -202,7 +202,7 @@ abstract class BaseISpec
   }
 
   protected def containLink(expectedMessageKey: String, expectedHref: String): Matcher[Result] = {
-    import scala.collection.JavaConverters._
+    import scala.jdk.CollectionConverters._
     new Matcher[Result] {
       override def apply(result: Result): MatchResult = {
         val doc = Jsoup.parse(bodyOf(result))
@@ -220,7 +220,7 @@ abstract class BaseISpec
   }
 
   protected def containLinkText(expectedMessageText: String, expectedHref: String): Matcher[Result] = {
-    import scala.collection.JavaConverters._
+    import scala.jdk.CollectionConverters._
     new Matcher[Result] {
       override def apply(result: Result): MatchResult = {
         val doc = Jsoup.parse(bodyOf(result))

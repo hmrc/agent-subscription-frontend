@@ -38,7 +38,7 @@ import scala.util.{Failure, Success, Try}
 class RedirectUrlActions @Inject()(sessionStoreService: MongoDBSessionStoreService, ssoConnector: SsoConnector)(implicit executor: ExecutionContext)
     extends Logging {
 
-  def whitelistedDomains()(implicit hc: HeaderCarrier): Future[Set[String]] = ssoConnector.getWhitelistedDomains()
+  def allowlistedDomains()(implicit hc: HeaderCarrier): Future[Set[String]] = ssoConnector.getAllowlistedDomains()
 
   def extractRedirectUrl[A](implicit request: Request[A]): Option[RedirectUrl] =
     request.getQueryString("continue") match {
@@ -54,16 +54,16 @@ class RedirectUrlActions @Inject()(sessionStoreService: MongoDBSessionStoreServi
     }
 
   def checkRedirectUrlAndContinue[A](redirectUrl: RedirectUrl, block: Option[String] => Future[A])(implicit hc: HeaderCarrier): Future[A] = {
-    val whitelistPolicy = AbsoluteWithHostnameFromAllowlist(whitelistedDomains)
+    val allowlistPolicy = AbsoluteWithHostnameFromAllowlist(allowlistedDomains())
     val unsafeUrl = redirectUrl.get(UnsafePermitAll).url
 
-    //if relative let through else check url domain is on whitelist
+    //if relative let through else check url domain is on allowlist
     if (RedirectUrl.isRelativeUrl(unsafeUrl)) block(Some(unsafeUrl))
     else
-      redirectUrl.getEither(whitelistPolicy).flatMap {
+      redirectUrl.getEither(allowlistPolicy).flatMap {
         case Right(safeRedirectUrl) => block(Some(safeRedirectUrl.url))
         case Left(errorMessage) =>
-          logger.warn(s"url does not comply with whitelist policy, removing redirect url... $errorMessage")
+          logger.warn(s"url does not comply with allowlist policy, removing redirect url... $errorMessage")
           block(None)
       }
   }

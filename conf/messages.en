@@ -52,7 +52,7 @@ error.business-email.empty=Enter your business email address, like name@example.
 
 error.postcode.invalid=Enter a valid postcode, for example AA1 1AA
 error.postcode.invalidchars=Postcode must only include letters a to z, numbers and spaces, like AA1 1AA
-error.postcode.blacklisted=You can’t use the postcode you’ve entered
+error.postcode.denylisted=You can’t use the postcode you’ve entered
 error.postcode.empty=Enter a valid postcode, like AA1 1AA
 error.postcode.maxlength=Postcode must be 8 characters or less
 

@@ -59,6 +59,7 @@ class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubs
         .fromAgentSession(agentSession, agent.authProviderId, agent.maybeCleanCredsAuthProviderId)
     saveJourneyRecord(sjr) map {
       case 200 | 204 => ()
+      case status    => throw new RuntimeException("unexpected status from saveJourneyRecord: " + status)
     }
   }
 }
