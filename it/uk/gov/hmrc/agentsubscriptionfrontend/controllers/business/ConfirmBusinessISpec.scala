@@ -283,7 +283,7 @@ class ConfirmBusinessISpec extends BaseISpec {
       }
 
       "redirect to showUpdateBusinessAddressForm if the user has clean creds and isSubscribedToAgentServices=false and" when {
-        "ETMP record contains blacklisted postcode" in new TestSetupNoJourneyRecord {
+        "ETMP record contains denylisted postcode" in new TestSetupNoJourneyRecord {
           implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(
@@ -292,7 +292,7 @@ class ConfirmBusinessISpec extends BaseISpec {
               registration = Some(
                 testRegistration.copy(
                   isSubscribedToAgentServices = false,
-                  address = businessAddress.copy(postalCode = Some(blacklistedPostcode))))
+                  address = businessAddress.copy(postalCode = Some(denylistedPostcode))))
             ))
 
           val result = await(controller.submitConfirmBusinessForm(request))

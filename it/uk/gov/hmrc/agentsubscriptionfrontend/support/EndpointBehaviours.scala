@@ -82,7 +82,7 @@ trait EndpointBehaviours {
     }
 
     "include absolute continue URL" in new TestSetupNoJourneyRecord{
-      SsoStub.givenWhitelistedDomainsExist
+      SsoStub.givenAllowlistedDomainsExist
       val continueUrl = "http://localhost"
       val (request, result) = doRequestWithContinueUrl(continueUrl)
       assertContinueUrlKept(request, result.futureValue, continueUrl)
@@ -100,13 +100,13 @@ trait EndpointBehaviours {
       assertContinueUrlKept(request, result.futureValue, continueUrl)
     }
 
-    "include continue URL if it's whitelisted" in new TestSetupNoJourneyRecord{
+    "include continue URL if it's allowlisted" in new TestSetupNoJourneyRecord{
       val continueUrl = "http://online-qa.ibt.hmrc.gov.uk/foo?some=false"
       val (request, result) = doRequestWithContinueUrl(continueUrl)
       assertContinueUrlKept(request, result.futureValue, continueUrl)
     }
 
-    "not include a continue URL if it's not whitelisted" in new TestSetupNoJourneyRecord{
+    "not include a continue URL if it's not allowlisted" in new TestSetupNoJourneyRecord{
       val continueUrl = "http://www.foo.org/bar?some=false"
       val (request, result) = doRequestWithContinueUrl(continueUrl)
       assertContinueUrlNotKept(request, result.futureValue, Some(continueUrl))

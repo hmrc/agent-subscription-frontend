@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalatest.{Assertion, EitherValues}
 import play.api.data.validation.{Invalid, Valid, ValidationError}
 import play.api.data.{FormError, Mapping}
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 
@@ -237,14 +237,14 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
     }
   }
 
-  "postcodeWithBlacklist bind" should {
-    val blacklistedPostcode = "BB1 1BB"
-    val blacklistedPostcodes: Set[String] =
-      Set(blacklistedPostcode, "CC1 1CC", "DD1 1DD")
+  "postcodeWithDenylist bind" should {
+    val denylistedPostcode = "BB1 1BB"
+    val denylistedPostcodes: Set[String] =
+      Set(denylistedPostcode, "CC1 1CC", "DD1 1DD")
         .filter(code => PostcodesLoader.formatPostcode(code).isDefined)
         .map(PostcodesLoader.formatPostcode(_).get)
 
-    val unprefixedPostcodeMapping = postcodeWithBlacklist(blacklistedPostcodes)
+    val unprefixedPostcodeMapping = postcodeWithDenylist(denylistedPostcodes)
     val postcodeMapping = unprefixedPostcodeMapping.withPrefix("testKey")
 
     behave like aPostcodeValidatingMapping(unprefixedPostcodeMapping)
@@ -257,20 +257,20 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
       errors should contain(FormError("testKey", List(messageKey), Seq()))
     }
 
-    "return an error if the postcode is blacklisted" in {
-      shouldRejectFieldValueContainingMessage(blacklistedPostcode, "error.postcode.blacklisted")
+    "return an error if the postcode is denylisted" in {
+      shouldRejectFieldValueContainingMessage(denylistedPostcode, "error.postcode.denylisted")
     }
 
-    "return an error if postcode without whitespace is blacklisted" in {
-      shouldRejectFieldValueContainingMessage("BB11BB", "error.postcode.blacklisted")
+    "return an error if postcode without whitespace is denylisted" in {
+      shouldRejectFieldValueContainingMessage("BB11BB", "error.postcode.denylisted")
     }
 
-    "return an error if postcode with whitespace is blacklisted" in {
-      shouldRejectFieldValueContainingMessage("BB1     1BB", "error.postcode.blacklisted")
+    "return an error if postcode with whitespace is denylisted" in {
+      shouldRejectFieldValueContainingMessage("BB1     1BB", "error.postcode.denylisted")
     }
 
-    "return an error if postcode with lowercase characters is blacklisted" in {
-      shouldRejectFieldValueContainingMessage("bb1 1bB", "error.postcode.blacklisted")
+    "return an error if postcode with lowercase characters is denylisted" in {
+      shouldRejectFieldValueContainingMessage("bb1 1bB", "error.postcode.denylisted")
     }
   }
 

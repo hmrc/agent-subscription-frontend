@@ -11,7 +11,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.SsoStub
 import java.time.LocalDate
 
 trait TestSetupNoJourneyRecord {
-  SsoStub.givenWhitelistedDomainsExist
+  SsoStub.givenAllowlistedDomainsExist
   givenNoSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"))
 }
 

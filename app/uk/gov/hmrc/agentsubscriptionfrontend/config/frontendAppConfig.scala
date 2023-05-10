@@ -20,7 +20,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.Lang
 import play.api.mvc.Call
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -29,7 +29,7 @@ trait AppConfig {
   val betaFeedbackUrl: String
   val betaFeedbackUnauthenticatedUrl: String
   val governmentGatewayUrl: String
-  val blacklistedPostcodes: Set[String]
+  val denylistedPostcodes: Set[String]
   val agentServicesAccountUrl: String
   val agentAssuranceBaseUrl: String
   val agentAssuranceRun: Boolean
@@ -75,7 +75,7 @@ class FrontendAppConfig @Inject()(servicesConfig: ServicesConfig) extends AppCon
   override val betaFeedbackUnauthenticatedUrl: String = getConf("betaFeedbackUnauthenticatedUrl")
 
   override val governmentGatewayUrl: String = getConf("government-gateway.url")
-  override val blacklistedPostcodes: Set[String] =
+  override val denylistedPostcodes: Set[String] =
     PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
   override val agentServicesAccountUrl: String = s"$servicesAccountUrl$servicesAccountPath"
   override lazy val agentAssuranceBaseUrl = servicesConfig.baseUrl("agent-assurance")

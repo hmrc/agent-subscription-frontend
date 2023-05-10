@@ -22,7 +22,7 @@ import org.slf4j.Logger
 import play.api.LoggerLike
 import play.api.data.FormError
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DesAddress
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{ResettingMockitoSugar, testAddressLookupFrontendAddress, testCountry}
@@ -53,10 +53,10 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
   private val validPostcode = "AA1 1AA"
   private val errorsForInvalidPostcode = Seq(FormError("postcode", "error.postcode.invalid", Seq()))
 
-  private val blacklistedPostcode = "BB1 1BB"
-  private val errorsForBlacklistedPostcode = Seq(FormError("postcode", "error.postcode.blacklisted", Seq()))
-  private val blacklistedPostcodes: Set[String] =
-    Set(blacklistedPostcode, "CC1 1CC", "DD1 1DD")
+  private val denylistedPostcode = "BB1 1BB"
+  private val errorsForDenylistedPostcode = Seq(FormError("postcode", "error.postcode.denylisted", Seq()))
+  private val denylistedPostcodes: Set[String] =
+    Set(denylistedPostcode, "CC1 1CC", "DD1 1DD")
       .filter(PostcodesLoader.formatPostcode(_).isDefined)
       .map(PostcodesLoader.formatPostcode(_).get)
 
@@ -67,7 +67,7 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
     override val logger: Logger = slf4jLogger
   }
 
-  private val desAddressForm = new DesAddressForm(logger, blacklistedPostcodes)
+  private val desAddressForm = new DesAddressForm(logger, denylistedPostcodes)
 
   "form" should {
     "populate all DesAddress fields when the input address is valid, even when all input lines are the maximum allowed length" in {
@@ -179,18 +179,18 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
       validatedForm.errors shouldBe Seq(FormError("postcode", "error.postcode.empty", Seq()))
     }
 
-    "pass on the postcode blacklist so that postcode blacklisting works" in {
-      val addressLookupFrontendAddress = testAddressLookupFrontendAddress(postcode = Some(blacklistedPostcode))
+    "pass on the postcode denylist so that postcode denylisting works" in {
+      val addressLookupFrontendAddress = testAddressLookupFrontendAddress(postcode = Some(denylistedPostcode))
 
       val validatedForm = desAddressForm.bindAddressLookupFrontendAddress(utr, addressLookupFrontendAddress)
 
-      validatedForm.errors shouldBe errorsForBlacklistedPostcode
+      validatedForm.errors shouldBe errorsForDenylistedPostcode
     }
 
     "validate all lines + postcode and accumulate errors" in {
       val addressLookupFrontendAddress = testAddressLookupFrontendAddress(
         lines = Seq(tooLongAndNonMatchingLine, nonMatchingLine, tooLongLine, nonMatchingLine),
-        postcode = Some(blacklistedPostcode))
+        postcode = Some(denylistedPostcode))
 
       val validatedForm = desAddressForm.bindAddressLookupFrontendAddress(utr, addressLookupFrontendAddress)
 
@@ -198,7 +198,7 @@ class DesAddressFormSpec extends UnitSpec with ResettingMockitoSugar with Either
         ++ errorsForNonMatchingLine("addressLine2", 2)
         ++ errorsForTooLongLine("addressLine3", 3)
         ++ errorsForNonMatchingLine("addressLine4", 4)
-        ++ errorsForBlacklistedPostcode)
+        ++ errorsForDenylistedPostcode)
     }
 
     "be successful for even if 5th address line exists and 5th line is not valid (because 5th line is ignored)" in {

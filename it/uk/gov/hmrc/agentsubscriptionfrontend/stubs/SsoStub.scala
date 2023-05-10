@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 
 object SsoStub {
 
-  def givenWhitelistedDomainsExist: StubMapping =
+  def givenAllowlistedDomainsExist: StubMapping =
     stubFor(
       get(urlEqualTo("/sso/domains")).willReturn(
         aResponse()
@@ -13,7 +13,7 @@ object SsoStub {
           .withBody(
             """{"externalDomains": ["127.0.0.1","online-qa.ibt.hmrc.gov.uk","ibt.hmrc.gov.uk"],"internalDomains":["localhost", "www.tax.service.gov.uk"]}""")))
 
-  def givenWhitelistedDomainsError: StubMapping =
+  def givenAllowlistedDomainsError: StubMapping =
     stubFor(
       get(urlEqualTo("/sso/domains")).willReturn(
         aResponse()

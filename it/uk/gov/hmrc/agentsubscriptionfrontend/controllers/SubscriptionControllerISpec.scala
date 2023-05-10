@@ -536,7 +536,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
     }
 
     "display address_form_with_errors and report related errors" when {
-      "postcode is blacklisted" in new TestSetupWithCompleteJourneyRecord {
+      "postcode is denylisted" in new TestSetupWithCompleteJourneyRecord {
         implicit val request = subscriptionDetailsRequest()
 
         givenAddressLookupInit(returnFromAddressLookupUrl)
@@ -548,7 +548,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
         val result =
           await(controller.returnFromAddressLookup("addr1")(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
-        result should containMessages("error.postcode.blacklisted", "invalidAddress.title")
+        result should containMessages("error.postcode.denylisted", "invalidAddress.title")
       }
 
       "the address is not valid according to DES's rules" in new TestSetupWithCompleteJourneyRecord {

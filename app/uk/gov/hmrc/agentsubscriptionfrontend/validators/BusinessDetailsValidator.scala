@@ -27,7 +27,7 @@ class BusinessDetailsValidator @Inject()(appConfig: AppConfig) {
   import CommonValidators._
   import uk.gov.hmrc.agentsubscriptionfrontend.models.ValidationResult._
 
-  private val blacklistedPostcodes = appConfig.blacklistedPostcodes
+  private val denylistedPostcodes = appConfig.denylistedPostcodes
 
   def validate(business: Option[Registration]): ValidationResult =
     business match {
@@ -55,7 +55,7 @@ class BusinessDetailsValidator @Inject()(appConfig: AppConfig) {
         // Checks for BFPO postcodes. Those postcodes starts with either BF or BFPO
         val isBfpo =
           !(formattedPostcode.startsWith("BF") || formattedPostcode.startsWith("BFPO"))
-        val isValid = validateBlacklist(formattedPostcode, blacklistedPostcodes)
+        val isValid = validateDenylist(formattedPostcode, denylistedPostcodes)
 
         if (isValid && isBfpo) Pass
         else Failure(DisallowedPostcode)

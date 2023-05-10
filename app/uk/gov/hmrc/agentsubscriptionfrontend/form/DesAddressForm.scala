@@ -23,14 +23,14 @@ import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AddressLookupFrontendAddress, DesAddress}
 
-class DesAddressForm(logger: LoggerLike, blacklistedPostcodes: Set[String]) {
+class DesAddressForm(logger: LoggerLike, denylistedPostcodes: Set[String]) {
   val form = Form[DesAddress](
     mapping(
       "addressLine1" -> addressLine1,
       "addressLine2" -> addressLine234(lineNumber = 2),
       "addressLine3" -> addressLine234(lineNumber = 3),
       "addressLine4" -> addressLine234(lineNumber = 4),
-      "postcode"     -> postcodeWithBlacklist(blacklistedPostcodes),
+      "postcode"     -> postcodeWithDenylist(denylistedPostcodes),
       "countryCode"  -> text
     )(DesAddress.apply)(DesAddress.unapply))
 
