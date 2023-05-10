@@ -22,7 +22,7 @@ class SsoConnectorISpec extends BaseISpec with MetricTestSupport {
     "return valid domains" in {
       withMetricsTimerUpdate("ConsumedAPI-SSO-getExternalDomains-GET") {
         SsoStub.givenWhitelistedDomainsExist
-        val result = await(connector.getWhitelistedDomains)
+        val result = await(connector.getWhitelistedDomains())
         result shouldBe Set("online-qa.ibt.hmrc.gov.uk", "localhost", "ibt.hmrc.gov.uk", "127.0.0.1", "www.tax.service.gov.uk")
       }
     }
@@ -30,7 +30,7 @@ class SsoConnectorISpec extends BaseISpec with MetricTestSupport {
     "return an empty set when the service throws an error" in {
       withMetricsTimerUpdate("ConsumedAPI-SSO-getExternalDomains-GET") {
         SsoStub.givenWhitelistedDomainsError
-        val result = await(connector.getWhitelistedDomains)
+        val result = await(connector.getWhitelistedDomains())
         result shouldBe Set.empty
       }
     }

@@ -231,7 +231,7 @@ object VatDetailsController {
 
   private def realDateConstraint: Constraint[(String, String, String)] = Constraint[(String, String, String)] { data: (String, String, String) =>
     val (year, month, day) = data
-    Try {
+    Try[play.api.data.validation.ValidationResult] {
       val date = LocalDate.of(year.toInt, month.toInt, day.toInt)
       if (date.isBefore(LocalDate.of(1900, 1, 1)))
         Invalid(ValidationError("vat-details.regDate.must.be.later.than.1900"))
@@ -245,7 +245,7 @@ object VatDetailsController {
 
   private def futureDateConstraint: Constraint[(String, String, String)] = Constraint[(String, String, String)] { data: (String, String, String) =>
     val (year, month, day) = data
-    Try {
+    Try[play.api.data.validation.ValidationResult] {
       if (LocalDate.of(year.toInt, month.toInt, day.toInt).isAfter(LocalDate.now()))
         Invalid(ValidationError("vat-details.regDate.must.be.in.past"))
       else

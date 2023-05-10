@@ -164,7 +164,7 @@ package object controllers extends Logging {
           "amlsCode"         -> amlsCode(bodies),
           "membershipNumber" -> membershipNumber,
           "expiry"           -> expiryDate
-        )(AMLSForm.apply)(AMLSForm.unapply) verifying (HMRC_AMLS_ERROR, { (o: AMLSForm) =>
+        )(AMLSForm.apply)(AMLSForm.unapply).verifying(HMRC_AMLS_ERROR, { (o: AMLSForm) =>
           o match {
             case AMLSForm(code, number, _) if code == "HMRC" => number.matches(amlsRegex)
             case AMLSForm(_, _, _)                           => true

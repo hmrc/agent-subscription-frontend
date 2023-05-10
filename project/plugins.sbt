@@ -8,5 +8,5 @@ addSbtPlugin("uk.gov.hmrc"       % "sbt-distributables" % "2.2.0")
 
 addSbtPlugin("org.scoverage"     % "sbt-scoverage"      % "1.9.3")
 addSbtPlugin("com.lucidchart"    % "sbt-scalafmt"       % "1.16")
-addSbtPlugin("org.wartremover"   % "sbt-wartremover"    % "2.4.0")
+addSbtPlugin("org.wartremover"   % "sbt-wartremover"    % "3.1.1")
 addSbtPlugin("org.irundaia.sbt"  % "sbt-sassify"        % "1.5.1")

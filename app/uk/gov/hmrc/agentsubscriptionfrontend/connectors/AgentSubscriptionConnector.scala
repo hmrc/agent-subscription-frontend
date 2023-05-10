@@ -190,6 +190,7 @@ class AgentSubscriptionConnector @Inject()(
           response.status match {
             case OK        => response.json.asOpt[AmlsSubscriptionRecord]
             case NOT_FOUND => None
+            case status    => throw UpstreamErrorResponse("getAmlsSubscriptionRecord", status)
           }
         }
     }

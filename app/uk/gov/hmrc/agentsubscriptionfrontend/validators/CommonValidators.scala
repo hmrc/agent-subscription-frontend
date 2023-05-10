@@ -283,7 +283,7 @@ object CommonValidators {
 
   def checkOneAtATime[A](constraints: Seq[Constraint[A]]): Constraint[A] = Constraint[A] { fieldValue: A =>
     @tailrec
-    def loop(c: Seq[Constraint[A]]): ValidationResult =
+    def loop(c: List[Constraint[A]]): ValidationResult =
       c match {
         case Nil => Valid
         case head :: tail =>
@@ -293,7 +293,7 @@ object CommonValidators {
           }
       }
 
-    loop(constraints)
+    loop(constraints.toList)
   }
 
   private def utrConstraint(errorMessages: UtrErrors = DefaultUtrErrors): Constraint[String] = Constraint[String] { fieldValue: String =>

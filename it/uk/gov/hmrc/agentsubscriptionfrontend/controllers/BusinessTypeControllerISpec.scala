@@ -68,7 +68,7 @@ class BusinessTypeControllerISpec extends BaseISpec with SessionDataMissingSpec 
       html.title() shouldBe "What type of business are you? - Create an agent services account - GOV.UK"
       private val signOutLink: Elements = html.select("a#sign-out")
       signOutLink.text() shouldBe "Finish and sign out"
-      signOutLink.attr("href") shouldBe routes.SignedOutController.signOutWithContinueUrl.url
+      signOutLink.attr("href") shouldBe routes.SignedOutController.signOutWithContinueUrl().url
     }
 
     "pre-populate the business type if one is already stored in the session" in new TestSetupNoJourneyRecord{

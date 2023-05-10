@@ -38,7 +38,7 @@ trait MongoSessionStore[T] extends Logging {
         case None               => Right(None)
       }
       .recover {
-        case e ⇒
+        case e =>
           Left(e.getMessage)
       }
 

@@ -134,7 +134,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
 
-      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck.url)
+      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck().url)
       noMetricExpectedAtThisPoint()
     }
 
@@ -147,7 +147,7 @@ class SubscriptionControllerISpec extends BaseISpec with SessionDataMissingSpec 
       val result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
 
-      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showTradingNameCheck.url)
+      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showTradingNameCheck().url)
       noMetricExpectedAtThisPoint()
     }
 

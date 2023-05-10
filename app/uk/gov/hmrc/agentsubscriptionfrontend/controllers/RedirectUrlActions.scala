@@ -54,7 +54,7 @@ class RedirectUrlActions @Inject()(sessionStoreService: MongoDBSessionStoreServi
     }
 
   def checkRedirectUrlAndContinue[A](redirectUrl: RedirectUrl, block: Option[String] => Future[A])(implicit hc: HeaderCarrier): Future[A] = {
-    val whitelistPolicy = AbsoluteWithHostnameFromAllowlist(whitelistedDomains)
+    val whitelistPolicy = AbsoluteWithHostnameFromAllowlist(whitelistedDomains())
     val unsafeUrl = redirectUrl.get(UnsafePermitAll).url
 
     //if relative let through else check url domain is on whitelist

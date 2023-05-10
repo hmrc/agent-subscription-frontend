@@ -68,10 +68,10 @@ class Agent(
     cleanCredsFold(None: Option[AuthProviderId])(Some(this.authProviderId))
 
   def withCleanCredsOrCreateNewAccount(cleanCredsBody: => Future[Result]): Future[Result] =
-    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.BusinessIdentificationController.showCreateNewAccount)))(isClean = cleanCredsBody)
+    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.BusinessIdentificationController.showCreateNewAccount())))(isClean = cleanCredsBody)
 
   def withCleanCredsOrSignIn(cleanCredsBody: => Future[Result]): Future[Result] =
-    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.SubscriptionController.showSignInWithNewID)))(isClean = cleanCredsBody)
+    this.cleanCredsFold(isDirty = toFuture(Redirect(routes.SubscriptionController.showSignInWithNewID())))(isClean = cleanCredsBody)
 
 }
 
@@ -123,7 +123,7 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
               }
             case None =>
               logger.warn("User does not have the correct credentials")
-              Redirect(routes.SignedOutController.signOut)
+              Redirect(routes.SignedOutController.signOut())
           }
       }
       .recover {

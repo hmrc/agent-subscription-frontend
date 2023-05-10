@@ -35,13 +35,13 @@ case class SampleUser(userId: String, enrolments: Seq[Enrolment], affinity: Affi
 
 object SampleUser {
 
-  def subscribingAgentEnrolledForHMRCASAGENT() =
+  def subscribingAgentEnrolledForHMRCASAGENT =
     SampleUser(
       "12345-credId",
       Seq(Enrolment("HMRC-AS-AGENT", Seq(EnrolmentIdentifier("AgentReferenceNumber", "TARN0000001")), "Activated")),
       AffinityGroup.Agent)
 
-  def subscribingAgentEnrolledForNonMTD() =
+  def subscribingAgentEnrolledForNonMTD =
     SampleUser(
       "12345-credId",
       Seq(
@@ -51,13 +51,13 @@ object SampleUser {
       AffinityGroup.Agent
     )
 
-  def subscribingCleanAgentWithoutEnrolments(): SampleUser =
+  def subscribingCleanAgentWithoutEnrolments: SampleUser =
     SampleUser("12345-credId", Seq(), AffinityGroup.Agent)
 
-  def subscribing2ndCleanAgentWithoutEnrolments(): SampleUser =
+  def subscribing2ndCleanAgentWithoutEnrolments: SampleUser =
     SampleUser("54321-credId", Seq(), AffinityGroup.Agent)
 
-  def individual() =
+  def individual =
     SampleUser(
       "individual",
       Seq(Enrolment("FOO", Seq(EnrolmentIdentifier("foo", "AAAAA")), "Activated")),

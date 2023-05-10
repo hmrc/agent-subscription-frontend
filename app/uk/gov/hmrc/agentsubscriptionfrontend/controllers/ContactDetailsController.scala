@@ -95,7 +95,8 @@ class ContactDetailsController @Inject()(
             Future successful Redirect(routes.StartController.start())
           )(
             businessEmail =>
-              contactEmailCheckForm.bindFromRequest
+              contactEmailCheckForm
+                .bindFromRequest()
                 .fold(
                   formWithErrors => {
                     Ok(contactEmailCheckTemplate(formWithErrors, businessEmail, isChanging.getOrElse(false)))
@@ -128,7 +129,7 @@ class ContactDetailsController @Inject()(
   def showContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       agent.getMandatorySubscriptionRecord.contactEmailData
-        .fold(Redirect(routes.ContactDetailsController.showContactEmailCheck)) { contactEmailData =>
+        .fold(Redirect(routes.ContactDetailsController.showContactEmailCheck())) { contactEmailData =>
           contactEmailData.contactEmail match {
             case Some(email) =>
               Ok(
@@ -144,13 +145,14 @@ class ContactDetailsController @Inject()(
   def changeContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>
     sessionStoreService
       .cacheIsChangingAnswers(changing = true)
-      .map(_ => Redirect(routes.ContactDetailsController.showContactEmailCheck))
+      .map(_ => Redirect(routes.ContactDetailsController.showContactEmailCheck()))
   }
 
   def submitContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
-        contactEmailAddressForm.bindFromRequest
+        contactEmailAddressForm
+          .bindFromRequest()
           .fold(
             formWithErrors => {
               Ok(contactEmailAddressTemplate(formWithErrors))
@@ -209,7 +211,8 @@ class ContactDetailsController @Inject()(
             Future successful Redirect(routes.StartController.start())
           )(
             businessName =>
-              contactTradingNameCheckForm.bindFromRequest
+              contactTradingNameCheckForm
+                .bindFromRequest()
                 .fold(
                   formWithErrors => {
                     Ok(contactTradingNameCheckTemplate(formWithErrors, businessName, isChanging.getOrElse(false)))
@@ -222,7 +225,7 @@ class ContactDetailsController @Inject()(
                         else (false, data.contactTradingName))
 
                     val call: Call =
-                      if (!useBusinessName) routes.ContactDetailsController.showTradingName
+                      if (!useBusinessName) routes.ContactDetailsController.showTradingName()
                       else if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
                       else routes.TaskListController.showTaskList()
 
@@ -261,7 +264,8 @@ class ContactDetailsController @Inject()(
   def submitTradingName: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
-        contactTradingNameForm.bindFromRequest
+        contactTradingNameForm
+          .bindFromRequest()
           .fold(
             formWithErrors => {
               Ok(contactTradingNameTemplate(formWithErrors))
@@ -322,7 +326,8 @@ class ContactDetailsController @Inject()(
             Future successful Redirect(routes.StartController.start())
           )(
             businessAddress =>
-              contactTradingAddressCheckForm.bindFromRequest
+              contactTradingAddressCheckForm
+                .bindFromRequest()
                 .fold(
                   formWithErrors => {
                     Ok(contactTradingAddressCheckTemplate(formWithErrors, formatBusinessAddress(businessAddress), isChanging.getOrElse(false)))

@@ -45,7 +45,7 @@ class AuditData {
     this
   }
 
-  import scala.collection.JavaConverters._
+  import scala.jdk.CollectionConverters._
 
   private[audit] def getDetails: Map[String, Any] = details.asScala.toMap
 }

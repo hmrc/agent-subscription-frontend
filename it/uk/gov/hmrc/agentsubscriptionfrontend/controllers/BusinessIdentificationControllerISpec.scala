@@ -148,7 +148,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
             authenticatedRequest(POST).withFormUrlEncodedBody("name" -> "New Agency Name", "submit" -> "continue")))
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.SubscriptionController.showCheckAnswers.url)
+        redirectLocation(result) shouldBe Some(routes.SubscriptionController.showCheckAnswers().url)
       }
 
       "redirect to /progress-saved when user inputs valid data and saves" in new Setup {
@@ -203,7 +203,7 @@ class BusinessIdentificationControllerISpec extends BaseISpec {
           authenticatedRequest(POST).withFormUrlEncodedBody("email" -> "new@gmail.com", "submit" -> "continue")))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.SubscriptionController.showCheckAnswers.url)
+      redirectLocation(result) shouldBe Some(routes.SubscriptionController.showCheckAnswers().url)
     }
 
     "redirect to /progress-saved when user inputs valid data and saves" in new Setup {

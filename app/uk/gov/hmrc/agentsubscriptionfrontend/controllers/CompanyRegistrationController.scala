@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import com.kenshoo.play.metrics.Metrics
+
 import javax.inject.{Inject, Singleton}
 import play.api.{Configuration, Environment}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -29,6 +30,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{company_registration, llp_interrupt}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
@@ -88,6 +90,7 @@ class CompanyRegistrationController @Inject()(
                               .map(_ => Redirect(routes.VatDetailsController.showRegisteredForVatForm()))
                           case CONFLICT  => Redirect(routes.BusinessIdentificationController.showCompanyNotAllowed())
                           case NOT_FOUND => Redirect(routes.BusinessIdentificationController.showNoMatchFound())
+                          case status    => throw UpstreamErrorResponse("checkCompanyStatus", status)
                         }
 
                       } else {
