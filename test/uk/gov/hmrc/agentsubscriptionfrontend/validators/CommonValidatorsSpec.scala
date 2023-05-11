@@ -514,10 +514,6 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
         shouldRejectFieldValueAsInvalid("My Agency & Co")
       }
 
-      "there is an apostrophe character" in {
-        shouldRejectFieldValueAsInvalid("My Agency's Co")
-      }
-
       "there is an invalid character" in {
         shouldRejectFieldValueAsInvalid("My Agency; His Agency #1")
       }
@@ -549,6 +545,10 @@ class CommonValidatorsSpec extends UnitSpec with EitherValues {
 
       "there are numbers and letters" in {
         shouldAcceptFieldValue("The 100 Agency")
+      }
+
+      "there is an apostrophe character" in {
+        shouldAcceptFieldValue("My Agency's Co")
       }
     }
   }

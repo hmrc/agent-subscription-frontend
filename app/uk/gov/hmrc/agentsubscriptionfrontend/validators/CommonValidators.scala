@@ -98,9 +98,7 @@ object CommonValidators {
       .verifying(
         checkOneAtATime(
           noAmpersand("error.business-name.invalid"),
-          checkOneAtATime(
-            noApostrophe("error.business-name.invalid"),
-            desText(msgKeyRequired = "error.business-name.empty", msgKeyInvalid = "error.business-name.invalid"))
+          desText(msgKeyRequired = "error.business-name.empty", msgKeyInvalid = "error.business-name.invalid")
         ))
 
   def tradingName: Mapping[String] =
@@ -109,9 +107,7 @@ object CommonValidators {
       .verifying(
         checkOneAtATime(
           noAmpersand("error.trading-name.invalid"),
-          checkOneAtATime(
-            noApostrophe("error.trading-name.invalid"),
-            desText(msgKeyRequired = "error.trading-name.empty", msgKeyInvalid = "error.trading-name.invalid"))
+          desText(msgKeyRequired = "error.trading-name.empty", msgKeyInvalid = "error.trading-name.invalid")
         ))
 
   def amlsCode(bodies: Set[String]): Mapping[String] = text verifying amlsCodeConstraint(bodies)
@@ -240,8 +236,6 @@ object CommonValidators {
   }
 
   private def noAmpersand(errorMsgKey: String) = Constraints.pattern("[^&]*".r, error = errorMsgKey)
-
-  private def noApostrophe(errorMsgKey: String) = Constraints.pattern("[^']*".r, error = errorMsgKey)
 
   private[validators] def desText(msgKeyRequired: String, msgKeyInvalid: String): Constraint[String] =
     Constraint[String] { fieldValue: String =>
