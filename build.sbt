@@ -1,43 +1,3 @@
-lazy val wartRemoverSettings = {
-  val wartRemoverWarning = {
-    val warningWarts = Seq(
-      Wart.AsInstanceOf,
-      Wart.IsInstanceOf
-    )
-    Compile / compile / wartremoverWarnings ++= warningWarts
-  }
-
-  val wartRemoverError = {
-    // Error
-    val errorWarts = Seq(
-      Wart.ArrayEquals,
-      Wart.AnyVal,
-      Wart.EitherProjectionPartial,
-      Wart.ExplicitImplicitTypes,
-      Wart.FinalVal,
-      Wart.JavaConversions,
-      Wart.JavaSerializable,
-      Wart.MutableDataStructures,
-      Wart.Null,
-      Wart.Recursion,
-      Wart.Return,
-      Wart.TryPartial,
-      Wart.Var,
-      Wart.While)
-    Compile / compile / wartremoverErrors ++= errorWarts
-  }
-
-  Seq(
-    wartRemoverError,
-    wartRemoverWarning,
-    Test / compile / wartremoverErrors --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference),
-    wartremoverExcluded ++=
-      (Compile / routes).value ++
-        (baseDirectory.value / "it").get ++
-        (baseDirectory.value / "test").get ++
-        Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
-  )
-}
 
 TwirlKeys.templateImports ++= Seq(
   "uk.gov.hmrc.agentsubscriptionfrontend.views.html.MainTemplate",
@@ -82,7 +42,6 @@ lazy val root = Project("agent-subscription-frontend", file("."))
     IntegrationTest / unmanagedSourceDirectories += baseDirectory(_ / "it").value,
     IntegrationTest / parallelExecution := false
   )
-  .settings(wartRemoverSettings: _*)
   .settings(CodeCoverageSettings.settings: _*)
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
