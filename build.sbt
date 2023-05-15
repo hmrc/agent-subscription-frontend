@@ -1,4 +1,3 @@
-import sbt.CrossVersion
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
@@ -27,22 +26,17 @@ lazy val wartRemoverSettings = {
       Wart.ArrayEquals,
       Wart.AnyVal,
       Wart.EitherProjectionPartial,
-      //Wart.Enumeration,
       Wart.ExplicitImplicitTypes,
       Wart.FinalVal,
       Wart.JavaConversions,
       Wart.JavaSerializable,
-      //Wart.LeakingSealed,
       Wart.MutableDataStructures,
       Wart.Null,
-      //Wart.OptionPartial,
       Wart.Recursion,
       Wart.Return,
-      //Wart.TraversableOps,
       Wart.TryPartial,
       Wart.Var,
       Wart.While)
-
     Compile / compile / wartremoverErrors ++= errorWarts
   }
 
@@ -68,6 +62,7 @@ lazy val root = Project("agent-subscription-frontend", file("."))
     name := "agent-subscription-frontend",
     organization := "uk.gov.hmrc",
     scalaVersion := "2.13.8",
+    majorVersion := 0,
     scalacOptions ++= Seq(
       "-Xfatal-warnings",
       "-Xlint:-missing-interpolator,_",
@@ -83,10 +78,9 @@ lazy val root = Project("agent-subscription-frontend", file("."))
     PlayKeys.playDefaultPort := 9437,
     resolvers ++= Seq(
       Resolver.typesafeRepo("releases"),
+      "HMRC-open-artefacts-maven" at "https://open.artefacts.tax.service.gov.uk/maven2",
+      Resolver.url("HMRC-open-artefacts-ivy", url("https://open.artefacts.tax.service.gov.uk/ivy2"))(Resolver.ivyStylePatterns),
     ),
-    resolvers += "HMRC-open-artefacts-maven" at "https://open.artefacts.tax.service.gov.uk/maven2",
-    resolvers += Resolver.url("HMRC-open-artefacts-ivy", url("https://open.artefacts.tax.service.gov.uk/ivy2"))(Resolver.ivyStylePatterns),
-
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     scoverageSettings,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
@@ -95,7 +89,6 @@ lazy val root = Project("agent-subscription-frontend", file("."))
   )
   .configs(IntegrationTest)
   .settings(
-    majorVersion := 0,
     IntegrationTest / Keys.fork := true,
     Defaults.itSettings,
     IntegrationTest / unmanagedSourceDirectories += baseDirectory(_ / "it").value,
@@ -103,6 +96,7 @@ lazy val root = Project("agent-subscription-frontend", file("."))
   )
   .settings(wartRemoverSettings: _*)
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
+  .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
 
 inConfig(IntegrationTest)(scalafmtCoreSettings)
 
