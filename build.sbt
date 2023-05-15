@@ -1,16 +1,3 @@
-
-lazy val scoverageSettings = {
-  import scoverage.ScoverageKeys
-  Seq(
-    // Semicolon-separated list of regexs matching classes to exclude
-    ScoverageKeys.coverageExcludedPackages := """uk\.gov\.hmrc\.BuildInfo;.*\.Routes;.*\.RoutesPrefix;.*Filters?;MicroserviceAuditConnector;Module;GraphiteStartUp;.*\.Reverse[^.]*""",
-    ScoverageKeys.coverageMinimumStmtTotal := 80.00,
-    ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true,
-    Test / parallelExecution := false
-  )
-}
-
 lazy val wartRemoverSettings = {
   val wartRemoverWarning = {
     val warningWarts = Seq(
@@ -82,7 +69,8 @@ lazy val root = Project("agent-subscription-frontend", file("."))
       Resolver.url("HMRC-open-artefacts-ivy", url("https://open.artefacts.tax.service.gov.uk/ivy2"))(Resolver.ivyStylePatterns),
     ),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
-    scoverageSettings,
+    //fix for scoverage compile errors for scala 2.13.10
+    libraryDependencySchemes ++= Seq("org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always),
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
     Compile / scalafmtOnCompile := true,
     Test / scalafmtOnCompile := true
@@ -95,6 +83,7 @@ lazy val root = Project("agent-subscription-frontend", file("."))
     IntegrationTest / parallelExecution := false
   )
   .settings(wartRemoverSettings: _*)
+  .settings(CodeCoverageSettings.settings: _*)
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
 
