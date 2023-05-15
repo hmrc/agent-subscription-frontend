@@ -16,16 +16,14 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.head
-@import uk.gov.hmrc.govukfrontend.views.html.components.GovukPhaseBanner
-@import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcLayout, HmrcReportTechnicalIssueHelper}
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcStandardPage, HmrcReportTechnicalIssueHelper}
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.helper.CSPNonce
 
 @this(
     head: head,
-    hmrcLayout: HmrcLayout,
-    govukPhaseBanner: GovukPhaseBanner,
-    standardBetaBanner: StandardBetaBanner,
+    hmrcStandardPage: HmrcStandardPage,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
 )
 
@@ -35,7 +33,6 @@
     hasTimeout: Boolean = true,
     backLinkHref: Option[String] = None
 )(mainContent: Html)(implicit request : Request[_], msgs: Messages, appConfig: AppConfig)
-
 
 @mainContentWithTechIssueHelper = {
     @mainContent
@@ -52,15 +49,19 @@
     <script src="@controllers.routes.Assets.versioned("javascripts/agent-subscription.js")" @{CSPNonce.attr}></script>
 }
 
-@hmrcLayout(
-    pageTitle = Some(title + " " + msgs("servicename.titleSuffix")),
+@hmrcStandardPage(HmrcStandardPageParams(
+    serviceURLs = ServiceURLs(
+        serviceUrl = None,
+        signOutUrl = None
+    ),
+    banners = Banners(displayHmrcBanner = true),
+    templateOverrides = TemplateOverrides(
+        additionalHeadBlock = Some(head(hasTimeout)),
+        additionalScriptsBlock = Some(additionalScripts)
+    ),
     serviceName = Some(msgs("service.name")),
-    phaseBanner = Some(standardBetaBanner(appConfig.betaFeedbackUrl)),
+    pageTitle = Some(title + " " + msgs("servicename.titleSuffix")),
     isWelshTranslationAvailable = true,
-    displayHmrcBanner = true,
-    serviceUrl = None,
-    signOutUrl = None,
-    additionalHeadBlock = Some(head(hasTimeout)),
-    additionalScriptsBlock = Some(additionalScripts),
-    backLinkUrl = backLinkHref
-)(mainContentWithTechIssueHelper)
+    backLink = if(backLinkHref.isDefined) Some(BackLink(href = backLinkHref.get)) else None
+))(mainContentWithTechIssueHelper)
+

@@ -49,7 +49,7 @@ lazy val root = Project("agent-subscription-frontend", file("."))
     name := "agent-subscription-frontend",
     organization := "uk.gov.hmrc",
     scalaVersion := "2.13.8",
-    majorVersion := 0,
+    majorVersion := 1,
     scalacOptions ++= Seq(
       "-Xfatal-warnings",
       "-Xlint:-missing-interpolator,_",
