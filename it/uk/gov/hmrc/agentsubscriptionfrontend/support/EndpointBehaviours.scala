@@ -52,20 +52,6 @@ trait EndpointBehaviours {
 
       bodyOf(result.futureValue) should include("Is this page not working properly?")
     }
-
-    "have a beta feedback banner" in new TestSetupWithCompleteJourneyRecord {
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(request, global))
-      val result = action(request)
-
-      bodyOf(result.futureValue) should include("This is a new service")
-    }
-
-    "have a beta feedback link" in new TestSetupWithCompleteJourneyRecord {
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(request, global))
-      val result = action(request)
-
-      bodyOf(result.futureValue) should include("/contact/beta-feedback")
-    }
   }
 
   private def urlencoded(toEncode: String) = URLEncoder.encode(toEncode, "UTF-8")

@@ -26,8 +26,6 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @ImplementedBy(classOf[FrontendAppConfig])
 trait AppConfig {
-  val betaFeedbackUrl: String
-  val betaFeedbackUnauthenticatedUrl: String
   val governmentGatewayUrl: String
   val denylistedPostcodes: Set[String]
   val agentServicesAccountUrl: String
@@ -70,9 +68,6 @@ class FrontendAppConfig @Inject()(servicesConfig: ServicesConfig) extends AppCon
   private val servicesAccountUrl = getConf("microservice.services.agent-services-account-frontend.external-url")
   private val servicesAccountPath =
     getConf("microservice.services.agent-services-account-frontend.start.path")
-
-  override val betaFeedbackUrl: String = getConf("betaFeedbackUrl")
-  override val betaFeedbackUnauthenticatedUrl: String = getConf("betaFeedbackUnauthenticatedUrl")
 
   override val governmentGatewayUrl: String = getConf("government-gateway.url")
   override val denylistedPostcodes: Set[String] =
