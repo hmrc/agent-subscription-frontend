@@ -24,7 +24,6 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
-import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
@@ -48,7 +47,6 @@ class AMLSController @Inject()(
   val redirectUrlActions: RedirectUrlActions,
   val subscriptionJourneyService: SubscriptionJourneyService,
   val sessionStoreService: MongoDBSessionStoreService,
-  agentAssuranceConnector: AgentAssuranceConnector,
   amlsService: AmlsService,
   mcc: MessagesControllerComponents,
   checkAmlsTemplate: check_amls,
