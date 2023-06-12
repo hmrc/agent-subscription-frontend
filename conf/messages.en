@@ -464,8 +464,8 @@ moneyLaunderingCompliance.expiry.month.title=Month
 moneyLaunderingCompliance.expiry.year.title=Year
 
 # Amls Not Found
-amls-details-not-found.title=We cannot find your membership details
-amls-details-not-found.p=Check your membership number and renewal date and try again.
+amls-details-not-found.title=We cannot find your registration details
+amls-details-not-found.p=Check your registration number and renewal date and try again.
 amls-details-not-found.button=Try again
 
 # Amls Ineligible status
