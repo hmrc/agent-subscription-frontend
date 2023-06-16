@@ -27,7 +27,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
-import uk.gov.hmrc.agentsubscriptionfrontend.service.AmlsValidationResult.{AmlsCheckFailed, AmlsSuspended, DateNotMatched, RecordNotFound, ResultOK}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.AmlsValidationResult.{AmlsCheckFailed, AmlsSuspended, DateNotMatched, RecordNotFound, ResultOK, ResultOKButCheckDate}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{AmlsService, MongoDBSessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls._
@@ -35,6 +35,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.time.LocalDate
 import scala.collection.immutable.Map
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -50,10 +51,11 @@ class AMLSController @Inject()(
   amlsService: AmlsService,
   mcc: MessagesControllerComponents,
   checkAmlsTemplate: check_amls,
+  amlsEnterNumber: amls_enter_number,
   amlsAppliedForTemplate: amls_applied_for,
   amlsNotAppliedTemplate: amls_not_applied,
   amlsDetailsTemplate: amls_details,
-  amlsPendingDetailsTemplate: amls_pending_details,
+  amlsEnterRenewalDate: amls_enter_renewal_date,
   amlsDetailsNotFoundTemplate: amls_details_not_found,
   amlsRecordIneligibleStatusTemplate: amls_record_ineligible_status)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
@@ -132,7 +134,7 @@ class AMLSController @Inject()(
           formWithErrors => Ok(amlsAppliedForTemplate(formWithErrors)),
           validForm => {
             val continue = validForm match {
-              case Yes => routes.AMLSController.showAmlsApplicationDatePage()
+              case Yes => routes.AMLSController.showAmlsApplicationEnterNumberPage()
               case No  => routes.AMLSController.showAmlsNotAppliedPage()
             }
             updateAmlsJourneyRecord(agent, amlsData => Some(amlsData.copy(amlsAppliedFor = Some(RadioInputAnswer.toBoolean(validForm))))).map(
@@ -178,32 +180,46 @@ class AMLSController @Inject()(
               amlsService.validateAmlsSubscription(validForm).flatMap {
                 case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
                 case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
-                case ResultOK(safeId) => {
-                  val supervisoryBodyData =
-                    amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))
-
-                  val continue = toTaskListOrCheckYourAnswers(isChanging)
-                  updateAmlsJourneyRecord(
-                    agent,
-                    amlsData =>
-                      Some(amlsData.copy(amlsDetails = Some(AmlsDetails(
-                        supervisoryBodyData,
-                        Right(RegisteredDetails(
-                          membershipNumber = validForm.membershipNumber,
-                          membershipExpiresOn = Some(validForm.expiry),
-                          amlsSafeId = safeId,
-                          agentBPRSafeId = agent.getMandatorySubscriptionRecord.businessDetails.registration.flatMap(_.safeId)
-                        ))
-                      ))))
-                  ).map(
-                    _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsDetailsForm()))
-                  )
-                }
+                case ResultOK(safeId) =>
+                  DealWithResultOkAmls(agent, isChanging, validForm.membershipNumber, validForm.amlsCode, Some(validForm.expiry), safeId)
+                //todo throw exception here?
+                case ResultOKButCheckDate(safeId) => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
               }
             }
           )
       }
     }
+  }
+
+  private def DealWithResultOkAmls(
+    agent: Agent,
+    isChanging: Option[Boolean],
+    membershipNumber: String,
+    amlsCode: String,
+    expiry: Option[LocalDate],
+    safeId: Option[String])(implicit hc: HeaderCarrier, ec: ExecutionContext, r: Request[AnyContent]) = {
+
+    val supervisoryBodyData =
+      amlsBodies.getOrElse(amlsCode, throw new Exception("Invalid AMLS code"))
+
+    val continue = toTaskListOrCheckYourAnswers(isChanging)
+    updateAmlsJourneyRecord(
+      agent,
+      amlsData =>
+        Some(
+          amlsData.copy(amlsDetails = Some(AmlsDetails(
+            supervisoryBodyData,
+            Right(RegisteredDetails(
+              membershipNumber = membershipNumber,
+              membershipExpiresOn = expiry,
+              amlsSafeId = safeId,
+              agentBPRSafeId = agent.getMandatorySubscriptionRecord.businessDetails.registration.flatMap(_.safeId)
+            ))
+          ))))
+    ).map(
+      _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsDetailsForm()))
+    )
+
   }
 
   def showAmlsDetailsNotFound: Action[AnyContent] = Action.async { implicit request =>
@@ -224,7 +240,12 @@ class AMLSController @Inject()(
     }
   }
 
-  def showAmlsApplicationDatePage: Action[AnyContent] = Action.async { implicit request =>
+  def showAmlsApplicationEnterNumberPage: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { agent =>
+      Ok(amlsEnterNumber(amlsEnterNumberForm()))
+    }
+  }
+  def showAmlsApplicationEnterDatePage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       agent.getMandatoryAmlsData.amlsDetails match {
         case Some(amlsDetails) =>
@@ -240,14 +261,41 @@ class AMLSController @Inject()(
                     "appliedOn.year"  -> appliedOn.getYear.toString
                   )
               }
-              Ok(amlsPendingDetailsTemplate(amlsPendingForm.bind(form)))
-            case Right(RegisteredDetails(_, _, _, _)) => Ok(amlsPendingDetailsTemplate(amlsPendingForm))
+              Ok(amlsEnterRenewalDate(amlsPendingForm.bind(form)))
+            case Right(RegisteredDetails(_, _, _, _)) => Ok(amlsEnterRenewalDate(amlsPendingForm))
           }
-        case _ => Ok(amlsPendingDetailsTemplate(amlsPendingForm))
+        case _ => Ok(amlsEnterRenewalDate(amlsPendingForm))
       }
     }
   }
+  //todo put the call with the number and redirect here tomorrow
+  def submitAmlsApplicationEnterNumberPage: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { agent =>
+      amlsEnterNumberForm()
+        .bindFromRequest()
+        .fold(
+          formWithErrors => {
+            Ok(amlsEnterNumber(formWithErrors))
+          },
+          validForm => {
+            amlsService.checkAmlsNumber(validForm.membershipNumber, None).flatMap {
+              case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
+              case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
+              case ResultOK(safeId) => {
+                //todo ask about changeing
+                DealWithResultOkAmls(agent, Some(false), validForm.membershipNumber, "HMRC", None, safeId)
+              }
+              case ResultOKButCheckDate(safeId) => {
+                //todo redirect here
+                Redirect(routes.AMLSController.showAmlsApplicationEnterDatePage())
+              }
+            }
+          }
+        )
+    }
+  }
 
+  //todo put the call with the number and redirect here tomorrow
   def submitAmlsApplicationDatePage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
@@ -256,19 +304,19 @@ class AMLSController @Inject()(
           .fold(
             formWithErrors => {
               val form = AMLSForms.amlsPendingDetailsFormWithRefinedErrors(formWithErrors)
-              Ok(amlsPendingDetailsTemplate(form))
+              Ok(amlsEnterRenewalDate(form))
             },
             validForm => {
+
               val supervisoryBodyData =
                 amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))
 
               val continue = toTaskListOrCheckYourAnswers(isChanging)
               updateAmlsJourneyRecord(
                 agent,
-                amlsData =>
-                  Some(amlsData.copy(amlsDetails = Some(AmlsDetails(supervisoryBodyData, Left(PendingDetails(Option(validForm.appliedOn)))))))
+                amlsData => Some(amlsData.copy(amlsDetails = Some(AmlsDetails(supervisoryBodyData, Left(PendingDetails(Option(validForm.expiry)))))))
               ).map(
-                _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsApplicationDatePage()))
+                _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsApplicationEnterNumberPage()))
               )
             }
           )

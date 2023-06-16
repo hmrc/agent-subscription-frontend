@@ -463,6 +463,12 @@ moneyLaunderingCompliance.expiry.day.title=Day
 moneyLaunderingCompliance.expiry.month.title=Month
 moneyLaunderingCompliance.expiry.year.title=Year
 
+# Money laundering enter number page
+moneyLaunderingCompliance.enter-number.title=What are your pending money laundering supervision registration details?
+moneyLaunderingCompliance.enter-number.membershipNumber=Your registration number
+moneyLaunderingCompliance.enter-number.membershipNumber.hint=You can find this in your AMLS dashboard
+
+
 # Amls Not Found
 amls-details-not-found.title=We cannot find your registration details
 amls-details-not-found.p=Check your registration number and renewal date and try again.
@@ -477,7 +483,7 @@ amls-ineligible-status.li.3=has stopped because it expired or you deregistered
 amls-ineligible-status.link=Read about how to challenge an HMRC decision to refuse registration (opens in a new tab)
 
 # Pending AMLS Details page
-amls.pending.appliedOn.title=When did you apply to register for money laundering supervision with HMRC?
+amls.enter-renewal-date.title=We have approved your money laundering supervision registration
 
 checkAnswers.title=Check your answers before creating your account
 checkAnswers.description.p3=By setting up this account, you confirm that, to the best of your knowledge, the details you provided are correct.

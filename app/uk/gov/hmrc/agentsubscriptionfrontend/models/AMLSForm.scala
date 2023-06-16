@@ -20,13 +20,23 @@ import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
 
+case class EnterAMLSNumberForm(membershipNumber: String)
+
+object EnterAMLSNumberForm {
+  implicit val formatEnterAMLSNumberForm: OFormat[EnterAMLSNumberForm] = Json.format[EnterAMLSNumberForm]
+}
+case class EnterAMLSExpiryDateForm(expiry: LocalDate)
+object EnterAMLSExpiryDateForm {
+  implicit val formatAMLSExpiryDateForm: OFormat[EnterAMLSExpiryDateForm] = Json.format[EnterAMLSExpiryDateForm]
+}
+
 case class AMLSForm(amlsCode: String, membershipNumber: String, expiry: LocalDate)
 
 object AMLSForm {
   implicit val formatAMLSForm: OFormat[AMLSForm] = Json.format[AMLSForm]
 }
 
-case class AmlsPendingForm(amlsCode: String, appliedOn: LocalDate)
+case class AmlsPendingForm(amlsCode: String, expiry: LocalDate)
 
 object AmlsPendingForm {
   implicit val format: OFormat[AmlsPendingForm] = Json.format[AmlsPendingForm]

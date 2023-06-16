@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait EndpointBehaviours {
-  me: BaseISpec =>
+  me: BaseISpecIt =>
   type PlayRequest = Request[AnyContent] => Future[Result]
 
   protected def authenticatedAs(user: SampleUser, method: String = GET): FakeRequest[AnyContentAsEmpty.type]

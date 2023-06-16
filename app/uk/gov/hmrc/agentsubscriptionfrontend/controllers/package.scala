@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend
 import play.api.Logging
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Call, Request}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
@@ -156,7 +157,7 @@ package object controllers extends Logging {
           .verifying("error.check-amlsAppliedFor-value.invalid", a => a.contains("yes") || a.contains("no")))(a =>
           RadioInputAnswer.apply(a.getOrElse("")))(a => Some(RadioInputAnswer.unapply(a))))
 
-    private val HMRC_AMLS_ERROR = "error.moneyLaunderingCompliance.membershipNumber.invalid"
+    val HMRC_AMLS_ERROR = "error.moneyLaunderingCompliance.membershipNumber.invalid"
 
     def amlsForm(bodies: Set[String]): Form[AMLSForm] =
       Form[AMLSForm](
@@ -170,6 +171,23 @@ package object controllers extends Logging {
             case AMLSForm(_, _, _)                           => true
           }
         }))
+
+    val HMRC_AMLS_Empty_ERROR = "error.moneyLaunderingCompliance.membershipNumber.empty"
+    val membershipNumberConstraint: Constraint[String] = Constraint("constraints.membershipNumber") { input =>
+      val errors = input match {
+        case ""                                    => Seq(ValidationError(HMRC_AMLS_Empty_ERROR))
+        case x if !x.matches(amlsRegex) && x != "" => Seq(ValidationError(HMRC_AMLS_ERROR))
+        case _                                     => Nil
+      }
+      if (errors.isEmpty) Valid else Invalid(errors)
+    }
+    def amlsEnterNumberForm(): Form[EnterAMLSNumberForm] =
+      Form[EnterAMLSNumberForm](
+        mapping(
+          "membershipNumber" -> membershipNumber
+            .verifying(membershipNumberConstraint)
+        )(EnterAMLSNumberForm.apply)(EnterAMLSNumberForm.unapply)
+      )
 
     private def amlsRegex = "X[A-Z]ML00000[0-9]{6}"
 
