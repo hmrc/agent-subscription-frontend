@@ -191,12 +191,11 @@ package object controllers extends Logging {
 
     private def amlsRegex = "X[A-Z]ML00000[0-9]{6}"
 
-    def amlsPendingForm(implicit messages: Messages): Form[AmlsPendingForm] =
-      Form[AmlsPendingForm](
+    def enterAmlsExpiryDateForm(implicit messages: Messages): Form[EnterAMLSExpiryDateForm] =
+      Form[EnterAMLSExpiryDateForm](
         mapping(
-          "amlsCode"  -> nonEmptyText,
-          "appliedOn" -> appliedOnDate
-        )(AmlsPendingForm.apply)(AmlsPendingForm.unapply))
+          "expiry" -> appliedOnDate
+        )(EnterAMLSExpiryDateForm.apply)(EnterAMLSExpiryDateForm.unapply))
 
     import play.api.data.{Form, FormError}
 
@@ -237,36 +236,38 @@ package object controllers extends Logging {
       }
     }
 
-    def amlsPendingDetailsFormWithRefinedErrors(form: Form[AmlsPendingForm]): Form[AmlsPendingForm] = {
-
-      val appliedOn = "appliedOn"
+    //todo rename and refactor this stuff
+    def amlsPendingDetailsFormWithRefinedErrors(form: Form[EnterAMLSExpiryDateForm]): Form[EnterAMLSExpiryDateForm] = {
+      println("form " + form.toString)
+      val expiry = "expiry"
       val dateFields =
-        (error: FormError) => error.key == s"$appliedOn.day" || error.key == s"$appliedOn.month" || error.key == s"$appliedOn.year"
-
+        (error: FormError) => error.key == s"$expiry.day" || error.key == s"$expiry.month" || error.key == s"$expiry.year"
+      println("dateFields" + dateFields)
       def refineErrors(dateFieldErrors: Seq[FormError]): Option[String] =
-        dateFieldErrors.map(_.key).map(k => s"$appliedOn.".r.replaceFirstIn(k, "")).sorted match {
-          case List("day", "month", "year") => Some("error.amls.pending.appliedOn.date.empty")
-          case List("day", "month")         => Some("error.amls.pending.appliedOn.day.month.empty")
-          case List("day", "year")          => Some("error.amls.pending.appliedOn.day.year.empty")
-          case List("day")                  => Some("error.amls.pending.appliedOn.day.empty")
-          case List("month", "year")        => Some("error.amls.pending.appliedOn.month.year.empty")
-          case List("month")                => Some("error.amls.pending.appliedOn.month.empty")
-          case List("year")                 => Some("error.amls.pending.appliedOn.year.empty")
+        dateFieldErrors.map(_.key).map(k => "expiry.".r.replaceFirstIn(k, "")).sorted match {
+          case List("day", "month", "year") => Some("error.moneyLaunderingCompliance.date.empty")
+          case List("day", "month")         => Some("error.moneyLaunderingCompliance.day.month.empty")
+          case List("day", "year")          => Some("error.moneyLaunderingCompliance.day.year.empty")
+          case List("day")                  => Some("error.moneyLaunderingCompliance.day.empty")
+          case List("month", "year")        => Some("error.moneyLaunderingCompliance.month.year.empty")
+          case List("month")                => Some("error.moneyLaunderingCompliance.month.empty")
+          case List("year")                 => Some("error.moneyLaunderingCompliance.year.empty")
           case _                            => None
         }
 
       val dateFieldErrors: Seq[FormError] = form.errors.filter(dateFields)
 
       val refinedMessage = refineErrors(dateFieldErrors).getOrElse("")
-
+      println("dateFieldErrors " + dateFieldErrors)
+      println("refinedMessage " + refinedMessage)
       dateFieldErrors match {
         case Nil => form
         case _ =>
           form.copy(errors = form.errors.map { error =>
-            if (error.key.contains(appliedOn)) {
+            if (error.key.contains(expiry)) {
               FormError(error.key, "", error.args)
             } else error
-          }.toList :+ FormError(key = appliedOn, message = refinedMessage, args = Seq()))
+          }.toList :+ FormError(key = expiry, message = refinedMessage, args = Seq()))
       }
     }
   }

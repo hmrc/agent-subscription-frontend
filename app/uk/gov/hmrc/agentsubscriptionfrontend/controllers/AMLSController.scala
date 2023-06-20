@@ -261,10 +261,10 @@ class AMLSController @Inject()(
                     "appliedOn.year"  -> appliedOn.getYear.toString
                   )
               }
-              Ok(amlsEnterRenewalDate(amlsPendingForm.bind(form)))
-            case Right(RegisteredDetails(_, _, _, _)) => Ok(amlsEnterRenewalDate(amlsPendingForm))
+              Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm.bind(form)))
+            case Right(RegisteredDetails(_, _, _, _)) => Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm))
           }
-        case _ => Ok(amlsEnterRenewalDate(amlsPendingForm))
+        case _ => Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm))
       }
     }
   }
@@ -299,17 +299,19 @@ class AMLSController @Inject()(
   def submitAmlsApplicationDatePage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
-        amlsPendingForm
+        enterAmlsExpiryDateForm
           .bindFromRequest()
           .fold(
             formWithErrors => {
+              println("formWithErrors \n\n" + formWithErrors.toString)
               val form = AMLSForms.amlsPendingDetailsFormWithRefinedErrors(formWithErrors)
+              println("form \n\n" + form.toString)
               Ok(amlsEnterRenewalDate(form))
             },
             validForm => {
 
               val supervisoryBodyData =
-                amlsBodies.getOrElse(validForm.amlsCode, throw new Exception("Invalid AMLS code"))
+                amlsBodies.getOrElse("HMRC", throw new Exception("Invalid AMLS code"))
 
               val continue = toTaskListOrCheckYourAnswers(isChanging)
               updateAmlsJourneyRecord(

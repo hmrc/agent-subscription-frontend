@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
-@import uk.gov.hmrc.agentsubscriptionfrontend.models.AmlsPendingForm
+@import uk.gov.hmrc.agentsubscriptionfrontend.models.EnterAMLSExpiryDateForm
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{ SubmitOrSaveButtonGroup}
 @import uk.gov.hmrc.govukfrontend.views.html.components.{ GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF}
@@ -35,7 +35,7 @@
 )
 
 
-@(amlsExpiryDateForm: Form[AmlsPendingForm])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(amlsExpiryDateForm: Form[EnterAMLSExpiryDateForm])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 
 @DayFieldError = @{
@@ -68,7 +68,7 @@
 ) {
 
     @if(amlsExpiryDateForm.hasErrors) {
-        @errorSummary(ErrorSummary(errorList = Seq(amlsExpiryDateForm.errors.asTextErrorLinks.head)))
+        @errorSummary(ErrorSummary(errorList = amlsExpiryDateForm.errors.asTextErrorLinks))
     }
     <h1 class="govuk-heading-xl">@msgs("amls.enter-renewal-date.title")</h1>
 
