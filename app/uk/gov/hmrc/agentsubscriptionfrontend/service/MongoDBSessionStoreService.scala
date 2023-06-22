@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Request
 
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AmlsSession}
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.{SessionCache, SessionCacheRepository}
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
@@ -51,6 +51,11 @@ class MongoDBSessionStoreService @Inject()(sessionCache: SessionCacheRepository)
     override val cacheRepository: SessionCacheRepository = sessionCache
   }
 
+  val amlsSessionCache: SessionCache[AmlsSession] = new SessionCache[AmlsSession] {
+    override val sessionName: String = "amlsSession"
+    override val cacheRepository: SessionCacheRepository = sessionCache
+  }
+
   def fetchContinueUrl(implicit request: Request[Any], ec: ExecutionContext): Future[Option[RedirectUrl]] =
     continueUrlCache.fetch
 
@@ -74,6 +79,12 @@ class MongoDBSessionStoreService @Inject()(sessionCache: SessionCacheRepository)
 
   def fetchAgentSession(implicit request: Request[Any], ec: ExecutionContext): Future[Option[AgentSession]] =
     agentSessionCache.fetch
+
+  def cacheAmlsSession(agentSession: AmlsSession)(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
+    amlsSessionCache.save(agentSession).map(_ => ())
+
+  def fetchAmlsSession(implicit request: Request[Any], ec: ExecutionContext): Future[Option[AmlsSession]] =
+    amlsSessionCache.fetch
 
   def remove()(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
     agentSessionCache.delete().map(_ => ())

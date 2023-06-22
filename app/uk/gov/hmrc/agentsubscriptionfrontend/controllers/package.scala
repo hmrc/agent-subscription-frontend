@@ -238,7 +238,7 @@ package object controllers extends Logging {
 
     //todo rename and refactor this stuff
     def amlsPendingDetailsFormWithRefinedErrors(form: Form[EnterAMLSExpiryDateForm]): Form[EnterAMLSExpiryDateForm] = {
-      println("form " + form.toString)
+
       val expiry = "expiry"
       val dateFields =
         (error: FormError) => error.key == s"$expiry.day" || error.key == s"$expiry.month" || error.key == s"$expiry.year"
@@ -258,8 +258,7 @@ package object controllers extends Logging {
       val dateFieldErrors: Seq[FormError] = form.errors.filter(dateFields)
 
       val refinedMessage = refineErrors(dateFieldErrors).getOrElse("")
-      println("dateFieldErrors " + dateFieldErrors)
-      println("refinedMessage " + refinedMessage)
+
       dateFieldErrors match {
         case Nil => form
         case _ =>

@@ -63,6 +63,7 @@ class AMLSController @Inject()(
   import AMLSForms._
 
   private val amlsBodies: Map[String, String] = AMLSLoader.load("/amls.csv")
+  private val hmrcAmlsCode = "HMRC"
 
   def changeAmlsDetails: Action[AnyContent] = Action.async { implicit request =>
     sessionStoreService
@@ -245,6 +246,7 @@ class AMLSController @Inject()(
       Ok(amlsEnterNumber(amlsEnterNumberForm()))
     }
   }
+
   def showAmlsApplicationEnterDatePage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       agent.getMandatoryAmlsData.amlsDetails match {
@@ -252,10 +254,10 @@ class AMLSController @Inject()(
           amlsDetails.details match {
             case Left(PendingDetails(maybeAppliedOn)) =>
               val form: Map[String, String] = maybeAppliedOn match {
-                case None => Map("amlsCode" -> "HMRC")
+                case None => Map("amlsCode" -> hmrcAmlsCode)
                 case Some(appliedOn) =>
                   Map(
-                    "amlsCode"        -> "HMRC",
+                    "amlsCode"        -> hmrcAmlsCode,
                     "appliedOn.day"   -> appliedOn.getDayOfMonth.toString,
                     "appliedOn.month" -> appliedOn.getMonthValue.toString,
                     "appliedOn.year"  -> appliedOn.getYear.toString
@@ -283,12 +285,13 @@ class AMLSController @Inject()(
               case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
               case ResultOK(safeId) => {
                 //todo ask about changeing
-                DealWithResultOkAmls(agent, Some(false), validForm.membershipNumber, "HMRC", None, safeId)
+                DealWithResultOkAmls(agent, Some(false), validForm.membershipNumber, hmrcAmlsCode, None, safeId)
               }
-              case ResultOKButCheckDate(safeId) => {
-                //todo redirect here
-                Redirect(routes.AMLSController.showAmlsApplicationEnterDatePage())
-              }
+              case ResultOKButCheckDate(safeId) =>
+                sessionStoreService
+                  .cacheAmlsSession(AmlsSession(validForm.membershipNumber, safeId))
+                  .flatMap(_ => Redirect(routes.AMLSController.showAmlsApplicationEnterDatePage()))
+
             }
           }
         )
@@ -298,30 +301,25 @@ class AMLSController @Inject()(
   //todo put the call with the number and redirect here tomorrow
   def submitAmlsApplicationDatePage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
-      sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
-        enterAmlsExpiryDateForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors => {
-              println("formWithErrors \n\n" + formWithErrors.toString)
-              val form = AMLSForms.amlsPendingDetailsFormWithRefinedErrors(formWithErrors)
-              println("form \n\n" + form.toString)
-              Ok(amlsEnterRenewalDate(form))
-            },
-            validForm => {
+      sessionStoreService.fetchAmlsSession.flatMap { maybeAmlsSession =>
+        sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
+          enterAmlsExpiryDateForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors => {
 
-              val supervisoryBodyData =
-                amlsBodies.getOrElse("HMRC", throw new Exception("Invalid AMLS code"))
+                val form = AMLSForms.amlsPendingDetailsFormWithRefinedErrors(formWithErrors)
 
-              val continue = toTaskListOrCheckYourAnswers(isChanging)
-              updateAmlsJourneyRecord(
-                agent,
-                amlsData => Some(amlsData.copy(amlsDetails = Some(AmlsDetails(supervisoryBodyData, Left(PendingDetails(Option(validForm.expiry)))))))
-              ).map(
-                _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsApplicationEnterNumberPage()))
-              )
-            }
-          )
+                Ok(amlsEnterRenewalDate(form))
+              },
+              validForm => {
+                val amlsSession = maybeAmlsSession.get
+
+                DealWithResultOkAmls(agent, isChanging, amlsSession.membershipNumber, hmrcAmlsCode, Some(validForm.expiry), amlsSession.safeId)
+
+              }
+            )
+        }
       }
     }
   }

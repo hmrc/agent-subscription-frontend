@@ -917,7 +917,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     val month = expiryDate.getMonthValue.toString
     val year = expiryDate.getYear.toString
 
-    "store AMLS pending details in temporary store after successful submission, redirect to task list when change flag is false" in new Setup {
+      "store AMLS pending details in temporary store after successful submission, redirect to task list when change flag is false" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenSubscriptionRecordCreated(
         id,
