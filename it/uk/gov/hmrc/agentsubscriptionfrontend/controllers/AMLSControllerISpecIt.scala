@@ -876,7 +876,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
   }
   "POST /money-laundering-application-details " should {
 
- //   val appliedOnDate = LocalDate.now().minusMonths(1)
+ //   val expiryDate = LocalDate.now().minusMonths(1)
     "show validation error when the form is submitted with invalid data" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "membershipNumber" -> "invalid")
@@ -912,10 +912,10 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "POST /agent-subscription/money-laundering-application-approved" should {
 
-    val appliedOnDate = LocalDate.now().minusMonths(1)
-    val day = appliedOnDate.getDayOfMonth.toString
-    val month = appliedOnDate.getMonthValue.toString
-    val year = appliedOnDate.getYear.toString
+    val expiryDate = LocalDate.now().minusMonths(1)
+    val day = expiryDate.getDayOfMonth.toString
+    val month = expiryDate.getMonthValue.toString
+    val year = expiryDate.getYear.toString
 
     "store AMLS pending details in temporary store after successful submission, redirect to task list when change flag is false" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
@@ -924,13 +924,12 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         record.copy(
           amlsData = Some(
             AmlsData.registeredUserNoDataEntered.copy(
-              amlsDetails = Some(AmlsDetails("Association of AccountingTechnicians (AAT)", Left(PendingDetails(Some(appliedOnDate))))))))
+              amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", Left(PendingDetails(Some(expiryDate))))))))
       )
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
-        "amlsCode"        -> "AAT",
-        "appliedOn.day"   -> day,
-        "appliedOn.month" -> month,
-        "appliedOn.year"  -> year,
+        "expiry.day"   -> day,
+        "expiry.month" -> month,
+        "expiry.year"  -> year,
       "submit" -> "continue")
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
@@ -947,13 +946,12 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         record.copy(
           amlsData = Some(
             AmlsData.registeredUserNoDataEntered.copy(
-              amlsDetails = Some(AmlsDetails("Association of AccountingTechnicians (AAT)", Left(PendingDetails(Some(appliedOnDate))))))))
+              amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", Left(PendingDetails(Some(expiryDate))))))))
       )
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
-        "amlsCode"        -> "AAT",
-        "appliedOn.day"   -> day,
-        "appliedOn.month" -> month,
-        "appliedOn.year"  -> year,
+        "expiry.day"   -> day,
+        "expiry.month" -> month,
+        "expiry.year"  -> year,
       "submit" -> "continue")
 
       sessionStoreService.currentSession.changingAnswers = Some(true)
@@ -965,22 +963,21 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "show validation error when the form is submitted with empty day field" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
-        "amlsCode"        -> "AAT",
-        "appliedOn.day"   -> "",
-        "appliedOn.month" -> month,
-        "appliedOn.year"  -> year)
+        "expiry.day"   -> "",
+        "expiry.month" -> month,
+        "expiry.year"  -> year)
 
       val result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
-      result should containMessages("amls.pending.appliedOn.title", "error.amls.pending.appliedOn.day.empty")
+      result should containMessages("amls.enter-renewal-date.title", "error.amls.enter-renewal-date.day.empty")
     }
 
-    "show validation error when the form is submitted with invalid appliedOn date" in new Setup {
+    "show validation error when the form is submitted with invalid expiry date" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
-        "amlsCode"        -> "AAT",
-        "appliedOn.day"   -> "123",
-        "appliedOn.month" -> month,
-        "appliedOn.year"  -> year)
+
+        "expiry.day"   -> "123",
+        "expiry.month" -> month,
+        "expiry.year"  -> year)
 
       val result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
@@ -989,71 +986,66 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "show validation error when the form is submitted with empty month field" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
-        "amlsCode"        -> "AAT",
-        "appliedOn.day"   -> day,
-        "appliedOn.month" -> "",
-        "appliedOn.year"  -> year)
+        "expiry.day"   -> day,
+        "expiry.month" -> "",
+        "expiry.year"  -> year)
 
       val result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
-      result should containMessages("error.amls.pending.appliedOn.month.empty")
+      result should containMessages("error.amls.enter-renewal-date.month.empty")
     }
 
     "show validation error when the form is submitted with empty year field" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
-        "amlsCode"        -> "AAT",
-        "appliedOn.day"   -> day,
-        "appliedOn.month" -> month,
-        "appliedOn.year"  -> "")
+        "expiry.day"   -> day,
+        "expiry.month" -> month,
+        "expiry.year"  -> "")
 
       val result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
-      result should containMessages("error.amls.pending.appliedOn.year.empty")
+      result should containMessages("error.amls.enter-renewal-date.year.empty")
     }
 
     "show validation error when the form is submitted with empty day and month field" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
-        "amlsCode"        -> "AAT",
-        "appliedOn.day"   -> "",
-        "appliedOn.month" -> "",
-        "appliedOn.year"  -> year)
+        "expiry.day"   -> "",
+        "expiry.month" -> "",
+        "expiry.year"  -> year)
 
       val result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
-      result should containMessages("error.amls.pending.appliedOn.day.month.empty")
+      result should containMessages("error.amls.enter-renewal-date.day.month.empty")
       result shouldNot containMessages(
-        "error.amls.pending.appliedOn.day.empty",
-        "error.amls.pending.appliedOn.month.empty")
+        "error.amls.enter-renewal-date.day.empty",
+        "error.amls.enter-renewal-date.month.empty")
     }
 
     "show validation error when the form is submitted with empty day and year field" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
-        "amlsCode"        -> "AAT",
-        "appliedOn.day"   -> "",
-        "appliedOn.month" -> month,
-        "appliedOn.year"  -> "")
+        "expiry.day"   -> "",
+        "expiry.month" -> month,
+        "expiry.year"  -> "")
 
       val result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
-      result should containMessages("error.amls.pending.appliedOn.day.year.empty")
+      result should containMessages("error.amls.enter-renewal-date.day.year.empty")
       result shouldNot containMessages(
-        "error.amls.pending.appliedOn.day.empty",
-        "error.amls.pending.appliedOn.year.empty")
+        "error.amls.enter-renewal-date.day.empty",
+        "error.amls.enter-renewal-date.year.empty")
     }
 
     "show validation error when the form is submitted with empty month and year field" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
-        "amlsCode"        -> "AAT",
-        "appliedOn.day"   -> day,
-        "appliedOn.month" -> "",
-        "appliedOn.year"  -> "")
+        "expiry.day"   -> day,
+        "expiry.month" -> "",
+        "expiry.year"  -> "")
 
       val result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
-      result should containMessages("error.amls.pending.appliedOn.month.year.empty")
+      result should containMessages("error.amls.enter-renewal-date.month.year.empty")
       result shouldNot containMessages(
-        "error.amls.pending.appliedOn.month.empty",
-        "error.amls.pending.appliedOn.year.empty")
+        "error.amls.enter-renewal-date.month.empty",
+        "error.amls.enter-renewal-date.year.empty")
     }
 
   }

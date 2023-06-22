@@ -112,16 +112,16 @@ error.moneyLaunderingCompliance.date.before=Rhaid i’r dyddiad y daw’ch aelod
 error.check-amls-value.invalid=Dewiswch ‘Iawn’ os ydych wedi cofrestru gyda chorff goruchwylio gwyngalchu arian
 error.check-amlsAppliedFor-value.invalid=Dewiswch ‘Iawn’ os ydych wedi gwneud cais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian
 
-error.amls.pending.appliedOn.date.empty=Nodwch y dyddiad y gwnaethoch gais 
-error.amls.pending.appliedOn.day.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod
-error.amls.pending.appliedOn.day.month.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod a mis
-error.amls.pending.appliedOn.day.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod a blwyddyn
-error.amls.pending.appliedOn.month.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys mis a blwyddyn
-error.amls.pending.appliedOn.month.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys mis
-error.amls.pending.appliedOn.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys blwyddyn
-error.amls.pending.appliedOn.date.invalid=Nodwch ddyddiad go iawn
-error.amls.pending.appliedOn.date.too-old=Rhaid i’r dyddiad y gwnaethoch gais fod ar ôl {0}
-error.amls.pending.appliedOn.date.cannot-be-in-future=Rhaid i’r dyddiad y gwnaethoch gais fod heddiw neu yn y gorffennol
+error.amls.enter-renewal-date.date.empty=Nodwch y dyddiad y gwnaethoch gais
+error.amls.enter-renewal-date.day.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod
+error.amls.enter-renewal-date.day.month.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod a mis
+error.amls.enter-renewal-date.day.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod a blwyddyn
+error.amls.enter-renewal-date.month.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys mis a blwyddyn
+error.amls.enter-renewal-date.month.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys mis
+error.amls.enter-renewal-date.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys blwyddyn
+error.amls.enter-renewal-date.date.invalid=Nodwch ddyddiad go iawn
+error.amls.enter-renewal-date.date.too-old=Rhaid i’r dyddiad y gwnaethoch gais fod ar ôl {0}
+error.amls.enter-renewal-date.date.cannot-be-in-future=Rhaid i’r dyddiad y gwnaethoch gais fod heddiw neu yn y gorffennol
 
 #Contact Email Check
 contactEmailCheck.title=Ai dyma’r cyfeiriad e-bost yr hoffech ei ddefnyddio ar gyfer eich cyfrif gwasanaethau asiant?
@@ -474,7 +474,7 @@ amls-ineligible-status.p3=neu mae’r cofrestriad wedi dod i ben neu rydych wedi
 amls-ineligible-status.link=Darllenwch sut i herio penderfyniad CThEM i wrthod cofrestriad (yn agor tab newydd)
 
 # Pending AMLS Details page
-amls.pending.appliedOn.title=Pryd gwnaethoch gais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian?
+amls.enter-renewal-date.title=Pryd gwnaethoch gais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian?
 
 checkAnswers.title=Gwiriwch eich atebion cyn creu eich cyfrif
 checkAnswers.description.p3=Drwy greu’r cyfrif hwn, rydych yn cadarnhau, hyd eithaf eich gwybodaeth, fod y manylion a roesoch yn gywir.

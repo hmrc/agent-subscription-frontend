@@ -245,13 +245,13 @@ package object controllers extends Logging {
       println("dateFields" + dateFields)
       def refineErrors(dateFieldErrors: Seq[FormError]): Option[String] =
         dateFieldErrors.map(_.key).map(k => "expiry.".r.replaceFirstIn(k, "")).sorted match {
-          case List("day", "month", "year") => Some("error.moneyLaunderingCompliance.date.empty")
-          case List("day", "month")         => Some("error.moneyLaunderingCompliance.day.month.empty")
-          case List("day", "year")          => Some("error.moneyLaunderingCompliance.day.year.empty")
-          case List("day")                  => Some("error.moneyLaunderingCompliance.day.empty")
-          case List("month", "year")        => Some("error.moneyLaunderingCompliance.month.year.empty")
-          case List("month")                => Some("error.moneyLaunderingCompliance.month.empty")
-          case List("year")                 => Some("error.moneyLaunderingCompliance.year.empty")
+          case List("day", "month", "year") => Some("error.amls.enter-renewal-date.day.empty")
+          case List("day", "month")         => Some("error.amls.enter-renewal-date.day.month.empty")
+          case List("day", "year")          => Some("error.amls.enter-renewal-date.day.year.empty")
+          case List("day")                  => Some("error.amls.enter-renewal-date.day.empty")
+          case List("month", "year")        => Some("error.amls.enter-renewal-date.month.year.empty")
+          case List("month")                => Some("error.amls.enter-renewal-date.month.empty")
+          case List("year")                 => Some("error.amls.enter-renewal-date.year.empty")
           case _                            => None
         }
 

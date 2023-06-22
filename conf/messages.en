@@ -113,16 +113,16 @@ error.moneyLaunderingCompliance.date.before=Your next membership renewal date mu
 error.check-amls-value.invalid=Select yes if you are registered with a money laundering supervisory body
 error.check-amlsAppliedFor-value.invalid=Select yes if you are applied to register for money laundering supervision with HMRC
 
-error.amls.pending.appliedOn.date.empty=Enter the date you applied
-error.amls.pending.appliedOn.day.empty=The date you applied must include a day
-error.amls.pending.appliedOn.day.month.empty=The date you applied must include a day and a month
-error.amls.pending.appliedOn.day.year.empty=The date you applied must include a day and a year
-error.amls.pending.appliedOn.month.year.empty=The date you applied must include a month and a year
-error.amls.pending.appliedOn.month.empty=The date you applied must include a month
-error.amls.pending.appliedOn.year.empty=The date you applied must include a year
-error.amls.pending.appliedOn.date.invalid=Enter a real date
-error.amls.pending.appliedOn.date.too-old=The date you applied must be after {0}
-error.amls.pending.appliedOn.date.cannot-be-in-future=The date you applied must be today or in the past
+error.amls.enter-renewal-date.date.empty=Enter the date you applied
+error.amls.enter-renewal-date.day.empty=The date you applied must include a day
+error.amls.enter-renewal-date.day.month.empty=The date you applied must include a day and a month
+error.amls.enter-renewal-date.day.year.empty=The date you applied must include a day and a year
+error.amls.enter-renewal-date.month.year.empty=The date you applied must include a month and a year
+error.amls.enter-renewal-date.month.empty=The date you applied must include a month
+error.amls.enter-renewal-date.year.empty=The date you applied must include a year
+error.amls.enter-renewal-date.date.invalid=Enter a real date
+error.amls.enter-renewal-date.date.too-old=The date you applied must be after {0}
+error.amls.enter-renewal-date.date.cannot-be-in-future=The date you applied must be today or in the past
 
 #Contact Email Check
 contactEmailCheck.title=Is this the email address you want to use for your agent services account?

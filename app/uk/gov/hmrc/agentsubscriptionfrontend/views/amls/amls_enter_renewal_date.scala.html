@@ -64,7 +64,8 @@
 }
 
 @mainTemplate(
-    title =  errorPrefix(amlsExpiryDateForm) + msgs("amls.enter-renewal-date.title")
+    title =  errorPrefix(amlsExpiryDateForm) + msgs("amls.enter-renewal-date.title"),
+    backLinkHref = Some(routes.AMLSController.showAmlsApplicationEnterNumberPage().url)
 ) {
 
     @if(amlsExpiryDateForm.hasErrors) {
