@@ -955,6 +955,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       "submit" -> "continue")
 
       sessionStoreService.currentSession.changingAnswers = Some(true)
+      sessionStoreService.currentSession.amlsSession = Some(AmlsSession
+      ("12234",Some("123456")))
 
       val result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 303

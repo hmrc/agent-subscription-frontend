@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import play.api.mvc.Request
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AmlsDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AmlsSession}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util._
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
@@ -33,7 +33,7 @@ class TestSessionStoreService extends MongoDBSessionStoreService(null) {
     var goBackUrl: Option[String] = None,
     var changingAnswers: Option[Boolean] = None,
     var agentSession: Option[AgentSession] = None,
-     var amlsDetails: Option[AmlsDetails] = None)
+     var amlsSession: Option[AmlsSession] = None)
 
   private val sessions = collection.mutable.Map[String, Session]()
 
@@ -85,11 +85,11 @@ class TestSessionStoreService extends MongoDBSessionStoreService(null) {
   override def fetchAgentSession(implicit req: Request[Any], ec: ExecutionContext): Future[Option[AgentSession]] =
     fetchFromSession(currentSession.agentSession)
 
-  override def cacheAmlsSession(amlsDetails: AmlsDetails)(implicit req: Request[Any], ec: ExecutionContext): Future[Unit] =
-    (currentSession.amlsDetails = Some(amlsDetails)).toFuture
+ override  def cacheAmlsSession(amlsDetails: AmlsSession)(implicit req: Request[Any], ec: ExecutionContext): Future[Unit] =
+    (currentSession.amlsSession = Some(amlsDetails)).toFuture
 
-  override def fetchAmlsSession(implicit req: Request[Any], ec: ExecutionContext): Future[Option[AmlsDetails]] =
-    fetchFromSession(currentSession.amlsDetails)
+  override def fetchAmlsSession(implicit req: Request[Any], ec: ExecutionContext): Future[Option[AmlsSession]] =
+    fetchFromSession(currentSession.amlsSession)
 
   override def remove()(implicit req: Request[Any], ec: ExecutionContext): Future[Unit] = {
     sessions.clear()

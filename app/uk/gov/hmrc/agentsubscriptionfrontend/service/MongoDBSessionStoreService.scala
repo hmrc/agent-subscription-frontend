@@ -80,8 +80,8 @@ class MongoDBSessionStoreService @Inject()(sessionCache: SessionCacheRepository)
   def fetchAgentSession(implicit request: Request[Any], ec: ExecutionContext): Future[Option[AgentSession]] =
     agentSessionCache.fetch
 
-  def cacheAmlsSession(agentSession: AmlsSession)(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
-    amlsSessionCache.save(agentSession).map(_ => ())
+  def cacheAmlsSession(amlsSession: AmlsSession)(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
+    amlsSessionCache.save(amlsSession).map(_ => ())
 
   def fetchAmlsSession(implicit request: Request[Any], ec: ExecutionContext): Future[Option[AmlsSession]] =
     amlsSessionCache.fetch
