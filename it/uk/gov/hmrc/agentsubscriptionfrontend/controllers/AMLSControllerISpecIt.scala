@@ -924,7 +924,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         record.copy(
           amlsData = Some(
             AmlsData.registeredUserNoDataEntered.copy(
-              amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", Left(PendingDetails(Some(expiryDate))))))))
+              amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)",
+                Right(RegisteredDetails("12345",membershipExpiresOn = Some(expiryDate))))))))
       )
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "expiry.day"   -> day,
@@ -933,6 +934,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       "submit" -> "continue")
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
+        sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345",None))
 
       val result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 303
@@ -946,7 +948,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         record.copy(
           amlsData = Some(
             AmlsData.registeredUserNoDataEntered.copy(
-              amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", Left(PendingDetails(Some(expiryDate))))))))
+              amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)",
+                Right(RegisteredDetails("12234",membershipExpiresOn = Some(expiryDate))))))))
       )
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "expiry.day"   -> day,
