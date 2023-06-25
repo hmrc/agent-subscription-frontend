@@ -270,7 +270,7 @@ class AMLSController @Inject()(
       }
     }
   }
-  //todo put the call with the number and redirect here tomorrow
+  
   def submitAmlsApplicationEnterNumberPage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       amlsEnterNumberForm()
