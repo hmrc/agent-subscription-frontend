@@ -183,8 +183,7 @@ class AMLSController @Inject()(
                 case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
                 case ResultOK(safeId) =>
                   DealWithResultOkAmls(agent, isChanging, validForm.membershipNumber, validForm.amlsCode, Some(validForm.expiry), safeId)
-                //todo throw exception here?
-                case ResultOKButCheckDate(safeId) => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
+                case ResultOKButCheckDate(_) => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
               }
             }
           )
@@ -252,15 +251,15 @@ class AMLSController @Inject()(
       agent.getMandatoryAmlsData.amlsDetails match {
         case Some(amlsDetails) =>
           amlsDetails.details match {
-            case Left(PendingDetails(maybeAppliedOn)) =>
-              val form: Map[String, String] = maybeAppliedOn match {
+            case Left(PendingDetails(expiry)) =>
+              val form: Map[String, String] = expiry match {
                 case None => Map("amlsCode" -> hmrcAmlsCode)
-                case Some(appliedOn) =>
+                case Some(expiry) =>
                   Map(
                     "amlsCode"        -> hmrcAmlsCode,
-                    "appliedOn.day"   -> appliedOn.getDayOfMonth.toString,
-                    "appliedOn.month" -> appliedOn.getMonthValue.toString,
-                    "appliedOn.year"  -> appliedOn.getYear.toString
+                    "expiry.day"   -> expiry.getDayOfMonth.toString,
+                    "expiry.month" -> expiry.getMonthValue.toString,
+                    "expiry.year"  -> expiry.getYear.toString
                   )
               }
               Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm.bind(form)))
