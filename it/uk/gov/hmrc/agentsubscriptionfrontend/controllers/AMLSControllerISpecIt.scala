@@ -876,7 +876,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
   }
   "POST /money-laundering-application-details " should {
 
-   // val expiryDate = LocalDate.now().minusMonths(1)
+
     "show validation error when the form is submitted with invalid data" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "membershipNumber" -> "invalid")
@@ -946,7 +946,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "POST /agent-subscription/money-laundering-application-approved" should {
 
-    val expiryDate = LocalDate.now().minusMonths(1)
+    val expiryDate = LocalDate.now().plusMonths(1)
     val day = expiryDate.getDayOfMonth.toString
     val month = expiryDate.getMonthValue.toString
     val year = expiryDate.getYear.toString
