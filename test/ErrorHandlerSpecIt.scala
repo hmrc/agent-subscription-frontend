@@ -17,9 +17,9 @@
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{LogCapturing, UnitSpecIt}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{LogCapturing, UnitSpec}
 
-class ErrorHandlerSpecIt extends UnitSpecIt with GuiceOneServerPerSuite with LogCapturing {
+class ErrorHandlerSpecIt extends UnitSpec with GuiceOneServerPerSuite with LogCapturing {
 
   val handler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 

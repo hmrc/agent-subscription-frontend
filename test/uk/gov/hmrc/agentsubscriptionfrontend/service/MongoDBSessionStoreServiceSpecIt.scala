@@ -24,12 +24,12 @@ import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, Postcode}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class MongoDBSessionStoreServiceSpecIt extends UnitSpecIt with MockFactory {
+class MongoDBSessionStoreServiceSpecIt extends UnitSpec with MockFactory {
 
   val utr = Utr("2000000000")
   val testPostcode = "AA1 1AA"

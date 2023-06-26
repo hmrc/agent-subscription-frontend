@@ -22,12 +22,12 @@ import org.scalatest.{Assertion, EitherValues}
 import play.api.data.validation.{Invalid, Valid, ValidationError}
 import play.api.data.{FormError, Mapping}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes.PostcodesLoader
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 
 import scala.util.Random
 
-class CommonValidatorsSpecIt extends UnitSpecIt with EitherValues {
+class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
 
   "utr bind" should {
     val utrMapping = utr.withPrefix("testKey")
