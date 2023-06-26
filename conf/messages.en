@@ -121,6 +121,8 @@ error.amls.enter-renewal-date.month.year.empty=The date you applied must include
 error.amls.enter-renewal-date.month.empty=The date you applied must include a month
 error.amls.enter-renewal-date.year.empty=The date you applied must include a year
 error.amls.enter-renewal-date.date.invalid=Enter a real date
+error.amls.enter-renewal-date.date.too-old=The date you applied must be after {0}
+error.amls.enter-renewal-date.date.cannot-be-in-future=The date you applied must be today or in the past
 
 #Contact Email Check
 contactEmailCheck.title=Is this the email address you want to use for your agent services account?
