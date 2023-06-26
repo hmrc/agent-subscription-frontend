@@ -20,7 +20,6 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Call, Request}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
@@ -191,10 +190,10 @@ package object controllers extends Logging {
 
     private def amlsRegex = "X[A-Z]ML00000[0-9]{6}"
 
-    def enterAmlsExpiryDateForm(implicit messages: Messages): Form[EnterAMLSExpiryDateForm] =
+    def enterAmlsExpiryDateForm: Form[EnterAMLSExpiryDateForm] =
       Form[EnterAMLSExpiryDateForm](
         mapping(
-          "expiry" -> appliedOnDate
+          "expiry" -> expiryDate
         )(EnterAMLSExpiryDateForm.apply)(EnterAMLSExpiryDateForm.unapply))
 
     import play.api.data.{Form, FormError}

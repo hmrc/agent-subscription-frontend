@@ -120,7 +120,6 @@ error.amls.enter-renewal-date.month.year.empty=Rhaid i’r dyddiad y gwnaethoch 
 error.amls.enter-renewal-date.month.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys mis
 error.amls.enter-renewal-date.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys blwyddyn
 error.amls.enter-renewal-date.date.invalid=Nodwch ddyddiad go iawn
-error.amls.enter-renewal-date.date.too-old=Rhaid i’r dyddiad y gwnaethoch gais fod ar ôl {0}
 error.amls.enter-renewal-date.date.cannot-be-in-future=Rhaid i’r dyddiad y gwnaethoch gais fod heddiw neu yn y gorffennol
 
 #Contact Email Check
