@@ -97,32 +97,32 @@ error.saAgentCode.blank=Enter a Self Assessment agent code
 error.saAgentCode.length=Self Assessment agent code must be 6 characters, like SA1234
 error.moneyLaunderingCompliance.amlscode.empty=Select the name of your money laundering supervisory body from the list
 error.moneyLaunderingCompliance.amlscode.invalid=Select the name of your money laundering supervisory body from the list
-error.moneyLaunderingCompliance.membershipNumber.empty=Enter your membership number
-error.moneyLaunderingCompliance.membershipNumber.invalid=Enter a membership number in the correct format
-error.moneyLaunderingCompliance.date.empty=Enter your next membership renewal date
-error.moneyLaunderingCompliance.day.empty=Your next membership renewal date must include a day
-error.moneyLaunderingCompliance.day.month.empty=Your next membership renewal date must include a day and a month
-error.moneyLaunderingCompliance.day.year.empty=Your next membership renewal date must include a day and a year
-error.moneyLaunderingCompliance.month.year.empty=Your next membership renewal date must include a month and a year
-error.moneyLaunderingCompliance.month.empty=Your next membership renewal date must include a month
-error.moneyLaunderingCompliance.year.empty=Your next membership renewal date must include a year
+error.moneyLaunderingCompliance.membershipNumber.empty=Enter your registration number
+error.moneyLaunderingCompliance.membershipNumber.invalid=Enter a registration number in the correct format
+error.moneyLaunderingCompliance.date.empty=Enter your next registration renewal date
+error.moneyLaunderingCompliance.day.empty=Your next registration renewal date must include a day
+error.moneyLaunderingCompliance.day.month.empty=Your next registration renewal date must include a day and a month
+error.moneyLaunderingCompliance.day.year.empty=Your next registration renewal date must include a day and a year
+error.moneyLaunderingCompliance.month.year.empty=Your next registration renewal date must include a month and a year
+error.moneyLaunderingCompliance.month.empty=Your next registration renewal date must include a month
+error.moneyLaunderingCompliance.year.empty=Your next registration renewal date must include a year
 error.moneyLaunderingCompliance.date.invalid=Enter a real date
-error.moneyLaunderingCompliance.date.past=Your next membership renewal date must be in the future
-error.moneyLaunderingCompliance.date.before=Your next membership renewal date must be within 13 months of today
+error.moneyLaunderingCompliance.date.past=Your next registration renewal date must be in the future
+error.moneyLaunderingCompliance.date.before=Your next registration renewal date must be within 13 months of today
 
 error.check-amls-value.invalid=Select yes if you are registered with a money laundering supervisory body
 error.check-amlsAppliedFor-value.invalid=Select yes if you are applied to register for money laundering supervision with HMRC
 
-error.amls.pending.appliedOn.date.empty=Enter the date you applied
-error.amls.pending.appliedOn.day.empty=The date you applied must include a day
-error.amls.pending.appliedOn.day.month.empty=The date you applied must include a day and a month
-error.amls.pending.appliedOn.day.year.empty=The date you applied must include a day and a year
-error.amls.pending.appliedOn.month.year.empty=The date you applied must include a month and a year
-error.amls.pending.appliedOn.month.empty=The date you applied must include a month
-error.amls.pending.appliedOn.year.empty=The date you applied must include a year
-error.amls.pending.appliedOn.date.invalid=Enter a real date
-error.amls.pending.appliedOn.date.too-old=The date you applied must be after {0}
-error.amls.pending.appliedOn.date.cannot-be-in-future=The date you applied must be today or in the past
+error.amls.enter-renewal-date.date.empty=Enter the date you applied
+error.amls.enter-renewal-date.day.empty=The date you applied must include a day
+error.amls.enter-renewal-date.day.month.empty=The date you applied must include a day and a month
+error.amls.enter-renewal-date.day.year.empty=The date you applied must include a day and a year
+error.amls.enter-renewal-date.month.year.empty=The date you applied must include a month and a year
+error.amls.enter-renewal-date.month.empty=The date you applied must include a month
+error.amls.enter-renewal-date.year.empty=The date you applied must include a year
+error.amls.enter-renewal-date.date.invalid=Enter a real date
+error.amls.enter-renewal-date.date.too-old=The date you applied must be after {0}
+error.amls.enter-renewal-date.date.cannot-be-in-future=The date you applied must be today or in the past
 
 #Contact Email Check
 contactEmailCheck.title=Is this the email address you want to use for your agent services account?
@@ -463,9 +463,15 @@ moneyLaunderingCompliance.expiry.day.title=Day
 moneyLaunderingCompliance.expiry.month.title=Month
 moneyLaunderingCompliance.expiry.year.title=Year
 
+# Money laundering enter number page
+moneyLaunderingCompliance.enter-number.title=What are your pending money laundering supervision registration details?
+moneyLaunderingCompliance.enter-number.membershipNumber=Your registration number
+moneyLaunderingCompliance.enter-number.membershipNumber.hint=You can find this in your AMLS dashboard
+
+
 # Amls Not Found
-amls-details-not-found.title=We cannot find your registration details
-amls-details-not-found.p=Check your registration number and renewal date and try again.
+amls-details-not-found.title=We cannot find your money laundering supervision registration details
+amls-details-not-found.p=Gwiriwch eich rhif cofrestru a’ch dyddiad adnewyddu, a rhowch gynnig arall arni.
 amls-details-not-found.button=Try again
 
 # Amls Ineligible status
@@ -477,7 +483,7 @@ amls-ineligible-status.li.3=has stopped because it expired or you deregistered
 amls-ineligible-status.link=Read about how to challenge an HMRC decision to refuse registration (opens in a new tab)
 
 # Pending AMLS Details page
-amls.pending.appliedOn.title=When did you apply to register for money laundering supervision with HMRC?
+amls.enter-renewal-date.title=We have approved your money laundering supervision registration
 
 checkAnswers.title=Check your answers before creating your account
 checkAnswers.description.p3=By setting up this account, you confirm that, to the best of your knowledge, the details you provided are correct.

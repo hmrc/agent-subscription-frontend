@@ -371,7 +371,7 @@ object CommonValidators {
       else
         Invalid(
           ValidationError(
-            Messages("error.amls.pending.appliedOn.date.too-old", sixMonthsEarlier.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))))
+            Messages("error.amls.enter-renewal-date.date.too-old", sixMonthsEarlier.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))))
     }
 
   private def validateAMLSBodies(amlsCode: String, bodies: Set[String]): Boolean =
@@ -382,7 +382,7 @@ object CommonValidators {
       val (year, month, day) = data
 
       if (LocalDate.of(year.toInt, month.toInt, day.toInt).isAfter(LocalDate.now()))
-        Invalid(ValidationError("error.amls.pending.appliedOn.date.cannot-be-in-future"))
+        Invalid(ValidationError("error.amls.enter-renewal-date.date.cannot-be-in-future"))
       else
         Valid
   }

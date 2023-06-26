@@ -16,24 +16,10 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-import java.time.LocalDate
+import play.api.libs.json.{Format, Json}
 
-import play.api.libs.json.{Json, OFormat}
+case class AmlsSession(membershipNumber: String, safeId: Option[String])
 
-case class EnterAMLSNumberForm(membershipNumber: String)
-
-object EnterAMLSNumberForm {
-  implicit val formatEnterAMLSNumberForm: OFormat[EnterAMLSNumberForm] = Json.format[EnterAMLSNumberForm]
-}
-
-case class AMLSForm(amlsCode: String, membershipNumber: String, expiry: LocalDate)
-
-object AMLSForm {
-  implicit val formatAMLSForm: OFormat[AMLSForm] = Json.format[AMLSForm]
-}
-
-case class EnterAMLSExpiryDateForm(expiry: LocalDate)
-
-object EnterAMLSExpiryDateForm {
-  implicit val format: OFormat[EnterAMLSExpiryDateForm] = Json.format[EnterAMLSExpiryDateForm]
+object AmlsSession {
+  implicit val format: Format[AmlsSession] = Json.format[AmlsSession]
 }

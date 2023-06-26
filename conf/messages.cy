@@ -96,32 +96,32 @@ error.saAgentCode.blank=Nodwch god asiant Hunanasesiad
 error.saAgentCode.length=Rhaid i’r cod asiant Hunanasesiad fod yn 6 o gymeriadau, megis SA1234
 error.moneyLaunderingCompliance.amlscode.empty=Dewiswch enw eich corff goruchwylio gwyngalchu arian o’r rhestr
 error.moneyLaunderingCompliance.amlscode.invalid=Dewiswch enw eich corff goruchwylio gwyngalchu arian o’r rhestr
-error.moneyLaunderingCompliance.membershipNumber.empty=Nodwch eich rhif aelodaeth
-error.moneyLaunderingCompliance.membershipNumber.invalid=Nodwch rif aelodaeth yn y fformat cywir
-error.moneyLaunderingCompliance.date.empty=Nodwch y dyddiad y mae’ch aelodaeth yn dod i ben
-error.moneyLaunderingCompliance.day.empty=Rhaid i’r dyddiad y daw’ch aelodaeth i ben gynnwys diwrnod 
-error.moneyLaunderingCompliance.day.month.empty=Rhaid i’r dyddiad y daw’ch aelodaeth i ben gynnwys diwrnod a mis
-error.moneyLaunderingCompliance.day.year.empty=Rhaid i’r dyddiad y daw’ch aelodaeth i ben gynnwys diwrnod a blwyddyn
+error.moneyLaunderingCompliance.membershipNumber.empty=Nodwch rif cofrestru yn y fformat cywir
+error.moneyLaunderingCompliance.membershipNumber.invalid=Nodwch rif cofrestru yn y fformat cywir
+error.moneyLaunderingCompliance.date.empty=Nodwch y dyddiad nesaf ar gyfer adnewyddu eich cofrestriad
+error.moneyLaunderingCompliance.day.empty=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad gynnwys diwrnod
+error.moneyLaunderingCompliance.day.month.empty=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad gynnwys diwrnod a mis
+error.moneyLaunderingCompliance.day.year.empty=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad gynnwys diwrnod a blwyddyn
 error.moneyLaunderingCompliance.month.year.empty=Rhaid i’r dyddiad y daw’ch aelodaeth i ben gynnwys mis a blwyddyn
-error.moneyLaunderingCompliance.month.empty=Rhaid i’r dyddiad y daw’ch aelodaeth i ben gynnwys mis
-error.moneyLaunderingCompliance.year.empty=Rhaid i’r dyddiad y daw’ch aelodaeth i ben gynnwys blwyddyn
+error.moneyLaunderingCompliance.month.empty=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad gynnwys mis
+error.moneyLaunderingCompliance.year.empty=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad gynnwys blwyddyn
 error.moneyLaunderingCompliance.date.invalid=Nodwch ddyddiad go iawn
-error.moneyLaunderingCompliance.date.past=Rhaid i’r dyddiad y daw’ch aelodaeth i ben fod yn y dyfodol
-error.moneyLaunderingCompliance.date.before=Rhaid i’r dyddiad y daw’ch aelodaeth i ben fod o fewn 13 mis i heddiw
+error.moneyLaunderingCompliance.date.past=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad fod yn y dyfodol
+error.moneyLaunderingCompliance.date.before=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad fod cyn pen 13 mis o heddiw
 
 error.check-amls-value.invalid=Dewiswch ‘Iawn’ os ydych wedi cofrestru gyda chorff goruchwylio gwyngalchu arian
 error.check-amlsAppliedFor-value.invalid=Dewiswch ‘Iawn’ os ydych wedi gwneud cais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian
 
-error.amls.pending.appliedOn.date.empty=Nodwch y dyddiad y gwnaethoch gais 
-error.amls.pending.appliedOn.day.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod
-error.amls.pending.appliedOn.day.month.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod a mis
-error.amls.pending.appliedOn.day.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod a blwyddyn
-error.amls.pending.appliedOn.month.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys mis a blwyddyn
-error.amls.pending.appliedOn.month.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys mis
-error.amls.pending.appliedOn.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys blwyddyn
-error.amls.pending.appliedOn.date.invalid=Nodwch ddyddiad go iawn
-error.amls.pending.appliedOn.date.too-old=Rhaid i’r dyddiad y gwnaethoch gais fod ar ôl {0}
-error.amls.pending.appliedOn.date.cannot-be-in-future=Rhaid i’r dyddiad y gwnaethoch gais fod heddiw neu yn y gorffennol
+error.amls.enter-renewal-date.date.empty=Nodwch y dyddiad y gwnaethoch gais
+error.amls.enter-renewal-date.day.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod
+error.amls.enter-renewal-date.day.month.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod a mis
+error.amls.enter-renewal-date.day.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod a blwyddyn
+error.amls.enter-renewal-date.month.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys mis a blwyddyn
+error.amls.enter-renewal-date.month.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys mis
+error.amls.enter-renewal-date.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys blwyddyn
+error.amls.enter-renewal-date.date.invalid=Nodwch ddyddiad go iawn
+error.amls.enter-renewal-date.date.too-old=Rhaid i’r dyddiad y gwnaethoch gais fod ar ôl {0}
+error.amls.enter-renewal-date.date.cannot-be-in-future=Rhaid i’r dyddiad y gwnaethoch gais fod heddiw neu yn y gorffennol
 
 #Contact Email Check
 contactEmailCheck.title=Ai dyma’r cyfeiriad e-bost yr hoffech ei ddefnyddio ar gyfer eich cyfrif gwasanaethau asiant?
@@ -449,15 +449,20 @@ moneyLaunderingCompliance.title=Manylion cydymffurfiad gwyngalchu arian
 moneyLaunderingCompliance.p1=Mae’n rhaid i chi fod wedi’ch cofrestru gyda chorff goruchwylio gwyngalchu arian cyn y gallwch greu cyfrif gwasanaethau asiant.
 moneyLaunderingCompliance.amls.title=Enw’r corff goruchwylio gwyngalchu arian
 moneyLaunderingCompliance.amls.hint=Dechreuwch deipio a dewiswch eich corff goruchwylio o’r rhestr
-moneyLaunderingCompliance.membershipNumber.title=Rhif aelodaeth
-moneyLaunderingCompliance.expiry.title=Pryd mae’r dyddiad adnewyddu nesaf ar gyfer eich aelodaeth?
+moneyLaunderingCompliance.membershipNumber.title=Eich rhif cofrestru
+moneyLaunderingCompliance.expiry.title=Y dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad
 moneyLaunderingCompliance.expiry.hint=Er enghraifft, 31 03 2019
 moneyLaunderingCompliance.expiry.day.title=Diwrnod
 moneyLaunderingCompliance.expiry.month.title=Mis
 moneyLaunderingCompliance.expiry.year.title=Blwyddyn
 
+# Money laundering enter number page
+    moneyLaunderingCompliance.enter-number.title=Beth yw manylion eich cofrestriad disgwyliedig ar gyfer goruchwyliaeth gwyngalchu arian?
+moneyLaunderingCompliance.enter-number.membershipNumber=Eich rhif cofrestru
+moneyLaunderingCompliance.enter-number.membershipNumber.hint=Gallwch ddod o hyd i hyn ar ddangosfwrdd eich cyfrif Goruchwyliaeth Gwrth-wyngalchu Arian (AMLS).
+
 # Amls Not Found
-amls-details-not-found.title=Ni allwn ddod o hyd i fanylion eich aelodaeth
+amls-details-not-found.title=Ni allwn ddod o hyd i’ch manylion cofrestru ar gyfer goruchwyliaeth gwyngalchu arian
 amls-details-not-found.p=Gwiriwch eich rhif aelodaeth a’ch dyddiad adnewyddu, a rhowch gynnig arall arni.
 amls-details-not-found.button=Rhowch gynnig arall arni
 
@@ -474,7 +479,7 @@ amls-ineligible-status.p3=neu mae’r cofrestriad wedi dod i ben neu rydych wedi
 amls-ineligible-status.link=Darllenwch sut i herio penderfyniad CThEM i wrthod cofrestriad (yn agor tab newydd)
 
 # Pending AMLS Details page
-amls.pending.appliedOn.title=Pryd gwnaethoch gais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian?
+amls.enter-renewal-date.title=Rydym wedi cymeradwyo’ch cofrestriad ar gyfer goruchwyliaeth gwyngalchu arian
 
 checkAnswers.title=Gwiriwch eich atebion cyn creu eich cyfrif
 checkAnswers.description.p3=Drwy greu’r cyfrif hwn, rydych yn cadarnhau, hyd eithaf eich gwybodaeth, fod y manylion a roesoch yn gywir.

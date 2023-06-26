@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend
 import play.api.Logging
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Call, Request}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
@@ -156,7 +157,7 @@ package object controllers extends Logging {
           .verifying("error.check-amlsAppliedFor-value.invalid", a => a.contains("yes") || a.contains("no")))(a =>
           RadioInputAnswer.apply(a.getOrElse("")))(a => Some(RadioInputAnswer.unapply(a))))
 
-    private val HMRC_AMLS_ERROR = "error.moneyLaunderingCompliance.membershipNumber.invalid"
+    val HMRC_AMLS_ERROR = "error.moneyLaunderingCompliance.membershipNumber.invalid"
 
     def amlsForm(bodies: Set[String]): Form[AMLSForm] =
       Form[AMLSForm](
@@ -171,14 +172,30 @@ package object controllers extends Logging {
           }
         }))
 
+    val HMRC_AMLS_Empty_ERROR = "error.moneyLaunderingCompliance.membershipNumber.empty"
+    val membershipNumberConstraint: Constraint[String] = Constraint("constraints.membershipNumber") { input =>
+      val errors = input match {
+        case ""                                    => Seq(ValidationError(HMRC_AMLS_Empty_ERROR))
+        case x if !x.matches(amlsRegex) && x != "" => Seq(ValidationError(HMRC_AMLS_ERROR))
+        case _                                     => Nil
+      }
+      if (errors.isEmpty) Valid else Invalid(errors)
+    }
+    def amlsEnterNumberForm(): Form[EnterAMLSNumberForm] =
+      Form[EnterAMLSNumberForm](
+        mapping(
+          "membershipNumber" -> membershipNumber
+            .verifying(membershipNumberConstraint)
+        )(EnterAMLSNumberForm.apply)(EnterAMLSNumberForm.unapply)
+      )
+
     private def amlsRegex = "X[A-Z]ML00000[0-9]{6}"
 
-    def amlsPendingForm(implicit messages: Messages): Form[AmlsPendingForm] =
-      Form[AmlsPendingForm](
+    def enterAmlsExpiryDateForm(implicit messages: Messages): Form[EnterAMLSExpiryDateForm] =
+      Form[EnterAMLSExpiryDateForm](
         mapping(
-          "amlsCode"  -> nonEmptyText,
-          "appliedOn" -> appliedOnDate
-        )(AmlsPendingForm.apply)(AmlsPendingForm.unapply))
+          "expiry" -> appliedOnDate
+        )(EnterAMLSExpiryDateForm.apply)(EnterAMLSExpiryDateForm.unapply))
 
     import play.api.data.{Form, FormError}
 
@@ -219,21 +236,21 @@ package object controllers extends Logging {
       }
     }
 
-    def amlsPendingDetailsFormWithRefinedErrors(form: Form[AmlsPendingForm]): Form[AmlsPendingForm] = {
+    def amlsPendingDetailsFormWithRefinedErrors(form: Form[EnterAMLSExpiryDateForm]): Form[EnterAMLSExpiryDateForm] = {
 
-      val appliedOn = "appliedOn"
+      val expiry = "expiry"
       val dateFields =
-        (error: FormError) => error.key == s"$appliedOn.day" || error.key == s"$appliedOn.month" || error.key == s"$appliedOn.year"
+        (error: FormError) => error.key == s"$expiry.day" || error.key == s"$expiry.month" || error.key == s"$expiry.year"
 
       def refineErrors(dateFieldErrors: Seq[FormError]): Option[String] =
-        dateFieldErrors.map(_.key).map(k => s"$appliedOn.".r.replaceFirstIn(k, "")).sorted match {
-          case List("day", "month", "year") => Some("error.amls.pending.appliedOn.date.empty")
-          case List("day", "month")         => Some("error.amls.pending.appliedOn.day.month.empty")
-          case List("day", "year")          => Some("error.amls.pending.appliedOn.day.year.empty")
-          case List("day")                  => Some("error.amls.pending.appliedOn.day.empty")
-          case List("month", "year")        => Some("error.amls.pending.appliedOn.month.year.empty")
-          case List("month")                => Some("error.amls.pending.appliedOn.month.empty")
-          case List("year")                 => Some("error.amls.pending.appliedOn.year.empty")
+        dateFieldErrors.map(_.key).map(k => "expiry.".r.replaceFirstIn(k, "")).sorted match {
+          case List("day", "month", "year") => Some("error.amls.enter-renewal-date.day.empty")
+          case List("day", "month")         => Some("error.amls.enter-renewal-date.day.month.empty")
+          case List("day", "year")          => Some("error.amls.enter-renewal-date.day.year.empty")
+          case List("day")                  => Some("error.amls.enter-renewal-date.day.empty")
+          case List("month", "year")        => Some("error.amls.enter-renewal-date.month.year.empty")
+          case List("month")                => Some("error.amls.enter-renewal-date.month.empty")
+          case List("year")                 => Some("error.amls.enter-renewal-date.year.empty")
           case _                            => None
         }
 
@@ -245,10 +262,10 @@ package object controllers extends Logging {
         case Nil => form
         case _ =>
           form.copy(errors = form.errors.map { error =>
-            if (error.key.contains(appliedOn)) {
+            if (error.key.contains(expiry)) {
               FormError(error.key, "", error.args)
             } else error
-          }.toList :+ FormError(key = appliedOn, message = refinedMessage, args = Seq()))
+          }.toList :+ FormError(key = expiry, message = refinedMessage, args = Seq()))
       }
     }
   }
