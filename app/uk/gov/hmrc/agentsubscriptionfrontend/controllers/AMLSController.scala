@@ -256,7 +256,7 @@ class AMLSController @Inject()(
                 case None => Map("amlsCode" -> hmrcAmlsCode)
                 case Some(expiry) =>
                   Map(
-                    "amlsCode"        -> hmrcAmlsCode,
+                    "amlsCode"     -> hmrcAmlsCode,
                     "expiry.day"   -> expiry.getDayOfMonth.toString,
                     "expiry.month" -> expiry.getMonthValue.toString,
                     "expiry.year"  -> expiry.getYear.toString
