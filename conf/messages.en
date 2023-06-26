@@ -471,7 +471,7 @@ moneyLaunderingCompliance.enter-number.membershipNumber.hint=You can find this i
 
 # Amls Not Found
 amls-details-not-found.title=We cannot find your money laundering supervision registration details
-amls-details-not-found.p=Check your registration number and renewal date and try again.
+amls-details-not-found.p=Gwiriwch eich rhif cofrestru a’ch dyddiad adnewyddu, a rhowch gynnig arall arni.
 amls-details-not-found.button=Try again
 
 # Amls Ineligible status
