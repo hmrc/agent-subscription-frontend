@@ -26,7 +26,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSForms.{HMRC_AMLS_ERROR, HMRC_AMLS_Empty_ERROR}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
-import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.{Approved,  Rejected}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.{Approved, Pending, Rejected}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.givenAgentIsNotManuallyAssured
@@ -876,7 +876,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
   }
   "POST /money-laundering-application-details " should {
 
- //   val expiryDate = LocalDate.now().minusMonths(1)
+   // val expiryDate = LocalDate.now().minusMonths(1)
     "show validation error when the form is submitted with invalid data" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "membershipNumber" -> "invalid")
@@ -906,6 +906,40 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       val result = await(controller.submitAmlsApplicationEnterNumberPage(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.AMLSController.showAmlsDetailsNotFound().url
+    }
+    " show a task list page if the the amls record is there and is pending " in new Setup {
+      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
+      givenAmlsRecordFound(validAmlsRegistrationNumber, Pending)
+      givenSubscriptionRecordCreated(
+        id,
+        record.copy(
+          amlsData = Some(AmlsData.registeredUserNoDataEntered
+            .copy(amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", Right(RegisteredDetails(validAmlsRegistrationNumber,None, Some("111234567890123"),None))))))))
+
+      implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
+        "membershipNumber" -> validAmlsRegistrationNumber,
+        "submit" -> "continue")
+
+      val result = await(controller.submitAmlsApplicationEnterNumberPage(request))
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
+    }
+    " show a enter list page if the the amls record is there and is Approved " in new Setup {
+      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
+      givenAmlsRecordFound(validAmlsRegistrationNumber,   Approved)
+      givenSubscriptionRecordCreated(
+        id,
+        record.copy(
+          amlsData = Some(AmlsData.registeredUserNoDataEntered
+            .copy(amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", Right(RegisteredDetails(validAmlsRegistrationNumber,None, Some("111234567890123"),None))))))))
+
+      implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
+        "membershipNumber" -> validAmlsRegistrationNumber,
+        "submit" -> "continue")
+
+      val result = await(controller.submitAmlsApplicationEnterNumberPage(request))
+      status(result) shouldBe 303
+      redirectLocation(result).get shouldBe routes.AMLSController.showAmlsApplicationEnterDatePage().url
     }
   }
 

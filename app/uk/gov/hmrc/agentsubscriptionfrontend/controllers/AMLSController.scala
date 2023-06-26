@@ -270,35 +270,35 @@ class AMLSController @Inject()(
       }
     }
   }
-  
+
   def submitAmlsApplicationEnterNumberPage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
-      amlsEnterNumberForm()
-        .bindFromRequest()
-        .fold(
-          formWithErrors => {
-            Ok(amlsEnterNumber(formWithErrors))
-          },
-          validForm => {
-            amlsService.checkAmlsNumber(validForm.membershipNumber, None).flatMap {
-              case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
-              case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
-              case ResultOK(safeId) => {
-                //todo ask about changeing
-                DealWithResultOkAmls(agent, Some(false), validForm.membershipNumber, hmrcAmlsCode, None, safeId)
-              }
-              case ResultOKButCheckDate(safeId) =>
-                sessionStoreService
-                  .cacheAmlsSession(AmlsSession(validForm.membershipNumber, safeId))
-                  .flatMap(_ => Redirect(routes.AMLSController.showAmlsApplicationEnterDatePage()))
+      sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
+        amlsEnterNumberForm()
+          .bindFromRequest()
+          .fold(
+            formWithErrors => {
+              Ok(amlsEnterNumber(formWithErrors))
+            },
+            validForm => {
+              amlsService.checkAmlsNumber(validForm.membershipNumber, None).flatMap {
+                case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
+                case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
+                case ResultOK(safeId) => {
+                  DealWithResultOkAmls(agent, isChanging, validForm.membershipNumber, hmrcAmlsCode, None, safeId)
+                }
+                case ResultOKButCheckDate(safeId) =>
+                  sessionStoreService
+                    .cacheAmlsSession(AmlsSession(validForm.membershipNumber, safeId))
+                    .flatMap(_ => Redirect(routes.AMLSController.showAmlsApplicationEnterDatePage()))
 
+              }
             }
-          }
-        )
+          )
+      }
     }
   }
 
-  //todo put the call with the number and redirect here tomorrow
   def submitAmlsApplicationDatePage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       sessionStoreService.fetchAmlsSession.flatMap { maybeAmlsSession =>

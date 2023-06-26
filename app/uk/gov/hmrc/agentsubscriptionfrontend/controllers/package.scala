@@ -236,13 +236,12 @@ package object controllers extends Logging {
       }
     }
 
-    //todo rename and refactor this stuff
     def amlsPendingDetailsFormWithRefinedErrors(form: Form[EnterAMLSExpiryDateForm]): Form[EnterAMLSExpiryDateForm] = {
 
       val expiry = "expiry"
       val dateFields =
         (error: FormError) => error.key == s"$expiry.day" || error.key == s"$expiry.month" || error.key == s"$expiry.year"
-      println("dateFields" + dateFields)
+      
       def refineErrors(dateFieldErrors: Seq[FormError]): Option[String] =
         dateFieldErrors.map(_.key).map(k => "expiry.".r.replaceFirstIn(k, "")).sorted match {
           case List("day", "month", "year") => Some("error.amls.enter-renewal-date.day.empty")
