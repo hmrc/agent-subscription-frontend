@@ -312,10 +312,16 @@ class AMLSController @Inject()(
                 Ok(amlsEnterRenewalDate(form))
               },
               validForm => {
+
                 val amlsSession = maybeAmlsSession.get
-
-                DealWithResultOkAmls(agent, isChanging, amlsSession.membershipNumber, hmrcAmlsCode, Some(validForm.expiry), amlsSession.safeId)
-
+                val expiryDate = validForm.expiry
+                val membershipNumber = amlsSession.membershipNumber
+                amlsService.checkAmlsExpiryDate(membershipNumber, expiryDate).flatMap {
+                  case ResultOK(amlsSafeId) =>
+                    DealWithResultOkAmls(agent, isChanging, membershipNumber, hmrcAmlsCode, Some(expiryDate), amlsSafeId)
+                  case _ =>
+                    Future.successful(Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus()))
+                }
               }
             )
         }

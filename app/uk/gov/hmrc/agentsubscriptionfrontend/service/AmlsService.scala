@@ -35,11 +35,13 @@ class AmlsService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnect
     else {
       checkAmlsNumber(amlsForm.membershipNumber, Some(amlsForm.expiry))
     }
+
   def checkEndDateMatch(amlsRecord: AmlsSubscriptionRecord, expireDate: LocalDate): AmlsValidationResult =
     amlsRecord.currentRegYearEndDate.map(_ == expireDate) match {
       case Some(false) | None => DateNotMatched
       case Some(true)         => ResultOK(Some(amlsRecord.safeId))
     }
+
   def checkAmlsNumber(membershipNumber: String, maybeExpireDate: Option[LocalDate])(
     implicit hc: HeaderCarrier,
     ec: ExecutionContext): Future[AmlsValidationResult] =
@@ -62,6 +64,16 @@ class AmlsService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnect
           }
       case None => RecordNotFound
     }
+
+  def checkAmlsExpiryDate(membershipNumber: String, expireDate: LocalDate)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext): Future[AmlsValidationResult] =
+    agentSubscriptionConnector.getAmlsSubscriptionRecord(membershipNumber).map {
+      case Some(amlsRecord) =>
+        checkEndDateMatch(amlsRecord, expireDate)
+      case None => RecordNotFound
+    }
+
 }
 
 object AmlsValidationResult {

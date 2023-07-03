@@ -283,7 +283,9 @@ object AgentSubscriptionStub {
       ).willReturn(aResponse().withStatus(status))
     )
 
-  def givenAmlsRecordFound(amlsRegistrationNumber: String, status: FormBundleStatus, suspended: Option[Boolean] = None): StubMapping =
+  def givenAmlsRecordFound(amlsRegistrationNumber: String,
+                           status: FormBundleStatus,
+                           suspended: Option[Boolean] = None,regYearEndDate :LocalDate= LocalDate.now().plusDays(2)): StubMapping =
     stubFor(
       get(
         urlEqualTo(
@@ -295,7 +297,7 @@ object AgentSubscriptionStub {
            |"formBundleStatus": "$status",
            |"safeId": "111234567890123",
            |"currentRegYearStartDate": "2021-01-01",
-           |"currentRegYearEndDate": "${LocalDate.now().plusDays(2)}"""".stripMargin ++ suspended.map(x => s""",""" ++
+           |"currentRegYearEndDate": "${regYearEndDate}"""".stripMargin ++ suspended.map(x => s""",""" ++
           s"""
              |"suspended": $x """.stripMargin).getOrElse("") ++
           """
