@@ -947,6 +947,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "POST /agent-subscription/money-laundering-application-approved" should {
 
     val expiryDate = LocalDate.now().plusDays(2)
+
     val day = expiryDate.getDayOfMonth.toString
     val month = expiryDate.getMonthValue.toString
     val year = expiryDate.getYear.toString
