@@ -946,7 +946,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "POST /agent-subscription/money-laundering-application-approved" should {
 
-    val expiryDate = LocalDate.now().plusMonths(1)
+    val expiryDate = LocalDate.now().plusDays(2)
+
     val day = expiryDate.getDayOfMonth.toString
     val month = expiryDate.getMonthValue.toString
     val year = expiryDate.getYear.toString
@@ -961,6 +962,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
               amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)",
                 Right(RegisteredDetails("12345",membershipExpiresOn = Some(expiryDate))))))))
       )
+        givenAmlsRecordFound("12345", Approved)
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "expiry.day"   -> day,
         "expiry.month" -> month,
@@ -974,8 +976,34 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
     }
+      "store AMLS pending details in temporary store after successful submission, redirect to not eligble page if the dates dont match" in new Setup {
+        givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
+        givenSubscriptionRecordCreated(
+          id,
+          record.copy(
+            amlsData = Some(
+              AmlsData.registeredUserNoDataEntered.copy(
+                amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)",
+                  Right(RegisteredDetails("12345",membershipExpiresOn = Some(expiryDate))))))))
+        )
+        givenAmlsRecordFound("12345", Approved,None,expiryDate)
+        val wrongDay = expiryDate.plusDays(2).getDayOfMonth.toString
+        implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
+          "expiry.day"   -> wrongDay,
+          "expiry.month" -> month,
+          "expiry.year"  -> year,
+          "submit" -> "continue")
 
-    "store AMLS pending details in temporary store after successful submission, redirect to check answers when change flag is true" in new Setup {
+        sessionStoreService.currentSession.changingAnswers = Some(false)
+        sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345",None))
+
+        val result = await(controller.submitAmlsApplicationDatePage(request))
+        status(result) shouldBe 303
+        redirectLocation(result).get shouldBe routes.AMLSController.showAmlsRecordIneligibleStatus().url
+      }
+
+
+      "store AMLS pending details in temporary store after successful submission, redirect to check answers when change flag is true" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenSubscriptionRecordCreated(
         id,
@@ -983,8 +1011,9 @@ class AMLSControllerISpecIt extends BaseISpecIt {
           amlsData = Some(
             AmlsData.registeredUserNoDataEntered.copy(
               amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)",
-                Right(RegisteredDetails("12234",membershipExpiresOn = Some(expiryDate))))))))
+                Right(RegisteredDetails("12345",membershipExpiresOn = Some(expiryDate))))))))
       )
+      givenAmlsRecordFound("12345", Approved)
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "expiry.day"   -> day,
         "expiry.month" -> month,
@@ -993,7 +1022,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
       sessionStoreService.currentSession.changingAnswers = Some(true)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession
-      ("12234",Some("123456")))
+      ("12345",Some("123456")))
 
       val result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 303
