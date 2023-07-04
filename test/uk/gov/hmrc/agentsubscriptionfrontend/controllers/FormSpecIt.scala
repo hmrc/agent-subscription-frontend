@@ -17,9 +17,9 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.ninoForm
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
-class FormSpecIt extends UnitSpecIt {
+class FormSpecIt extends UnitSpec {
 
   "Nino Form" should {
     "bind successfully" in {

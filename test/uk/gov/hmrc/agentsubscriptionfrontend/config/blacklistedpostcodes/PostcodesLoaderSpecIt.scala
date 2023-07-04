@@ -18,9 +18,9 @@ package uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes
 
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes.PostcodesLoader.PostcodeLoaderException
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
-class PostcodesLoaderSpecIt extends UnitSpecIt with MockitoSugar {
+class PostcodesLoaderSpecIt extends UnitSpec with MockitoSugar {
   private val header = "PostCode"
 
   "PostcodesLoader" should {

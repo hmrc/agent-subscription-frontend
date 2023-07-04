@@ -19,9 +19,9 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models
 import java.time.LocalDate
 
 import play.api.libs.json.{JsNumber, JsResultException, JsString, Json}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
-class DateOfBirthSpecIt extends UnitSpecIt {
+class DateOfBirthSpecIt extends UnitSpec {
 
   "DateOfBirth" should {
     "serialize to json string" in {
