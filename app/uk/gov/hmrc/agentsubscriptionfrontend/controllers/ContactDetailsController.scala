@@ -83,15 +83,8 @@ class ContactDetailsController @Inject()(
           agent.getMandatorySubscriptionRecord.businessDetails.registration
             .flatMap(_.emailAddress)
             .fold(
-              Future.successful(Redirect(routes.StartController.start()))
-            )(businessEmail =>
-              retrieveEmail.flatMap {
-                case Some(authEmail) =>
-                  if (authEmail == businessEmail.toLowerCase) Redirect(routes.StartController.start())
-                  else
-                    getEmailTemplate(agent, isChanging, businessEmail)
-                case None => getEmailTemplate(agent, isChanging, businessEmail)
-            })
+              Redirect(routes.StartController.start())
+            )(businessEmail => getEmailTemplate(agent, isChanging, businessEmail))
         }
 
     }
