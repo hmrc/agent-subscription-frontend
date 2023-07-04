@@ -18,10 +18,10 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import org.scalatest.Assertion
 import play.api.mvc.Result
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
 
 trait SessionDataMissingSpec {
-  this: UnitSpec =>
+  this: UnitSpecIt =>
 
   def resultShouldBeSessionDataMissing(result: Result): Assertion = {
     status(result) shouldBe 303

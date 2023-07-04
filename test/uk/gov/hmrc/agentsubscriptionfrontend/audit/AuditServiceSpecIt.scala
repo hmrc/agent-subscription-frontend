@@ -27,12 +27,12 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, RequestId, SessionId}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuditServiceSpecIt extends UnitSpec with MockitoSugar with Eventually {
+class AuditServiceSpecIt extends UnitSpecIt with MockitoSugar with Eventually {
 
   implicit val patience: PatienceConfig =
     PatienceConfig(timeout = scaled(Span(500, Millis)), interval = scaled(Span(200, Millis)))

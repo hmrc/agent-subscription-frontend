@@ -13,9 +13,10 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.AuthProviderId
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SubscriptionJourneyService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.givenSubscriptionJourneyRecordExists
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.minimalSubscriptionJourneyRecord
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{completeJourneyRecordNoMappings, completeJourneyRecordWithMappingsNoVerifiedEmails, minimalSubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestSetupNoJourneyRecord}
-import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, EnrolmentIdentifier}
+import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, SessionKeys}
 
 import scala.concurrent.Future
@@ -38,10 +39,14 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
     override def redirectUrlActions: RedirectUrlActions = app.injector.instanceOf[RedirectUrlActions]
     override def metrics: Metrics = app.injector.instanceOf[Metrics]
     override def subscriptionJourneyService: SubscriptionJourneyService = app.injector.instanceOf[SubscriptionJourneyService]
+    val agent = new Agent(Set(Enrolment("",Seq.empty[EnrolmentIdentifier],"",None)), Some(Credentials("test-provider-id","test")), None, None)
+    val body: Agent => Future[Result] = _ => Future.successful(Ok("subscribing agent with email verification"))
 
     def withSubscribedAgent[A]: Result =
       await(super.withSubscribedAgent { (arn, sjr) => Future.successful(Ok(arn.value)) })
 
+    def withSubscribedAgentCheckEmail[A]: Result =
+      await(super.withSubscribingEmailVerifiedAgent { body })
   }
 
   "withSubscribedAgent" should {
@@ -86,5 +91,49 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/agent-subscription/finish-sign-out")
     }
+  }
+  "withSubscribedAgent Email check" should {
+    val providerId = AuthProviderId("12345-credId")
+
+    " check if the email needs verificaton and let it pass if it does not" in new TestSetupNoJourneyRecord {
+      //Put in email in here
+      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordNoMappings)
+      authenticatedAgentEmailCheck("fooArn", "12345-credId")
+
+      val result = TestController.withSubscribedAgentCheckEmail
+
+      status(result) shouldBe 200
+      bodyOf(result) shouldBe "subscribing agent with email verification"
+    }
+    " check if the email needs verificaton and and redirect if it does " in new TestSetupNoJourneyRecord {
+      //Put in email in here
+      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordWithMappingsNoVerifiedEmails)
+      authenticatedAgentEmailCheck("fooArn", "12345-credId")
+
+      val result = TestController.withSubscribedAgentCheckEmail
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some("/agent-subscription/verify-email")
+    }
+    " check if the email is the same as one supplied in auth and dont redirect if it does (ignore case)" in new TestSetupNoJourneyRecord {
+
+      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordWithMappingsNoVerifiedEmails)
+      authenticatedAgentEmailCheck("fooArn", "12345-credId",Some("email@email.com"))
+
+      val result = TestController.withSubscribedAgentCheckEmail
+
+      status(result) shouldBe 200
+      bodyOf(result) shouldBe "subscribing agent with email verification"
+    }
+    " check if the email is the same as one supplied in auth and  redirect if it doesnt" in new TestSetupNoJourneyRecord {
+      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordWithMappingsNoVerifiedEmails)
+      authenticatedAgentEmailCheck("fooArn", "12345-credId",Some("emailNotmatching@email.com"))
+
+      val result = TestController.withSubscribedAgentCheckEmail
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some("/agent-subscription/verify-email")
+    }
+
   }
 }

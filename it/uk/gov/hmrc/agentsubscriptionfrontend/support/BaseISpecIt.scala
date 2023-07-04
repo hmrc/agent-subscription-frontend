@@ -19,7 +19,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 abstract class BaseISpecIt
-    extends UnitSpec with GuiceOneAppPerSuite with WireMockSupport with EndpointBehaviours with DataStreamStubs
+    extends UnitSpecIt with GuiceOneAppPerSuite with WireMockSupport with EndpointBehaviours with DataStreamStubs
      with MetricTestSupport {
 
   override implicit lazy val app: Application = appBuilder.build()

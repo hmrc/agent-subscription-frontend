@@ -17,9 +17,9 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.config.amls
 
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader.AMLSLoaderException
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
 
-class AMLSLoaderSpecIt extends UnitSpec {
+class AMLSLoaderSpecIt extends UnitSpecIt {
   "AMLSLoaderSpec" should {
     "load all AMLS bodies from the csv file" in {
       val result = AMLSLoader.load("/amls.csv")

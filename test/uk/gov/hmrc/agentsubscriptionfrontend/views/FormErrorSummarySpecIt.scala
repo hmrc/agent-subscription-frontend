@@ -21,11 +21,11 @@ import play.api.data.Forms._
 import play.api.i18n.{DefaultMessagesApi, Messages}
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
 import uk.gov.hmrc.govukfrontend.views.Aliases.ErrorSummary
 import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
-class FormErrorSummarySpecIt extends UnitSpec {
+class FormErrorSummarySpecIt extends UnitSpecIt {
 
   private case class Model(name: String)
 

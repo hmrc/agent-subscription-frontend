@@ -99,6 +99,11 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
       .retrieve(credentials) { creds =>
         Future.successful(creds)
       }
+  def retrieveEmail[A](implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[String]] =
+    authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
+      .retrieve(email) { email =>
+        Future.successful(email)
+      }
 
   /**
     * For a user logged in as a subscribed agent (finished journey)
@@ -151,8 +156,8 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
-      .retrieve(allEnrolments and credentials and nino) {
-        case enrolments ~ creds ~ mayBeNino =>
+      .retrieve(allEnrolments and credentials and nino and email) {
+        case enrolments ~ creds ~ mayBeNino ~ maybeAuthEmail =>
           if (isEnrolledForHmrcAsAgent(enrolments)) {
             redirectUrlActions.withMaybeRedirectUrl {
               case Some(redirectUrl) =>
@@ -166,11 +171,11 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
             val authProviderId = AuthProviderId(creds.fold("unknown")(_.providerId))
             subscriptionJourneyService
               .getJourneyRecord(authProviderId)
-              .flatMap(
-                maybeSjr =>
-                  if (requireEmailVerification && maybeSjr.exists(_.emailNeedsVerifying))
-                    Redirect(routes.EmailVerificationController.verifyEmail())
-                  else body(new Agent(enrolments.enrolments, creds, maybeSjr, mayBeNino)))
+              .flatMap(maybeSjr => {
+                if (requireEmailVerification && maybeSjr.exists(_.emailNeedsVerifying(maybeAuthEmail)))
+                  Redirect(routes.EmailVerificationController.verifyEmail())
+                else body(new Agent(enrolments.enrolments, creds, maybeSjr, mayBeNino))
+              })
             // check what we should do when AuthProviderId not available!
           }
       }

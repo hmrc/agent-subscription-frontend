@@ -29,11 +29,11 @@ import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
-class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
+class TaskListServiceSpecIt extends UnitSpecIt with MockitoSugar {
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
   implicit lazy val ec: ExecutionContextExecutor = ExecutionContext.global

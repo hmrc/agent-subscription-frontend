@@ -20,7 +20,7 @@ import com.kenshoo.play.metrics.Metrics
 import play.api.i18n.Lang
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import play.api.{Configuration, Environment, Logging}
-import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AddressLookupFrontendConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsForms._
@@ -61,27 +61,39 @@ class ContactDetailsController @Inject()(
   val desAddressForm = new DesAddressForm(logger, denylistedPostCodes)
 
   def showContactEmailCheck: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
-      sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
-        agent.getMandatorySubscriptionRecord.businessDetails.registration
-          .flatMap(_.emailAddress)
-          .fold(
-            Redirect(routes.StartController.start())
-          )(businessEmail =>
-            agent.getMandatorySubscriptionRecord.contactEmailData match {
-              case Some(data) => {
-                Ok(contactEmailCheckTemplate(
-                  contactEmailCheckForm
-                    .fill(ContactEmailCheck(RadioInputAnswer
-                      .apply(RadioInputAnswer.apply(data.useBusinessEmail)))),
-                  businessEmail,
-                  isChanging.getOrElse(false)
-                ))
-              }
-              case None =>
-                Ok(contactEmailCheckTemplate(contactEmailCheckForm, businessEmail, isChanging.getOrElse(false)))
-          })
-      }
+    withSubscribingAgent {
+      def getEmailTemplate(agent: Agent, isChanging: Option[Boolean], businessEmail: String) =
+        agent.getMandatorySubscriptionRecord.contactEmailData match {
+          case Some(data) => {
+            Ok(
+              contactEmailCheckTemplate(
+                contactEmailCheckForm
+                  .fill(ContactEmailCheck(RadioInputAnswer
+                    .apply(RadioInputAnswer.apply(data.useBusinessEmail)))),
+                businessEmail,
+                isChanging.getOrElse(false)
+              ))
+          }
+          case None =>
+            Ok(contactEmailCheckTemplate(contactEmailCheckForm, businessEmail, isChanging.getOrElse(false)))
+        }
+
+      agent =>
+        sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
+          agent.getMandatorySubscriptionRecord.businessDetails.registration
+            .flatMap(_.emailAddress)
+            .fold(
+              Future.successful(Redirect(routes.StartController.start()))
+            )(businessEmail =>
+              retrieveEmail.flatMap {
+                case Some(authEmail) =>
+                  if (authEmail == businessEmail.toLowerCase) Redirect(routes.StartController.start())
+                  else
+                    getEmailTemplate(agent, isChanging, businessEmail)
+                case None => getEmailTemplate(agent, isChanging, businessEmail)
+            })
+        }
+
     }
   }
 

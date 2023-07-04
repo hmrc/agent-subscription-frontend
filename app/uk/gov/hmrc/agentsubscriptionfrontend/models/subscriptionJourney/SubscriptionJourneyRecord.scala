@@ -47,7 +47,9 @@ final case class SubscriptionJourneyRecord(
     case Some(ced) if ced.useBusinessEmail => businessDetails.registration.flatMap(_.emailAddress)
     case Some(ced)                         => ced.contactEmail
   }
-  def emailNeedsVerifying = effectiveEmail.exists(email => !verifiedEmails.contains(email))
+  def emailNeedsVerifying(authEmail: Option[String]) =
+    if (effectiveEmail.map(_.toLowerCase) == authEmail) false
+    else effectiveEmail.exists(email => !verifiedEmails.contains(email))
 }
 
 object SubscriptionJourneyRecord {

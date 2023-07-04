@@ -26,9 +26,9 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes.Postcode
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DesAddress
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{ResettingMockitoSugar, testAddressLookupFrontendAddress, testCountry}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
 
-class DesAddressFormSpecIt extends UnitSpec with ResettingMockitoSugar with EitherValues {
+class DesAddressFormSpecIt extends UnitSpecIt with ResettingMockitoSugar with EitherValues {
 
   // Each of these valid lines should be the maximum allowed length, 35
   // chars, to ensure we test the edge case of validation passing when all

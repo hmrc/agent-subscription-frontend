@@ -22,9 +22,9 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
 
-class ViewsSpecIt extends UnitSpec with GuiceOneAppPerSuite {
+class ViewsSpecIt extends UnitSpecIt with GuiceOneAppPerSuite {
 
   "ErrorTemplate view" should {
 

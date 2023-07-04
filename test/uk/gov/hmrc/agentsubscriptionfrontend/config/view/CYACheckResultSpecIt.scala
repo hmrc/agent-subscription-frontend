@@ -19,10 +19,10 @@ package uk.gov.hmrc.agentsubscriptionfrontend.config.view
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, BusinessDetails, SubscriptionJourneyRecord}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 
-class CYACheckResultSpecIt extends UnitSpec {
+class CYACheckResultSpecIt extends UnitSpecIt {
 
   val id = AuthProviderId("12345-credId")
   val validUtr = Utr("2000000000")

@@ -20,9 +20,9 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.data.validation.{Invalid, Valid, ValidationError}
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSForms._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.EnterAMLSNumberForm
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpecIt
 
-class AmlsFormSpecIt extends UnitSpec with MockitoSugar {
+class AmlsFormSpecIt extends UnitSpecIt with MockitoSugar {
 
   "membershipNumberConstraint" should {
     "return Valid for a valid membership number" in {
