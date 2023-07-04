@@ -48,7 +48,7 @@ final case class SubscriptionJourneyRecord(
     case Some(ced)                         => ced.contactEmail
   }
   def emailNeedsVerifying(authEmail: Option[String]) =
-    if (effectiveEmail.map(_.toLowerCase) == authEmail) false
+    if (effectiveEmail.map(_.toLowerCase) == authEmail.map(_.toLowerCase)) false
     else effectiveEmail.exists(email => !verifiedEmails.contains(email))
 }
 

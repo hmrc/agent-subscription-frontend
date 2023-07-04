@@ -9,7 +9,7 @@ import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.RedirectUrlActions
-import uk.gov.hmrc.agentsubscriptionfrontend.models.AuthProviderId
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AuthProviderId, ContactEmailData}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SubscriptionJourneyService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.givenSubscriptionJourneyRecordExists
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub._
@@ -114,10 +114,21 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some("/agent-subscription/verify-email")
     }
-    " check if the email is the same as one supplied in auth and dont redirect if it does (ignore case)" in new TestSetupNoJourneyRecord {
+    " check if the email is the same as one supplied in auth and dont redirect if it does " in new TestSetupNoJourneyRecord {
 
       givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordWithMappingsNoVerifiedEmails)
       authenticatedAgentEmailCheck("fooArn", "12345-credId",Some("email@email.com"))
+
+      val result = TestController.withSubscribedAgentCheckEmail
+
+      status(result) shouldBe 200
+      bodyOf(result) shouldBe "subscribing agent with email verification"
+    }
+    " check if the email is the same as one supplied in auth and dont redirect if it does (ignore case)" in new TestSetupNoJourneyRecord {
+
+      givenSubscriptionJourneyRecordExists(providerId,
+        completeJourneyRecordWithMappingsNoVerifiedEmails.copy( contactEmailData = Some(ContactEmailData(false, Some("eMaiL@email.Com")))))
+      authenticatedAgentEmailCheck("fooArn", "12345-credId",Some("EmAil@email.com"))
 
       val result = TestController.withSubscribedAgentCheckEmail
 
