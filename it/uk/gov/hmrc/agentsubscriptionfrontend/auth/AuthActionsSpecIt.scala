@@ -95,8 +95,7 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
   "withSubscribedAgent Email check" should {
     val providerId = AuthProviderId("12345-credId")
 
-    " check if the email needs verificaton and let it pass if it does not" in new TestSetupNoJourneyRecord {
-      //Put in email in here
+    " check if the email needs verification and let it pass if it does not" in new TestSetupNoJourneyRecord {
       givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordNoMappings)
       authenticatedAgentEmailCheck("fooArn", "12345-credId")
 
@@ -105,8 +104,8 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
       status(result) shouldBe 200
       bodyOf(result) shouldBe "subscribing agent with email verification"
     }
-    " check if the email needs verificaton and and redirect if it does " in new TestSetupNoJourneyRecord {
-      //Put in email in here
+    " check if the email needs verification and and redirect if it does " in new TestSetupNoJourneyRecord {
+
       givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordWithMappingsNoVerifiedEmails)
       authenticatedAgentEmailCheck("fooArn", "12345-credId")
 
