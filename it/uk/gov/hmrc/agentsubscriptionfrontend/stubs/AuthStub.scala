@@ -99,6 +99,38 @@ object AuthStub {
     )
   }
 
+  def authenticatedAgentEmailCheck(arn: String, providerId: String,maybeEmail:Option[String] = None): StubMapping = {
+    givenAuthorisedFor(
+      s"""
+         |  {
+         |    "authorise" : [ {
+         |    "authProviders" : [
+         |    "GovernmentGateway" ]
+         |  }, {
+         |    "affinityGroup" :
+         |      "Agent"
+         |  } ],
+         |    "retrieve" : [ "allEnrolments",
+         |   "optionalCredentials", "nino", "email" ]
+         |  }
+           """.stripMargin,
+      s"""
+         |{
+         |"authorisedEnrolments": [
+         |  { "key":"HMRC-AS-AGENT", "identifiers": [
+         |    {"key":"AgentReferenceNumber", "value": "$arn"}
+         |  ]}
+         |],
+         | "allEnrolments": [],
+         | ${maybeEmail.map(email =>s"""\"email" : "$email\",""").getOrElse(
+        ""
+      )}
+         |"optionalCredentials": {"providerId": "$providerId", "providerType": "GovernmentGateway"}
+         |}
+          """.stripMargin
+    )
+  }
+
   def givenAuthorisedFor(payload: String, responseBody: String): StubMapping =
     stubFor(
       post(urlEqualTo("/auth/authorise"))

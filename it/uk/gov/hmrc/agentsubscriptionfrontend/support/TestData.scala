@@ -121,6 +121,10 @@ object TestData {
     contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
     verifiedEmails = Set("email@email.com")
   )
+  val completeJourneyRecordWithMappingsNoVerifiedEmails: SubscriptionJourneyRecord = completeJourneyRecordNoMappings
+    .copy(
+      verifiedEmails = Set("")
+    )
 
   val completeJourneyRecordWithMappings: SubscriptionJourneyRecord = completeJourneyRecordNoMappings
     .copy(

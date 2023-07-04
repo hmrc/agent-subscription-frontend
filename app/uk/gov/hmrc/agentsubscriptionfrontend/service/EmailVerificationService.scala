@@ -50,13 +50,15 @@ class EmailVerificationService @Inject()(emailVerificationConnector: EmailVerifi
                              )
     } yield mVerifyEmailResponse.map(_.redirectUri)
 
-  def checkStatus(credId: String, email: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[EmailVerificationStatus] =
+  def checkStatus(credId: String, email: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[EmailVerificationStatus] = {
+    val emailLowerCase = email.toLowerCase
     emailVerificationConnector.checkEmail(credId).map {
-      case Some(vsr) if vsr.emails.filter(_.emailAddress == email).exists(_.verified) =>
+      case Some(vsr) if vsr.emails.filter(_.emailAddress == emailLowerCase).exists(_.verified) =>
         EmailVerificationStatus.Verified
-      case Some(vsr) if vsr.emails.filter(_.emailAddress == email).exists(_.locked) => EmailVerificationStatus.Locked
-      case Some(x)                                                                  => EmailVerificationStatus.Unverified
-      case None                                                                     => EmailVerificationStatus.Error
+      case Some(vsr) if vsr.emails.filter(_.emailAddress == emailLowerCase).exists(_.locked) => EmailVerificationStatus.Locked
+      case Some(x)                                                                           => EmailVerificationStatus.Unverified
+      case None                                                                              => EmailVerificationStatus.Error
     }
+  }
 
 }

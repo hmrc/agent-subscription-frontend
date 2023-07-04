@@ -67,7 +67,7 @@ class EmailVerificationController @Inject()(
     } yield (RelevantState(subscriptionJourneyRecord, isChangingAnswers), authProviderId.providerId)
 
   override def getEmailToVerify(session: RelevantState): String =
-    session.subscriptionJourneyRecord.effectiveEmail.getOrElse {
+    session.subscriptionJourneyRecord.effectiveEmail.map(_.toLowerCase).getOrElse {
       throw new IllegalStateException("A verify email call has been made but no email to verify is present.")
     }
 
