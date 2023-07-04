@@ -99,11 +99,6 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
       .retrieve(credentials) { creds =>
         Future.successful(creds)
       }
-  def retrieveEmail[A](implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[String]] =
-    authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
-      .retrieve(email) { email =>
-        Future.successful(email)
-      }
 
   /**
     * For a user logged in as a subscribed agent (finished journey)
