@@ -58,6 +58,7 @@ class AMLSController @Inject()(
   amlsEnterRenewalDate: amls_enter_renewal_date,
   amlsDetailsNotFoundTemplate: amls_details_not_found,
   amlsNumberNotFoundTemplate: amls_number_not_found,
+  amlsDateNotMatchedTemplate: amls_date_not_matched,
   amlsRecordIneligibleStatusTemplate: amls_record_ineligible_status)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
@@ -236,7 +237,7 @@ class AMLSController @Inject()(
   }
   def showAmlsDateNotMatched: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
-      Ok(amlsNumberNotFoundTemplate())
+      Ok(amlsDateNotMatchedTemplate())
     }
   }
   def showAmlsRecordIneligibleStatus: Action[AnyContent] = Action.async { implicit request =>
