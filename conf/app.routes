@@ -62,8 +62,12 @@ POST        /money-laundering-compliance                   uk.gov.hmrc.agentsubs
 GET         /money-laundering-application-details          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsApplicationEnterNumberPage()
 POST        /money-laundering-application-details          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsApplicationEnterNumberPage()
 
-GET         /agent-subscription/money-laundering-application-approved        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsApplicationEnterDatePage()
-POST        /agent-subscription/money-laundering-application-approved        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsApplicationDatePage()
+GET         /money-laundering-application-approved        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsApplicationEnterDatePage()
+POST        /money-laundering-application-approved        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsApplicationDatePage()
+
+
+GET         /money-laundering-number-not-found           uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsNumberNotFound()
+
 
 GET         /money-laundering-compliance-incomplete        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsNotAppliedPage()
 

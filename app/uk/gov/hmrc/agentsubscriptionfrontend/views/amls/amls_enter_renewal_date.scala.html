@@ -69,7 +69,7 @@
 ) {
 
     @if(amlsExpiryDateForm.hasErrors) {
-        @errorSummary(ErrorSummary(errorList = amlsExpiryDateForm.errors.asTextErrorLinks))
+        @errorSummary(ErrorSummary().withFormErrorsAsText(amlsExpiryDateForm))
     }
     <h1 class="govuk-heading-xl">@msgs("amls.enter-renewal-date.title")</h1>
 
