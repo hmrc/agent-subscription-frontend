@@ -2,14 +2,18 @@ package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import com.google.inject.AbstractModule
 import org.jsoup.Jsoup
-import org.scalatest.Assertion
+import org.scalatest.{Assertion, OptionValues}
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.{MatchResult, Matcher}
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.JsValue
 import play.api.mvc.{AnyContentAsEmpty, Request, Result}
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat.escape
 import uk.gov.hmrc.agentsubscriptionfrontend.service.MongoDBSessionStoreService
@@ -18,10 +22,25 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.DataStreamStubs
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-abstract class BaseISpecIt
-    extends UnitSpec with GuiceOneAppPerSuite with WireMockSupport with EndpointBehaviours with DataStreamStubs
-     with MetricTestSupport {
+import scala.concurrent.Future
 
+abstract class BaseISpecIt
+  extends AnyWordSpecLike with Matchers with OptionValues with ScalaFutures  with GuiceOneAppPerSuite with WireMockSupport with EndpointBehaviours with DataStreamStubs
+     with MetricTestSupport {
+  def status(result: Result): Int = result.header.status
+  def status(result: Future[Result]): Int = Helpers.status(result)
+  def bodyOf(result: Result): String = Helpers.contentAsString(Future.successful(result))
+  def redirectLocation(result: Result) = Helpers.redirectLocation(Future.successful(result))
+  def contentAsString(result: Result): String = Helpers.contentAsString(Future.successful(result))
+  def contentAsJson(result: Result): JsValue = Helpers.contentAsJson(Future.successful(result))
+  def contentType(result: Result): Option[String] =
+    result.body.contentType.map(_.split(";").take(1).mkString.trim)
+
+  def charset(result: Result): Option[String] =
+    result.body.contentType match {
+      case Some(s) if s.contains("charset=") => Some(s.split("; *charset=").drop(1).mkString.trim)
+      case _                                 => None
+    }
   override implicit lazy val app: Application = appBuilder.build()
 
   protected def appBuilder: GuiceApplicationBuilder =

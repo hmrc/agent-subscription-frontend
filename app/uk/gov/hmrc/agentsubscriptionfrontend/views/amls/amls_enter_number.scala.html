@@ -43,7 +43,7 @@ title =  errorPrefix(amlsForm) + msgs("check-amls.title"),
 ) {
 
 @if(amlsForm.hasErrors) {
-@errorSummary(ErrorSummary(errorList = Seq(amlsForm.errors.asTextErrorLinks.head)))
+ @errorSummary(ErrorSummary().withFormErrorsAsText(amlsForm))
 }
  <h1 class="govuk-heading-xl">@msgs("moneyLaunderingCompliance.enter-number.title")</h1>
 

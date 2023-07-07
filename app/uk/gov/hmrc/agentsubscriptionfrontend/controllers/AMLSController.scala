@@ -57,6 +57,7 @@ class AMLSController @Inject()(
   amlsDetailsTemplate: amls_details,
   amlsEnterRenewalDate: amls_enter_renewal_date,
   amlsDetailsNotFoundTemplate: amls_details_not_found,
+  amlsNumberNotFoundTemplate: amls_number_not_found,
   amlsRecordIneligibleStatusTemplate: amls_record_ineligible_status)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
@@ -228,6 +229,11 @@ class AMLSController @Inject()(
     }
   }
 
+  def showAmlsNumberNotFound: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Ok(amlsNumberNotFoundTemplate())
+    }
+  }
   def showAmlsRecordIneligibleStatus: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(amlsRecordIneligibleStatusTemplate())
@@ -237,12 +243,6 @@ class AMLSController @Inject()(
   def showAmlsNotAppliedPage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(amlsNotAppliedTemplate())
-    }
-  }
-
-  def showAmlsApplicationEnterNumberPage: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
-      Ok(amlsEnterNumber(amlsEnterNumberForm()))
     }
   }
 
@@ -269,6 +269,11 @@ class AMLSController @Inject()(
       }
     }
   }
+  def showAmlsApplicationEnterNumberPage: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Ok(amlsEnterNumber(amlsEnterNumberForm()))
+    }
+  }
 
   def submitAmlsApplicationEnterNumberPage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
@@ -277,12 +282,14 @@ class AMLSController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors => {
-              Ok(amlsEnterNumber(formWithErrors))
+
+              val formWithError = formWithErrors.copy(errors = formWithErrors.errors.take(1))
+              Ok(amlsEnterNumber(formWithError))
             },
             validForm => {
               amlsService.checkAmlsNumber(validForm.membershipNumber, None).flatMap {
-                case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
-                case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
+                case AmlsSuspended | _: AmlsCheckFailed | DateNotMatched => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
+                case RecordNotFound                                      => Redirect(routes.AMLSController.showAmlsNumberNotFound())
                 case ResultOK(safeId) => {
                   DealWithResultOkAmls(agent, isChanging, validForm.membershipNumber, hmrcAmlsCode, None, safeId)
                 }

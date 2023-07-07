@@ -5,12 +5,12 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.givenSubscriptionJourneyRecordExists
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpecIt
 
 import scala.concurrent.Future
 
 // these are not stand-alone tests, they are designed to be called with 'behave like' from other specs
-trait EmailVerificationBehaviours { this: UnitSpec =>
+trait EmailVerificationBehaviours { this: BaseISpecIt =>
 
   def checksIfEmailIsVerified(sjr: SubscriptionJourneyRecord, isExpectedResult: Result => Boolean)(f: () => Future[Result]) = {
 
