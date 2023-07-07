@@ -980,7 +980,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
     }
-      "store AMLS pending details in temporary store after successful submission, redirect to not eligble page if the dates dont match" in new Setup {
+      "store AMLS pending details in temporary store after successful submission, redirect to not showAmlsDateNotMatched page if the dates dont match" in new Setup {
         givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
         givenSubscriptionRecordCreated(
           id,
@@ -1003,7 +1003,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
         val result = await(controller.submitAmlsApplicationDatePage(request))
         status(result) shouldBe 303
-        redirectLocation(result).get shouldBe routes.AMLSController.showAmlsRecordIneligibleStatus().url
+        redirectLocation(result).get shouldBe routes.AMLSController.showAmlsDateNotMatched().url
       }
 
 
@@ -1032,6 +1032,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
     }
+
 
     "show validation error when the form is submitted with empty day field" in new Setup {
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(

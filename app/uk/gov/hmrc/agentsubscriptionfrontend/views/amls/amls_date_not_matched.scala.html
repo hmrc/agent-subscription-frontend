@@ -22,14 +22,14 @@
 
 @()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
-@mainTemplate(title = msgs("amls-number-not-found.title"),
-    backLinkHref = Some(routes.AMLSController.showAmlsApplicationEnterNumberPage().url)) {
+@mainTemplate(title = msgs("amls-date-not-matched.title"),
+    backLinkHref = Some(routes.AMLSController.showAmlsApplicationEnterDatePage().url)) {
 
-    <h1 class="govuk-heading-xl">@msgs("amls-number-not-found.title")</h1>
+    <h1 class="govuk-heading-xl">@msgs("amls-date-not-matched.title")</h1>
 
-    <p>@msgs("amls-number-not-found.p")</p>
+    <p>@msgs("amls-date-not-matched-found.p")</p>
 
-    <a class="govuk-button govuk-!-margin-top-2" href="@routes.AMLSController.showAmlsApplicationEnterNumberPage()">@msgs("amls-number-not-found.button")</a>
+    <a class="govuk-button govuk-!-margin-top-2" href="@routes.AMLSController.showAmlsApplicationEnterDatePage()">@msgs("amls-date-not-matched.button")</a>
 
 }
 
