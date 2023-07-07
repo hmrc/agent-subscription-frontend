@@ -234,6 +234,11 @@ class AMLSController @Inject()(
       Ok(amlsNumberNotFoundTemplate())
     }
   }
+  def showAmlsDateNotMatched: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { _ =>
+      Ok(amlsNumberNotFoundTemplate())
+    }
+  }
   def showAmlsRecordIneligibleStatus: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(amlsRecordIneligibleStatusTemplate())
@@ -246,29 +251,6 @@ class AMLSController @Inject()(
     }
   }
 
-  def showAmlsApplicationEnterDatePage: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
-      agent.getMandatoryAmlsData.amlsDetails match {
-        case Some(amlsDetails) =>
-          amlsDetails.details match {
-            case Left(PendingDetails(expiry)) =>
-              val form: Map[String, String] = expiry match {
-                case None => Map("amlsCode" -> hmrcAmlsCode)
-                case Some(expiry) =>
-                  Map(
-                    "amlsCode"     -> hmrcAmlsCode,
-                    "expiry.day"   -> expiry.getDayOfMonth.toString,
-                    "expiry.month" -> expiry.getMonthValue.toString,
-                    "expiry.year"  -> expiry.getYear.toString
-                  )
-              }
-              Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm.bind(form)))
-            case Right(RegisteredDetails(_, _, _, _)) => Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm))
-          }
-        case _ => Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm))
-      }
-    }
-  }
   def showAmlsApplicationEnterNumberPage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
       Ok(amlsEnterNumber(amlsEnterNumberForm()))
@@ -304,6 +286,29 @@ class AMLSController @Inject()(
       }
     }
   }
+  def showAmlsApplicationEnterDatePage: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { agent =>
+      agent.getMandatoryAmlsData.amlsDetails match {
+        case Some(amlsDetails) =>
+          amlsDetails.details match {
+            case Left(PendingDetails(expiry)) =>
+              val form: Map[String, String] = expiry match {
+                case None => Map("amlsCode" -> hmrcAmlsCode)
+                case Some(expiry) =>
+                  Map(
+                    "amlsCode"     -> hmrcAmlsCode,
+                    "expiry.day"   -> expiry.getDayOfMonth.toString,
+                    "expiry.month" -> expiry.getMonthValue.toString,
+                    "expiry.year"  -> expiry.getYear.toString
+                  )
+              }
+              Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm.bind(form)))
+            case Right(RegisteredDetails(_, _, _, _)) => Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm))
+          }
+        case _ => Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm))
+      }
+    }
+  }
 
   def submitAmlsApplicationDatePage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
@@ -326,6 +331,7 @@ class AMLSController @Inject()(
                 amlsService.checkAmlsExpiryDate(membershipNumber, expiryDate).flatMap {
                   case ResultOK(amlsSafeId) =>
                     DealWithResultOkAmls(agent, isChanging, membershipNumber, hmrcAmlsCode, Some(expiryDate), amlsSafeId)
+                  case DateNotMatched => Future.successful(Redirect(routes.AMLSController.showAmlsDateNotMatched()))
                   case _ =>
                     Future.successful(Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus()))
                 }
