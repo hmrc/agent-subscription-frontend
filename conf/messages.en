@@ -475,13 +475,13 @@ amls-details-not-found.p=Check your registration number and renewal date and try
 amls-details-not-found.button=Try again
 
 # Amls Number Not Found
-amls-number-not-found.title=The date you entered did not match our records
-amls-number-not-found.p=Check your registration renewal date and try again.
+amls-number-not-found.title=We cannot find your money laundering supervision registration number
+amls-number-not-found.p=Check your registration number and try again.
 amls-number-not-found.button=Try again
 
 # Amls Date Not Matched
-amls-date-not-matched.title=We cannot find your money laundering supervision registration number
-amls-date-not-matched.p=Check your registration number and try again.
+amls-date-not-matched.title=The date you entered did not match our records
+amls-date-not-matched.p=Check your registration renewal date and try again.
 amls-date-not-matched.button=Try again
 
 # Amls Ineligible status
