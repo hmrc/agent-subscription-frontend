@@ -98,6 +98,9 @@ error.moneyLaunderingCompliance.amlscode.empty=Dewiswch enw eich corff goruchwyl
 error.moneyLaunderingCompliance.amlscode.invalid=Dewiswch enw eich corff goruchwylio gwyngalchu arian o’r rhestr
 error.moneyLaunderingCompliance.membershipNumber.empty=Nodwch rif cofrestru yn y fformat cywir
 error.moneyLaunderingCompliance.membershipNumber.invalid=Nodwch rif cofrestru yn y fformat cywir
+
+amls.enter-renewal-date.form.title=Y dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad
+
 error.moneyLaunderingCompliance.date.empty=Nodwch y dyddiad nesaf ar gyfer adnewyddu eich cofrestriad
 error.moneyLaunderingCompliance.day.empty=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad gynnwys diwrnod
 error.moneyLaunderingCompliance.day.month.empty=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad gynnwys diwrnod a mis
@@ -113,6 +116,7 @@ error.check-amls-value.invalid=Dewiswch ‘Iawn’ os ydych wedi cofrestru gyda 
 error.check-amlsAppliedFor-value.invalid=Dewiswch ‘Iawn’ os ydych wedi gwneud cais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian
 
 error.amls.enter-renewal-date.date.empty=Nodwch y dyddiad y gwnaethoch gais
+error.amls.enter-renewal-date.all.empty=Nodwch y dyddiad nesaf ar gyfer adnewyddu eich cofrestriad
 error.amls.enter-renewal-date.day.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod
 error.amls.enter-renewal-date.day.month.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod a mis
 error.amls.enter-renewal-date.day.year.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod a blwyddyn
@@ -480,6 +484,7 @@ amls-ineligible-status.link=Darllenwch sut i herio penderfyniad CThEM i wrthod c
 
 # Pending AMLS Details page
 amls.enter-renewal-date.title=Rydym wedi cymeradwyo’ch cofrestriad ar gyfer goruchwyliaeth gwyngalchu arian
+amls.enter-renewal-date.hint=Gallwch ddod o hyd i hwn yn eich dangosfwrdd AMLS.Er enghraifft, 31 03 2024
 
 checkAnswers.title=Gwiriwch eich atebion cyn creu eich cyfrif
 checkAnswers.description.p3=Drwy greu’r cyfrif hwn, rydych yn cadarnhau, hyd eithaf eich gwybodaeth, fod y manylion a roesoch yn gywir.

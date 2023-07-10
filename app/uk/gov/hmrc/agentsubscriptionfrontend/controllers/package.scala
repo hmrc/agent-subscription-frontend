@@ -243,7 +243,7 @@ package object controllers extends Logging {
 
       def refineErrors(dateFieldErrors: Seq[FormError]): Option[String] =
         dateFieldErrors.map(_.key).map(k => "expiry.".r.replaceFirstIn(k, "")).sorted match {
-          case List("day", "month", "year") => Some("error.amls.enter-renewal-date.day.empty")
+          case List("day", "month", "year") => Some("error.amls.enter-renewal-date.all.empty")
           case List("day", "month")         => Some("error.amls.enter-renewal-date.day.month.empty")
           case List("day", "year")          => Some("error.amls.enter-renewal-date.day.year.empty")
           case List("day")                  => Some("error.amls.enter-renewal-date.day.empty")
