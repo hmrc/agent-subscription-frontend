@@ -113,7 +113,9 @@ error.moneyLaunderingCompliance.date.before=Your next registration renewal date 
 error.check-amls-value.invalid=Select yes if you are registered with a money laundering supervisory body
 error.check-amlsAppliedFor-value.invalid=Select yes if you are applied to register for money laundering supervision with HMRC
 
+amls.enter-renewal-date.form.title=Your next registration renewal date
 error.amls.enter-renewal-date.date.empty=Enter the date you applied
+error.amls.enter-renewal-date.all.empty=Enter your next registration renewal date
 error.amls.enter-renewal-date.day.empty=The date you applied must include a day
 error.amls.enter-renewal-date.day.month.empty=The date you applied must include a day and a month
 error.amls.enter-renewal-date.day.year.empty=The date you applied must include a day and a year
@@ -466,7 +468,7 @@ moneyLaunderingCompliance.expiry.year.title=Year
 # Money laundering enter number page
 moneyLaunderingCompliance.enter-number.title=What are your pending money laundering supervision registration details?
 moneyLaunderingCompliance.enter-number.membershipNumber=Your registration number
-moneyLaunderingCompliance.enter-number.membershipNumber.hint=You can find this in your AMLS dashboard
+moneyLaunderingCompliance.enter-number.membershipNumber.hint=You can find this in your AMLS dashboard.
 
 
 # Amls Not Found
@@ -494,6 +496,7 @@ amls-ineligible-status.link=Read about how to challenge an HMRC decision to refu
 
 # Pending AMLS Details page
 amls.enter-renewal-date.title=We have approved your money laundering supervision registration
+amls.enter-renewal-date.hint=You can find this in your AMLS dashboard.For example, 31 03 2024
 
 checkAnswers.title=Check your answers before creating your account
 checkAnswers.description.p3=By setting up this account, you confirm that, to the best of your knowledge, the details you provided are correct.
