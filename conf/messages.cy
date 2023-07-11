@@ -484,7 +484,7 @@ amls-ineligible-status.link=Darllenwch sut i herio penderfyniad CThEM i wrthod c
 
 # Pending AMLS Details page
 amls.enter-renewal-date.title=Rydym wedi cymeradwyo’ch cofrestriad ar gyfer goruchwyliaeth gwyngalchu arian
-amls.enter-renewal-date.hint=Gallwch ddod o hyd i hwn yn eich dangosfwrdd AMLS.Er enghraifft, 31 03 2024
+amls.enter-renewal-date.hint=Gallwch ddod o hyd i hwn yn eich dangosfwrdd AMLS. Er enghraifft, 31 03 2024
 
 checkAnswers.title=Gwiriwch eich atebion cyn creu eich cyfrif
 checkAnswers.description.p3=Drwy greu’r cyfrif hwn, rydych yn cadarnhau, hyd eithaf eich gwybodaeth, fod y manylion a roesoch yn gywir.
