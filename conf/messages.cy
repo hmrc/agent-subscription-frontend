@@ -83,6 +83,7 @@ error.client.sautr.blank=Nodwch Gyfeirnod Unigryw y Trethdalwr (UTR) y cleient a
 error.client.sautr.invalid=Rhaid i Gyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad fod yn 10 rhif
 error.crn.empty=Nodwch rif cofrestru cwmni eich busnes
 error.crn.invalid=Rhaid i’r rhif cofrestru cwmni fod yn 8 rhif, neu’n 2 lythyren wedi’u dilyn gan 6 rhif
+
 error.business-name.empty =Nodwch enw eich busnes
 error.business-name.invalid = Nodwch enw eich busnes yn y fformat cywir
 error.business-name.maxlength =Rhaid i enw’r busnes fod yn 40 o gymeriadau neu lai
@@ -98,9 +99,6 @@ error.moneyLaunderingCompliance.amlscode.empty=Dewiswch enw eich corff goruchwyl
 error.moneyLaunderingCompliance.amlscode.invalid=Dewiswch enw eich corff goruchwylio gwyngalchu arian o’r rhestr
 error.moneyLaunderingCompliance.membershipNumber.empty=Nodwch rif cofrestru yn y fformat cywir
 error.moneyLaunderingCompliance.membershipNumber.invalid=Nodwch rif cofrestru yn y fformat cywir
-
-amls.enter-renewal-date.form.title=Y dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad
-
 error.moneyLaunderingCompliance.date.empty=Nodwch y dyddiad nesaf ar gyfer adnewyddu eich cofrestriad
 error.moneyLaunderingCompliance.day.empty=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad gynnwys diwrnod
 error.moneyLaunderingCompliance.day.month.empty=Mae’n rhaid i’r dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad gynnwys diwrnod a mis
@@ -115,6 +113,7 @@ error.moneyLaunderingCompliance.date.before=Mae’n rhaid i’r dyddiad nesaf ar
 error.check-amls-value.invalid=Dewiswch ‘Iawn’ os ydych wedi cofrestru gyda chorff goruchwylio gwyngalchu arian
 error.check-amlsAppliedFor-value.invalid=Dewiswch ‘Iawn’ os ydych wedi gwneud cais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian
 
+amls.enter-renewal-date.form.title=Y dyddiad nesaf ar gyfer adnewyddu’ch cofrestriad
 error.amls.enter-renewal-date.date.empty=Nodwch y dyddiad y gwnaethoch gais
 error.amls.enter-renewal-date.all.empty=Nodwch y dyddiad nesaf ar gyfer adnewyddu eich cofrestriad
 error.amls.enter-renewal-date.day.empty=Rhaid i’r dyddiad y gwnaethoch gais gynnwys diwrnod
@@ -184,6 +183,12 @@ confirmBusiness.error.no-radio-selected=Dewiswch ‘Iawn’ os mai dyma’ch bus
 noAgencyFound.title=Nid oeddem yn gallu dod o hyd i’ch busnes
 noAgencyFound.p1=Nid oeddem yn gallu dod o hyd i fusnes yn ein cofnodion drwy ddefnyddio’r manylion a roesoch i ni.
 noAgencyFound.p2=Gwiriwch y manylion a rhowch gynnig arall arni.
+
+#Company Not Allowed
+companyNotAllowed.title=We cannot create an account for this company
+companyNotAllowed.p1=We cannot register this company for an agent services account. This is because of the company''s status on the Companies House register.
+companyNotAllowed.p2=To view your company status you can <a href={0} target='_blank'>search the Companies House register (opens in a new tab)</a>. If you believe the status is incorrect, contact Companies House.
+companyNotAllowed.p3=If you''ve entered the incorrect details, you can try again.
 
 #Already subscribed
 alreadySubscribed.title=Mae gan eich busnes gyfrif gwasanaethau asiant eisoes
@@ -469,6 +474,16 @@ moneyLaunderingCompliance.enter-number.membershipNumber.hint=Gallwch ddod o hyd 
 amls-details-not-found.title=Ni allwn ddod o hyd i’ch manylion cofrestru ar gyfer goruchwyliaeth gwyngalchu arian
 amls-details-not-found.p=Gwiriwch eich rhif aelodaeth a’ch dyddiad adnewyddu, a rhowch gynnig arall arni.
 amls-details-not-found.button=Rhowch gynnig arall arni
+
+# Amls Number Not Found
+amls-number-not-found.title=Ni allwn ddod o hyd i’ch rhif cofrestru ar gyfer goruchwyliaeth gwyngalchu arian
+amls-number-not-found.p=Gwiriwch eich rhif cofrestru a rhowch gynnig arall arni.
+amls-number-not-found.button=Try again
+
+# Amls Date Not Matched
+amls-date-not-matched.title=Nid yw’r dyddiad a nodoch yn cyd-fynd â’n cofnodion
+amls-date-not-matched.p=Gwiriwch ddyddiad adnewyddu’ch cofrestriad, a rhowch gynnig arall arni.
+amls-date-not-matched.button=Try again
 
 # Amls Ineligible status
 amls-ineligible-status.title=Ni allwch greu cyfrif gwasanaethau asiant ar hyn o bryd
