@@ -20,6 +20,7 @@ import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
+import play.api.libs.json.Json
 import uk.gov.hmrc.agentmtdidentifiers.model.{Utr, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.FormBundleStatus
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -342,20 +343,8 @@ object AgentSubscriptionStub {
                                       |    },
                                       |    "email": "${agency.email}"
                                       |  },
-                                      |  "langForEmail": "${request.langForEmail.fold("")(_.code)}"
-                                      |  ${request.amlsDetails.get.details match {
-                                        case Right(registeredDetails) =>
-                                          s""","amlsDetails" : {
-                                          |     "supervisoryBody" : "${request.amlsDetails.get.supervisoryBody}",
-                                          |     "membershipNumber" : "${registeredDetails.membershipNumber}",
-                                          |     "membershipExpiresOn" : "${registeredDetails.membershipExpiresOn.getOrElse("")}"
-                                          |   }"""
-                                        case Left(pendingDetails) =>
-                                          s""","amlsDetails" : {
-                                          |     "supervisoryBody" : "${request.amlsDetails.get.supervisoryBody}",
-                                          |     "appliedOn" : "${pendingDetails.appliedOn}"
-                                          |   }"""
-                                      }}
+                                      |  "langForEmail": "${request.langForEmail.fold("")(_.code)}",
+                                      |  ${request.amlsDetails.fold("")(details => s""""amlsDetails" : ${Json.toJson(details).toString}""")}
                                       |}""".stripMargin))
   }
 

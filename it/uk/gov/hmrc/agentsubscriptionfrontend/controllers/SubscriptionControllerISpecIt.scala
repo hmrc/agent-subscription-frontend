@@ -83,7 +83,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
   protected lazy val redirectUrl = "https://www.gov.uk/"
 
-  val amlsDetails = AmlsDetails("supervisory", Right(RegisteredDetails("123456789", Some(LocalDate.now().plusDays(10)))))
+  val amlsDetails = AmlsDetails("supervisory", membershipNumber = Some("123456789"), appliedOn = None, membershipExpiresOn = Some(LocalDate.now().plusDays(10)))
 
   val agentSession = Some(
     AgentSession(

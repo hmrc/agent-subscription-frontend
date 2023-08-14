@@ -404,7 +404,7 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
         email = "agency@example.com"
       ),
       Some(Lang("en")),
-      amlsDetails = Some(AmlsDetails("supervisory", Right(RegisteredDetails("123456789", Some(LocalDate.now())))))
+      amlsDetails = Some(AmlsDetails("supervisory", membershipNumber = Some("123456789"), appliedOn = None, membershipExpiresOn = Some(LocalDate.now())))
     )
 
   private val partialSubscriptionRequest =

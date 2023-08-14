@@ -23,7 +23,7 @@ import play.api.mvc.Call
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, UserMapping}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{BusinessAddress, PendingDetails, RegisteredDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessAddress
 
 case class CheckYourAnswers(
   businessNameRow: AnswerRow,
@@ -96,30 +96,25 @@ object CheckYourAnswers {
 
   private def amlsAnswer(data: AmlsData): List[String] =
     data.amlsDetails match {
-      case Some(amlsDetails) =>
-        amlsDetails.details match {
-          case Left(PendingDetails(maybeAppliedOn)) =>
-            maybeAppliedOn.fold(List.empty[String])(appliedOn => List(appliedOn.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))))
-          case Right(RegisteredDetails(membershipNumber, membershipExpiresOn, _, _)) =>
-            List(
-              amlsDetails.supervisoryBody,
-              membershipNumber,
-              membershipExpiresOn
-                .getOrElse(throw new Exception("ExpiresOn date is mandatory for AMLS registered agents."))
-                .format(DateTimeFormatter.ofPattern("dd MM yyyy"))
-            )
-        }
+      case Some(amlsDetails) if amlsDetails.isPending =>
+        amlsDetails.appliedOn.fold(List.empty[String])(appliedOn => List(appliedOn.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))))
+      case Some(amlsDetails) /* if registered */ =>
+        List(
+          amlsDetails.supervisoryBody,
+          amlsDetails.membershipNumber.getOrElse(throw new IllegalStateException("Registered AMLS details without a membership number")),
+          amlsDetails.membershipExpiresOn
+            .getOrElse(throw new Exception("ExpiresOn date is mandatory for AMLS registered agents."))
+            .format(DateTimeFormatter.ofPattern("dd MM yyyy"))
+        )
       case None => throw new Exception("AMLS details incomplete")
     }
 
   private def amlsQuestion(data: AmlsData)(implicit messages: Messages): String =
     data.amlsDetails match {
-      case Some(amlsDetails) =>
-        amlsDetails.details match {
-          case Left(PendingDetails(appliedOn)) => Messages("checkAnswers.amlsDetails.pending.label")
-          case Right(RegisteredDetails(membershipNumber, membershipExpiresOn, _, _)) =>
-            Messages("checkAnswers.amlsDetails.label")
-        }
+      case Some(amlsDetails) if amlsDetails.isPending =>
+        Messages("checkAnswers.amlsDetails.pending.label")
+      case Some(amlsDetails) /* if registered */ =>
+        Messages("checkAnswers.amlsDetails.label")
       case None => throw new Exception("AMLS details incomplete")
     }
 
