@@ -152,17 +152,19 @@ class AMLSController @Inject()(
     withSubscribingAgent { agent =>
       agent.getMandatoryAmlsData.amlsDetails match {
         case Some(amlsDetails) =>
-          amlsDetails.details match {
-            case Left(PendingDetails(_)) => Ok(amlsDetailsTemplate(amlsForm(amlsBodies.keySet), amlsBodies))
-            case Right(RegisteredDetails(membershipNumber, membershipExpiresOn, _, _)) =>
-              val form: Map[String, String] = Map(
-                "amlsCode"         -> amlsBodies.find(_._2 == amlsDetails.supervisoryBody).map(_._1).getOrElse(""),
-                "membershipNumber" -> membershipNumber,
-                "expiry.day"       -> membershipExpiresOn.fold("")(_.getDayOfMonth.toString),
-                "expiry.month"     -> membershipExpiresOn.fold("")(_.getMonthValue.toString),
-                "expiry.year"      -> membershipExpiresOn.fold("")(_.getYear.toString)
-              )
-              Ok(amlsDetailsTemplate(amlsForm(amlsBodies.keySet).bind(form), amlsBodies))
+          if (amlsDetails.isPending) {
+            Ok(amlsDetailsTemplate(amlsForm(amlsBodies.keySet), amlsBodies))
+          } else {
+            val membershipNumber: String =
+              amlsDetails.membershipNumber.getOrElse(throw new IllegalStateException("AMLS registered details without a membership number"))
+            val form: Map[String, String] = Map(
+              "amlsCode"         -> amlsBodies.find(_._2 == amlsDetails.supervisoryBody).map(_._1).getOrElse(""),
+              "membershipNumber" -> membershipNumber,
+              "expiry.day"       -> amlsDetails.membershipExpiresOn.fold("")(_.getDayOfMonth.toString),
+              "expiry.month"     -> amlsDetails.membershipExpiresOn.fold("")(_.getMonthValue.toString),
+              "expiry.year"      -> amlsDetails.membershipExpiresOn.fold("")(_.getYear.toString)
+            )
+            Ok(amlsDetailsTemplate(amlsForm(amlsBodies.keySet).bind(form), amlsBodies))
           }
         case _ => Ok(amlsDetailsTemplate(amlsForm(amlsBodies.keySet), amlsBodies))
       }
@@ -184,7 +186,7 @@ class AMLSController @Inject()(
                 case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
                 case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
                 case ResultOK(safeId) =>
-                  DealWithResultOkAmls(agent, isChanging, validForm.membershipNumber, validForm.amlsCode, Some(validForm.expiry), safeId)
+                  dealWithResultOkAmls(agent, isChanging, validForm.membershipNumber, validForm.amlsCode, Some(validForm.expiry), safeId)
                 case ResultOKButCheckDate(_) => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
               }
             }
@@ -193,7 +195,7 @@ class AMLSController @Inject()(
     }
   }
 
-  private def DealWithResultOkAmls(
+  private def dealWithResultOkAmls(
     agent: Agent,
     isChanging: Option[Boolean],
     membershipNumber: String,
@@ -209,15 +211,16 @@ class AMLSController @Inject()(
       agent,
       amlsData =>
         Some(
-          amlsData.copy(amlsDetails = Some(AmlsDetails(
-            supervisoryBodyData,
-            Right(RegisteredDetails(
-              membershipNumber = membershipNumber,
+          amlsData.copy(
+            amlsDetails = Some(AmlsDetails(
+              supervisoryBodyData,
+              membershipNumber = Some(membershipNumber),
               membershipExpiresOn = expiry,
               amlsSafeId = safeId,
-              agentBPRSafeId = agent.getMandatorySubscriptionRecord.businessDetails.registration.flatMap(_.safeId)
-            ))
-          ))))
+              agentBPRSafeId = agent.getMandatorySubscriptionRecord.businessDetails.registration.flatMap(_.safeId),
+              appliedOn = None
+            )))
+      )
     ).map(
       _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsDetailsForm()))
     )
@@ -274,7 +277,7 @@ class AMLSController @Inject()(
                 case AmlsSuspended | _: AmlsCheckFailed | DateNotMatched => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
                 case RecordNotFound                                      => Redirect(routes.AMLSController.showAmlsNumberNotFound())
                 case ResultOK(safeId) => {
-                  DealWithResultOkAmls(agent, isChanging, validForm.membershipNumber, hmrcAmlsCode, None, safeId)
+                  dealWithResultOkAmls(agent, isChanging, validForm.membershipNumber, hmrcAmlsCode, None, safeId)
                 }
                 case ResultOKButCheckDate(safeId) =>
                   sessionStoreService
@@ -289,24 +292,18 @@ class AMLSController @Inject()(
   }
   def showAmlsApplicationEnterDatePage: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
-      agent.getMandatoryAmlsData.amlsDetails match {
-        case Some(amlsDetails) =>
-          amlsDetails.details match {
-            case Left(PendingDetails(expiry)) =>
-              val form: Map[String, String] = expiry match {
-                case None => Map("amlsCode" -> hmrcAmlsCode)
-                case Some(expiry) =>
-                  Map(
-                    "amlsCode"     -> hmrcAmlsCode,
-                    "expiry.day"   -> expiry.getDayOfMonth.toString,
-                    "expiry.month" -> expiry.getMonthValue.toString,
-                    "expiry.year"  -> expiry.getYear.toString
-                  )
-              }
-              Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm.bind(form)))
-            case Right(RegisteredDetails(_, _, _, _)) => Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm))
-          }
-        case _ => Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm))
+      agent.getMandatoryAmlsData.amlsDetails.flatMap(_.membershipExpiresOn) match {
+        case Some(expiry) =>
+          val formData = Map(
+            "amlsCode"     -> hmrcAmlsCode,
+            "expiry.day"   -> expiry.getDayOfMonth.toString,
+            "expiry.month" -> expiry.getMonthValue.toString,
+            "expiry.year"  -> expiry.getYear.toString
+          )
+          Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm.bind(formData)))
+        case None =>
+          val formData = Map("amlsCode" -> hmrcAmlsCode)
+          Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm.bind(formData)))
       }
     }
   }
@@ -331,7 +328,7 @@ class AMLSController @Inject()(
                 val membershipNumber = amlsSession.membershipNumber
                 amlsService.checkAmlsExpiryDate(membershipNumber, expiryDate).flatMap {
                   case ResultOK(amlsSafeId) =>
-                    DealWithResultOkAmls(agent, isChanging, membershipNumber, hmrcAmlsCode, Some(expiryDate), amlsSafeId)
+                    dealWithResultOkAmls(agent, isChanging, membershipNumber, hmrcAmlsCode, Some(expiryDate), amlsSafeId)
                   case DateNotMatched => Future.successful(Redirect(routes.AMLSController.showAmlsDateNotMatched()))
                   case _ =>
                     Future.successful(Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus()))

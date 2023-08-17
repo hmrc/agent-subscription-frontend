@@ -38,7 +38,7 @@ class TaskListService @Inject()(
       val journeyRecord = (subscriptionJourneyRecord.amlsData, amlsOpt) match {
         case (None, Some(amls)) =>
           val newJourneyRecord = subscriptionJourneyRecord
-            .copy(amlsData = Some(AmlsData(amlsRegistered = amls.details.isRight, Some(amls.details.isLeft), amlsOpt)))
+            .copy(amlsData = Some(AmlsData(amlsRegistered = amls.isRegistered, Some(amls.isPending), amlsOpt)))
           agentSubscriptionConnector.createOrUpdateJourney(newJourneyRecord)
           newJourneyRecord
         case _ => subscriptionJourneyRecord

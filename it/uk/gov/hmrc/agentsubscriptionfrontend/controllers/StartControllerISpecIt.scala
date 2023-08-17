@@ -29,7 +29,7 @@ class StartControllerISpecIt extends BaseISpecIt {
 
   object FixturesForReturnAfterGGCredsCreated {
 
-    val amlsSDetails: AmlsDetails = AmlsDetails("supervisory", Right(RegisteredDetails("123456789", Some(LocalDate.now()))))
+    val amlsSDetails: AmlsDetails = AmlsDetails("supervisory", Some("123456789"), appliedOn = None, membershipExpiresOn = Some(LocalDate.now()))
 
     val agentSession: AgentSession =
       AgentSession(

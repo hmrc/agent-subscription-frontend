@@ -125,7 +125,6 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       val result =
         await(controller.submitAmlsRegistered(authenticatedRequest("POST").withFormUrlEncodedBody("registeredAmls" -> "yes", "submit" -> "continue")))
 
-      println(bodyOf(result))
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.AMLSController.showAmlsDetailsForm().url)
     }
@@ -154,7 +153,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       val completeAmlsData = AmlsData(
         false,
         None,
-        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", Some(LocalDate.now()))))))
+        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", membershipNumber = Some("123456789"), appliedOn = None, membershipExpiresOn = Some(LocalDate.now())))
+      )
 
       givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
       givenSubscriptionRecordCreated(
@@ -173,7 +173,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       val completeAmlsData = AmlsData(
         amlsRegistered = false,
         None,
-        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", Some(LocalDate.now()))))))
+        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", membershipNumber = Some("123456789"), appliedOn = None, membershipExpiresOn = Some(LocalDate.now())))
+      )
 
       givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
       givenSubscriptionRecordCreated(
@@ -191,7 +192,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       val completeAmlsData = AmlsData(
         amlsRegistered = true,
         None,
-        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", Some(LocalDate.now()))))))
+        Some(AmlsDetails("Insolvency Practitioners Association (IPA)", membershipNumber = Some("123456789"), appliedOn = None, membershipExpiresOn = Some(LocalDate.now())))
+      )
 
       givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(completeAmlsData)))
@@ -473,7 +475,10 @@ class AMLSControllerISpecIt extends BaseISpecIt {
             AmlsData(
               amlsRegistered = true,
               None,
-              Some(AmlsDetails("Insolvency Practitioners Association (IPA)", Right(RegisteredDetails("123456789", Some(LocalDate.now()))))))))
+              Some(AmlsDetails("Insolvency Practitioners Association (IPA)", membershipNumber = Some("123456789"), appliedOn = None, membershipExpiresOn = Some(LocalDate.now())))
+            )
+          )
+        )
 
       givenSubscriptionJourneyRecordExists(id, minimalSubscriptionJourneyRecordWithAmls(id))
 
@@ -507,7 +512,9 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         id,
         record.copy(
           amlsData = Some(AmlsData.registeredUserNoDataEntered
-            .copy(amlsDetails = Some(AmlsDetails(amlsBody, Right(RegisteredDetails("12345", Some(expiryDate)))))))))
+            .copy(amlsDetails = Some(AmlsDetails(amlsBody, membershipNumber = Some("12345"), appliedOn = None, membershipExpiresOn = Some(expiryDate)))))
+        )
+      )
 
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "amlsCode"         -> "AAT",
@@ -532,7 +539,9 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         id,
         record.copy(
           amlsData = Some(AmlsData.registeredUserNoDataEntered
-            .copy(amlsDetails = Some(AmlsDetails(amlsBody, Right(RegisteredDetails(validAmlsRegistrationNumber, Some(expiryDate)))))))))
+            .copy(amlsDetails = Some(AmlsDetails(amlsBody, membershipNumber = Some(validAmlsRegistrationNumber), appliedOn = None, membershipExpiresOn = Some(expiryDate)))))
+        )
+      )
 
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "amlsCode"         -> "HMRC",
@@ -638,7 +647,9 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         id,
         record.copy(
           amlsData = Some(AmlsData.registeredUserNoDataEntered
-            .copy(amlsDetails = Some(AmlsDetails(amlsBody, Right(RegisteredDetails("12345", Some(expiryDate)))))))))
+            .copy(amlsDetails = Some(AmlsDetails(amlsBody, membershipNumber = Some("12345"), appliedOn = None, membershipExpiresOn = Some(expiryDate)))))
+        )
+      )
 
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "amlsCode"         -> "AAT",
@@ -863,8 +874,15 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     }
 
     "display and pre-populate page when this information is in the store" in new Setup {
-      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecord(id).copy(amlsData =
-        Some(AmlsData(false, Some(true), Some(AmlsDetails("supervisory", Left(PendingDetails(Some(LocalDate.now().minusDays(5))))))))))
+      givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecord(id).copy(
+        amlsData = Some(
+          AmlsData(
+            false,
+            Some(true),
+            Some(AmlsDetails("supervisory", membershipNumber = None, appliedOn = Some(LocalDate.now().minusDays(5)), membershipExpiresOn = None))
+          )
+        )
+      ))
 
       val result = await(controller.showAmlsApplicationEnterNumberPage(authenticatedRequest()))
 
@@ -901,7 +919,17 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         id,
         record.copy(
           amlsData = Some(AmlsData.registeredUserNoDataEntered
-            .copy(amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", Right(RegisteredDetails(validAmlsRegistrationNumber,None, Some("111234567890123"),None))))))))
+            .copy(amlsDetails = Some(AmlsDetails(
+              "HM Revenue and Customs (HMRC)",
+              membershipNumber = Some(validAmlsRegistrationNumber),
+              appliedOn = None,
+              membershipExpiresOn = None,
+              amlsSafeId = Some("111234567890123"),
+              agentBPRSafeId = None
+            )))
+          )
+        )
+      )
 
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "membershipNumber" -> validAmlsRegistrationNumber,
@@ -918,7 +946,16 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         id,
         record.copy(
           amlsData = Some(AmlsData.registeredUserNoDataEntered
-            .copy(amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", Right(RegisteredDetails(validAmlsRegistrationNumber,None, Some("111234567890123"),None))))))))
+            .copy(amlsDetails = Some(AmlsDetails(
+              "HM Revenue and Customs (HMRC)",
+              Some(validAmlsRegistrationNumber),
+              appliedOn = None,
+              membershipExpiresOn = None,
+              amlsSafeId = Some("111234567890123"),
+              agentBPRSafeId = None)))
+          )
+        )
+      )
 
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "membershipNumber" -> validAmlsRegistrationNumber,
@@ -935,7 +972,17 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         id,
         record.copy(
           amlsData = Some(AmlsData.registeredUserNoDataEntered
-            .copy(amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", Right(RegisteredDetails(validAmlsRegistrationNumber,None, Some("111234567890123"),None))))))))
+            .copy(amlsDetails = Some(AmlsDetails(
+              "HM Revenue and Customs (HMRC)",
+              membershipNumber = Some(validAmlsRegistrationNumber),
+              appliedOn = None,
+              membershipExpiresOn = None,
+              amlsSafeId = Some("111234567890123"),
+              agentBPRSafeId = None))
+            )
+          )
+        )
+      )
 
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
         "membershipNumber" -> validAmlsRegistrationNumber,
@@ -963,8 +1010,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         record.copy(
           amlsData = Some(
             AmlsData.registeredUserNoDataEntered.copy(
-              amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)",
-                Right(RegisteredDetails("12345",membershipExpiresOn = Some(expiryDate))))))))
+              amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", membershipNumber = Some("12345"), membershipExpiresOn = Some(expiryDate), appliedOn = None)))))
       )
         givenAmlsRecordFound("12345", Approved)
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
@@ -987,8 +1033,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
           record.copy(
             amlsData = Some(
               AmlsData.registeredUserNoDataEntered.copy(
-                amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)",
-                  Right(RegisteredDetails("12345",membershipExpiresOn = Some(expiryDate))))))))
+                amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", membershipNumber = Some("12345"), membershipExpiresOn = Some(expiryDate), appliedOn = None)))))
         )
         givenAmlsRecordFound("12345", Approved,None,expiryDate)
         val wrongDay = expiryDate.plusDays(2).getDayOfMonth.toString
@@ -1014,8 +1059,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         record.copy(
           amlsData = Some(
             AmlsData.registeredUserNoDataEntered.copy(
-              amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)",
-                Right(RegisteredDetails("12345",membershipExpiresOn = Some(expiryDate))))))))
+              amlsDetails = Some(AmlsDetails("HM Revenue and Customs (HMRC)", membershipNumber = Some("12345"), membershipExpiresOn = Some(expiryDate), appliedOn = None)))))
       )
       givenAmlsRecordFound("12345", Approved)
       implicit val request = authenticatedRequest(POST).withFormUrlEncodedBody(
