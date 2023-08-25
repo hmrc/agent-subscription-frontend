@@ -1,0 +1,76 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
+@import uk.gov.hmrc.agentsubscriptionfrontend.models.ContactPhoneCheck
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputRadios}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF, RadioItem, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
+
+
+@this(
+        mainTemplate: MainTemplate,
+        errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+        formHelper: FormWithCSRF,
+        errorSummary: GovukErrorSummary,
+        inputRadio: InputRadios,
+        submitButton: SubmitButton,
+)
+
+@(contactPhoneCheckForm: Form[ContactPhoneCheck], businessPhone: String, isChanging: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+
+@backLinkCall = @{if(isChanging){routes.SubscriptionController.showCheckAnswers()} else {routes.TaskListController.showTaskList()}}
+
+@mainTemplate(
+    title = errorPrefix(contactPhoneCheckForm) + msgs("contactPhoneCheck.title"),
+    backLinkHref = Some(backLinkCall.toString)
+) {
+
+    @if(contactPhoneCheckForm.hasErrors) {
+        @errorSummary(ErrorSummary().withFormErrorsAsText(contactPhoneCheckForm))
+    }
+
+    @formHelper(action = routes.ContactDetailsController.submitCheckTelephoneNumber) {
+
+        <div class="govuk-form-group @if(contactPhoneCheckForm.hasErrors){govuk-form-group--error}">
+            <h1 class="govuk-heading-xl">@msgs("contactPhoneCheck.title")</h1>
+
+            <p class="govuk-body govuk-!-font-weight-bold">@msgs(s"$businessPhone")</p>
+
+            @inputRadio(
+                field = contactPhoneCheckForm("check"),
+                legend = msgs("contactPhoneCheck.title"),
+                legendClass = Some("govuk-visually-hidden"),
+                headingIsLegend = false,
+                inputs = Seq(
+                    RadioItem(
+                        content = Text(msgs("contactPhoneCheck.yes")),
+                        value = Some("yes")
+                    ),
+                    RadioItem(
+                        content = Text(msgs("contactPhoneCheck.no")),
+                        value = Some("no")
+                    )
+                )
+            )
+        </div>
+
+        @submitButton()
+
+    }
+}

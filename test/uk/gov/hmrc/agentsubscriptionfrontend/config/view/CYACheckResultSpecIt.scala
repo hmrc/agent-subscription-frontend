@@ -31,6 +31,7 @@ class CYACheckResultSpecIt extends UnitSpec {
   val tradingName = "My Trading Name"
   val businessAddress =
     BusinessAddress("AddressLine1 A", Some("AddressLine2 A"), Some("AddressLine3 A"), Some("AddressLine4 A"), Some("AA11AA"), "GB")
+  val telephoneNumber = "01273111111"
 
   val amlsData = AmlsData.registeredUserNoDataEntered
 
@@ -41,7 +42,9 @@ class CYACheckResultSpecIt extends UnitSpec {
       isSubscribedToETMP = false,
       businessAddress,
       Some("test@gmail.com"),
-      Some("safeId"))
+      Some(telephoneNumber),
+      Some("safeId")
+    )
 
   "CYACheckResult" should {
 
@@ -53,7 +56,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         amlsData = Some(amlsData),
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
+        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
       )
 
       CYACheckResult.check(sjr) shouldBe PassWithMaybeAmls(
@@ -62,7 +66,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         Some(amlsData),
         "email@email.com",
         Some("My Trading Name"),
-        businessAddress)
+        businessAddress,
+        telephoneNumber)
     }
 
     "PassWithMaybeAmls when SubscriptionJourneyRecord is complete without Amls" in {
@@ -73,7 +78,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
+        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
       )
 
       CYACheckResult.check(sjr) shouldBe PassWithMaybeAmls(
@@ -82,7 +88,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         None,
         "email@email.com",
         Some("My Trading Name"),
-        businessAddress)
+        businessAddress,
+        telephoneNumber)
     }
 
     "FailedRegistration when SubscriptionJourneyRecord is missing Registration" in {
@@ -93,7 +100,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
+        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
       )
 
       CYACheckResult.check(sjr) shouldBe FailedRegistration
@@ -107,7 +115,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         amlsData = None,
         contactEmailData = None,
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
+        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
       )
 
       CYACheckResult.check(sjr) shouldBe FailedContactEmail
@@ -121,7 +130,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, None)),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
+        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
       )
 
       CYACheckResult.check(sjr) shouldBe FailedContactEmail
@@ -135,7 +145,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = None,
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
+        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
       )
 
       CYACheckResult.check(sjr) shouldBe FailedContactTradingName
@@ -149,7 +160,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(false, None)),
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
+        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
       )
 
       CYACheckResult.check(sjr) shouldBe FailedContactTradingName
@@ -163,7 +175,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
-        contactTradingAddressData = None
+        contactTradingAddressData = None,
+        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
       )
 
       CYACheckResult.check(sjr) shouldBe FailedContactTradingAddress
@@ -177,11 +190,41 @@ class CYACheckResultSpecIt extends UnitSpec {
         amlsData = Some(amlsData),
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
-        contactTradingAddressData = Some(ContactTradingAddressData(true, None))
+        contactTradingAddressData = Some(ContactTradingAddressData(true, None)),
+        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
       )
 
       CYACheckResult.check(sjr) shouldBe FailedContactTradingAddress
     }
   }
 
+  "FailedContactTelephoneNumber when SubscriptionJourneyRecord is complete except no contact telephone data is defined" in {
+
+    val sjr = SubscriptionJourneyRecord(
+      authProviderId = id,
+      businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+      amlsData = None,
+      contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
+      contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
+      contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+      contactTelephoneData = None
+    )
+
+    CYACheckResult.check(sjr) shouldBe FailedContactTelephone
+  }
+
+  "FailedContactTelephoneNumber when SubscriptionJourneyRecord is complete except no contact telephone is defined" in {
+
+    val sjr = SubscriptionJourneyRecord(
+      authProviderId = id,
+      businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+      amlsData = Some(amlsData),
+      contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
+      contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
+      contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+      contactTelephoneData = Some(ContactTelephoneData(true, None))
+    )
+
+    CYACheckResult.check(sjr) shouldBe FailedContactTelephone
+  }
 }

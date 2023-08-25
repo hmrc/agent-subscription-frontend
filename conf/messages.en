@@ -210,6 +210,7 @@ task-list.contactDetailsTask.header=Enter your agent services account details
 task-list.contactDetailsEmailSubTask=Confirm your email address
 task-list.contactDetailsTradingNameSubTask=Confirm your name
 task-list.contactDetailsTradingAddressSubTask=Confirm your address
+task-list.contactDetailsTelephoneNumberSubTask=Confirm your telephone number
 task-list.3.number=3.
 task-list.mappingTask.header=Copy across your existing client relationships
 task-list.mappingSubTask=Copy across VAT and Self Assessment clients to your new account
@@ -470,7 +471,6 @@ moneyLaunderingCompliance.enter-number.title=What are your pending money launder
 moneyLaunderingCompliance.enter-number.membershipNumber=Your registration number
 moneyLaunderingCompliance.enter-number.membershipNumber.hint=You can find this in your AMLS dashboard.
 
-
 # Amls Not Found
 amls-details-not-found.title=We cannot find your money laundering supervision registration details
 amls-details-not-found.p=Check your registration number and renewal date and try again.
@@ -537,7 +537,6 @@ updateBusinessAddress.address_line_3.title = Address line 3 (Optional)
 updateBusinessAddress.address_line_4.title = Address line 4 (Optional)
 updateBusinessAddress.postcode.title = Postcode
 
-
 postcodeNotAllowed.title=You cannot use this postcode
 postcodeNotAllowed.p1=You cannot use this postcode to create an agent services account.
 postcodeNotAllowed.p2=Use a different postcode and try again.
@@ -590,3 +589,13 @@ address.lookup.editPageLabels.header=Change your address
 form-input.day=Day
 form-input.month=Month
 form-input.year=Year
+
+contactPhoneCheck.title=Is this the telephone number you want to use for your agent services account?
+contactPhoneCheck.yes=Yes
+contactPhoneCheck.no=No - I want to use a different telephone number
+error.contact-phone-check.invalid=Select yes if this is the telephone number you want to use for your agent services account
+contactTelephone.title=What is the telephone number you want to use for your agent services account?
+contactTelephone.p=Enter a UK telephone number, like 01632 960 001, 07700 900 982 or +44 808 157 0192
+error.contact.phone.invalid=Enter a telephone number in the correct format
+error.contact.phone.empty=Enter a UK telephone number
+checkAnswers.telephoneNumber.label=Contact telephone number

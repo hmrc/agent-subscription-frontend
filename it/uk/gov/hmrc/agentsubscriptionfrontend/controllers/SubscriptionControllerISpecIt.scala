@@ -741,7 +741,8 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           addressLine4 = Some("Address Line 4"),
           postcode = postcode,
           countryCode = countryCode),
-        email = "agency@example.com"
+        email = "agency@example.com",
+        telephone = Some(phoneNumber),
       ),
       langForEmail = Some(Lang("en")),
       amlsDetails = Some(amlsDetails))
@@ -761,7 +762,8 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           postcode = testRegistration.address.postalCode.get,
           countryCode = testRegistration.address.countryCode
         ),
-        email = "email@email.com"
+        email = "email@email.com",
+        telephone = Some(phoneNumber),
       ),
       langForEmail = Some(Lang("en")),
       amlsDetails = Some(amlsDetails)
@@ -785,7 +787,8 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           addressLine4 = Some("Address Line 4"),
           postcode = postcode,
           countryCode = "GB"),
-        email = "agency2@example.com"
+        email = "agency2@example.com",
+        telephone = Some(phoneNumber),
       ),
       langForEmail = Some(Lang("en")),
       amlsDetails = Some(amlsDetails)

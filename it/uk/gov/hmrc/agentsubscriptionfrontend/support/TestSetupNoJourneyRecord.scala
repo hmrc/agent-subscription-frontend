@@ -32,6 +32,7 @@ trait TestSetupWithCompleteJourneyRecord {
             isSubscribedToETMP = true,
             BusinessAddress("line 1", Some("line 2"), Some("line 3"), Some("line 4"), Some("POST"), "GB"),
             Some("abc@xyz.com"),
+            Some("01273111111"),
             Some("safeId")))
       ),
       amlsData = Some(

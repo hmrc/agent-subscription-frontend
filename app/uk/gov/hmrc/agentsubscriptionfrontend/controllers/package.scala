@@ -309,5 +309,33 @@ package object controllers extends Logging {
           submittedAnswer => Seq(Yes, No).contains(submittedAnswer.check)
         )
     )
+
+    val contactPhoneCheckForm = Form[ContactPhoneCheck](
+      mapping("check" -> optional(text).verifying(radioInputSelected("error.contact-phone-check.invalid")))(answer =>
+        ContactPhoneCheck(RadioInputAnswer.apply(answer.getOrElse(""))))(answer => Some(RadioInputAnswer.unapply(answer.check)))
+        .verifying(
+          "error.contact-phone-check.invalid",
+          submittedAnswer => Seq(Yes, No).contains(submittedAnswer.check)
+        )
+    )
+
+    private val ukPhoneNumberRegex =
+      "^(?:(?:\\(?(?:0(?:0|11)\\)?[\\s-]?\\(?|\\+)44\\)?[\\s-]?(?:\\(?0\\)?[\\s-]?)?)|(?:\\(?0))(?:(?:\\d{5}\\)?[\\s-]?" +
+        "\\d{4,5})|(?:\\d{4}\\)?[\\s-]?(?:\\d{5}|\\d{3}[\\s-]?\\d{3}))|(?:\\d{3}\\)?[\\s-]?\\d{3}[\\s-]?\\d{3,4})|" +
+        "(?:\\d{2}\\)?[\\s-]?\\d{4}[\\s-]?\\d{4}))(?:[\\s-]?(?:x|ext\\.?|\\#)\\d{3,4})?$"
+
+    private val phoneNumberConstraint: Constraint[String] = Constraint[String] { input: String =>
+      if (input.trim.isEmpty) Invalid(ValidationError("error.contact.phone.empty"))
+      else if (!input.trim.matches(ukPhoneNumberRegex)) Invalid(ValidationError("error.contact.phone.invalid"))
+      else Valid
+    }
+
+    private val phoneNumberMapping = text.verifying(phoneNumberConstraint)
+
+    val contactTelephoneForm = Form[String](
+      single(
+        "telephone" -> phoneNumberMapping
+      )
+    )
   }
 }

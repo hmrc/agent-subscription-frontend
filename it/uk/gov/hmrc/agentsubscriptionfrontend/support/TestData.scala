@@ -1,6 +1,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
-import java.time.LocalDate
+import org.apache.commons.lang3.RandomStringUtils
 
+import java.time.LocalDate
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -16,12 +17,12 @@ object TestData {
   val validPostcode = "AA1 1AA"
   val invalidPostcode = "11AAAA"
   val denylistedPostcode = "AB10 1ZT"
-
+  val phoneNumber = "01273111111"
   val utr = Utr("2000000000")
   val testPostcode = "AA1 1AA"
   val registrationName = "My Agency"
   val tradingName = "My Trading Name"
-  val emailTooLong = "emailaddresstoolongxxxxxxxxxxxxxxxxxxxxxwaytoolong@emailaddressistoolongggggggggggggggg_________waytoolong.comxxxxxxxxxxxxxxxxxxxxxxx"
+  val emailTooLong = RandomStringUtils.randomAlphanumeric(250).concat("@a.a")
   val businessAddress =
     BusinessAddress(
       "AddressLine1 A",
@@ -52,7 +53,7 @@ object TestData {
 
   val agentSessionForLimitedPartnership: AgentSession = agentSession.copy(businessType = Some(Llp))
 
-  val testRegistration = Registration(Some(registrationName), isSubscribedToAgentServices = false, isSubscribedToETMP = false, businessAddress, Some("test@gmail.com"), Some("safeId"))
+  val testRegistration = Registration(Some(registrationName), isSubscribedToAgentServices = false, isSubscribedToETMP = false, businessAddress, Some("test@gmail.com"), Some(phoneNumber), Some("safeId"))
 
   val id = AuthProviderId("12345-credId")
 
@@ -73,6 +74,7 @@ object TestData {
           isSubscribedToETMP = true,
           businessAddress,
           Some("test@gmail.com"),
+          Some(phoneNumber),
           Some("safeId"))),
         nino = None,
         companyRegistrationNumber = Some(CompanyRegistrationNumber("01234567")),
@@ -85,7 +87,8 @@ object TestData {
       cleanCredsAuthProviderId = Some(id),
       contactEmailData = None,
       contactTradingAddressData = None,
-      contactTradingNameData = None
+      contactTradingNameData = None,
+      contactTelephoneData = None
     )
 
   def minimalSubscriptionJourneyRecordWithAmls(authProviderId: AuthProviderId) =
@@ -106,6 +109,7 @@ object TestData {
           isSubscribedToETMP = true,
           businessAddress,
           Some("test@gmail.com"),
+        Some(phoneNumber),
         Some("safeId")))
     ),
     amlsData = Some(AmlsData(
@@ -119,6 +123,7 @@ object TestData {
     contactEmailData = Some(ContactEmailData(false, Some("email@email.com"))),
     contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),
     contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+    contactTelephoneData = Some(ContactTelephoneData(true, Some(phoneNumber))),
     verifiedEmails = Set("email@email.com")
   )
   val completeJourneyRecordWithMappingsNoVerifiedEmails: SubscriptionJourneyRecord = completeJourneyRecordNoMappings
@@ -140,7 +145,8 @@ object TestData {
     completeJourneyRecordWithMappings
     .copy(
       contactTradingNameData = Some(ContactTradingNameData(true, tradingName)),
-      contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))
+      contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+      contactTelephoneData = Some(ContactTelephoneData(true, Some(phoneNumber)))
     )
 
   def completeJourneyRecordWithUpdatedBusinessName(newBusinessName: String): SubscriptionJourneyRecord =
@@ -150,6 +156,7 @@ object TestData {
       Some(Registration(Some(newBusinessName), isSubscribedToAgentServices = true, isSubscribedToETMP = true,
         businessAddress,
         Some("test@gmail.com"),
+        Some(phoneNumber),
         Some("safeId")))))
 
   def completeJourneyRecordWithUpdatedBusinessEmail(newBusinessEmail: String): SubscriptionJourneyRecord =
@@ -159,6 +166,7 @@ object TestData {
       Some(Registration(Some(registrationName), isSubscribedToAgentServices = true, isSubscribedToETMP = true,
         businessAddress,
         Some(newBusinessEmail),
+        Some(phoneNumber),
         Some("safeId")))))
 
 }

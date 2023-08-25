@@ -1,7 +1,6 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import java.time.LocalDate
-
 import com.kenshoo.play.metrics.Metrics
 import org.scalatest.Assertion
 import play.api.http.Status
@@ -13,7 +12,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.DesignatoryDetails.Person
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, BusinessDetails, SubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionJourneyStub, AgentSubscriptionStub}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{validPostcode, validUtr}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{phoneNumber, validPostcode, validUtr}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, MetricTestSupport, TestData}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http._
@@ -401,7 +400,8 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
           addressLine4 = None,
           postcode = "AA1 1AA",
           countryCode = "GB"),
-        email = "agency@example.com"
+        email = "agency@example.com",
+        telephone = Some(phoneNumber)
       ),
       Some(Lang("en")),
       amlsDetails = Some(AmlsDetails("supervisory", membershipNumber = Some("123456789"), appliedOn = None, membershipExpiresOn = Some(LocalDate.now())))

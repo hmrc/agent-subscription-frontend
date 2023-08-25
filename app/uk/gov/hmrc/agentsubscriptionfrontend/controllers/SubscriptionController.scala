@@ -74,7 +74,7 @@ class SubscriptionController @Inject()(
         agentAssuranceConnector.isManuallyAssuredAgent(sjr.businessDetails.utr).flatMap { isMAAgent =>
           sessionStoreService.cacheIsChangingAnswers(changing = false).flatMap { _ =>
             CYACheckResult.check(sjr) match {
-              case PassWithMaybeAmls(taxpayerName, address, maybeAmls, contactEmail, maybeTradingName, tradingAddress) => {
+              case PassWithMaybeAmls(taxpayerName, address, maybeAmls, contactEmail, maybeTradingName, tradingAddress, telephone) => {
                 if (maybeAmls.isDefined || isMAAgent) {
                   sessionStoreService
                     .cacheGoBackUrl(routes.SubscriptionController.showCheckAnswers().url)
@@ -90,20 +90,17 @@ class SubscriptionController @Inject()(
                           contactEmailAddress = contactEmail,
                           contactTradingName = maybeTradingName,
                           contactTradingAddress = tradingAddress,
+                          contactTelephone = telephone,
                           appConfig)
                         ))
                     }
                 } else Redirect(routes.AMLSController.showAmlsRegisteredPage())
               }
-
               case FailedRegistration => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
-
               case FailedContactEmail => Redirect(routes.ContactDetailsController.showContactEmailCheck())
-
               case FailedContactTradingName => Redirect(routes.ContactDetailsController.showTradingNameCheck())
-
               case FailedContactTradingAddress => Redirect(routes.ContactDetailsController.showCheckMainTradingAddress())
-
+              case FailedContactTelephone => Redirect(routes.ContactDetailsController.contactPhoneCheck)
             }
           }
         }
@@ -115,22 +112,28 @@ class SubscriptionController @Inject()(
   private def updateSessionAndReturnAgencyBeforeSubscribing(registration: Registration)
                                             (emailData: ContactEmailData,
                                              nameData: ContactTradingNameData,
-                                             addressData: ContactTradingAddressData, userMappings: List[UserMapping])(implicit request: Request[_]) = {
+                                             addressData: ContactTradingAddressData,
+                                             telephoneData: ContactTelephoneData,
+                                             userMappings: List[UserMapping])(implicit request: Request[_]): Future[Agency] = {
     val agencyName = nameData.contactTradingName.orElse(registration.taxpayerName)
     val agencyEmail = emailData.contactEmail
     val agencyAddress: BusinessAddress = addressData.contactTradingAddress.getOrElse(
       throw new Exception("contact trading address should be defined"))
     val clientCount = userMappings.map(_.count).sum
+    val agencyTelephone = telephoneData.telephoneNumber
 
     sessionStoreService.cacheAgentSession(AgentSession(registration = Some(
       Registration(taxpayerName = agencyName,
         isSubscribedToAgentServices = false,
         isSubscribedToETMP = false,
         agencyAddress,
-        agencyEmail, registration.safeId)), clientCount = Some(clientCount))).map(_ => Agency(
-      agencyName.getOrElse(registration.taxpayerName.getOrElse(throw new Exception("taxpayer name should be defined"))),
-      DesAddress.fromBusinessAddress(agencyAddress),
-      agencyEmail.getOrElse(throw new Exception("contact email address should be defined"))))
+        agencyEmail,
+        agencyTelephone,
+        registration.safeId)), clientCount = Some(clientCount))).map(_ => Agency(
+      name = agencyName.getOrElse(registration.taxpayerName.getOrElse(throw new Exception("taxpayer name should be defined"))),
+      address = DesAddress.fromBusinessAddress(agencyAddress),
+      telephone = agencyTelephone,
+      email = agencyEmail.getOrElse(throw new Exception("contact email address should be defined"))))
   }
 
   def submitCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
@@ -144,10 +147,11 @@ class SubscriptionController @Inject()(
           sjr.contactEmailData,
           sjr.contactTradingNameData,
           sjr.contactTradingAddressData,
+          sjr.contactTelephoneData,
         sjr.userMappings) match {
-          case (utr, postcode, Some(registration), amlsData, Some(email), Some(name), Some(address), userMappings) => {
+          case (utr, postcode, Some(registration), amlsData, Some(email), Some(name), Some(address), Some(telephone), userMappings) => {
             for {
-              agencyDetails <- updateSessionAndReturnAgencyBeforeSubscribing(registration)(email, name, address, userMappings)
+              agencyDetails <- updateSessionAndReturnAgencyBeforeSubscribing(registration)(email, name, address, telephone, userMappings)
               langForEmail = extractLangPreferenceFromCookie
               _ <- subscriptionService.subscribe(utr, postcode, agencyDetails, langForEmail, amlsData)
               result <- redirectSubscriptionResponse

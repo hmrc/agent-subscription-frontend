@@ -40,6 +40,7 @@ final case class SubscriptionJourneyRecord(
   contactEmailData: Option[ContactEmailData] = None,
   contactTradingNameData: Option[ContactTradingNameData] = None,
   contactTradingAddressData: Option[ContactTradingAddressData] = None,
+  contactTelephoneData: Option[ContactTelephoneData] = None,
   verifiedEmails: Set[String] = Set.empty
 ) {
   def effectiveEmail: Option[String] = contactEmailData match {
@@ -68,6 +69,7 @@ object SubscriptionJourneyRecord {
       (JsPath \ "contactEmailData").formatNullable[ContactEmailData] and
       (JsPath \ "contactTradingNameData").formatNullable[ContactTradingNameData] and
       (JsPath \ "contactTradingAddressData").formatNullable[ContactTradingAddressData] and
+      (JsPath \ "contactTelephoneData").formatNullable[ContactTelephoneData] and
       (JsPath \ "verifiedEmails")
         .formatWithDefault[Set[String]](Set.empty[String]))(SubscriptionJourneyRecord.apply, unlift(SubscriptionJourneyRecord.unapply))
 

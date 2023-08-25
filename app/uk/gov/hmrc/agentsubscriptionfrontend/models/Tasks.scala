@@ -91,6 +91,12 @@ final case class ContactTradingAddressSubTask(contactTradingAddressData: Option[
   override val link: String = routes.ContactDetailsController.showCheckMainTradingAddress().url
 }
 
+final case class ContactTelephoneNumberSubTask(contactTelephoneData: Option[ContactTelephoneData], showLink: Boolean) extends SubTask {
+  override val taskKey: String = "contactDetailsTelephoneNumberSubTask"
+  override val isComplete: Boolean = contactTelephoneData.flatMap(_.telephoneNumber).isDefined
+  override val link: String = routes.ContactDetailsController.contactPhoneCheck.url
+}
+
 final case class MappingSubTask(
   cleanCredsAuthProviderId: Option[AuthProviderId],
   mappingComplete: Boolean,

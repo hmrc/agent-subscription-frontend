@@ -88,11 +88,16 @@ class TaskListService @Inject()(
       subscriptionJourneyRecord.contactTradingAddressData,
       contactTradingNameSubTask.isComplete
     )
+    val contactTelephoneNumberSubTask: SubTask = ContactTelephoneNumberSubTask(
+      subscriptionJourneyRecord.contactTelephoneData,
+      contactTradingAddressSubTask.isComplete
+    )
     val contactDetailsTask: Task = ContactDetailsTask(
       List(
         contactEmailSubTask,
         contactTradingNameSubTask,
-        contactTradingAddressSubTask
+        contactTradingAddressSubTask,
+        contactTelephoneNumberSubTask
       )
     )
     List(amlsTask, contactDetailsTask)
