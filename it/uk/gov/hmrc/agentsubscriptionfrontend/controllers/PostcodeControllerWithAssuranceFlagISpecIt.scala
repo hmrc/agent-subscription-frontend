@@ -116,7 +116,8 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
                 businessType = Some(businessType),
                 postcode = Some(Postcode(validPostcode)),
                 nino = None,
-                registration = Some(testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)),
+                registration = Some(testRegistration.copy(
+                  emailAddress = Some("someone@example.com"), safeId = None)),
               isMAA = Some(false)))
         }
       }

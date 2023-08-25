@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.config.view
 
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{BusinessAddress, ContactEmailData, ContactTradingAddressData, ContactTradingNameData, Registration}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{BusinessAddress, ContactEmailData, ContactTelephoneData, ContactTradingAddressData, ContactTradingNameData, Registration}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, SubscriptionJourneyRecord}
 
 sealed trait CYACheckResult
@@ -27,7 +27,8 @@ case class PassWithMaybeAmls(
   amlsData: Option[AmlsData],
   contactEmailAddress: String,
   contactTradingName: Option[String],
-  contactTradingAddress: BusinessAddress
+  contactTradingAddress: BusinessAddress,
+  contactTelephoneNumber: String
 ) extends CYACheckResult
 
 case object FailedRegistration extends CYACheckResult
@@ -38,28 +39,39 @@ case object FailedContactTradingName extends CYACheckResult
 
 case object FailedContactTradingAddress extends CYACheckResult
 
+case object FailedContactTelephone extends CYACheckResult
+
 object CYACheckResult {
 
   def check(sjr: SubscriptionJourneyRecord): CYACheckResult =
-    (sjr.businessDetails.registration, sjr.amlsData, sjr.contactEmailData, sjr.contactTradingNameData, sjr.contactTradingAddressData) match {
+    (
+      sjr.businessDetails.registration,
+      sjr.amlsData,
+      sjr.contactEmailData,
+      sjr.contactTradingNameData,
+      sjr.contactTradingAddressData,
+      sjr.contactTelephoneData) match {
 
-      case (Some(reg), _, Some(email), Some(tradingName), Some(tradingAddress)) =>
-        checkContactDetails(email, tradingName, tradingAddress)(reg, sjr.amlsData)
+      case (Some(reg), _, Some(email), Some(tradingName), Some(tradingAddress), Some(telephone)) =>
+        checkContactDetails(email, tradingName, tradingAddress, telephone)(reg, sjr.amlsData)
 
-      case (None, _, _, _, _) => FailedRegistration
-      case (_, _, None, _, _) => FailedContactEmail
-      case (_, _, _, None, _) => FailedContactTradingName
-      case (_, _, _, _, None) => FailedContactTradingAddress
+      case (None, _, _, _, _, _) => FailedRegistration
+      case (_, _, None, _, _, _) => FailedContactEmail
+      case (_, _, _, None, _, _) => FailedContactTradingName
+      case (_, _, _, _, None, _) => FailedContactTradingAddress
+      case (_, _, _, _, _, None) => FailedContactTelephone
     }
 
   private def checkContactDetails(
     emailData: ContactEmailData,
     tradingNameData: ContactTradingNameData,
-    tradingAddressData: ContactTradingAddressData)(reg: Registration, maybeAmls: Option[AmlsData]): CYACheckResult =
+    tradingAddressData: ContactTradingAddressData,
+    telephoneData: ContactTelephoneData)(reg: Registration, maybeAmls: Option[AmlsData]): CYACheckResult =
     if (emailData.contactEmail.isEmpty) FailedContactEmail
     else if (!tradingNameData.hasTradingName && tradingNameData.contactTradingName.isEmpty)
       FailedContactTradingName
     else if (tradingAddressData.contactTradingAddress.isEmpty) FailedContactTradingAddress
+    else if (telephoneData.telephoneNumber.isEmpty) FailedContactTelephone
     else
       PassWithMaybeAmls(
         reg.taxpayerName.getOrElse(""),
@@ -67,6 +79,7 @@ object CYACheckResult {
         maybeAmls,
         emailData.contactEmail.getOrElse(""),
         tradingNameData.contactTradingName,
-        tradingAddressData.contactTradingAddress.get
+        tradingAddressData.contactTradingAddress.get,
+        telephoneData.telephoneNumber.get
       )
 }

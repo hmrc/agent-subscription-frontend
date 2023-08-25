@@ -32,6 +32,7 @@ case class CheckYourAnswers(
   contactEmailRow: AnswerRow,
   contactTradingNameRow: AnswerRow,
   contactTradingAddressRow: AnswerRow,
+  contactTelephoneNumberRow: AnswerRow,
   maybeMappingClientNumberRow: Option[AnswerRow],
   maybeMappingGGIdsRow: Option[AnswerRow])
 
@@ -47,6 +48,7 @@ object CheckYourAnswers {
     contactEmailAddress: String,
     contactTradingName: Option[String],
     contactTradingAddress: BusinessAddress,
+    contactTelephone: String,
     appConfig: AppConfig)(implicit messages: Messages): CheckYourAnswers =
     CheckYourAnswers(
       businessNameRow = makeBusinessNameRow(registrationName),
@@ -55,6 +57,7 @@ object CheckYourAnswers {
       contactEmailRow = makeContactEmailRow(contactEmailAddress),
       contactTradingNameRow = makeContactTradingNameRow(contactTradingName, registrationName),
       contactTradingAddressRow = makeContactTradingAddressRow(contactTradingAddress),
+      contactTelephoneNumberRow = makeContactTelephoneNumberRow(contactTelephone),
       maybeMappingClientNumberRow =
         if (userMappings.isEmpty)
           None
@@ -156,6 +159,14 @@ object CheckYourAnswers {
       answerLines = List(registrationName),
       changeLink = None,
       buttonText = None
+    )
+
+  private def makeContactTelephoneNumberRow(telephoneNumber: String)(implicit messages: Messages) =
+    AnswerRow(
+      question = Messages("checkAnswers.telephoneNumber.label"),
+      answerLines = List(telephoneNumber),
+      changeLink = Some(routes.ContactDetailsController.changeTelephoneNumber),
+      buttonText = Some(defaultButtonText)
     )
 
 }

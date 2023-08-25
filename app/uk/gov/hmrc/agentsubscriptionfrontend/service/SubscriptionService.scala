@@ -85,7 +85,7 @@ class SubscriptionService @Inject()(
     val request = SubscriptionRequest(
       subscriptionDetails.utr,
       SubscriptionRequestKnownFacts(subscriptionDetails.knownFactsPostcode),
-      Agency(name = subscriptionDetails.name, email = subscriptionDetails.email, address = address),
+      Agency(name = subscriptionDetails.name, email = subscriptionDetails.email, address = address, telephone = subscriptionDetails.telephone),
       langForEmail,
       subscriptionDetails.amlsData match {
         case Some(amlsData) => amlsData.amlsDetails

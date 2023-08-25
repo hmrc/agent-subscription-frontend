@@ -184,7 +184,7 @@ class TaskListControllerISpecIt extends BaseISpecIt with EmailVerificationBehavi
       result should containLink("task-list.contactDetailsTradingAddressSubTask", routes.ContactDetailsController.showCheckMainTradingAddress().url)
     }
 
-    "contain a url to the mapping journey when user has completed contact details" in {
+    "contain a url to the contact details telephone number when user has completed trading name sub-task" in {
       givenAgentIsNotManuallyAssured(validUtr.value)
       givenAmlsDataIsNotFound(validUtr.value)
       givenSubscriptionJourneyRecordExists(
@@ -194,6 +194,30 @@ class TaskListControllerISpecIt extends BaseISpecIt with EmailVerificationBehavi
             contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
             contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),
             contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress)))))
+
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+
+      val result = await(controller.showTaskList(request))
+      status(result) shouldBe 200
+
+      result should containLink("task-list.contactDetailsTelephoneNumberSubTask", routes.ContactDetailsController.contactPhoneCheck.url)
+
+     // checkHtmlResultWithBodyText(result, "/agent-mapping/task-list/start?continueId=continue-id")
+    }
+
+    "contain a url to the mapping journey when user has completed telephone number sub-task" in {
+      givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAmlsDataIsNotFound(validUtr.value)
+      givenSubscriptionJourneyRecordExists(
+        AuthProviderId("12345-credId"),
+        TestData.minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId"))
+          .copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true), Some(pendingAmlsDetails))), continueId = Some("continue-id"),
+            contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
+            contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),
+            contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+            contactTelephoneData = Some(ContactTelephoneData(true, Some(phoneNumber))))
+      )
+
 
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 

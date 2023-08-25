@@ -1,0 +1,57 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
+@import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessEmail
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, InputText}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF}
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
+
+@this(
+        mainTemplate: MainTemplate,
+        errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+        formHelper: FormWithCSRF,
+        errorSummary: GovukErrorSummary,
+        submitButton: SubmitButton,
+        inputText: InputText
+)
+
+@(form: Form[String], backCall: Call)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+
+@mainTemplate(
+  title = errorPrefix(form) + msgs("contactTelephone.title"),
+  backLinkHref = Some(backCall.url)
+) {
+
+  @if(form.hasErrors) {
+    @errorSummary(ErrorSummary().withFormErrorsAsText(form))
+  }
+
+  @formHelper(action = routes.ContactDetailsController.submitTelephoneNumber) {
+
+    @inputText(
+      field = form("telephone"),
+      label = msgs("contactTelephone.title"),
+      labelAsHeading = true,
+      labelClass = Some("govuk-label--xl"),
+      hint = Some(msgs("contactTelephone.p")),
+    )
+
+    @submitButton()
+  }
+}

@@ -20,7 +20,7 @@ import play.api.i18n.Lang
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import play.api.libs.json._
 
-case class Agency(name: String, address: DesAddress, email: String)
+case class Agency(name: String, address: DesAddress, telephone: Option[String], email: String)
 
 object Agency {
   implicit val formatDesAddress: Format[DesAddress] = Json.format[DesAddress]

@@ -111,6 +111,13 @@ GET         /change-contact-email-address                   uk.gov.hmrc.agentsub
 GET         /contact-email-address                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showContactEmailAddress()
 POST        /contact-email-address                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitContactEmailAddress()
 
+GET         /contact-phone-check                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.contactPhoneCheck
+GET         /check-telephone-number                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showCheckTelephoneNumber
+POST        /check-telephone-number                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitCheckTelephoneNumber
+GET         /telephone-number                               uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTelephoneNumber
+POST        /telephone-number                               uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTelephoneNumber
+GET         /change-contact-telephone-number                uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeTelephoneNumber
+
 
 GET         /trading-name                                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTradingNameCheck()
 POST        /trading-name                                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTradingNameCheck()

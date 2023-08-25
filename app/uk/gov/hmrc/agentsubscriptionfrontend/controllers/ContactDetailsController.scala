@@ -52,7 +52,9 @@ class ContactDetailsController @Inject()(
   contactTradingNameCheckTemplate: contact_trading_name_check,
   contactTradingNameTemplate: contact_trading_name,
   contactTradingAddressCheckTemplate: contact_trading_address_check,
-  addressFormWithErrorsTemplate: address_form_with_errors
+  addressFormWithErrorsTemplate: address_form_with_errors,
+  contactPhoneCheckTemplate: contact_phone_check,
+  contactTelephoneTemplate: contact_telephone,
 )(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions with Logging {
 
@@ -404,7 +406,110 @@ class ContactDetailsController @Inject()(
     }
   }
 
+  def contactPhoneCheck: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { agent =>
+      phoneNumberFromBusinessPartnerRecord(agent)
+        .fold(Redirect(routes.ContactDetailsController.showTelephoneNumber))(_ => Redirect(routes.ContactDetailsController.showCheckTelephoneNumber))
+    }
+  }
+
+  def showCheckTelephoneNumber: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { agent =>
+      sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
+        phoneNumberFromBusinessPartnerRecord(agent)
+          .fold(Redirect(routes.ContactDetailsController.showTelephoneNumber))(phoneNumber =>
+            Ok(contactPhoneCheckTemplate(contactPhoneCheckForm, phoneNumber, isChanging.getOrElse(false))))
+      }
+    }
+  }
+
+  def submitCheckTelephoneNumber: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { agent =>
+      sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
+        phoneNumberFromBusinessPartnerRecord(agent)
+          .fold(Future successful Redirect(routes.ContactDetailsController.showTelephoneNumber)) { phoneNumber =>
+            contactPhoneCheckForm
+              .bindFromRequest()
+              .fold(
+                hasErrors => Ok(contactPhoneCheckTemplate(hasErrors, phoneNumber, isChanging.getOrElse(false))),
+                validForm => {
+                  val (updatedSjr, nextPage) = {
+                    if (validForm.check == Yes) {
+                      (
+                        agent.getMandatorySubscriptionRecord
+                          .copy(contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = true, telephoneNumber = Some(phoneNumber)))),
+                        if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
+                        else routes.TaskListController.showTaskList())
+                    } else {
+                      (
+                        agent.getMandatorySubscriptionRecord
+                          .copy(contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = false, telephoneNumber = None))),
+                        routes.ContactDetailsController.showTelephoneNumber)
+                    }
+                  }
+                  for {
+                    _ <- subscriptionJourneyService.saveJourneyRecord(updatedSjr)
+                  } yield Redirect(nextPage)
+                }
+              )
+          }
+      }
+    }
+  }
+
+  def showTelephoneNumber: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { agent =>
+      sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
+        val contactPhone: Option[String] =
+          agent.getMandatorySubscriptionRecord.contactTelephoneData.flatMap(_.telephoneNumber)
+        Ok(contactTelephoneTemplate(contactTelephoneForm.fill(contactPhone.getOrElse("")), getBackLinkForTelephoneNumber(agent, isChanging)))
+      }
+    }
+  }
+
+  def submitTelephoneNumber: Action[AnyContent] = Action.async { implicit request =>
+    withSubscribingAgent { agent =>
+      sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
+        contactTelephoneForm
+          .bindFromRequest()
+          .fold(
+            hasErrors => {
+              Ok(contactTelephoneTemplate(hasErrors, getBackLinkForTelephoneNumber(agent, isChanging)))
+            },
+            telephoneNumber => {
+              val (updatedSjr, nextPage) = (
+                agent.getMandatorySubscriptionRecord
+                  .copy(contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = false, telephoneNumber = Some(telephoneNumber)))),
+                if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
+                else routes.TaskListController.showTaskList()
+              )
+              for {
+                _    <- subscriptionJourneyService.saveJourneyRecord(updatedSjr)
+                goto <- Redirect(nextPage)
+              } yield goto
+            }
+          )
+      }
+    }
+  }
+
+  def changeTelephoneNumber: Action[AnyContent] = Action.async { implicit request =>
+    sessionStoreService
+      .cacheIsChangingAnswers(changing = true)
+      .map(_ => Redirect(routes.ContactDetailsController.contactPhoneCheck))
+  }
+
+  private def getBackLinkForTelephoneNumber(agent: Agent, isChanging: Option[Boolean]): Call = {
+    val businessPhone: Option[String] = phoneNumberFromBusinessPartnerRecord(agent)
+    if (businessPhone.isDefined) routes.ContactDetailsController.showCheckTelephoneNumber
+    else if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
+    else routes.TaskListController.showTaskList()
+  }
+
   private def formatBusinessAddress(address: BusinessAddress): List[String] =
     List(Some(address.addressLine1), address.addressLine2, address.addressLine3, address.addressLine4, address.postalCode).flatten
+
+  private def phoneNumberFromBusinessPartnerRecord(agent: Agent): Option[String] =
+    agent.getMandatorySubscriptionRecord.businessDetails.registration.flatMap(_.primaryPhoneNumber)
 
 }

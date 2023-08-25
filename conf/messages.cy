@@ -210,6 +210,7 @@ task-list.contactDetailsTask.header=Nodwch fanylion eich cyfrif gwasanaethau asi
 task-list.contactDetailsEmailSubTask=Cadarnhewch eich cyfeiriad e-bost
 task-list.contactDetailsTradingNameSubTask=Cadarnhewch eich enw
 task-list.contactDetailsTradingAddressSubTask=Cadarnhewch eich cyfeiriad
+task-list.contactDetailsTelephoneNumberSubTask=Confirm your telephone number
 task-list.3.number=3.
 task-list.mappingTask.header=Copïwch ar draws eich perthnasoedd presennol â chleientiaid
 task-list.mappingSubTask=Copïwch eich cleientiaid Hunanasesiad a TAW presennol ar draws i’ch cyfrif newydd
@@ -491,10 +492,6 @@ amls-ineligible-status.p1=Mae hyn gan fod eich cofrestriad Goruchwyliaeth Gwrth-
 amls-ineligible-status.li.1=wedi’i ohirio
 amls-ineligible-status.li.2=wedi’i ganslo
 amls-ineligible-status.li.3=wedi’i wrthod
-amls-ineligible-status.p2=neu mae naill ai:
-amls-ineligible-status.li.4=ar y gweill
-amls-ineligible-status.li.5=yn destun apêl
-amls-ineligible-status.p3=neu mae’r cofrestriad wedi dod i ben neu rydych wedi dadgofrestru.
 amls-ineligible-status.link=Darllenwch sut i herio penderfyniad CThEM i wrthod cofrestriad (yn agor tab newydd)
 
 # Pending AMLS Details page
@@ -592,3 +589,13 @@ address.lookup.editPageLabels.header=Newid eich cyfeiriad
 form-input.day=Diwrnod
 form-input.month=Mis
 form-input.year=Blwyddyn
+
+contactPhoneCheck.title=Is this the telephone number you want to use for your agent services account?
+contactPhoneCheck.yes=Yes
+contactPhoneCheck.no=No - I want to use a different telephone number
+error.contact-phone-check.invalid=Select yes if this is the telephone number you want to use for your agent services account
+contactTelephone.title=What is the telephone number you want to use for your agent services account?
+contactTelephone.p=Enter a UK telephone number, like 01632 960 001, 07700 900 982 or +44 808 157 0192
+error.contact.phone.invalid=Enter a telephone number in the correct format
+error.contact.phone.empty=Enter a UK telephone number
+checkAnswers.telephoneNumber.label=Contact telephone number

@@ -42,6 +42,7 @@ object AgentSubscriptionStub {
        |        "countryCode": "GB",
        |        "postalCode": "AA11AA"
        |    },
+       |    "primaryPhoneNumber": "01273111111",
        |    "emailAddress": "someone@example.com"
        |}""".stripMargin
 
@@ -341,6 +342,7 @@ object AgentSubscriptionStub {
                                       |      "postcode": "${address.postcode}",
                                       |      "countryCode": "${address.countryCode}"
                                       |    },
+                                      |    "telephone": "${agency.telephone.getOrElse("")}",
                                       |    "email": "${agency.email}"
                                       |  },
                                       |  "langForEmail": "${request.langForEmail.fold("")(_.code)}",

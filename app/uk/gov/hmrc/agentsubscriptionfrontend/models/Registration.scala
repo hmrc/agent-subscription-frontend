@@ -46,6 +46,7 @@ case class Registration(
   isSubscribedToETMP: Boolean, // TODO remove?
   address: BusinessAddress,
   emailAddress: Option[String],
+  primaryPhoneNumber: Option[String],
   safeId: Option[String])
 
 object Registration {

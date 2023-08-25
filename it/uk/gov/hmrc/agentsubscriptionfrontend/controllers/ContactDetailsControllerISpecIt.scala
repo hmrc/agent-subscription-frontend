@@ -11,7 +11,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Css.ERROR_SUMMARY_LINK
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{businessAddress, registrationName, validPostcode, validUtr}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{businessAddress, phoneNumber, registrationName, validPostcode, validUtr}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestData}
 import uk.gov.hmrc.http.BadRequestException
 
@@ -45,6 +45,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
                 isSubscribedToETMP = true,
                 businessAddress,
                 Some("test@gmail.com"),
+                Some(phoneNumber),
                 Some("safeId")))
             )
           ))
@@ -85,6 +86,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
                 isSubscribedToETMP = true,
                 businessAddress,
                 Some("test@gmail.com"),
+                Some(phoneNumber),
                 Some("safeId")))
             ),
             contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("test@gmail.com")))
@@ -125,6 +127,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
                 isSubscribedToETMP = true,
                 businessAddress,
                 None,
+                None,
                 Some("safeId"))
               )
             )))
@@ -152,6 +155,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId"))
           )
         ))
@@ -184,6 +188,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           ))))
 
@@ -212,6 +217,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           ))))
 
@@ -240,6 +246,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           )
           ))))
@@ -268,6 +275,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           )
           )),
@@ -300,6 +308,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
               isSubscribedToETMP = true,
               businessAddress,
               Some("email@email.com"),
+              Some(phoneNumber),
               Some("safeId")
             )
             ))))
@@ -328,6 +337,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
             )
           )),
@@ -344,6 +354,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
             )
           )),
@@ -369,6 +380,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           )
           )),
@@ -398,6 +410,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           )
           )),
@@ -432,6 +445,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           )
           )),
@@ -474,6 +488,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
                 isSubscribedToETMP = true,
                 businessAddress,
                 Some("test@gmail.com"),
+                Some(phoneNumber),
                 Some("safeId")))
             )
           ))
@@ -513,6 +528,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
                 isSubscribedToETMP = true,
                 businessAddress,
                 Some("test@gmail.com"),
+                Some(phoneNumber),
                 Some("safeId")))
             ),
             contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("test@gmail.com"))),
@@ -553,6 +569,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
                 isSubscribedToETMP = true,
                 businessAddress,
                 None,
+                None,
                 Some("safeId"))
               )
             )))
@@ -580,6 +597,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId"))
           )
         ))
@@ -611,6 +629,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           ))))
 
@@ -639,6 +658,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           ))))
 
@@ -667,6 +687,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
               isSubscribedToETMP = true,
               businessAddress,
               Some("email@email.com"),
+              Some(phoneNumber),
               Some("safeId")
             )
             ))))
@@ -697,6 +718,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
                 isSubscribedToETMP = true,
                 businessAddress,
                 Some("test@gmail.com"),
+                Some(phoneNumber),
                 Some("safeId")))
             )
           ))
@@ -736,6 +758,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
                 isSubscribedToETMP = true,
                 businessAddress,
                 Some("test@gmail.com"),
+                Some(phoneNumber),
                 Some("safeId")))
             ),
             contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("test@gmail.com"))),
@@ -798,6 +821,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId"))
           )
         ))
@@ -829,6 +853,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           ))))
 
@@ -857,6 +882,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             isSubscribedToETMP = true,
             businessAddress,
             Some("email@email.com"),
+            Some(phoneNumber),
             Some("safeId")
           ))))
 
@@ -885,6 +911,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
               isSubscribedToETMP = true,
               businessAddress,
               Some("email@email.com"),
+              Some(phoneNumber),
               Some("safeId")
             )
             ))))
@@ -932,6 +959,333 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
       status(result) shouldBe 303
 
       redirectLocation(result) shouldBe Some(routes.TaskListController.showTaskList().url)
+    }
+  }
+
+  "GET /contact-phone-check" should {
+    "redirect to /check-telephone-number when business partner record contains a primaryPhoneNumber" in {
+
+      givenSubscriptionJourneyRecordExists(id,
+        TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+          businessDetails = BusinessDetails(SoleTrader,
+            validUtr,
+            Postcode(validPostcode),
+            registration = Some(Registration(
+              Some(registrationName),
+              isSubscribedToAgentServices = false,
+              isSubscribedToETMP = true,
+              businessAddress,
+              Some("email@email.com"),
+              Some(phoneNumber),
+              Some("safeId")
+            )
+            ))))
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, GET)
+
+      val result = await(controller.contactPhoneCheck(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showCheckTelephoneNumber.url)
+    }
+
+    "redirect to /telephone-number when business partner record does not contain a primaryPhoneNumber" in {
+
+      givenSubscriptionJourneyRecordExists(id,
+        TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+          businessDetails = BusinessDetails(SoleTrader,
+            validUtr,
+            Postcode(validPostcode),
+            registration = Some(Registration(
+              Some(registrationName),
+              isSubscribedToAgentServices = false,
+              isSubscribedToETMP = true,
+              businessAddress,
+              Some("email@email.com"),
+              None,
+              Some("safeId")
+            )
+            ))))
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, GET)
+
+      val result = await(controller.contactPhoneCheck(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showTelephoneNumber.url)
+    }
+  }
+
+  "GET /check-telephone-number" should {
+    "200 OK when primaryPhoneNumber is on business partner record" in {
+
+      givenSubscriptionJourneyRecordExists(id,
+        TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+          businessDetails = BusinessDetails(SoleTrader,
+            validUtr,
+            Postcode(validPostcode),
+            registration = Some(Registration(
+              Some(registrationName),
+              isSubscribedToAgentServices = false,
+              isSubscribedToETMP = true,
+              businessAddress,
+              Some("email@email.com"),
+              Some(phoneNumber),
+              Some("safeId")
+            )
+            ))))
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, GET)
+      val result = await(controller.showCheckTelephoneNumber(request))
+
+      status(result) shouldBe OK
+
+      result should containMessages(
+        "contactPhoneCheck.title",
+        "contactPhoneCheck.yes",
+        "contactPhoneCheck.no",
+        "button.continue"
+      )
+    }
+
+    "303 SEE_OTHER when primaryPhoneNumber is not on the business partner record" in {
+
+      givenSubscriptionJourneyRecordExists(id,
+        TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+          businessDetails = BusinessDetails(SoleTrader,
+            validUtr,
+            Postcode(validPostcode),
+            registration = Some(Registration(
+              Some(registrationName),
+              isSubscribedToAgentServices = false,
+              isSubscribedToETMP = true,
+              businessAddress,
+              Some("email@email.com"),
+              None,
+              Some("safeId")
+            )
+            ))))
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, GET)
+      val result = await(controller.showCheckTelephoneNumber(request))
+
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showTelephoneNumber.url)
+    }
+  }
+
+  "POST /check-telephone-number" should {
+    "303 SEE_OTHER to /task-list when Yes is selected" in {
+
+      val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+        businessDetails = BusinessDetails(SoleTrader,
+          validUtr,
+          Postcode(validPostcode),
+          registration = Some(Registration(
+            Some(registrationName),
+            isSubscribedToAgentServices = false,
+            isSubscribedToETMP = true,
+            businessAddress,
+            Some("email@email.com"),
+            Some(phoneNumber),
+            Some("safeId")
+          ))))
+
+      givenSubscriptionJourneyRecordExists(id, sjr)
+      givenSubscriptionRecordCreated(id, sjr.copy(
+        contactTelephoneData = Some(ContactTelephoneData(true, Some(phoneNumber)))
+      ))
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      val result = await(controller.submitCheckTelephoneNumber(request.withFormUrlEncodedBody("check" -> "yes")))
+
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(routes.TaskListController.showTaskList().url)
+    }
+
+    "303 SEE_OTHER to /telephone-number when No is selected" in {
+
+      val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+        businessDetails = BusinessDetails(SoleTrader,
+          validUtr,
+          Postcode(validPostcode),
+          registration = Some(Registration(
+            Some(registrationName),
+            isSubscribedToAgentServices = false,
+            isSubscribedToETMP = true,
+            businessAddress,
+            Some("email@email.com"),
+            Some(phoneNumber),
+            Some("safeId")
+          ))))
+
+      givenSubscriptionJourneyRecordExists(id, sjr)
+      givenSubscriptionRecordCreated(id, sjr.copy(
+        contactTelephoneData = Some(ContactTelephoneData(false, None))
+      ))
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      val result = await(controller.submitCheckTelephoneNumber(request.withFormUrlEncodedBody("check" -> "no")))
+
+      status(result) shouldBe SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showTelephoneNumber.url)
+    }
+
+    "200 OK with error when empty submit" in {
+
+      val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+        businessDetails = BusinessDetails(SoleTrader,
+          validUtr,
+          Postcode(validPostcode),
+          registration = Some(Registration(
+            Some(registrationName),
+            isSubscribedToAgentServices = false,
+            isSubscribedToETMP = true,
+            businessAddress,
+            Some("email@email.com"),
+            Some(phoneNumber),
+            Some("safeId")
+          ))))
+
+      givenSubscriptionJourneyRecordExists(id, sjr)
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      val result = await(controller.submitCheckTelephoneNumber(request.withFormUrlEncodedBody("check" -> "")))
+
+      status(result) shouldBe OK
+
+      result should containMessages(
+        "contactPhoneCheck.title",
+        "contactPhoneCheck.yes",
+        "contactPhoneCheck.no",
+        "button.continue",
+        "error.contact-phone-check.invalid"
+      )
+    }
+  }
+
+  "GET /telephone-number" should {
+    "200 OK" in {
+
+      givenSubscriptionJourneyRecordExists(id,
+        TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+          businessDetails = BusinessDetails(SoleTrader,
+            validUtr,
+            Postcode(validPostcode),
+            registration = Some(Registration(
+              Some(registrationName),
+              isSubscribedToAgentServices = false,
+              isSubscribedToETMP = true,
+              businessAddress,
+              Some("email@email.com"),
+              None,
+              Some("safeId")
+            )
+            ))))
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, GET)
+      val result = await(controller.showTelephoneNumber(request))
+
+      status(result) shouldBe 200
+
+      result should containMessages(
+        "contactTelephone.title",
+        "contactTelephone.p"
+      )
+    }
+  }
+
+  "POST /telephone-number" should {
+    "303 SEE_OTHER to /task-list when valid telephone number entered" in {
+
+      val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+        businessDetails = BusinessDetails(SoleTrader,
+          validUtr,
+          Postcode(validPostcode),
+          registration = Some(Registration(
+            Some(registrationName),
+            isSubscribedToAgentServices = false,
+            isSubscribedToETMP = true,
+            businessAddress,
+            Some("email@email.com"),
+            Some(phoneNumber),
+            Some("safeId")
+          ))))
+
+      givenSubscriptionJourneyRecordExists(id, sjr)
+      givenSubscriptionRecordCreated(id, sjr.copy(
+        contactTelephoneData = Some(ContactTelephoneData(false, Some("01273111111")))
+      ))
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      val result = await(controller.submitTelephoneNumber(request.withFormUrlEncodedBody("telephone" -> "01273111111")))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.TaskListController.showTaskList().url)
+
+    }
+
+    "200 OK with error-empty when nothing submitted" in {
+
+      val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+        businessDetails = BusinessDetails(SoleTrader,
+          validUtr,
+          Postcode(validPostcode),
+          registration = Some(Registration(
+            Some(registrationName),
+            isSubscribedToAgentServices = false,
+            isSubscribedToETMP = true,
+            businessAddress,
+            Some("email@email.com"),
+            Some(phoneNumber),
+            Some("safeId")
+          ))))
+
+      givenSubscriptionJourneyRecordExists(id, sjr)
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      val result = await(controller.submitTelephoneNumber(request.withFormUrlEncodedBody("telephone" -> "")))
+
+      status(result) shouldBe OK
+
+      result should containMessages(
+        "contactTelephone.title",
+        "contactTelephone.p",
+        "error.contact.phone.empty"
+      )
+    }
+
+    "200 OK with error-invalid when not a UK number submitted" in {
+
+      val sjr = TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(
+        businessDetails = BusinessDetails(SoleTrader,
+          validUtr,
+          Postcode(validPostcode),
+          registration = Some(Registration(
+            Some(registrationName),
+            isSubscribedToAgentServices = false,
+            isSubscribedToETMP = true,
+            businessAddress,
+            Some("email@email.com"),
+            Some(phoneNumber),
+            Some("safeId")
+          ))))
+
+      givenSubscriptionJourneyRecordExists(id, sjr)
+
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      val result = await(controller.submitTelephoneNumber(request.withFormUrlEncodedBody("telephone" -> "+112121111111")))
+
+      status(result) shouldBe OK
+
+      result should containMessages(
+        "contactTelephone.title",
+        "contactTelephone.p",
+        "error.contact.phone.invalid"
+      )
     }
   }
 

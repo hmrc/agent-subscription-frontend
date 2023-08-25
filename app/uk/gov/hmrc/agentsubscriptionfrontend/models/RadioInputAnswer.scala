@@ -56,3 +56,5 @@ case class ContactEmailCheck(check: RadioInputAnswer)
 case class ContactTradingNameCheck(check: RadioInputAnswer)
 
 case class ContactTradingAddressCheck(check: RadioInputAnswer)
+
+case class ContactPhoneCheck(check: RadioInputAnswer)
