@@ -596,6 +596,6 @@ contactPhoneCheck.no=No - I want to use a different telephone number
 error.contact-phone-check.invalid=Select yes if this is the telephone number you want to use for your agent services account
 contactTelephone.title=What is the telephone number you want to use for your agent services account?
 contactTelephone.p=Enter a UK telephone number, like 01632 960 001, 07700 900 982 or +44 808 157 0192
-error.contact.phone.invalid=Enter a telephone number in the correct format
+error.contact.phone.invalid=Enter a UK telephone number in the correct format
 error.contact.phone.empty=Enter a UK telephone number
 checkAnswers.telephoneNumber.label=Contact telephone number
