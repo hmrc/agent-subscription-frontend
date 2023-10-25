@@ -62,6 +62,6 @@
     serviceName = Some(msgs("service.name")),
     pageTitle = Some(title + " " + msgs("servicename.titleSuffix")),
     isWelshTranslationAvailable = true,
-    backLink = if(backLinkHref.isDefined) Some(BackLink(href = backLinkHref.get)) else None
+    backLink = if(backLinkHref.isDefined) Some(BackLink.withDefaultText(href = backLinkHref.get)) else None
 ))(mainContentWithTechIssueHelper)
 
