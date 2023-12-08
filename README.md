@@ -1,11 +1,34 @@
 # agent-subscription-frontend
 
-[![Build Status](https://travis-ci.org/hmrc/agent-subscription-frontend.svg)](https://travis-ci.org/hmrc/agent-subscription-frontend) [ ![Download](https://api.bintray.com/packages/hmrc/releases/agent-subscription-frontend/images/download.svg) ](https://bintray.com/hmrc/releases/agent-subscription-frontend/_latestVersion)
+[![Build Status](https://travis-ci.org/hmrc/agent-subscription-frontend.svg)](https://travis-ci.org/hmrc/agent-subscription-frontend)
 
-This is a web frontend service for agent-subscription. After signing in using government-gateway, agents can go through the steps to
+This is a frontend service for agent-subscription. After signing in using government-gateway, agents can go through the steps to
 register for Agent Services and obtain an HMRC-AS-AGENT enrolment, giving them access a range of functions available for interacting
 with their clients. The domain is Subscriptions to Agent Services 
 following the ROSM (Register Once Subscribe Many) pattern.
+
+For an accountant/bookkeeper to be eligible to register for an Agent Services Account:
+- AMLS registered (or pending if via HMRC)
+- Create a clean Government Gateway account with affinity type "Agent" to create new EACD group (this can be done during the journey if not starting with one)
+
+We use the agent-assurance service for some of these checks
+
+## Journey overview
+
+Pre-task list:
+- Business type
+- UTR
+- Postcode/NI or CRN depending on business type
+- Vat registered? Gather details if yes.
+
+Task list:
+- AMLS (can be autocompleted if 'manually assured')
+- contact details
+- mapping (optional - if on unclean cred)
+- create new GG (if on unclean cred)
+- Check your answers
+
+After submission the agent should be assigned the HMRC-AS-AGENT enrolment if successful. They can then access the Agent Services Account.
 
 
 ### Running the tests
