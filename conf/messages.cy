@@ -375,22 +375,6 @@ nonAgent.title=Nid ydych wedi mewngofnodi gyda Dynodydd Defnyddiwr (ID) asiant
 nonAgent.p1=I fynd yn eich blaen, <a href="{0}">mewngofnodwch gyda Dynodydd Defnyddiwr (ID) asiant</a>.
 nonAgent.p2=Os nad oes un gennych, <a href="{0}">crëwch Ddynodydd Defnyddiwr (ID) Porth y Llywodraeth newydd</a>, gan ddewis yr opsiwn ‘Asiant’.
 
-#Link account
-linkClients.title=Cysylltu’ch cleientiaid â’ch cyfrif gwasanaethau asiant
-linkClients.p1=Byddwn yn cysylltu’ch cleientiaid Hunanasesiad a TAW presennol â’ch cyfrif gwasanaethau asiant yn awtomatig.
-linkClients.p2=Os yw’n well gennych, gallwch hepgor y cam hwn am y tro. Gallwch ei wneud yn nes ymlaen ar ôl creu eich cyfrif, ond gallwch arbed amser drwy ei wneud nawr.
-linkClients.expand.button=Rhagor o fanylion am gysylltu’ch cleientiaid
-linkClients.expand.p1=Gallwch ganiatáu i’ch cyfrif gwasanaethau asiant gael mynediad at eich perthnasoedd presennol â chleientiaid.
-linkClients.expand.p2=I wneud hyn, byddwn yn gwirio am unrhyw berthnasoedd cleientiaid o ran Hunanasesiad neu TAW sy’n gysylltiedig â’r cyfrif asiant Porth y Llywodraeth a ddefnyddioch i fewngofnodi.
-linkClients.expand.p3=Dylech ddefnyddio’r gwasanaeth hwn os ydych yn disgwyl darparu unrhyw rai o’r gwasanaethau canlynol ar gyfer cleientiaid:
-linkClients.expand.bullet1=adrodd am eu hincwm a’u treuliau drwy feddalwedd
-linkClients.expand.bullet2=adrodd am eu Ffurflenni TAW drwy feddalwedd
-linkClients.expand.p4=Os dewiswch gysylltu’ch cleientiaid, efallai y gall unrhyw un sy’n defnyddio’r cyfrif gwasanaethau asiant hwn gael mynediad at eich perthnasoedd cleient.
-linkClients.legend=A hoffech gysylltu’ch cleientiaid nawr?
-linkClients.option.yes=Iawn
-linkClients.option.no=Na
-linkClients.error.no-radio-selected=Dewiswch ‘Iawn’ os hoffech gysylltu’ch cleientiaid nawr
-
 #Subscription complete
 subscriptionComplete.title=Cyfrif gwasanaethau asiant wedi’i greu
 subscriptionComplete.h1=Cyfrif gwasanaethau asiant wedi’i greu
