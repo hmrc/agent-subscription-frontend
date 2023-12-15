@@ -39,9 +39,7 @@ package object controllers extends Logging {
     val call = submitAction.headOption match {
       case Some("continue") => next
       case Some("save")     => routes.TaskListController.savedProgress(Some(previous.url))
-      case e => {
-        throw new Exception(s"unexpected value in submit $e")
-      }
+      case e => throw new Exception(s"unexpected value in submit $e")
     }
     call
   }
@@ -125,14 +123,6 @@ package object controllers extends Logging {
           .transform[String](_.getOrElse(""), s => Some(s))
       )((hasSaAgentCode, saAgentCode) => RadioInvasiveStartSaAgentCode(hasSaAgentCode.toBoolean, saAgentCode))(radioInvasiveStartSaAgentCode =>
         Some((radioInvasiveStartSaAgentCode.hasSaAgentCode.toString, radioInvasiveStartSaAgentCode.saAgentCode))))
-  }
-
-  object SubscriptionControllerForms {
-    val linkClientsForm: Form[LinkClients] =
-      Form[LinkClients](
-        mapping("autoMapping" -> optional(text).verifying(radioInputSelected("linkClients.error.no-radio-selected")))(ans =>
-          LinkClients(RadioInputAnswer.apply(ans.getOrElse(""))))(lc => Some(RadioInputAnswer.unapply(lc.autoMapping)))
-          .verifying("error.link-clients-value.invalid", submittedLinkClients => Seq(Yes, No).contains(submittedLinkClients.autoMapping)))
   }
 
   object CompanyRegistrationForms {
