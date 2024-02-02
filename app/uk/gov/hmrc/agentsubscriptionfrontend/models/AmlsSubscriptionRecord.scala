@@ -46,7 +46,7 @@ case class AmlsSubscriptionRecord(
   safeId: String,
   currentRegYearStartDate: Option[LocalDate],
   currentRegYearEndDate: Option[LocalDate],
-  suspended: Option[Boolean],
+  suspended: Option[Boolean]
 )
 
 object AmlsSubscriptionRecord {

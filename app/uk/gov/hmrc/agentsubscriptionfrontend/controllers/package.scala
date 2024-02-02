@@ -39,7 +39,7 @@ package object controllers extends Logging {
     val call = submitAction.headOption match {
       case Some("continue") => next
       case Some("save")     => routes.TaskListController.savedProgress(Some(previous.url))
-      case e => throw new Exception(s"unexpected value in submit $e")
+      case e                => throw new Exception(s"unexpected value in submit $e")
     }
     call
   }
