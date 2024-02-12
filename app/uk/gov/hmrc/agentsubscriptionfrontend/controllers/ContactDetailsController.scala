@@ -54,7 +54,7 @@ class ContactDetailsController @Inject()(
   contactTradingAddressCheckTemplate: contact_trading_address_check,
   addressFormWithErrorsTemplate: address_form_with_errors,
   contactPhoneCheckTemplate: contact_phone_check,
-  contactTelephoneTemplate: contact_telephone,
+  contactTelephoneTemplate: contact_telephone
 )(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions with Logging {
 
