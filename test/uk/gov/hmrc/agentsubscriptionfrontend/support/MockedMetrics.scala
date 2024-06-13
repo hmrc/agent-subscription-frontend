@@ -17,9 +17,9 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import com.codahale.metrics.{Meter, MetricRegistry}
-import com.kenshoo.play.metrics.Metrics
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.{BeforeAndAfterEach, Suite}
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 trait MockedMetrics extends ResettingMockitoSugar with BeforeAndAfterEach {
   this: Suite =>

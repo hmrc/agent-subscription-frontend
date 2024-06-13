@@ -32,7 +32,8 @@ class DesAddressForm(logger: LoggerLike, denylistedPostcodes: Set[String]) {
       "addressLine4" -> addressLine234(lineNumber = 4),
       "postcode"     -> postcodeWithDenylist(denylistedPostcodes),
       "countryCode"  -> text
-    )(DesAddress.apply)(DesAddress.unapply))
+    )(DesAddress.apply)(DesAddress.unapply)
+  )
 
   def bindAddressLookupFrontendAddress(utr: Utr, addressLookupFrontendAddress: AddressLookupFrontendAddress): Form[DesAddress] = {
     if (addressLookupFrontendAddress.lines.length > 4) {
@@ -46,7 +47,8 @@ class DesAddressForm(logger: LoggerLike, denylistedPostcodes: Set[String]) {
         "addressLine4" -> lineIfPresent(addressLookupFrontendAddress.lines, 3).getOrElse(""),
         "postcode"     -> addressLookupFrontendAddress.postcode.getOrElse(""),
         "countryCode"  -> addressLookupFrontendAddress.country.code
-      ))
+      )
+    )
   }
 
   private def lineIfPresent(lines: Seq[String], index: Int): Option[String] =

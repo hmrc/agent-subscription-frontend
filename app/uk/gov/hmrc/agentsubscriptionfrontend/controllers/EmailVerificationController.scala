@@ -16,19 +16,18 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import com.kenshoo.play.metrics.Metrics
-import play.api.{Configuration, Environment}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Call, MessagesControllerComponents, Request, RequestHeader}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.service.SubscriptionJourneyService
-import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.hmrcfrontend.config.AccessibilityStatementConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{EmailVerificationService, MongoDBSessionStoreService}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{EmailVerificationService, MongoDBSessionStoreService, SubscriptionJourneyService}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.hmrcfrontend.config.AccessibilityStatementConfig
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 case class RelevantState(subscriptionJourneyRecord: SubscriptionJourneyRecord, isChangingAnswers: Option[Boolean])
 
 @Singleton
-class EmailVerificationController @Inject()(
+class EmailVerificationController @Inject() (
   env: Environment,
   val config: Configuration,
   val metrics: Metrics,
@@ -60,10 +59,10 @@ class EmailVerificationController @Inject()(
     for {
       authProviderId    <- retrieveCredentials.map(_.getOrElse(throw new RuntimeException("Email verification: No credentials could be retrieved")))
       isChangingAnswers <- sessionStoreService.fetchIsChangingAnswers
-      subscriptionJourneyRecord <- subscriptionJourneyService
-                                    .getJourneyRecord(AuthProviderId(authProviderId.providerId))
-                                    .map(_.getOrElse(
-                                      throw new RuntimeException("Email verification: No subscription journey record could be retrieved")))
+      subscriptionJourneyRecord <-
+        subscriptionJourneyService
+          .getJourneyRecord(AuthProviderId(authProviderId.providerId))
+          .map(_.getOrElse(throw new RuntimeException("Email verification: No subscription journey record could be retrieved")))
     } yield (RelevantState(subscriptionJourneyRecord, isChangingAnswers), authProviderId.providerId)
 
   override def getEmailToVerify(session: RelevantState): String =

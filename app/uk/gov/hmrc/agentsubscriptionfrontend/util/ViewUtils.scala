@@ -29,17 +29,15 @@ object ViewUtils {
     if (form.hasErrors || form.hasGlobalErrors) s"${messages("error.prefix")} " else ""
 
   def mapRadioOptionsToRadioItems(field: Field, inputs: Seq[RadioOption])(implicit messages: Messages): Seq[RadioItem] =
-    inputs.map(
-      a => {
-        RadioItem(
-          id = Some(a.id),
-          value = Some(a.value),
-          checked = field.value.contains(a.value),
-          content = Text(messages(a.messageKey)),
-          attributes = Map.empty
-        )
-      }
-    )
+    inputs.map { a =>
+      RadioItem(
+        id = Some(a.id),
+        value = Some(a.value),
+        checked = field.value.contains(a.value),
+        content = Text(messages(a.messageKey)),
+        attributes = Map.empty
+      )
+    }
 
 //  def mapAnswerRowToSummaryListRow(field: Field, answerRow: Seq[AnswerRow])(implicit messages: Messages): Seq[SummaryListRow] =
 //    answerRow.map(

@@ -28,14 +28,12 @@ import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, Re
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-/**
-  * RedirectUrl class provides methods to validate a continue url provided as a query parameter.
-  * To retrieve the url from the RedirectUrl class you need to provide a RedirectUrlPolicy which defines a set of rules
-  * to validate the url.
+/** RedirectUrl class provides methods to validate a continue url provided as a query parameter. To retrieve the url from the RedirectUrl class you
+  * need to provide a RedirectUrlPolicy which defines a set of rules to validate the url.
   */
 
 @Singleton
-class RedirectUrlActions @Inject()(sessionStoreService: MongoDBSessionStoreService, ssoConnector: SsoConnector)(implicit executor: ExecutionContext)
+class RedirectUrlActions @Inject() (sessionStoreService: MongoDBSessionStoreService, ssoConnector: SsoConnector)(implicit executor: ExecutionContext)
     extends Logging {
 
   def allowlistedDomains()(implicit hc: HeaderCarrier): Future[Set[String]] = ssoConnector.getAllowlistedDomains()
@@ -57,7 +55,7 @@ class RedirectUrlActions @Inject()(sessionStoreService: MongoDBSessionStoreServi
     val allowlistPolicy = AbsoluteWithHostnameFromAllowlist(allowlistedDomains())
     val unsafeUrl = redirectUrl.get(UnsafePermitAll).url
 
-    //if relative let through else check url domain is on allowlist
+    // if relative let through else check url domain is on allowlist
     if (RedirectUrl.isRelativeUrl(unsafeUrl)) block(Some(unsafeUrl))
     else
       redirectUrl.getEither(allowlistPolicy).flatMap {

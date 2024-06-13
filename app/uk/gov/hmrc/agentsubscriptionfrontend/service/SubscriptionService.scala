@@ -16,10 +16,6 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
-import java.time.LocalDate
-
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.http.Status
 import play.api.i18n.Lang
@@ -34,7 +30,10 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 case class HttpError(msg: String, httpStatusCode: Int) extends RuntimeException
@@ -52,31 +51,34 @@ case object NoRegistrationFound extends SubscriptionState
 case class SubscriptionProcess(state: SubscriptionState, details: Option[Registration])
 
 @Singleton
-class SubscriptionService @Inject()(
+class SubscriptionService @Inject() (
   agentSubscriptionConnector: AgentSubscriptionConnector,
   sessionStoreService: MongoDBSessionStoreService,
   subscriptionJourneyService: SubscriptionJourneyService,
-  val metrics: Metrics)
-    extends Monitoring with Logging {
+  val metrics: Metrics
+) extends Monitoring with Logging {
 
   import SubscriptionDetails._
 
-  def subscribe(utr: Utr, postcode: Postcode, agency: Agency, langForEmail: Option[Lang], amlsData: Option[AmlsData])(
-    implicit hc: HeaderCarrier,
-    ec: ExecutionContext): Future[(Arn, String)] = {
+  def subscribe(utr: Utr, postcode: Postcode, agency: Agency, langForEmail: Option[Lang], amlsData: Option[AmlsData])(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[(Arn, String)] = {
     val subscriptionDetails = mapper(utr, postcode, agency, amlsData)
     subscribeAgencyToMtd(subscriptionDetails, langForEmail) map { arn =>
       (arn, subscriptionDetails.name)
     }
   }
 
-  def subscribeAgencyToMtd(subscriptionDetails: SubscriptionDetails, langForEmail: Option[Lang])(
-    implicit hc: HeaderCarrier,
-    ec: ExecutionContext): Future[Arn] = {
+  def subscribeAgencyToMtd(subscriptionDetails: SubscriptionDetails, langForEmail: Option[Lang])(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[Arn] = {
     val address = if (subscriptionDetails.address.countryCode != "GB") {
       logger.warn(
         s"Non-GB country code chosen by user for UTR ${subscriptionDetails.utr.value}. " +
-          s"Overriding with GB. A better fix for this is coming in APB-1288.")
+          s"Overriding with GB. A better fix for this is coming in APB-1288."
+      )
       subscriptionDetails.address.copy(countryCode = "GB")
     } else {
       subscriptionDetails.address
@@ -97,7 +99,7 @@ class SubscriptionService @Inject()(
       case e: UpstreamErrorResponse if Seq(Status.FORBIDDEN, Status.CONFLICT) contains e.statusCode =>
         logger.warn("Upstream error (in agent-subscription): see agent-subscription log for details")
         Future failed HttpError("Upstream error", e.statusCode)
-      case e: UpstreamErrorResponse if e.message contains ("AGENT_TERMINATED") =>
+      case e: UpstreamErrorResponse if e.message contains "AGENT_TERMINATED" =>
         logger.warn(s"Terminated agent is trying to re-subscribe ${e.message}")
         Future failed HttpError("Terminated agent", e.statusCode)
       case e =>
@@ -106,57 +108,66 @@ class SubscriptionService @Inject()(
     }
   }
 
-  def completePartialSubscription(
-    utr: Utr,
-    businessPostCode: Postcode)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Arn] =
+  def completePartialSubscription(utr: Utr, businessPostCode: Postcode)(implicit
+    request: Request[_],
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[Arn] =
     agentSubscriptionConnector
       .completePartialSubscription(
-        CompletePartialSubscriptionBody(utr, SubscriptionRequestKnownFacts(businessPostCode.value), extractLangPreferenceFromCookie))
+        CompletePartialSubscriptionBody(utr, SubscriptionRequestKnownFacts(businessPostCode.value), extractLangPreferenceFromCookie)
+      )
       .recover {
         case e: UpstreamErrorResponse if Seq(Status.FORBIDDEN, Status.CONFLICT) contains e.statusCode =>
           logger.warn(s"Eligibility checks failed for partialSubscriptionFix, with status: ${e.statusCode}")
           throw e
       }
 
-  def completePartialSubscriptionAndGoToComplete(
-    utr: Utr,
-    businessPostCode: Postcode)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
+  def completePartialSubscriptionAndGoToComplete(utr: Utr, businessPostCode: Postcode)(implicit
+    request: Request[_],
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[Result] =
     completePartialSubscription(utr, businessPostCode).map { _ =>
       mark("Count-Subscription-PartialSubscriptionCompleted")
       Redirect(routes.SubscriptionController.showSubscriptionComplete())
     } recover {
-      case e: UpstreamErrorResponse if e.message contains ("AGENT_TERMINATED") =>
+      case e: UpstreamErrorResponse if e.message contains "AGENT_TERMINATED" =>
         logger.warn(s"Terminated agent has isASAgent flag and is trying to re-subscribe ${e.message}")
         Redirect(routes.StartController.showCannotCreateAccount())
     }
 
-  def redirectAfterGGCredsCreatedBasedOnStatus(
-    continueId: ContinueId,
-    agent: Agent)(implicit request: Request[_], hc: HeaderCarrier, ex: ExecutionContext): Future[Result] =
+  def redirectAfterGGCredsCreatedBasedOnStatus(continueId: ContinueId, agent: Agent)(implicit
+    request: Request[_],
+    hc: HeaderCarrier,
+    ex: ExecutionContext
+  ): Future[Result] =
     for {
       record             <- subscriptionJourneyService.getMandatoryJourneyRecord(continueId)
       subscriptionStatus <- getSubscriptionStatus(record.businessDetails.utr, record.businessDetails.postcode)
-      //if user is partially subscribed when they come back with a new user ID can complete partial subscription with clean creds
+      // if user is partially subscribed when they come back with a new user ID can complete partial subscription with clean creds
       completePartialSubscriptionOrTaskList <- subscriptionStatus match {
-                                                case SubscriptionProcess(SubscribedButNotEnrolled, Some(_)) =>
-                                                  subscriptionJourneyService
-                                                    .saveJourneyRecord(
-                                                      record.copy(
-                                                        cleanCredsAuthProviderId = Some(agent.authProviderId)
-                                                      ))
-                                                    .flatMap(
-                                                      _ =>
-                                                        completePartialSubscriptionAndGoToComplete(
-                                                          record.businessDetails.utr,
-                                                          record.businessDetails.postcode))
+                                                 case SubscriptionProcess(SubscribedButNotEnrolled, Some(_)) =>
+                                                   subscriptionJourneyService
+                                                     .saveJourneyRecord(
+                                                       record.copy(
+                                                         cleanCredsAuthProviderId = Some(agent.authProviderId)
+                                                       )
+                                                     )
+                                                     .flatMap(_ =>
+                                                       completePartialSubscriptionAndGoToComplete(
+                                                         record.businessDetails.utr,
+                                                         record.businessDetails.postcode
+                                                       )
+                                                     )
 
-                                                case _ =>
-                                                  subscriptionJourneyService
-                                                    .saveJourneyRecord(record.copy(cleanCredsAuthProviderId = Some(agent.authProviderId)))
-                                                    .map { _ =>
-                                                      Redirect(routes.TaskListController.showTaskList())
-                                                    }
-                                              }
+                                                 case _ =>
+                                                   subscriptionJourneyService
+                                                     .saveJourneyRecord(record.copy(cleanCredsAuthProviderId = Some(agent.authProviderId)))
+                                                     .map { _ =>
+                                                       Redirect(routes.TaskListController.showTaskList())
+                                                     }
+                                               }
     } yield completePartialSubscriptionOrTaskList
 
   def getSubscriptionStatus(utr: Utr, postcode: Postcode)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[SubscriptionProcess] =
@@ -187,24 +198,25 @@ class SubscriptionService @Inject()(
     agentSubscriptionConnector.matchVatKnownFacts(vrn, vatRegistrationDate)
 
   def handlePartiallySubscribedAndRedirect(agent: Agent, agentSession: AgentSession)(
-    whenNotPartiallySubscribed: => Future[Result])(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
+    whenNotPartiallySubscribed: => Future[Result]
+  )(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
     val utr = agentSession.utr.getOrElse(Utr(""))
     val postcode = agentSession.postcode.getOrElse(Postcode(""))
     for {
       subscriptionProcess <- getSubscriptionStatus(utr, postcode)
       result <- if (subscriptionProcess.state == SubscribedButNotEnrolled)
-                 agent.cleanCredsFold(isDirty = {
-                   subscriptionJourneyService
-                     .createJourneyRecord(agentSession, agent)
-                     .map { _ =>
-                       Redirect(routes.SubscriptionController.showSignInWithNewID())
-                     } recover {
-                     case HttpError(msg, _) => logger.warn(msg); Conflict
-                   }
-                 })(
-                   isClean = completePartialSubscriptionAndGoToComplete(utr, postcode)
-                 )
-               else whenNotPartiallySubscribed
+                  agent.cleanCredsFold(isDirty =
+                    subscriptionJourneyService
+                      .createJourneyRecord(agentSession, agent)
+                      .map { _ =>
+                        Redirect(routes.SubscriptionController.showSignInWithNewID())
+                      } recover { case HttpError(msg, _) =>
+                      logger.warn(msg); Conflict
+                    }
+                  )(
+                    isClean = completePartialSubscriptionAndGoToComplete(utr, postcode)
+                  )
+                else whenNotPartiallySubscribed
     } yield result
   }
 

@@ -23,4 +23,5 @@ case class AssuranceCheckInput(
   passCesaAgentAssuranceCheck: Option[Boolean],
   userEnteredSaAgentRef: Option[String] = None,
   userEnteredUtr: Option[Utr] = None,
-  userEnteredNino: Option[Nino] = None)
+  userEnteredNino: Option[Nino] = None
+)

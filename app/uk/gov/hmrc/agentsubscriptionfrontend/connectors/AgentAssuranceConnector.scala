@@ -16,27 +16,24 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
-import com.codahale.metrics.MetricRegistry
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.http.Status._
-import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AmlsDetails
+import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpClientConverter.transformOptionResponse
 import uk.gov.hmrc.domain.{SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http.HttpErrorFunctions._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AgentAssuranceConnector @Inject()(http: HttpClient, metrics: Metrics, appConfig: AppConfig)(implicit ec: ExecutionContext)
+class AgentAssuranceConnector @Inject() (http: HttpClient, val metrics: Metrics, appConfig: AppConfig)(implicit val ec: ExecutionContext)
     extends HttpAPIMonitor {
-
-  override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
   def hasAcceptableNumberOfClients(regime: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     monitor(s"ConsumedAPI-AgentAssurance-hasAcceptableNumberOfClients-GET") {
@@ -76,7 +73,8 @@ class AgentAssuranceConnector @Inject()(http: HttpClient, metrics: Metrics, appC
             case FORBIDDEN     => true
             case NOT_FOUND =>
               throw new IllegalStateException(
-                s"unable to reach ${appConfig.agentAssuranceBaseUrl}$endpoint. R2dw list might not have been configured")
+                s"unable to reach ${appConfig.agentAssuranceBaseUrl}$endpoint. R2dw list might not have been configured"
+              )
             case s => throw UpstreamErrorResponse(response.body, s)
           }
         }
@@ -93,7 +91,8 @@ class AgentAssuranceConnector @Inject()(http: HttpClient, metrics: Metrics, appC
             case FORBIDDEN     => false
             case NOT_FOUND =>
               throw new IllegalStateException(
-                s"unable to reach ${appConfig.agentAssuranceBaseUrl}/$endpoint. Manually assured agents list might not have been configured")
+                s"unable to reach ${appConfig.agentAssuranceBaseUrl}/$endpoint. Manually assured agents list might not have been configured"
+              )
             case s => throw UpstreamErrorResponse(response.body, s)
           }
         }
@@ -112,8 +111,9 @@ class AgentAssuranceConnector @Inject()(http: HttpClient, metrics: Metrics, appC
   private def cesaGetUrl(ninoOrUtr: String, valueOfNinoOrUtr: String, saAgentReference: SaAgentReference): String =
     s"/agent-assurance/activeCesaRelationship/$ninoOrUtr/$valueOfNinoOrUtr/saAgentReference/${saAgentReference.value}"
 
-  def hasActiveCesaRelationship(ninoOrUtr: TaxIdentifier, taxIdName: String, saAgentReference: SaAgentReference)(
-    implicit hc: HeaderCarrier): Future[Boolean] =
+  def hasActiveCesaRelationship(ninoOrUtr: TaxIdentifier, taxIdName: String, saAgentReference: SaAgentReference)(implicit
+    hc: HeaderCarrier
+  ): Future[Boolean] =
     getActiveCesaRelationship(cesaGetUrl(taxIdName, ninoOrUtr.value, saAgentReference))
 
   def hasAcceptableNumberOfPayeClients(implicit hc: HeaderCarrier): Future[Boolean] =

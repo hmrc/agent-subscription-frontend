@@ -48,30 +48,25 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
 
     "give \"error.utr.invalid\" error" when {
       "it has more than 10 digits" in {
-        bind("20000000000") should matchPattern {
-          case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
+        bind("20000000000") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
         }
       }
 
       "it has fewer than 10 digits" in {
-        bind("200000") should matchPattern {
-          case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
+        bind("200000") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
         }
 
-        bind("20000000 0") should matchPattern {
-          case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
+        bind("20000000 0") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
         }
       }
 
       "it has non-digit characters" in {
-        bind("200000000B") should matchPattern {
-          case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
+        bind("200000000B") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
         }
       }
 
       "it has non-alphanumeric characters" in {
-        bind("200000000!") should matchPattern {
-          case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
+        bind("200000000!") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
         }
       }
     }
@@ -79,11 +74,14 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
 
   "businessUtr bind" should {
     behave like aUtrValidatingMapping("sole_trader")(fieldValue =>
-      businessUtr("sole_trader").withPrefix("testKey").bind(Map("testKey" -> fieldValue)))
+      businessUtr("sole_trader").withPrefix("testKey").bind(Map("testKey" -> fieldValue))
+    )
     behave like aUtrValidatingMapping("limited_company")(fieldValue =>
-      businessUtr("limited_company").withPrefix("testKey").bind(Map("testKey" -> fieldValue)))
+      businessUtr("limited_company").withPrefix("testKey").bind(Map("testKey" -> fieldValue))
+    )
     behave like aUtrValidatingMapping("partnership")(fieldValue =>
-      businessUtr("partnership").withPrefix("testKey").bind(Map("testKey"                                              -> fieldValue)))
+      businessUtr("partnership").withPrefix("testKey").bind(Map("testKey" -> fieldValue))
+    )
     behave like aUtrValidatingMapping("llp")(fieldValue => businessUtr("llp").withPrefix("testKey").bind(Map("testKey" -> fieldValue)))
   }
 
@@ -121,31 +119,26 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
 
     s"give invalid length error $errorMessageFor" when {
       "it has more than 10 digits" in {
-        bind("20000000000") should matchPattern {
-          case Left(List(FormError("testKey", List(invalid), _))) =>
+        bind("20000000000") should matchPattern { case Left(List(FormError("testKey", List(invalid), _))) =>
         }
       }
 
       "it has fewer than 10 digits" in {
-        bind("200000") should matchPattern {
-          case Left(List(FormError("testKey", List(invalid), _))) =>
+        bind("200000") should matchPattern { case Left(List(FormError("testKey", List(invalid), _))) =>
         }
 
-        bind("20000000 0") should matchPattern {
-          case Left(List(FormError("testKey", List(invalid), _))) =>
+        bind("20000000 0") should matchPattern { case Left(List(FormError("testKey", List(invalid), _))) =>
         }
       }
     }
     s"give invalid format error $errorMessageFor" when {
       "it has non-digit characters" in {
-        bind("200000000B") should matchPattern {
-          case Left(List(FormError("testKey", List(invalid), _))) =>
+        bind("200000000B") should matchPattern { case Left(List(FormError("testKey", List(invalid), _))) =>
         }
       }
 
       "it has non-alphanumeric characters" in {
-        bind("200000000!") should matchPattern {
-          case Left(List(FormError("testKey", List(invalid), _))) =>
+        bind("200000000!") should matchPattern { case Left(List(FormError("testKey", List(invalid), _))) =>
         }
       }
     }
@@ -165,13 +158,11 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
       bind(fieldValue) shouldBe Right(fieldValue)
 
     def shouldRejectFieldValueAsInvalid(fieldValue: String): Assertion =
-      bind(fieldValue) should matchPattern {
-        case Left(List(FormError("testKey", List("error.postcode.invalid"), _))) =>
+      bind(fieldValue) should matchPattern { case Left(List(FormError("testKey", List("error.postcode.invalid"), _))) =>
       }
 
     def shouldRejectFieldValueAsInvalidChars(fieldValue: String): Assertion =
-      bind(fieldValue) should matchPattern {
-        case Left(List(FormError("testKey", List("error.postcode.invalidchars"), _))) =>
+      bind(fieldValue) should matchPattern { case Left(List(FormError("testKey", List("error.postcode.invalidchars"), _))) =>
       }
 
     "accept valid postcodes" in {
@@ -280,13 +271,11 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
     def bind(fieldValue: String) = emailAddress.bind(Map("testKey" -> fieldValue))
 
     def shouldRejectFieldValueAsInvalid(fieldValue: String): Assertion =
-      bind(fieldValue) should matchPattern {
-        case Left(List(FormError("testKey", List("error.business-email.format"), _))) =>
+      bind(fieldValue) should matchPattern { case Left(List(FormError("testKey", List("error.business-email.format"), _))) =>
       }
 
     def shouldRejectFieldValueAsInvalidChars(fieldValue: String): Assertion =
-      bind(fieldValue) should matchPattern {
-        case Left(List(FormError("testKey", List("error.business-email.format"), _))) =>
+      bind(fieldValue) should matchPattern { case Left(List(FormError("testKey", List("error.business-email.format"), _))) =>
       }
 
     def shouldAcceptFieldValue(fieldValue: String): Assertion =
@@ -304,7 +293,8 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
       "input has length more than 132 characters" in {
         bind(s"${Random.alphanumeric.take(132).mkString}@example.com").left.value should contain only FormError(
           "testKey",
-          "error.business-email.maxlength")
+          "error.business-email.maxlength"
+        )
       }
 
       "input is only whitespace" in {
@@ -440,8 +430,7 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
     def bind(fieldValue: String) = addressLine1Mapping.bind(Map("testKey" -> fieldValue))
 
     def shouldRejectFieldValueAsInvalid(fieldValue: String): Assertion =
-      bind(fieldValue) should matchPattern {
-        case Left(List(FormError("testKey", List(emptyError), _))) =>
+      bind(fieldValue) should matchPattern { case Left(List(FormError("testKey", List(emptyError), _))) =>
       }
 
     def shouldRejectFieldValueAsTooLong(fieldValue: String): Assertion =
@@ -485,7 +474,9 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
       bind(tooLongAndNonMatchingLine) shouldBe Left(
         List(
           FormError("testKey", s"error.addressline.$lineNumber.maxlength", Seq(35)),
-          FormError("testKey", s"error.addressline.$lineNumber.invalid", Seq())))
+          FormError("testKey", s"error.addressline.$lineNumber.invalid", Seq())
+        )
+      )
     }
   }
 
@@ -496,13 +487,11 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
     def bind(fieldValue: String) = businessNameMapping.bind(Map("testKey" -> fieldValue))
 
     def shouldRejectFieldValueAsInvalid(fieldValue: String): Assertion =
-      bind(fieldValue) should matchPattern {
-        case Left(List(FormError("testKey", List("error.business-name.invalid"), _))) =>
+      bind(fieldValue) should matchPattern { case Left(List(FormError("testKey", List("error.business-name.invalid"), _))) =>
       }
 
     def shouldRejectFieldValueAsTooLong(fieldValue: String): Assertion =
-      bind(fieldValue) should matchPattern {
-        case Left(List(FormError("testKey", List("error.business-name.maxlength"), _))) =>
+      bind(fieldValue) should matchPattern { case Left(List(FormError("testKey", List("error.business-name.maxlength"), _))) =>
       }
 
     def shouldAcceptFieldValue(fieldValue: String): Assertion =
@@ -572,27 +561,22 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
 
     "give \"error.saAgentCode.length\" error" when {
       "it has more than 6 characters" in {
-        bind("SA20000000000") should matchPattern {
-          case Left(List(FormError("testKey", List("error.saAgentCode.length"), _))) =>
+        bind("SA20000000000") should matchPattern { case Left(List(FormError("testKey", List("error.saAgentCode.length"), _))) =>
         }
       }
 
       "it has fewer than 6 characters" in {
-        bind("SA200") should matchPattern {
-          case Left(List(FormError("testKey", List("error.saAgentCode.length"), _))) =>
+        bind("SA200") should matchPattern { case Left(List(FormError("testKey", List("error.saAgentCode.length"), _))) =>
         }
       }
 
       "it has no-alphanumeric characters" in {
-        bind("SA*$") should matchPattern {
-          case Left(List(FormError("testKey", List("error.saAgentCode.invalid"), _))) =>
+        bind("SA*$") should matchPattern { case Left(List(FormError("testKey", List("error.saAgentCode.invalid"), _))) =>
         }
-        bind("SA**12") should matchPattern {
-          case Left(List(FormError("testKey", List("error.saAgentCode.invalid"), _))) =>
+        bind("SA**12") should matchPattern { case Left(List(FormError("testKey", List("error.saAgentCode.invalid"), _))) =>
         }
 
-        bind("SA**12222") should matchPattern {
-          case Left(List(FormError("testKey", List("error.saAgentCode.invalid"), _))) =>
+        bind("SA**12222") should matchPattern { case Left(List(FormError("testKey", List("error.saAgentCode.invalid"), _))) =>
         }
       }
     }
@@ -690,13 +674,16 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
       "Membership expiry date is today" in {
         bind(today.getYear.toString, today.getMonthValue.toString, today.getDayOfMonth.toString).left.value should contain only FormError(
           "",
-          "error.moneyLaunderingCompliance.date.past")
+          "error.moneyLaunderingCompliance.date.past"
+        )
       }
 
       "Membership expiry date is not less than 13 months from today" in {
-        bind(futureDate.getYear.toString, futureDate.getMonthValue.toString, futureDate.getDayOfMonth.toString).left.value should contain only FormError(
-          "",
-          "error.moneyLaunderingCompliance.date.before")
+        bind(
+          futureDate.getYear.toString,
+          futureDate.getMonthValue.toString,
+          futureDate.getDayOfMonth.toString
+        ).left.value should contain only FormError("", "error.moneyLaunderingCompliance.date.before")
       }
     }
   }

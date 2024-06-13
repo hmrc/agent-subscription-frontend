@@ -26,10 +26,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TaskListService @Inject()(
+class TaskListService @Inject() (
   agentAssuranceConnector: AgentAssuranceConnector,
   agentSubscriptionConnector: AgentSubscriptionConnector,
-  appConfig: AppConfig) {
+  appConfig: AppConfig
+) {
 
   def createTasks(subscriptionJourneyRecord: SubscriptionJourneyRecord)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[List[Task]] =
     for {

@@ -34,7 +34,8 @@ case class CheckYourAnswers(
   contactTradingAddressRow: AnswerRow,
   contactTelephoneNumberRow: AnswerRow,
   maybeMappingClientNumberRow: Option[AnswerRow],
-  maybeMappingGGIdsRow: Option[AnswerRow])
+  maybeMappingGGIdsRow: Option[AnswerRow]
+)
 
 object CheckYourAnswers {
 
@@ -49,7 +50,8 @@ object CheckYourAnswers {
     contactTradingName: Option[String],
     contactTradingAddress: BusinessAddress,
     contactTelephone: String,
-    appConfig: AppConfig)(implicit messages: Messages): CheckYourAnswers =
+    appConfig: AppConfig
+  )(implicit messages: Messages): CheckYourAnswers =
     CheckYourAnswers(
       businessNameRow = makeBusinessNameRow(registrationName),
       businessAddressRow = makeBusinessAddressRow(address),
@@ -69,9 +71,12 @@ object CheckYourAnswers {
               changeLink = Some(
                 Call(
                   "GET",
-                  url = appConfig.agentMappingFrontendStartUrl(continueId.getOrElse(throw new RuntimeException("no continueId found in record"))))),
+                  url = appConfig.agentMappingFrontendStartUrl(continueId.getOrElse(throw new RuntimeException("no continueId found in record")))
+                )
+              ),
               buttonText = Some(Messages("checkAnswers.addMore.button"))
-            )),
+            )
+          ),
       maybeMappingGGIdsRow =
         if (userMappings.isEmpty)
           None
@@ -82,7 +87,8 @@ object CheckYourAnswers {
               answerLines = userMappings.map(u => Messages("checkAnswers.ggId.xs", u.ggTag)),
               changeLink = None,
               buttonText = None
-            ))
+            )
+          )
     )
 
   private def makeAmlsDataRow(amlsData: Option[AmlsData])(implicit messages: Messages) =

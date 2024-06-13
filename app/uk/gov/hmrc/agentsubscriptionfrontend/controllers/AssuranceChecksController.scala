@@ -15,8 +15,6 @@
  */
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
@@ -32,11 +30,13 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AssuranceChecksController @Inject()(
+class AssuranceChecksController @Inject() (
   val config: Configuration,
   val metrics: Metrics,
   val authConnector: AuthConnector,
@@ -47,7 +47,8 @@ class AssuranceChecksController @Inject()(
   assuranceService: AssuranceService,
   invasiveCheckStartTemplate: invasive_check_start,
   clientDetailsTemplate: client_details,
-  mcc: MessagesControllerComponents)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  mcc: MessagesControllerComponents
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def invasiveCheckStart: Action[AnyContent] = Action.async { implicit request =>
@@ -64,10 +65,8 @@ class AssuranceChecksController @Inject()(
         invasiveCheckStartSaAgentCodeForm
           .bindFromRequest()
           .fold(
-            formWithErrors => {
-              Ok(invasiveCheckStartTemplate(formWithErrors))
-            },
-            correctForm => {
+            formWithErrors => Ok(invasiveCheckStartTemplate(formWithErrors)),
+            correctForm =>
               if (correctForm.hasSaAgentCode) {
                 Redirect(routes.AssuranceChecksController.showClientDetailsForm())
                   .withSession(request.session + ("saAgentReferenceToCheck" -> correctForm.saAgentCode))
@@ -75,7 +74,6 @@ class AssuranceChecksController @Inject()(
                 mark("Count-Subscription-InvasiveCheck-Declined")
                 Redirect(routes.StartController.showCannotCreateAccount())
               }
-            }
           )
       }
     }
@@ -96,7 +94,7 @@ class AssuranceChecksController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors => Ok(clientDetailsTemplate(formWithErrors)),
-            correctForm => {
+            correctForm =>
               ValidVariantsTaxPayerOptionForm.findByValue(correctForm.variant) match {
                 case TaxPayerUtr  => checkAndRedirect(Utr(correctForm.utr), "utr", businessType)
                 case TaxPayerNino => checkAndRedirect(Nino(correctForm.nino), "nino", businessType)
@@ -104,16 +102,16 @@ class AssuranceChecksController @Inject()(
                   mark("Count-Subscription-InvasiveCheck-Could-Not-Provide-Tax-Payer-Identifier")
                   Redirect(routes.StartController.showCannotCreateAccount())
               }
-            }
           )
       }
     }
   }
 
-  private def checkAndRedirect(value: TaxIdentifier, taxIdentifierName: String, businessType: BusinessType)(
-    implicit hc: HeaderCarrier,
+  private def checkAndRedirect(value: TaxIdentifier, taxIdentifierName: String, businessType: BusinessType)(implicit
+    hc: HeaderCarrier,
     request: Request[AnyContent],
-    agent: Agent): Future[Result] =
+    agent: Agent
+  ): Future[Result] =
     request.session.get("saAgentReferenceToCheck") match {
       case Some(saAgentReference) =>
         assuranceService

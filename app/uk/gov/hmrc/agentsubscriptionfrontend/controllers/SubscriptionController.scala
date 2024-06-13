@@ -16,11 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import com.kenshoo.play.metrics.Metrics
-
-import javax.inject.{Inject, Singleton}
 import play.api.i18n.Lang
-import play.api.mvc.{AnyContent, _}
+import play.api.mvc._
 import play.api.{Configuration, Environment, Logging}
 import uk.gov.hmrc.agentmtdidentifiers.model.Arn
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
@@ -32,36 +29,37 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{SubscriptionJourneyRecord, UserMapping}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{HttpError, MongoDBSessionStoreService, SubscriptionJourneyService, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.{toFuture, valueOps}
-import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{address_form_with_errors, check_answers, sign_in_new_id, subscription_complete, cannot_verify_email_locked, cannot_verify_email_technical}
+import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HttpException
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
-class SubscriptionController @Inject()(
-                                        val authConnector: AuthConnector,
-                                        subscriptionService: SubscriptionService,
-                                        val sessionStoreService: MongoDBSessionStoreService,
-                                        val metrics: Metrics,
-                                        val config: Configuration,
-                                        val env: Environment,
-                                        addressLookUpConnector: AddressLookupFrontendConnector,
-                                        agentAssuranceConnector: AgentAssuranceConnector,
-                                        val redirectUrlActions: RedirectUrlActions,
-                                        mcc: MessagesControllerComponents,
-                                        val subscriptionJourneyService: SubscriptionJourneyService,
-                                        checkAnswersTemplate: check_answers,
-                                        addressFormWithErrorsTemplate: address_form_with_errors,
-                                        subscriptionCompleteTemplate: subscription_complete,
-                                        signInNewIdTemplate: sign_in_new_id,
-                                        cannotVerifyEmailLockedTemplate: cannot_verify_email_locked,
-                                        cannotVerifyEmailTechnicalTemplate: cannot_verify_email_technical                                      )(
-  implicit val appConfig: AppConfig, val ec: ExecutionContext)
-    extends FrontendController(mcc)
-    with SessionBehaviour with AuthActions with Logging {
+class SubscriptionController @Inject() (
+  val authConnector: AuthConnector,
+  subscriptionService: SubscriptionService,
+  val sessionStoreService: MongoDBSessionStoreService,
+  val metrics: Metrics,
+  val config: Configuration,
+  val env: Environment,
+  addressLookUpConnector: AddressLookupFrontendConnector,
+  agentAssuranceConnector: AgentAssuranceConnector,
+  val redirectUrlActions: RedirectUrlActions,
+  mcc: MessagesControllerComponents,
+  val subscriptionJourneyService: SubscriptionJourneyService,
+  checkAnswersTemplate: check_answers,
+  addressFormWithErrorsTemplate: address_form_with_errors,
+  subscriptionCompleteTemplate: subscription_complete,
+  signInNewIdTemplate: sign_in_new_id,
+  cannotVerifyEmailLockedTemplate: cannot_verify_email_locked,
+  cannotVerifyEmailTechnicalTemplate: cannot_verify_email_technical
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+    extends FrontendController(mcc) with SessionBehaviour with AuthActions with Logging {
 
   private val denylistedPostCodes: Set[String] = appConfig.denylistedPostcodes
 
@@ -74,33 +72,35 @@ class SubscriptionController @Inject()(
         agentAssuranceConnector.isManuallyAssuredAgent(sjr.businessDetails.utr).flatMap { isMAAgent =>
           sessionStoreService.cacheIsChangingAnswers(changing = false).flatMap { _ =>
             CYACheckResult.check(sjr) match {
-              case PassWithMaybeAmls(taxpayerName, address, maybeAmls, contactEmail, maybeTradingName, tradingAddress, telephone) => {
+              case PassWithMaybeAmls(taxpayerName, address, maybeAmls, contactEmail, maybeTradingName, tradingAddress, telephone) =>
                 if (maybeAmls.isDefined || isMAAgent) {
                   sessionStoreService
                     .cacheGoBackUrl(routes.SubscriptionController.showCheckAnswers().url)
                     .map { _ =>
                       Ok(
-                        checkAnswersTemplate(CheckYourAnswers(
-                          registrationName = taxpayerName,
-                          address = address,
-                          amlsData = maybeAmls,
-                          isManuallyAssured = isMAAgent,
-                          userMappings = sjr.userMappings,
-                          continueId = sjr.continueId,
-                          contactEmailAddress = contactEmail,
-                          contactTradingName = maybeTradingName,
-                          contactTradingAddress = tradingAddress,
-                          contactTelephone = telephone,
-                          appConfig)
-                        ))
+                        checkAnswersTemplate(
+                          CheckYourAnswers(
+                            registrationName = taxpayerName,
+                            address = address,
+                            amlsData = maybeAmls,
+                            isManuallyAssured = isMAAgent,
+                            userMappings = sjr.userMappings,
+                            continueId = sjr.continueId,
+                            contactEmailAddress = contactEmail,
+                            contactTradingName = maybeTradingName,
+                            contactTradingAddress = tradingAddress,
+                            contactTelephone = telephone,
+                            appConfig
+                          )
+                        )
+                      )
                     }
                 } else Redirect(routes.AMLSController.showAmlsRegisteredPage())
-              }
-              case FailedRegistration => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
-              case FailedContactEmail => Redirect(routes.ContactDetailsController.showContactEmailCheck())
-              case FailedContactTradingName => Redirect(routes.ContactDetailsController.showTradingNameCheck())
+              case FailedRegistration          => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+              case FailedContactEmail          => Redirect(routes.ContactDetailsController.showContactEmailCheck())
+              case FailedContactTradingName    => Redirect(routes.ContactDetailsController.showTradingNameCheck())
               case FailedContactTradingAddress => Redirect(routes.ContactDetailsController.showCheckMainTradingAddress())
-              case FailedContactTelephone => Redirect(routes.ContactDetailsController.contactPhoneCheck)
+              case FailedContactTelephone      => Redirect(routes.ContactDetailsController.contactPhoneCheck)
             }
           }
         }
@@ -108,39 +108,53 @@ class SubscriptionController @Inject()(
     }
   }
 
-  //helper function to copy record details to session before the record is deleted allowing them to be displayed on subscription complete page
-  private def updateSessionAndReturnAgencyBeforeSubscribing(registration: Registration)
-                                            (emailData: ContactEmailData,
-                                             nameData: ContactTradingNameData,
-                                             addressData: ContactTradingAddressData,
-                                             telephoneData: ContactTelephoneData,
-                                             userMappings: List[UserMapping])(implicit request: Request[_]): Future[Agency] = {
+  // helper function to copy record details to session before the record is deleted allowing them to be displayed on subscription complete page
+  private def updateSessionAndReturnAgencyBeforeSubscribing(registration: Registration)(
+    emailData: ContactEmailData,
+    nameData: ContactTradingNameData,
+    addressData: ContactTradingAddressData,
+    telephoneData: ContactTelephoneData,
+    userMappings: List[UserMapping]
+  )(implicit request: Request[_]): Future[Agency] = {
     val agencyName = nameData.contactTradingName.orElse(registration.taxpayerName)
     val agencyEmail = emailData.contactEmail
-    val agencyAddress: BusinessAddress = addressData.contactTradingAddress.getOrElse(
-      throw new Exception("contact trading address should be defined"))
+    val agencyAddress: BusinessAddress = addressData.contactTradingAddress.getOrElse(throw new Exception("contact trading address should be defined"))
     val clientCount = userMappings.map(_.count).sum
     val agencyTelephone = telephoneData.telephoneNumber
 
-    sessionStoreService.cacheAgentSession(AgentSession(registration = Some(
-      Registration(taxpayerName = agencyName,
-        isSubscribedToAgentServices = false,
-        isSubscribedToETMP = false,
-        agencyAddress,
-        agencyEmail,
-        agencyTelephone,
-        registration.safeId)), clientCount = Some(clientCount))).map(_ => Agency(
-      name = agencyName.getOrElse(registration.taxpayerName.getOrElse(throw new Exception("taxpayer name should be defined"))),
-      address = DesAddress.fromBusinessAddress(agencyAddress),
-      telephone = agencyTelephone,
-      email = agencyEmail.getOrElse(throw new Exception("contact email address should be defined"))))
+    sessionStoreService
+      .cacheAgentSession(
+        AgentSession(
+          registration = Some(
+            Registration(
+              taxpayerName = agencyName,
+              isSubscribedToAgentServices = false,
+              isSubscribedToETMP = false,
+              agencyAddress,
+              agencyEmail,
+              agencyTelephone,
+              registration.safeId
+            )
+          ),
+          clientCount = Some(clientCount)
+        )
+      )
+      .map(_ =>
+        Agency(
+          name = agencyName.getOrElse(registration.taxpayerName.getOrElse(throw new Exception("taxpayer name should be defined"))),
+          address = DesAddress.fromBusinessAddress(agencyAddress),
+          telephone = agencyTelephone,
+          email = agencyEmail.getOrElse(throw new Exception("contact email address should be defined"))
+        )
+      )
   }
 
   def submitCheckAnswers: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingEmailVerifiedAgent { agent =>
       agent.withCleanCredsOrSignIn {
         val sjr = agent.getMandatorySubscriptionRecord
-        (sjr.businessDetails.utr,
+        (
+          sjr.businessDetails.utr,
           sjr.businessDetails.postcode,
           sjr.businessDetails.registration,
           sjr.amlsData,
@@ -148,25 +162,27 @@ class SubscriptionController @Inject()(
           sjr.contactTradingNameData,
           sjr.contactTradingAddressData,
           sjr.contactTelephoneData,
-        sjr.userMappings) match {
-          case (utr, postcode, Some(registration), amlsData, Some(email), Some(name), Some(address), Some(telephone), userMappings) => {
-            for {
-              agencyDetails <- updateSessionAndReturnAgencyBeforeSubscribing(registration)(email, name, address, telephone, userMappings)
-              langForEmail = extractLangPreferenceFromCookie
-              _ <- subscriptionService.subscribe(utr, postcode, agencyDetails, langForEmail, amlsData)
-              result <- redirectSubscriptionResponse
-            } yield result
-          } recoverWith {
-            case HttpError(_, CONFLICT) =>
-              mark("Count-Subscription-AlreadySubscribed-APIResponse")
-              Future successful Redirect(routes.BusinessIdentificationController.showAlreadySubscribed())
-            case HttpError(_, INTERNAL_SERVER_ERROR) =>
-              mark("Count-Subscription-Failed-Agent_Terminated")
-              Future successful Redirect(routes.StartController.showCannotCreateAccount())
-            case HttpError(_, status) =>
-              mark("Count-Subscription-Failed")
-              Future failed new HttpException(s"Subscription failed: HTTP status $status from agent-subscription service ", status)
-          }
+          sjr.userMappings
+        ) match {
+          case (utr, postcode, Some(registration), amlsData, Some(email), Some(name), Some(address), Some(telephone), userMappings) =>
+            {
+              for {
+                agencyDetails <- updateSessionAndReturnAgencyBeforeSubscribing(registration)(email, name, address, telephone, userMappings)
+                langForEmail = extractLangPreferenceFromCookie
+                _      <- subscriptionService.subscribe(utr, postcode, agencyDetails, langForEmail, amlsData)
+                result <- redirectSubscriptionResponse
+              } yield result
+            } recoverWith {
+              case HttpError(_, CONFLICT) =>
+                mark("Count-Subscription-AlreadySubscribed-APIResponse")
+                Future successful Redirect(routes.BusinessIdentificationController.showAlreadySubscribed())
+              case HttpError(_, INTERNAL_SERVER_ERROR) =>
+                mark("Count-Subscription-Failed-Agent_Terminated")
+                Future successful Redirect(routes.StartController.showCannotCreateAccount())
+              case HttpError(_, status) =>
+                mark("Count-Subscription-Failed")
+                Future failed new HttpException(s"Subscription failed: HTTP status $status from agent-subscription service ", status)
+            }
           case _ =>
             logger.warn(s"Missing data in session, redirecting back to /business-type")
             Redirect(routes.BusinessTypeController.showBusinessTypeForm())
@@ -187,8 +203,8 @@ class SubscriptionController @Inject()(
 
   private def extractLangPreferenceFromCookie(implicit request: Request[_]): Option[Lang] =
     request.cookies
-      .get("PLAY_LANG").map(x => Lang(x.value))
-
+      .get("PLAY_LANG")
+      .map(x => Lang(x.value))
 
   private def redirectSubscriptionResponse: Future[Result] = {
     mark("Count-Subscription-Complete")
@@ -207,12 +223,17 @@ class SubscriptionController @Inject()(
                 formWithErrors => Future successful Ok(addressFormWithErrorsTemplate(formWithErrors)),
                 validDesAddress => {
                   mark("Count-Subscription-AddressLookup-Success")
-                  val updatedSjr = sjr.copy(businessDetails = sjr.businessDetails.copy(
-                    registration = Some(sjr.businessDetails.registration
-                      .getOrElse(throw new RuntimeException("missing registration data"))
-                      .copy(address = BusinessAddress(validDesAddress)))))
+                  val updatedSjr = sjr.copy(businessDetails =
+                    sjr.businessDetails.copy(
+                      registration = Some(
+                        sjr.businessDetails.registration
+                          .getOrElse(throw new RuntimeException("missing registration data"))
+                          .copy(address = BusinessAddress(validDesAddress))
+                      )
+                    )
+                  )
                   for {
-                    _ <- subscriptionJourneyService.saveJourneyRecord(updatedSjr)
+                    _    <- subscriptionJourneyService.saveJourneyRecord(updatedSjr)
                     goto <- Redirect(routes.SubscriptionController.showCheckAnswers())
                   } yield goto
                 }
@@ -244,16 +265,13 @@ class SubscriptionController @Inject()(
     }
   }
 
-
   def showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>
     withSubscribedAgent { (arn: Arn, sjrOpt: Option[SubscriptionJourneyRecord]) =>
-      for{
-        maybeContinueUrl <- getMaybeContinueUrl
+      for {
+        maybeContinueUrl           <- getMaybeContinueUrl
         (name, email, clientCount) <- agencyNameAndEmailClientCount(sjrOpt)
 
-      } yield Ok(
-        subscriptionCompleteTemplate(
-          arn.value, name, email, clientCount))
+      } yield Ok(subscriptionCompleteTemplate(arn.value, name, email, clientCount))
     }
   }
 
@@ -265,51 +283,53 @@ class SubscriptionController @Inject()(
     Ok(cannotVerifyEmailTechnicalTemplate())
   }
 
-  private def agencyNameAndEmailClientCount(maybeSjr: Option[SubscriptionJourneyRecord])(implicit request: Request[Any]): Future[(String, String, Int)] = {
+  private def agencyNameAndEmailClientCount(
+    maybeSjr: Option[SubscriptionJourneyRecord]
+  )(implicit request: Request[Any]): Future[(String, String, Int)] =
     maybeSjr match {
-      case Some(sjr) => {
+      case Some(sjr) =>
+        {
 
-        val agencyName: String = sjr.contactTradingNameData.flatMap(_.contactTradingName).getOrElse(
-          sjr.businessDetails.registration.flatMap(_.taxpayerName).getOrElse(throw new Exception("taxpayer name should be defined"))
-        )
+          val agencyName: String = sjr.contactTradingNameData
+            .flatMap(_.contactTradingName)
+            .getOrElse(
+              sjr.businessDetails.registration.flatMap(_.taxpayerName).getOrElse(throw new Exception("taxpayer name should be defined"))
+            )
 
-        val agencyEmail: String = sjr.contactEmailData.flatMap(_.contactEmail).getOrElse(
-          sjr.businessDetails.registration.flatMap(_.emailAddress).getOrElse(throw new Exception("business email address should be defined"))
-        )
+          val agencyEmail: String = sjr.contactEmailData
+            .flatMap(_.contactEmail)
+            .getOrElse(
+              sjr.businessDetails.registration.flatMap(_.emailAddress).getOrElse(throw new Exception("business email address should be defined"))
+            )
 
-        val clientCount = sjr.userMappings.map(_.count).sum
+          val clientCount = sjr.userMappings.map(_.count).sum
 
-        (agencyName, agencyEmail, clientCount)
-      }.toFuture
-      case None => {
+          (agencyName, agencyEmail, clientCount)
+        }.toFuture
+      case None =>
         sessionStoreService.fetchAgentSession.map {
-          case Some(agentSession) => {
+          case Some(agentSession) =>
             val reg = agentSession.registration.getOrElse(throw new Exception("agent session should have a registration "))
             val agencyName = reg.taxpayerName.getOrElse(throw new Exception("taxpayer name should be defined"))
             val agencyEmail = reg.emailAddress.getOrElse(throw new Exception("agency email should be defined"))
             val clientCount = agentSession.clientCount.getOrElse(0)
             (agencyName, agencyEmail, clientCount)
-          }
           case None => throw new RuntimeException("no agent session found")
         }
-      }
     }
-  }
 
   private def getMaybeContinueUrl(implicit request: Request[_]): Future[Option[String]] = {
 
-    def recoverSessionStoreWithNone[T]: PartialFunction[Throwable, Option[T]] = {
-      case NonFatal(ex) =>
-        logger.warn("Session store service failure", ex)
-        None
+    def recoverSessionStoreWithNone[T]: PartialFunction[Throwable, Option[T]] = { case NonFatal(ex) =>
+      logger.warn("Session store service failure", ex)
+      None
     }
 
     for {
-      continueUrl <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
+      continueUrl    <- sessionStoreService.fetchContinueUrl.recover(recoverSessionStoreWithNone)
       redirectUrlOpt <- redirectUrlActions.getUrl(continueUrl)
     } yield redirectUrlOpt
   }
-
 
   def showSignInWithNewID: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { _ =>
@@ -317,6 +337,3 @@ class SubscriptionController @Inject()(
     }
   }
 }
-
-
-

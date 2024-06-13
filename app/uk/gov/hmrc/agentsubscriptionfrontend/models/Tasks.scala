@@ -74,20 +74,18 @@ final case class ContactDetailsEmailSubTask(contactEmailData: Option[ContactEmai
 
 final case class ContactTradingNameSubTask(contactTradingNameData: Option[ContactTradingNameData], showLink: Boolean) extends SubTask {
   override val taskKey: String = "contactDetailsTradingNameSubTask"
-  override val isComplete: Boolean = {
+  override val isComplete: Boolean =
     contactTradingNameData.fold(false) { data =>
-      //logic has flipped so 'true' means use business name, not has trading name (as before). Avoiding breaking changes by not renaming the variable.
+      // logic has flipped so 'true' means use business name, not has trading name (as before). Avoiding breaking changes by not renaming the variable.
       (!data.hasTradingName && data.contactTradingName.isDefined) || data.hasTradingName
     }
-  }
   override val link: String = routes.ContactDetailsController.showTradingNameCheck().url
 }
 
 final case class ContactTradingAddressSubTask(contactTradingAddressData: Option[ContactTradingAddressData], showLink: Boolean) extends SubTask {
   override val taskKey: String = "contactDetailsTradingAddressSubTask"
-  override val isComplete: Boolean = {
+  override val isComplete: Boolean =
     contactTradingAddressData.flatMap(_.contactTradingAddress).isDefined
-  }
   override val link: String = routes.ContactDetailsController.showCheckMainTradingAddress().url
 }
 
@@ -102,8 +100,8 @@ final case class MappingSubTask(
   mappingComplete: Boolean,
   continueId: String,
   showLink: Boolean,
-  appConfig: AppConfig)
-    extends SubTask {
+  appConfig: AppConfig
+) extends SubTask {
   override val taskKey: String = "mappingSubTask"
   override val isComplete: Boolean = mappingComplete
   override val link: String = appConfig.agentMappingFrontendStartUrl(continueId)

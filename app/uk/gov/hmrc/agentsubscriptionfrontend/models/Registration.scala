@@ -24,7 +24,8 @@ case class BusinessAddress(
   addressLine3: Option[String] = None,
   addressLine4: Option[String] = None,
   postalCode: Option[String],
-  countryCode: String)
+  countryCode: String
+)
 
 object BusinessAddress {
   implicit val format: OFormat[BusinessAddress] = Json.format[BusinessAddress]
@@ -47,7 +48,8 @@ case class Registration(
   address: BusinessAddress,
   emailAddress: Option[String],
   primaryPhoneNumber: Option[String],
-  safeId: Option[String])
+  safeId: Option[String]
+)
 
 object Registration {
 
@@ -59,7 +61,8 @@ case class UpdateBusinessAddressForm(
   addressLine2: Option[String],
   addressLine3: Option[String] = None,
   addressLine4: Option[String] = None,
-  postCode: String)
+  postCode: String
+)
 
 object UpdateBusinessAddressForm {
   def apply(businessAddress: BusinessAddress): UpdateBusinessAddressForm =

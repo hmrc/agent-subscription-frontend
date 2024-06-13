@@ -56,7 +56,8 @@ class PostcodesLoaderSpecIt extends UnitSpec with MockitoSugar {
       }
 
       exception.getMessage should include(
-        "Invalid entries found in the denylisted postcodes file: AB10 1ZTInvalid-post-code,AB11 6NWInvalid-post-code")
+        "Invalid entries found in the denylisted postcodes file: AB10 1ZTInvalid-post-code,AB11 6NWInvalid-post-code"
+      )
     }
   }
 }

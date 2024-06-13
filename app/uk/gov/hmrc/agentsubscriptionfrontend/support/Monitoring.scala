@@ -17,8 +17,8 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import com.codahale.metrics.MetricRegistry
-import com.kenshoo.play.metrics.Metrics
 import play.api.Logger
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 trait Monitoring {
 

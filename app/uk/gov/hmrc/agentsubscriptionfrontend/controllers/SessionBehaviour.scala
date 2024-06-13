@@ -48,8 +48,8 @@ trait SessionBehaviour {
       .cacheAgentSession(updatedSession)
       .map(_ => Redirect(redirectTo))
 
-  protected def updateSubscriptionJourneyRecordAndRedirect(subscriptionJourneyRecord: SubscriptionJourneyRecord)(redirectTo: Call)(
-    implicit hc: HeaderCarrier
+  protected def updateSubscriptionJourneyRecordAndRedirect(subscriptionJourneyRecord: SubscriptionJourneyRecord)(redirectTo: Call)(implicit
+    hc: HeaderCarrier
   ): Future[Result] =
     subscriptionJourneyService.saveJourneyRecord(subscriptionJourneyRecord).map(_ => Redirect(redirectTo))
 }

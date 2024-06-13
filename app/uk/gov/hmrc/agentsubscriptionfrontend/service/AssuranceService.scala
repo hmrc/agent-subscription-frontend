@@ -33,62 +33,65 @@ import scala.concurrent.{ExecutionContext, Future}
 
 //noinspection ScalaStyle
 @Singleton
-class AssuranceService @Inject()(
+class AssuranceService @Inject() (
   appConfig: AppConfig,
   assuranceConnector: AgentAssuranceConnector,
   auditService: AuditService,
-  sessionStoreService: MongoDBSessionStoreService) {
+  sessionStoreService: MongoDBSessionStoreService
+) {
 
   def assureIsAgent(utr: Utr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[AssuranceResults]] =
     if (appConfig.agentAssuranceRun) {
       for {
         isOnRefusalToDealWithList <- assuranceConnector.isR2DWAgent(utr)
         isManuallyAssured <- if (!isOnRefusalToDealWithList) assuranceConnector.isManuallyAssuredAgent(utr)
-                            else Future successful false
+                             else Future successful false
         assuranceResults <- if (isOnRefusalToDealWithList || isManuallyAssured) {
-                             Future.successful(
-                               Some(
-                                 AssuranceResults(
-                                   isOnRefusalToDealWithList = isOnRefusalToDealWithList,
-                                   isManuallyAssured = isManuallyAssured,
-                                   hasAcceptableNumberOfPayeClients = None,
-                                   hasAcceptableNumberOfSAClients = None,
-                                   hasAcceptableNumberOfVatDecOrgClients = None,
-                                   hasAcceptableNumberOfIRCTClients = None
-                                 )))
-                           } else {
+                              Future.successful(
+                                Some(
+                                  AssuranceResults(
+                                    isOnRefusalToDealWithList = isOnRefusalToDealWithList,
+                                    isManuallyAssured = isManuallyAssured,
+                                    hasAcceptableNumberOfPayeClients = None,
+                                    hasAcceptableNumberOfSAClients = None,
+                                    hasAcceptableNumberOfVatDecOrgClients = None,
+                                    hasAcceptableNumberOfIRCTClients = None
+                                  )
+                                )
+                              )
+                            } else {
 
-                             for {
-                               hasAcceptableNumberOfPayeClientsOpt <- assuranceConnector.hasAcceptableNumberOfPayeClients
+                              for {
+                                hasAcceptableNumberOfPayeClientsOpt <- assuranceConnector.hasAcceptableNumberOfPayeClients
+                                                                         .map(Some(_))
+                                hasAcceptableNumberOfSAClientsOpt <- assuranceConnector.hasAcceptableNumberOfSAClients
                                                                        .map(Some(_))
-                               hasAcceptableNumberOfSAClientsOpt <- assuranceConnector.hasAcceptableNumberOfSAClients
-                                                                     .map(Some(_))
-                               hasAcceptableNumberOfVatDecOrgClientsOpt <- assuranceConnector.hasAcceptableNumberOfVatDecOrgClients
-                                                                            .map(Some(_))
-                               hasAcceptableNumberOfIRCTClientsOpt <- assuranceConnector.hasAcceptableNumberOfIRCTClients
-                                                                       .map(Some(_))
-                             } yield
-                               Some(
-                                 AssuranceResults(
-                                   isOnRefusalToDealWithList = isOnRefusalToDealWithList,
-                                   isManuallyAssured = isManuallyAssured,
-                                   hasAcceptableNumberOfPayeClients = hasAcceptableNumberOfPayeClientsOpt,
-                                   hasAcceptableNumberOfSAClients = hasAcceptableNumberOfSAClientsOpt,
-                                   hasAcceptableNumberOfVatDecOrgClients = hasAcceptableNumberOfVatDecOrgClientsOpt,
-                                   hasAcceptableNumberOfIRCTClients = hasAcceptableNumberOfIRCTClientsOpt
-                                 ))
-                           }
+                                hasAcceptableNumberOfVatDecOrgClientsOpt <- assuranceConnector.hasAcceptableNumberOfVatDecOrgClients
+                                                                              .map(Some(_))
+                                hasAcceptableNumberOfIRCTClientsOpt <- assuranceConnector.hasAcceptableNumberOfIRCTClients
+                                                                         .map(Some(_))
+                              } yield Some(
+                                AssuranceResults(
+                                  isOnRefusalToDealWithList = isOnRefusalToDealWithList,
+                                  isManuallyAssured = isManuallyAssured,
+                                  hasAcceptableNumberOfPayeClients = hasAcceptableNumberOfPayeClientsOpt,
+                                  hasAcceptableNumberOfSAClients = hasAcceptableNumberOfSAClientsOpt,
+                                  hasAcceptableNumberOfVatDecOrgClients = hasAcceptableNumberOfVatDecOrgClientsOpt,
+                                  hasAcceptableNumberOfIRCTClients = hasAcceptableNumberOfIRCTClientsOpt
+                                )
+                              )
+                            }
       } yield assuranceResults
     } else {
       Future.successful(None)
     }
 
-  def checkActiveCesaRelationship(userEnteredNinoOrUtr: TaxIdentifier, name: String, saAgentReference: SaAgentReference)(
-    implicit
+  def checkActiveCesaRelationship(userEnteredNinoOrUtr: TaxIdentifier, name: String, saAgentReference: SaAgentReference)(implicit
     hc: HeaderCarrier,
     ec: ExecutionContext,
     request: Request[AnyContent],
-    agent: Agent): Future[Boolean] =
+    agent: Agent
+  ): Future[Boolean] =
     assuranceConnector.hasActiveCesaRelationship(userEnteredNinoOrUtr, name, saAgentReference).map { relationshipExists =>
       val (userEnteredNino, userEnteredUtr) = userEnteredNinoOrUtr match {
         case nino @ Nino(_) => (Some(nino), None)
@@ -99,34 +102,35 @@ class AssuranceService @Inject()(
       for {
         agentSessionOpt <- sessionStoreService.fetchAgentSession
         _ <- agentSessionOpt match {
-              case Some(agentSession) =>
-                (agentSession.utr, agentSession.postcode) match {
-                  case (Some(utr), Some(postcode)) =>
-                    auditService.sendAgentAssuranceAuditEvent(
-                      utr = utr,
-                      postcode = postcode,
-                      assuranceResults = AssuranceResults(
-                        isOnRefusalToDealWithList = false,
-                        isManuallyAssured = false,
-                        hasAcceptableNumberOfPayeClients = Some(false),
-                        hasAcceptableNumberOfSAClients = Some(false),
-                        hasAcceptableNumberOfVatDecOrgClients = Some(false),
-                        hasAcceptableNumberOfIRCTClients = Some(false)
-                      ),
-                      assuranceCheckInput = Some(
-                        AssuranceCheckInput(
-                          passCesaAgentAssuranceCheck = Some(relationshipExists),
-                          userEnteredSaAgentRef = Some(saAgentReference.value),
-                          userEnteredUtr = userEnteredUtr,
-                          userEnteredNino = userEnteredNino
-                        ))
-                    )
-                  case _ => ().toFuture
-                }
+               case Some(agentSession) =>
+                 (agentSession.utr, agentSession.postcode) match {
+                   case (Some(utr), Some(postcode)) =>
+                     auditService.sendAgentAssuranceAuditEvent(
+                       utr = utr,
+                       postcode = postcode,
+                       assuranceResults = AssuranceResults(
+                         isOnRefusalToDealWithList = false,
+                         isManuallyAssured = false,
+                         hasAcceptableNumberOfPayeClients = Some(false),
+                         hasAcceptableNumberOfSAClients = Some(false),
+                         hasAcceptableNumberOfVatDecOrgClients = Some(false),
+                         hasAcceptableNumberOfIRCTClients = Some(false)
+                       ),
+                       assuranceCheckInput = Some(
+                         AssuranceCheckInput(
+                           passCesaAgentAssuranceCheck = Some(relationshipExists),
+                           userEnteredSaAgentRef = Some(saAgentReference.value),
+                           userEnteredUtr = userEnteredUtr,
+                           userEnteredNino = userEnteredNino
+                         )
+                       )
+                     )
+                   case _ => ().toFuture
+                 }
 
-              case None =>
-                Future.successful(Logger(getClass).warn("Could not send audit events due to empty knownfacts results"))
-            }
+               case None =>
+                 Future.successful(Logger(getClass).warn("Could not send audit events due to empty knownfacts results"))
+             }
       } yield ()
 
       relationshipExists

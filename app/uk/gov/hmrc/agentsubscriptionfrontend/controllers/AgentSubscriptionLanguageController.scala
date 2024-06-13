@@ -22,12 +22,12 @@ import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
 
-class AgentSubscriptionLanguageController @Inject()(
+class AgentSubscriptionLanguageController @Inject() (
   languageUtils: LanguageUtils,
   override val messagesApi: MessagesApi,
   cc: ControllerComponents,
-  appConfig: AppConfig)
-    extends LanguageController(languageUtils, cc) {
+  appConfig: AppConfig
+) extends LanguageController(languageUtils, cc) {
 
   override def languageMap: Map[String, Lang] = appConfig.languageMap
 

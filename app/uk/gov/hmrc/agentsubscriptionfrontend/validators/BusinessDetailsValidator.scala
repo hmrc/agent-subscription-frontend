@@ -23,7 +23,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.ValidationResult.FailureReas
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{BusinessAddress, Registration, ValidationResult}
 
 @Singleton
-class BusinessDetailsValidator @Inject()(appConfig: AppConfig) {
+class BusinessDetailsValidator @Inject() (appConfig: AppConfig) {
   import CommonValidators._
   import uk.gov.hmrc.agentsubscriptionfrontend.models.ValidationResult._
 
@@ -39,8 +39,8 @@ class BusinessDetailsValidator @Inject()(appConfig: AppConfig) {
           validateBusinessAddress(details.address)
         )
 
-        val reasons: Set[FailureReason] = allValidations.collect {
-          case Failure(failureReasons) => failureReasons
+        val reasons: Set[FailureReason] = allValidations.collect { case Failure(failureReasons) =>
+          failureReasons
         }.flatten
 
         if (reasons.nonEmpty) Failure(reasons) else Pass

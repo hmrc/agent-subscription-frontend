@@ -19,8 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney
 import play.api.libs.json.Format
 import play.api.libs.functional.syntax._
 
-/**
-  * A value associated with an enrolment key
+/** A value associated with an enrolment key
   */
 final case class IdentifierValue(value: String)
 

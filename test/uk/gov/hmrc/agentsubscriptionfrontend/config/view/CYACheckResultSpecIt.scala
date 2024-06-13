@@ -67,7 +67,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         "email@email.com",
         Some("My Trading Name"),
         businessAddress,
-        telephoneNumber)
+        telephoneNumber
+      )
     }
 
     "PassWithMaybeAmls when SubscriptionJourneyRecord is complete without Amls" in {
@@ -89,7 +90,8 @@ class CYACheckResultSpecIt extends UnitSpec {
         "email@email.com",
         Some("My Trading Name"),
         businessAddress,
-        telephoneNumber)
+        telephoneNumber
+      )
     }
 
     "FailedRegistration when SubscriptionJourneyRecord is missing Registration" in {

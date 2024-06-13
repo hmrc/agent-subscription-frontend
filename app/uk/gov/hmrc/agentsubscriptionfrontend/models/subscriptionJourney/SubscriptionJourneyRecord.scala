@@ -23,10 +23,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, OFormat}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 
-/**
-  * A Mongo record which represents the user's current journey in setting up a new
-  * MTD Agent Services account, with their existing relationships.
-  *
+/** A Mongo record which represents the user's current journey in setting up a new MTD Agent Services account, with their existing relationships.
   */
 final case class SubscriptionJourneyRecord(
   authProviderId: AuthProviderId,
@@ -76,7 +73,8 @@ object SubscriptionJourneyRecord {
   def fromAgentSession(
     agentSession: AgentSession,
     authProviderId: AuthProviderId,
-    cleanCredsAuthProviderId: Option[AuthProviderId] = None): SubscriptionJourneyRecord =
+    cleanCredsAuthProviderId: Option[AuthProviderId] = None
+  ): SubscriptionJourneyRecord =
     SubscriptionJourneyRecord(
       authProviderId = authProviderId,
       continueId = Some(UUID.randomUUID().toString.replace("-", "")),

@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubscriptionJourneyService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector)(implicit ec: ExecutionContext) {
+class SubscriptionJourneyService @Inject() (agentSubscriptionConnector: AgentSubscriptionConnector)(implicit ec: ExecutionContext) {
 
   def getMandatoryJourneyRecord(continueId: ContinueId)(implicit hc: HeaderCarrier): Future[SubscriptionJourneyRecord] =
     agentSubscriptionConnector.getJourneyByContinueId(continueId).map(extractMandatoryRecord)

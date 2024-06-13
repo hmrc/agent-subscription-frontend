@@ -46,7 +46,8 @@ class AuditServiceSpecIt extends UnitSpec with MockitoSugar with Eventually {
       val hc = HeaderCarrier(
         authorization = Some(Authorization("dummy bearer token")),
         sessionId = Some(SessionId("dummy session id")),
-        requestId = Some(RequestId("dummy request id")))
+        requestId = Some(RequestId("dummy request id"))
+      )
 
       val auditData = new AuditData()
 

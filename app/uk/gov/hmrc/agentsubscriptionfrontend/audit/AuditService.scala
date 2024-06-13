@@ -51,7 +51,7 @@ class AuditData {
 }
 
 @Singleton
-class AuditService @Inject()(val auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
+class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
 
   val agentAssuranceDetailsFields: Seq[(String, Option[Any])] = Seq(
     ("utr", None),
@@ -77,7 +77,8 @@ class AuditService @Inject()(val auditConnector: AuditConnector)(implicit ec: Ex
     utr: Utr,
     postcode: Postcode,
     assuranceResults: AssuranceResults,
-    assuranceCheckInput: Option[AssuranceCheckInput] = None)(implicit request: Request[AnyContent], agent: Agent, hc: HeaderCarrier): Future[Unit] = {
+    assuranceCheckInput: Option[AssuranceCheckInput] = None
+  )(implicit request: Request[AnyContent], agent: Agent, hc: HeaderCarrier): Future[Unit] = {
     implicit val auditData: AuditData = new AuditData
 
     auditData
@@ -135,14 +136,16 @@ class AuditService @Inject()(val auditConnector: AuditConnector)(implicit ec: Ex
       case (f, Some(d))                  => (f, d)
     }
 
-  private[audit] def auditEvent(event: AgentSubscriptionFrontendEvent, transactionName: String, details: Seq[(String, Any)] = Seq.empty)(
-    implicit hc: HeaderCarrier,
-    request: Request[Any]): Future[Unit] =
+  private[audit] def auditEvent(event: AgentSubscriptionFrontendEvent, transactionName: String, details: Seq[(String, Any)] = Seq.empty)(implicit
+    hc: HeaderCarrier,
+    request: Request[Any]
+  ): Future[Unit] =
     send(createEvent(event, transactionName, details: _*))
 
-  private[audit] def createEvent(event: AgentSubscriptionFrontendEvent, transactionName: String, details: (String, Any)*)(
-    implicit hc: HeaderCarrier,
-    request: Request[Any]): DataEvent = {
+  private[audit] def createEvent(event: AgentSubscriptionFrontendEvent, transactionName: String, details: (String, Any)*)(implicit
+    hc: HeaderCarrier,
+    request: Request[Any]
+  ): DataEvent = {
 
     def toString(x: Any): String = x match {
       case t: TaxIdentifier => t.value

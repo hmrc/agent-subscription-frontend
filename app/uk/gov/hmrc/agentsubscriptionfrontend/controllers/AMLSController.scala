@@ -16,10 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import com.kenshoo.play.metrics.Metrics
-
-import javax.inject.{Inject, Singleton}
-import play.api.mvc.{AnyContent, _}
+import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -27,20 +24,21 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
-import uk.gov.hmrc.agentsubscriptionfrontend.service.AmlsValidationResult.{AmlsCheckFailed, AmlsSuspended, DateNotMatched, RecordNotFound, ResultOK, ResultOKButCheckDate}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.AmlsValidationResult._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{AmlsService, MongoDBSessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import java.time.LocalDate
-import scala.collection.immutable.Map
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AMLSController @Inject()(
+class AMLSController @Inject() (
   val config: Configuration,
   val metrics: Metrics,
   val authConnector: AuthConnector,
@@ -59,7 +57,8 @@ class AMLSController @Inject()(
   amlsDetailsNotFoundTemplate: amls_details_not_found,
   amlsNumberNotFoundTemplate: amls_number_not_found,
   amlsDateNotMatchedTemplate: amls_date_not_matched,
-  amlsRecordIneligibleStatusTemplate: amls_record_ineligible_status)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  amlsRecordIneligibleStatusTemplate: amls_record_ineligible_status
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   import AMLSForms._
@@ -81,7 +80,9 @@ class AMLSController @Inject()(
             Ok(
               checkAmlsTemplate(
                 checkAmlsForm.bind(Map("registeredAmls" -> RadioInputAnswer(amlsData.amlsRegistered))),
-                isChange = isChange.getOrElse(false)))
+                isChange = isChange.getOrElse(false)
+              )
+            )
           case None => Ok(checkAmlsTemplate(checkAmlsForm, isChange.getOrElse(false)))
         }
       }
@@ -103,16 +104,12 @@ class AMLSController @Inject()(
               val cleanAmlsData = AmlsData(amlsRegistered = RadioInputAnswer.toBoolean(validForm), amlsAppliedFor = None, amlsDetails = None)
 
               updateAmlsJourneyRecord(
-                agent, { amlsData =>
-                  {
-                    if (amlsData.amlsRegistered == RadioInputAnswer.toBoolean(validForm)) Some(amlsData)
-                    else Some(cleanAmlsData)
-                  }
-                },
+                agent,
+                amlsData =>
+                  if (amlsData.amlsRegistered == RadioInputAnswer.toBoolean(validForm)) Some(amlsData)
+                  else Some(cleanAmlsData),
                 maybeCreateNewAmlsData = Some(cleanAmlsData)
-              ).map(
-                _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsRegisteredPage()))
-              )
+              ).map(_ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsRegisteredPage())))
             }
           )
       }
@@ -140,9 +137,8 @@ class AMLSController @Inject()(
               case Yes => routes.AMLSController.showAmlsApplicationEnterNumberPage()
               case No  => routes.AMLSController.showAmlsNotAppliedPage()
             }
-            updateAmlsJourneyRecord(agent, amlsData => Some(amlsData.copy(amlsAppliedFor = Some(RadioInputAnswer.toBoolean(validForm))))).map(
-              _ => Redirect(continueOrStop(continue, routes.AMLSController.showCheckAmlsAlreadyAppliedForm()))
-            )
+            updateAmlsJourneyRecord(agent, amlsData => Some(amlsData.copy(amlsAppliedFor = Some(RadioInputAnswer.toBoolean(validForm)))))
+              .map(_ => Redirect(continueOrStop(continue, routes.AMLSController.showCheckAmlsAlreadyAppliedForm())))
           }
         )
     }
@@ -181,7 +177,7 @@ class AMLSController @Inject()(
               val form = AMLSForms.formWithRefinedErrors(formWithErrors)
               Ok(amlsDetailsTemplate(form, amlsBodies))
             },
-            validForm => {
+            validForm =>
               amlsService.validateAmlsSubscription(validForm).flatMap {
                 case AmlsSuspended | _: AmlsCheckFailed => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
                 case DateNotMatched | RecordNotFound    => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
@@ -189,7 +185,6 @@ class AMLSController @Inject()(
                   dealWithResultOkAmls(agent, isChanging, validForm.membershipNumber, validForm.amlsCode, Some(validForm.expiry), safeId)
                 case ResultOKButCheckDate(_) => Redirect(routes.AMLSController.showAmlsDetailsNotFound())
               }
-            }
           )
       }
     }
@@ -201,7 +196,8 @@ class AMLSController @Inject()(
     membershipNumber: String,
     amlsCode: String,
     expiry: Option[LocalDate],
-    safeId: Option[String])(implicit hc: HeaderCarrier, ec: ExecutionContext, r: Request[AnyContent]) = {
+    safeId: Option[String]
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext, r: Request[AnyContent]) = {
 
     val supervisoryBodyData =
       amlsBodies.getOrElse(amlsCode, throw new Exception("Invalid AMLS code"))
@@ -212,18 +208,19 @@ class AMLSController @Inject()(
       amlsData =>
         Some(
           amlsData.copy(
-            amlsDetails = Some(AmlsDetails(
-              supervisoryBodyData,
-              membershipNumber = Some(membershipNumber),
-              membershipExpiresOn = expiry,
-              amlsSafeId = safeId,
-              agentBPRSafeId = agent.getMandatorySubscriptionRecord.businessDetails.registration.flatMap(_.safeId),
-              appliedOn = None
-            )))
-      )
-    ).map(
-      _ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsDetailsForm()))
-    )
+            amlsDetails = Some(
+              AmlsDetails(
+                supervisoryBodyData,
+                membershipNumber = Some(membershipNumber),
+                membershipExpiresOn = expiry,
+                amlsSafeId = safeId,
+                agentBPRSafeId = agent.getMandatorySubscriptionRecord.businessDetails.registration.flatMap(_.safeId),
+                appliedOn = None
+              )
+            )
+          )
+        )
+    ).map(_ => Redirect(continueOrStop(continue, routes.AMLSController.showAmlsDetailsForm())))
 
   }
 
@@ -272,20 +269,18 @@ class AMLSController @Inject()(
               val formWithError = formWithErrors.copy(errors = formWithErrors.errors.take(1))
               Ok(amlsEnterNumber(formWithError))
             },
-            validForm => {
+            validForm =>
               amlsService.checkAmlsNumber(validForm.membershipNumber, None).flatMap {
                 case AmlsSuspended | _: AmlsCheckFailed | DateNotMatched => Redirect(routes.AMLSController.showAmlsRecordIneligibleStatus())
                 case RecordNotFound                                      => Redirect(routes.AMLSController.showAmlsNumberNotFound())
-                case ResultOK(safeId) => {
+                case ResultOK(safeId) =>
                   dealWithResultOkAmls(agent, isChanging, validForm.membershipNumber, hmrcAmlsCode, None, safeId)
-                }
                 case ResultOKButCheckDate(safeId) =>
                   sessionStoreService
                     .cacheAmlsSession(AmlsSession(validForm.membershipNumber, safeId))
                     .flatMap(_ => Redirect(routes.AMLSController.showAmlsApplicationEnterDatePage()))
 
               }
-            }
           )
       }
     }
@@ -347,7 +342,8 @@ class AMLSController @Inject()(
   private def updateAmlsJourneyRecord(
     agent: Agent,
     updateExistingAmlsData: AmlsData => Option[AmlsData],
-    maybeCreateNewAmlsData: Option[AmlsData] = None)(implicit hc: HeaderCarrier): Future[Unit] = {
+    maybeCreateNewAmlsData: Option[AmlsData] = None
+  )(implicit hc: HeaderCarrier): Future[Unit] = {
 
     val record = agent.getMandatorySubscriptionRecord
     val updatedRecord = {

@@ -28,7 +28,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AmlsService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnector) extends Logging {
+class AmlsService @Inject() (agentSubscriptionConnector: AgentSubscriptionConnector) extends Logging {
 
   def validateAmlsSubscription(amlsForm: AMLSForm)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmlsValidationResult] =
     if (amlsForm.amlsCode != "HMRC") Future successful ResultOK(None)
@@ -42,9 +42,10 @@ class AmlsService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnect
       case Some(true)         => ResultOK(Some(amlsRecord.safeId))
     }
 
-  def checkAmlsNumber(membershipNumber: String, maybeExpireDate: Option[LocalDate])(
-    implicit hc: HeaderCarrier,
-    ec: ExecutionContext): Future[AmlsValidationResult] =
+  def checkAmlsNumber(membershipNumber: String, maybeExpireDate: Option[LocalDate])(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[AmlsValidationResult] =
     agentSubscriptionConnector.getAmlsSubscriptionRecord(membershipNumber).map {
       case Some(amlsRecord) =>
         if (amlsRecord.suspended.contains(true)) AmlsSuspended
@@ -57,17 +58,17 @@ class AmlsService @Inject()(agentSubscriptionConnector: AgentSubscriptionConnect
                 case None             => ResultOKButCheckDate(Some(amlsRecord.safeId))
               }
 
-            case status => {
+            case status =>
               logger.warn(s"amls record returned an ineligible status $status")
               AmlsCheckFailed(status)
-            }
           }
       case None => RecordNotFound
     }
 
-  def checkAmlsExpiryDate(membershipNumber: String, expireDate: LocalDate)(
-    implicit hc: HeaderCarrier,
-    ec: ExecutionContext): Future[AmlsValidationResult] =
+  def checkAmlsExpiryDate(membershipNumber: String, expireDate: LocalDate)(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[AmlsValidationResult] =
     agentSubscriptionConnector.getAmlsSubscriptionRecord(membershipNumber).map {
       case Some(amlsRecord) =>
         checkEndDateMatch(amlsRecord, expireDate)

@@ -16,38 +16,34 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
-import java.time.LocalDate
-
-import com.codahale.metrics.MetricRegistry
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
 import play.utils.UriEncoding
-import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
+import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpClientConverter._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpErrorFunctions._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import uk.gov.hmrc.play.encoding.UriPathEncoding.encodePathSegment
 
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AgentSubscriptionConnector @Inject()(
+class AgentSubscriptionConnector @Inject() (
   http: HttpClient,
-  metrics: Metrics,
+  val metrics: Metrics,
   appConfig: AppConfig
-)(implicit ec: ExecutionContext)
+)(implicit val ec: ExecutionContext)
     extends HttpAPIMonitor with Logging {
-
-  override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
   def getJourneyById(internalId: AuthProviderId)(implicit hc: HeaderCarrier): Future[Option[SubscriptionJourneyRecord]] =
     monitor(s"ConsumedAPI-Agent-Subscription-getJourneyByPrimaryId-GET") {
@@ -60,7 +56,8 @@ class AgentSubscriptionConnector @Inject()(
             case 200           => Some(Json.parse(response.body).as[SubscriptionJourneyRecord])
             case s if is2xx(s) => None
             case s             => throw UpstreamErrorResponse(response.body, s)
-        })
+          }
+        )
     }
 
   def getJourneyByContinueId(continueId: ContinueId)(implicit hc: HeaderCarrier): Future[Option[SubscriptionJourneyRecord]] =

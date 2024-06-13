@@ -21,7 +21,7 @@ import play.api.i18n.{Lang, MessagesApi}
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 
-class AddressLookupConfig @Inject()(appConfig: AppConfig, messagesApi: MessagesApi) {
+class AddressLookupConfig @Inject() (appConfig: AppConfig, messagesApi: MessagesApi) {
 
   def config(continueUrl: String)(implicit lang: Lang) = {
 
