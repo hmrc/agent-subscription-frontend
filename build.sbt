@@ -24,11 +24,11 @@ TwirlKeys.templateImports ++= Seq(
   "uk.gov.hmrc.agentsubscriptionfrontend.views.html.components._",
 )
 
-lazy val root = Project("agent-subscription-frontend", file("."))
+lazy val root = (project in file("."))
   .settings(
     name := appName,
     organization := "uk.gov.hmrc",
-    majorVersion := 1,
+    majorVersion := 2,
     PlayKeys.playDefaultPort := 9437,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     resolvers ++= Seq(Resolver.typesafeRepo("releases")),
