@@ -99,7 +99,8 @@ object CommonValidators {
         checkOneAtATime(
           noAmpersand("error.business-name.invalid"),
           desText(msgKeyRequired = "error.business-name.empty", msgKeyInvalid = "error.business-name.invalid")
-        ))
+        )
+      )
 
   def tradingName: Mapping[String] =
     text
@@ -108,7 +109,8 @@ object CommonValidators {
         checkOneAtATime(
           noAmpersand("error.trading-name.invalid"),
           desText(msgKeyRequired = "error.trading-name.empty", msgKeyInvalid = "error.trading-name.invalid")
-        ))
+        )
+      )
 
   def amlsCode(bodies: Set[String]): Mapping[String] = text verifying amlsCodeConstraint(bodies)
 
@@ -145,7 +147,8 @@ object CommonValidators {
     optional(
       text
         .verifying(maxLength(AddresslineMaxLength, s"error.addressline.$lineNumber.maxlength"))
-        .verifying(desText(msgKeyRequired = s"error.addressline.$lineNumber.empty", msgKeyInvalid = s"error.addressline.$lineNumber.invalid")))
+        .verifying(desText(msgKeyRequired = s"error.addressline.$lineNumber.empty", msgKeyInvalid = s"error.addressline.$lineNumber.invalid"))
+    )
 
   def radioInputSelected[T](message: String = "error.no-radio-selected"): Constraint[Option[T]] =
     Constraint[Option[T]] { fieldValue: Option[T] =>
@@ -192,7 +195,8 @@ object CommonValidators {
   private def validEmailAddress(
     nonEmptyMessageKey: String = "error.contact-email.empty",
     maxLengthMessageKey: String = "error.contact-email.maxLength",
-    wrongFormatMessageKey: String = "error.contact-email.format") = Constraint { fieldValue: String =>
+    wrongFormatMessageKey: String = "error.contact-email.format"
+  ) = Constraint { fieldValue: String =>
     nonEmptyWithMessage(nonEmptyMessageKey)(fieldValue) match {
       case i: Invalid => i
       case Valid =>
@@ -371,7 +375,9 @@ object CommonValidators {
       else
         Invalid(
           ValidationError(
-            Messages("error.amls.enter-renewal-date.date.too-old", sixMonthsEarlier.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))))
+            Messages("error.amls.enter-renewal-date.date.too-old", sixMonthsEarlier.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))
+          )
+        )
     }
 
   private def validateAMLSBodies(amlsCode: String, bodies: Set[String]): Boolean =

@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.auth
 
-import play.api.{Configuration, Logging}
 import play.api.mvc.Results._
 import play.api.mvc.{Request, Result}
+import play.api.{Configuration, Logging}
 import uk.gov.hmrc.agentmtdidentifiers.model.Arn
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -33,7 +33,6 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,7 +41,8 @@ class Agent(
   private val enrolments: Set[Enrolment],
   private val maybeCredentials: Option[Credentials],
   val subscriptionJourneyRecord: Option[SubscriptionJourneyRecord],
-  val authNino: Option[String]) {
+  val authNino: Option[String]
+) {
 
   def hasIrPayeAgent: Option[Enrolment] = enrolments.find(e => e.key == "IR-PAYE-AGENT" && e.isActivated)
 
@@ -84,7 +84,7 @@ object Agent {
 
 }
 
-trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring with Logging {
+trait AuthActions extends AuthorisedFunctions with Monitoring with Logging {
 
   def redirectUrlActions: RedirectUrlActions
 
@@ -100,79 +100,74 @@ trait AuthActions extends AuthorisedFunctions with AuthRedirects with Monitoring
         Future.successful(creds)
       }
 
-  /**
-    * For a user logged in as a subscribed agent (finished journey)
-    * */
-  def withSubscribedAgent[A](body: (Arn, Option[SubscriptionJourneyRecord]) => Future[Result])(
-    implicit request: Request[A],
-    hc: HeaderCarrier,
-    ec: ExecutionContext): Future[Result] =
+  /** For a user logged in as a subscribed agent (finished journey)
+    */
+  def withSubscribedAgent[A](
+    body: (Arn, Option[SubscriptionJourneyRecord]) => Future[Result]
+  )(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     authorised(Enrolment("HMRC-AS-AGENT") and AuthProviders(GovernmentGateway))
-      .retrieve(authorisedEnrolments and credentials) {
-        case enrolments ~ creds =>
-          creds match {
-            case Some(c) =>
-              subscriptionJourneyService.getJourneyRecord(AuthProviderId(c.providerId)).flatMap { sjrOpt =>
-                getArn(enrolments) match {
-                  case Some(arn) =>
-                    body(arn, sjrOpt)
-                  case None =>
-                    logger.warn("could not find the Arn for the logged in agent to continue")
-                    Future successful Forbidden
-                }
+      .retrieve(authorisedEnrolments and credentials) { case enrolments ~ creds =>
+        creds match {
+          case Some(c) =>
+            subscriptionJourneyService.getJourneyRecord(AuthProviderId(c.providerId)).flatMap { sjrOpt =>
+              getArn(enrolments) match {
+                case Some(arn) =>
+                  body(arn, sjrOpt)
+                case None =>
+                  logger.warn("could not find the Arn for the logged in agent to continue")
+                  Future successful Forbidden
               }
-            case None =>
-              logger.warn("User does not have the correct credentials")
-              Redirect(routes.SignedOutController.signOut())
-          }
+            }
+          case None =>
+            logger.warn("User does not have the correct credentials")
+            Redirect(routes.SignedOutController.signOut())
+        }
       }
       .recover {
         handleException
       }
 
-  /**
-    * User is half way through a setup/onboarding journey
-    * */
+  /** User is half way through a setup/onboarding journey
+    */
   def withSubscribingAgent[A](body: Agent => Future[Result])(implicit request: Request[A], ec: ExecutionContext): Future[Result] =
     withSubscribingAgent(requireEmailVerification = false)(body)
 
-  /**
-    * User is half way through a setup/onboarding journey and their email is verified
-    * */
+  /** User is half way through a setup/onboarding journey and their email is verified
+    */
   def withSubscribingEmailVerifiedAgent[A](body: Agent => Future[Result])(implicit request: Request[A], ec: ExecutionContext): Future[Result] =
     withSubscribingAgent(requireEmailVerification = true)(body)
 
-  /**
-    * User is half way through a setup/onboarding journey. Optionally, check that the email (if any) is verified and redirect to email verification if not.
-    * */
-  def withSubscribingAgent[A](requireEmailVerification: Boolean)(
-    body: Agent => Future[Result])(implicit request: Request[A], ec: ExecutionContext): Future[Result] = {
+  /** User is half way through a setup/onboarding journey. Optionally, check that the email (if any) is verified and redirect to email verification if
+    * not.
+    */
+  def withSubscribingAgent[A](
+    requireEmailVerification: Boolean
+  )(body: Agent => Future[Result])(implicit request: Request[A], ec: ExecutionContext): Future[Result] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
-      .retrieve(allEnrolments and credentials and nino and email) {
-        case enrolments ~ creds ~ mayBeNino ~ maybeAuthEmail =>
-          if (isEnrolledForHmrcAsAgent(enrolments)) {
-            redirectUrlActions.withMaybeRedirectUrl {
-              case Some(redirectUrl) =>
-                mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
-                Redirect(redirectUrl) // end of journey; back to calling service
-              case None =>
-                mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
-                Redirect(appConfig.agentServicesAccountUrl) // dashboard
-            }
-          } else {
-            val authProviderId = AuthProviderId(creds.fold("unknown")(_.providerId))
-            subscriptionJourneyService
-              .getJourneyRecord(authProviderId)
-              .flatMap(maybeSjr => {
-                if (requireEmailVerification && maybeSjr.exists(_.emailNeedsVerifying(maybeAuthEmail)))
-                  Redirect(routes.EmailVerificationController.verifyEmail())
-                else body(new Agent(enrolments.enrolments, creds, maybeSjr, mayBeNino))
-              })
-            // check what we should do when AuthProviderId not available!
+      .retrieve(allEnrolments and credentials and nino and email) { case enrolments ~ creds ~ mayBeNino ~ maybeAuthEmail =>
+        if (isEnrolledForHmrcAsAgent(enrolments)) {
+          redirectUrlActions.withMaybeRedirectUrl {
+            case Some(redirectUrl) =>
+              mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
+              Redirect(redirectUrl) // end of journey; back to calling service
+            case None =>
+              mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
+              Redirect(appConfig.agentServicesAccountUrl) // dashboard
           }
+        } else {
+          val authProviderId = AuthProviderId(creds.fold("unknown")(_.providerId))
+          subscriptionJourneyService
+            .getJourneyRecord(authProviderId)
+            .flatMap { maybeSjr =>
+              if (requireEmailVerification && maybeSjr.exists(_.emailNeedsVerifying(maybeAuthEmail)))
+                Redirect(routes.EmailVerificationController.verifyEmail())
+              else body(new Agent(enrolments.enrolments, creds, maybeSjr, mayBeNino))
+            }
+          // check what we should do when AuthProviderId not available!
+        }
       }
       .recover {
         handleException

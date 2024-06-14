@@ -75,11 +75,13 @@ package object controllers extends Logging {
     val confirmBusinessForm: Form[ConfirmBusiness] =
       Form[ConfirmBusiness](
         mapping("confirmBusiness" -> optional(text).verifying(radioInputSelected("error.confirm-business-value.invalid")))(answer =>
-          ConfirmBusiness(RadioInputAnswer.apply(answer.getOrElse(""))))(answer => Some(RadioInputAnswer.unapply(answer.confirm)))
+          ConfirmBusiness(RadioInputAnswer.apply(answer.getOrElse("")))
+        )(answer => Some(RadioInputAnswer.unapply(answer.confirm)))
           .verifying(
             "error.confirm-business-value.invalid",
             submittedAnswer => Seq(Yes, No).contains(submittedAnswer.confirm)
-          ))
+          )
+      )
 
     val businessEmailForm = Form[BusinessEmail](
       mapping(
@@ -100,9 +102,10 @@ package object controllers extends Logging {
         "addressLine3" -> addressLine234(lineNumber = 3),
         "addressLine4" -> addressLine234(lineNumber = 4),
         "postcode"     -> postcode
-      )(UpdateBusinessAddressForm.apply)(UpdateBusinessAddressForm.unapply))
+      )(UpdateBusinessAddressForm.apply)(UpdateBusinessAddressForm.unapply)
+    )
 
-    //uses variant "cannotProvide" to determine action if user cannot provide allowed options: utr or nino
+    // uses variant "cannotProvide" to determine action if user cannot provide allowed options: utr or nino
     val clientDetailsForm: Form[RadioInvasiveTaxPayerOption] = Form[RadioInvasiveTaxPayerOption](
       mapping(
         "variant" -> optional(text)
@@ -112,7 +115,8 @@ package object controllers extends Logging {
           .transform[String](u => u.getOrElse("").replace(" ", "").toUpperCase(), s => Some(s)),
         "nino" -> mandatoryIfEqual("variant", "nino", clientDetailsNino)
           .transform[String](n => n.getOrElse("").replace(" ", "").toUpperCase(), s => Some(s))
-      )(RadioInvasiveTaxPayerOption.apply)(RadioInvasiveTaxPayerOption.unapply))
+      )(RadioInvasiveTaxPayerOption.apply)(RadioInvasiveTaxPayerOption.unapply)
+    )
 
     val invasiveCheckStartSaAgentCodeForm: Form[RadioInvasiveStartSaAgentCode] = Form[RadioInvasiveStartSaAgentCode](
       mapping(
@@ -122,7 +126,9 @@ package object controllers extends Logging {
         "saAgentCode" -> mandatoryIfTrue("hasSaAgentCode", saAgentCode)
           .transform[String](_.getOrElse(""), s => Some(s))
       )((hasSaAgentCode, saAgentCode) => RadioInvasiveStartSaAgentCode(hasSaAgentCode.toBoolean, saAgentCode))(radioInvasiveStartSaAgentCode =>
-        Some((radioInvasiveStartSaAgentCode.hasSaAgentCode.toString, radioInvasiveStartSaAgentCode.saAgentCode))))
+        Some((radioInvasiveStartSaAgentCode.hasSaAgentCode.toString, radioInvasiveStartSaAgentCode.saAgentCode))
+      )
+    )
   }
 
   object CompanyRegistrationForms {
@@ -136,15 +142,19 @@ package object controllers extends Logging {
 
     def checkAmlsForm: Form[RadioInputAnswer] =
       Form[RadioInputAnswer](
-        mapping("registeredAmls" -> optional(text)
-          .verifying("error.check-amls-value.invalid", a => a.contains("yes") || a.contains("no")))(a => RadioInputAnswer.apply(a.getOrElse("")))(a =>
-          Some(RadioInputAnswer.unapply(a))))
+        mapping(
+          "registeredAmls" -> optional(text)
+            .verifying("error.check-amls-value.invalid", a => a.contains("yes") || a.contains("no"))
+        )(a => RadioInputAnswer.apply(a.getOrElse("")))(a => Some(RadioInputAnswer.unapply(a)))
+      )
 
     def appliedForAmlsForm: Form[RadioInputAnswer] =
       Form[RadioInputAnswer](
-        mapping("amlsAppliedFor" -> optional(text)
-          .verifying("error.check-amlsAppliedFor-value.invalid", a => a.contains("yes") || a.contains("no")))(a =>
-          RadioInputAnswer.apply(a.getOrElse("")))(a => Some(RadioInputAnswer.unapply(a))))
+        mapping(
+          "amlsAppliedFor" -> optional(text)
+            .verifying("error.check-amlsAppliedFor-value.invalid", a => a.contains("yes") || a.contains("no"))
+        )(a => RadioInputAnswer.apply(a.getOrElse("")))(a => Some(RadioInputAnswer.unapply(a)))
+      )
 
     val HMRC_AMLS_ERROR = "error.moneyLaunderingCompliance.membershipNumber.invalid"
 
@@ -154,12 +164,15 @@ package object controllers extends Logging {
           "amlsCode"         -> amlsCode(bodies),
           "membershipNumber" -> membershipNumber,
           "expiry"           -> expiryDate
-        )(AMLSForm.apply)(AMLSForm.unapply).verifying(HMRC_AMLS_ERROR, { (o: AMLSForm) =>
-          o match {
-            case AMLSForm(code, number, _) if code == "HMRC" => number.matches(amlsRegex)
-            case AMLSForm(_, _, _)                           => true
-          }
-        }))
+        )(AMLSForm.apply)(AMLSForm.unapply).verifying(
+          HMRC_AMLS_ERROR,
+          (o: AMLSForm) =>
+            o match {
+              case AMLSForm(code, number, _) if code == "HMRC" => number.matches(amlsRegex)
+              case AMLSForm(_, _, _)                           => true
+            }
+        )
+      )
 
     val HMRC_AMLS_Empty_ERROR = "error.moneyLaunderingCompliance.membershipNumber.empty"
     val membershipNumberConstraint: Constraint[String] = Constraint("constraints.membershipNumber") { input =>
@@ -184,7 +197,8 @@ package object controllers extends Logging {
       Form[EnterAMLSExpiryDateForm](
         mapping(
           "expiry" -> expiryDate
-        )(EnterAMLSExpiryDateForm.apply)(EnterAMLSExpiryDateForm.unapply))
+        )(EnterAMLSExpiryDateForm.apply)(EnterAMLSExpiryDateForm.unapply)
+      )
 
     import play.api.data.{Form, FormError}
 
@@ -263,7 +277,8 @@ package object controllers extends Logging {
 
     val contactEmailCheckForm = Form[ContactEmailCheck](
       mapping("check" -> optional(text).verifying(radioInputSelected("error.contact-email-check.invalid")))(answer =>
-        ContactEmailCheck(RadioInputAnswer.apply(answer.getOrElse(""))))(answer => Some(RadioInputAnswer.unapply(answer.check)))
+        ContactEmailCheck(RadioInputAnswer.apply(answer.getOrElse("")))
+      )(answer => Some(RadioInputAnswer.unapply(answer.check)))
         .verifying(
           "error.contact-email-check.invalid",
           submittedAnswer => Seq(Yes, No).contains(submittedAnswer.check)
@@ -278,7 +293,8 @@ package object controllers extends Logging {
 
     val contactTradingNameCheckForm = Form[ContactTradingNameCheck](
       mapping("check" -> optional(text).verifying(radioInputSelected("error.contact-trading-name-check.invalid")))(answer =>
-        ContactTradingNameCheck(RadioInputAnswer.apply(answer.getOrElse(""))))(answer => Some(RadioInputAnswer.unapply(answer.check)))
+        ContactTradingNameCheck(RadioInputAnswer.apply(answer.getOrElse("")))
+      )(answer => Some(RadioInputAnswer.unapply(answer.check)))
         .verifying(
           "error.contact-trading-name-check.invalid",
           submittedAnswer => Seq(Yes, No).contains(submittedAnswer.check)
@@ -293,7 +309,8 @@ package object controllers extends Logging {
 
     val contactTradingAddressCheckForm = Form[ContactTradingAddressCheck](
       mapping("check" -> optional(text).verifying(radioInputSelected("error.contact-trading-address-check.invalid")))(answer =>
-        ContactTradingAddressCheck(RadioInputAnswer.apply(answer.getOrElse(""))))(answer => Some(RadioInputAnswer.unapply(answer.check)))
+        ContactTradingAddressCheck(RadioInputAnswer.apply(answer.getOrElse("")))
+      )(answer => Some(RadioInputAnswer.unapply(answer.check)))
         .verifying(
           "error.contact-trading-address-check.invalid",
           submittedAnswer => Seq(Yes, No).contains(submittedAnswer.check)
@@ -302,7 +319,8 @@ package object controllers extends Logging {
 
     val contactPhoneCheckForm = Form[ContactPhoneCheck](
       mapping("check" -> optional(text).verifying(radioInputSelected("error.contact-phone-check.invalid")))(answer =>
-        ContactPhoneCheck(RadioInputAnswer.apply(answer.getOrElse(""))))(answer => Some(RadioInputAnswer.unapply(answer.check)))
+        ContactPhoneCheck(RadioInputAnswer.apply(answer.getOrElse("")))
+      )(answer => Some(RadioInputAnswer.unapply(answer.check)))
         .verifying(
           "error.contact-phone-check.invalid",
           submittedAnswer => Seq(Yes, No).contains(submittedAnswer.check)

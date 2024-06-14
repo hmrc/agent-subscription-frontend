@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.FormBundleStatus
 
 import java.time.LocalDate
@@ -50,5 +50,5 @@ case class AmlsSubscriptionRecord(
 )
 
 object AmlsSubscriptionRecord {
-  implicit val amlsSubscriptionRecordFormat = Json.format[AmlsSubscriptionRecord]
+  implicit val amlsSubscriptionRecordFormat: OFormat[AmlsSubscriptionRecord] = Json.format[AmlsSubscriptionRecord]
 }

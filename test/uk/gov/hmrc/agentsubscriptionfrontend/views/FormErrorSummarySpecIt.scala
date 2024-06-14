@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.views
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{DefaultMessagesApi, Messages}
+import play.api.mvc.AnyContentAsFormUrlEncoded
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
@@ -39,11 +40,10 @@ class FormErrorSummarySpecIt extends UnitSpec {
         Map("error.min" -> "minimum!")
     )
   )
-  implicit val request = {
+  implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest("POST", "/")
       .withFormUrlEncodedBody("name" -> "Play", "age" -> "-1")
-  }
-  implicit val messages = messagesApi.preferred(request)
+  implicit val messages: Messages = messagesApi.preferred(request)
 
   "form_error_summary" should {
     "display error messages.en including arguments" in {

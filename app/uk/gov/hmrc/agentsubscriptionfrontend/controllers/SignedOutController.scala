@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
-import play.api.{Configuration, Environment}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService}
@@ -27,11 +25,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps.addParamsToUrl
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.timed_out
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SignedOutController @Inject()(
+class SignedOutController @Inject() (
   timedOutTemplate: timed_out,
   val sessionStoreService: MongoDBSessionStoreService,
   val redirectUrlActions: RedirectUrlActions,
@@ -40,7 +40,8 @@ class SignedOutController @Inject()(
   val env: Environment,
   val config: Configuration,
   val subscriptionJourneyService: SubscriptionJourneyService,
-  mcc: MessagesControllerComponents)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  mcc: MessagesControllerComponents
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def redirectAgentToCreateCleanCreds: Action[AnyContent] = Action.async { implicit request =>
@@ -48,9 +49,8 @@ class SignedOutController @Inject()(
       for {
         agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
         redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
-        continueId = {
+        continueId =
           agent.subscriptionJourneyRecord.flatMap(_.continueId)
-        }
       } yield {
         val continueUrl =
           addParamsToUrl(
@@ -89,8 +89,8 @@ class SignedOutController @Inject()(
       SeeOther(signOutUrlWithContinueUrl).withNewSession
     }
 
-    result.recover {
-      case _: RuntimeException => startNewSession
+    result.recover { case _: RuntimeException =>
+      startNewSession
     }
   }
 

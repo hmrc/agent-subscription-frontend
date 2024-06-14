@@ -56,7 +56,7 @@ class CallOpsSpec extends AnyWordSpecLike with Matchers {
       }
 
       "one of the parameters to add has no value" in {
-        CallOps.addParamsToUrl(url, "foo" -> None, "baz"        -> Some("qwaggly")) shouldBe s"$url?baz=qwaggly"
+        CallOps.addParamsToUrl(url, "foo" -> None, "baz" -> Some("qwaggly")) shouldBe s"$url?baz=qwaggly"
         CallOps.addParamsToUrl(url, "foo" -> Some("bar"), "baz" -> None) shouldBe s"$url?foo=bar"
       }
 

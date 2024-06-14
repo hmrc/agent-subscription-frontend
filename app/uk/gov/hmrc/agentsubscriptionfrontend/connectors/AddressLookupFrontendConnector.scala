@@ -16,32 +16,30 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
-import com.codahale.metrics.MetricRegistry
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.http.HeaderNames.LOCATION
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.Call
-import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import uk.gov.hmrc.agentsubscriptionfrontend.config.{AddressLookupConfig, AppConfig}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AddressLookupFrontendAddress
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
+
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NoStackTrace
 
 @Singleton
-class AddressLookupFrontendConnector @Inject()(
+class AddressLookupFrontendConnector @Inject() (
   http: HttpClient,
-  metrics: Metrics,
+  val metrics: Metrics,
   addressLookupConfig: AddressLookupConfig,
   messagesApi: MessagesApi,
-  appConfig: AppConfig)
+  appConfig: AppConfig
+)(implicit val ec: ExecutionContext)
     extends HttpAPIMonitor {
-
-  override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
   def initJourney(call: Call)(implicit hc: HeaderCarrier, ec: ExecutionContext, lang: Lang): Future[String] =
     monitor(s"ConsumedAPI-Address-Lookup-Frontend-initJourney-POST") {

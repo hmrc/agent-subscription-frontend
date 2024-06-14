@@ -16,11 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import com.kenshoo.play.metrics.Metrics
-
-import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -34,11 +31,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html.national_insurance_numbe
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NationalInsuranceController @Inject()(
+class NationalInsuranceController @Inject() (
   val redirectUrlActions: RedirectUrlActions,
   val authConnector: AuthConnector,
   val sessionStoreService: MongoDBSessionStoreService,
@@ -48,12 +47,12 @@ class NationalInsuranceController @Inject()(
   val subscriptionJourneyService: SubscriptionJourneyService,
   val subscriptionService: SubscriptionService,
   mcc: MessagesControllerComponents,
-  nationalInsuranceNumberTemplate: national_insurance_number)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  nationalInsuranceNumberTemplate: national_insurance_number
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
-  /**
-    * In-case of SoleTrader or Partnerships, we should display NI and DOB pages based on if nino and dob exist or not.
-    * We need to force users to go through these pages, hence the below checks
+  /** In-case of SoleTrader or Partnerships, we should display NI and DOB pages based on if nino and dob exist or not. We need to force users to go
+    * through these pages, hence the below checks
     */
   def showNationalInsuranceNumberForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
@@ -73,7 +72,7 @@ class NationalInsuranceController @Inject()(
     }
   }
 
-  //noinspection ScalaStyle
+  // noinspection ScalaStyle
   def submitNationalInsuranceNumberForm(): Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { implicit agent =>
       withValidSession { (_, existingSession) =>
@@ -99,12 +98,15 @@ class NationalInsuranceController @Inject()(
                         logger.warn("no DateOfBirth in the /citizen-details response for logged in agent")
                         updateSessionAndRedirect(existingSession.copy(nino = Some(validNino)))(routes.VatDetailsController.showRegisteredForVatForm())
                       case Some(person) if person.dateOfBirth.nonEmpty && businessType != Llp =>
-                        updateSessionAndRedirect(existingSession
-                          .copy(nino = Some(validNino), dateOfBirthFromCid = person.dateOfBirth))(routes.DateOfBirthController.showDateOfBirthForm())
+                        updateSessionAndRedirect(
+                          existingSession
+                            .copy(nino = Some(validNino), dateOfBirthFromCid = person.dateOfBirth)
+                        )(routes.DateOfBirthController.showDateOfBirthForm())
                       case Some(person) if person.lastName.nonEmpty && person.dateOfBirth.nonEmpty =>
-                        updateSessionAndRedirect(existingSession
-                          .copy(nino = Some(validNino), dateOfBirthFromCid = person.dateOfBirth, lastNameFromCid = person.lastName))(
-                          routes.DateOfBirthController.showDateOfBirthForm())
+                        updateSessionAndRedirect(
+                          existingSession
+                            .copy(nino = Some(validNino), dateOfBirthFromCid = person.dateOfBirth, lastNameFromCid = person.lastName)
+                        )(routes.DateOfBirthController.showDateOfBirthForm())
                       case _ =>
                         logger.warn(s"business type $businessType no lastName and or no dob from CiD")
                         if (businessType != Llp)
@@ -134,10 +136,11 @@ class NationalInsuranceController @Inject()(
       case _   => routes.PostcodeController.showPostcodeForm().url
     }
 
-  private def withValidBusinessType(agentSession: AgentSession)(result: (BusinessType => Future[Result]))(
-    implicit request: Request[_]): Future[Result] =
+  private def withValidBusinessType(
+    agentSession: AgentSession
+  )(result: (BusinessType => Future[Result]))(implicit request: Request[_]): Future[Result] =
     agentSession.businessType match {
-      case b @ (Some(SoleTrader | Partnership | Llp)) => result(b.get)
+      case b @ Some(SoleTrader | Partnership | Llp) => result(b.get)
       case _ =>
         updateSessionAndRedirect(AgentSession())(routes.BusinessTypeController.showBusinessTypeForm())
     }

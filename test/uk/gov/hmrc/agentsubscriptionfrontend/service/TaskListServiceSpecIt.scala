@@ -50,7 +50,8 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
   private def givenAmlsDataIsPresent: OngoingStubbing[Future[Option[AmlsDetails]]] =
     when(stubAssuranceConnector.getAmlsData(Utr("12345")))
       .thenReturn(
-        Future.successful(Some(AmlsDetails("HMRC", membershipNumber = Some("12345"), appliedOn = Some(LocalDate.now()), membershipExpiresOn = None))))
+        Future.successful(Some(AmlsDetails("HMRC", membershipNumber = Some("12345"), appliedOn = Some(LocalDate.now()), membershipExpiresOn = None)))
+      )
 
   private val taskListService = new TaskListService(stubAssuranceConnector, stubAgentSubscriptionConnector, stubAppConfig)
 
@@ -102,7 +103,8 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
       "when agent has registered AMLS data with no renewal date show AMLS as not complete" in {
         givenAmlsDataNotPresent
         val amlsRecord = minimalUncleanCredsRecord.copy(amlsData =
-          Some(AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Some("12345"), appliedOn = None, membershipExpiresOn = None)))))
+          Some(AmlsData(amlsRegistered = true, None, Some(AmlsDetails("supervisory", Some("12345"), appliedOn = None, membershipExpiresOn = None))))
+        )
         val tasks = await(taskListService.createTasks(amlsRecord))
 
         tasks.length shouldBe 5

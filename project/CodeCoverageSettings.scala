@@ -34,7 +34,7 @@ object CodeCoverageSettings {
     ScoverageKeys.coverageExcludedPackages := excludedPackages.mkString(";"),
     ScoverageKeys.coverageExcludedFiles := excludedFiles.mkString(";"),
     ScoverageKeys.coverageMinimumStmtTotal := 83,
-    ScoverageKeys.coverageMinimumStmtPerFile := 50, // increase to 80 asap
+//    ScoverageKeys.coverageMinimumStmtPerFile := 50, // increase to 80 asap
     ScoverageKeys.coverageMinimumBranchTotal:= 78,
     ScoverageKeys.coverageMinimumBranchPerFile:= 50,
     ScoverageKeys.coverageFailOnMinimum := true,

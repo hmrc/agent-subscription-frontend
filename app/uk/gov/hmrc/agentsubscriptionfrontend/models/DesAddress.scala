@@ -22,7 +22,8 @@ case class DesAddress(
   addressLine3: Option[String],
   addressLine4: Option[String],
   postcode: String,
-  countryCode: String)
+  countryCode: String
+)
 
 object DesAddress {
 

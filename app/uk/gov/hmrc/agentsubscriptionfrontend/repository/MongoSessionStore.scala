@@ -37,24 +37,23 @@ trait MongoSessionStore[T] extends Logging {
         case Some(agentSession) => Right(Some(agentSession))
         case None               => Right(None)
       }
-      .recover {
-        case e =>
-          Left(e.getMessage)
+      .recover { case e =>
+        Left(e.getMessage)
       }
 
   def store(newSession: T)(implicit writes: Writes[T], request: Request[Any], ec: ExecutionContext): Future[Either[String, Unit]] =
     cacheRepository
       .putSession[T](DataKey[T](sessionName), newSession)
       .map(_ => Right(()))
-      .recover {
-        case e: MongoWriteException => Left(e.getError.getMessage)
+      .recover { case e: MongoWriteException =>
+        Left(e.getError.getMessage)
       }
 
   def delete()(implicit request: Request[Any], ec: ExecutionContext): Future[Either[String, Unit]] =
     cacheRepository
       .deleteFromSession[AgentSession](DataKey[AgentSession]("agentSession"))
       .map(_ => Right(()))
-      .recover {
-        case e: MongoWriteException => Left(e.getError.getMessage)
+      .recover { case e: MongoWriteException =>
+        Left(e.getError.getMessage)
       }
 }

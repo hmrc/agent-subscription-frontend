@@ -16,11 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import com.kenshoo.play.metrics.Metrics
-
-import javax.inject.{Inject, Singleton}
-import play.api.{Configuration, Environment}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.CompanyRegistrationForms._
@@ -32,11 +29,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{company_registration, l
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class CompanyRegistrationController @Inject()(
+class CompanyRegistrationController @Inject() (
   val redirectUrlActions: RedirectUrlActions,
   val authConnector: AuthConnector,
   val sessionStoreService: MongoDBSessionStoreService,
@@ -73,41 +72,43 @@ class CompanyRegistrationController @Inject()(
             validCrn =>
               existingSession.utr match {
                 case Some(utr) =>
-                  subscriptionService.matchCorporationTaxUtrWithCrn(utr, validCrn).flatMap {
-                    foundMatch =>
-                      if (foundMatch) {
-                        subscriptionService.checkCompanyStatus(validCrn).flatMap {
-                          case OK =>
-                            sessionStoreService
-                              .cacheAgentSession(existingSession.copy(
+                  subscriptionService.matchCorporationTaxUtrWithCrn(utr, validCrn).flatMap { foundMatch =>
+                    if (foundMatch) {
+                      subscriptionService.checkCompanyStatus(validCrn).flatMap {
+                        case OK =>
+                          sessionStoreService
+                            .cacheAgentSession(
+                              existingSession.copy(
                                 companyRegistrationNumber = Some(validCrn),
                                 ctUtrCheckResult = Some(foundMatch),
                                 nino = None, // in case they are LLP and re-entered a new CRN that does match
                                 dateOfBirth = None,
                                 lastNameFromCid = None,
                                 dateOfBirthFromCid = None
-                              ))
-                              .map(_ => Redirect(routes.VatDetailsController.showRegisteredForVatForm()))
-                          case CONFLICT  => Redirect(routes.BusinessIdentificationController.showCompanyNotAllowed())
-                          case NOT_FOUND => Redirect(routes.BusinessIdentificationController.showNoMatchFound())
-                          case status    => throw UpstreamErrorResponse("checkCompanyStatus", status)
-                        }
-
-                      } else {
-                        existingSession.businessType match {
-                          case Some(bt) =>
-                            if (bt == Llp)
-                              updateSessionAndRedirect(existingSession
-                                .copy(companyRegistrationNumber = Some(validCrn), ctUtrCheckResult = Some(foundMatch)))(
-                                routes.CompanyRegistrationController.showLlpInterrupt())
-                            else
-                              Redirect(routes.BusinessIdentificationController.showNoMatchFound())
-                          case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
-                        }
+                              )
+                            )
+                            .map(_ => Redirect(routes.VatDetailsController.showRegisteredForVatForm()))
+                        case CONFLICT  => Redirect(routes.BusinessIdentificationController.showCompanyNotAllowed())
+                        case NOT_FOUND => Redirect(routes.BusinessIdentificationController.showNoMatchFound())
+                        case status    => throw UpstreamErrorResponse("checkCompanyStatus", status)
                       }
+
+                    } else {
+                      existingSession.businessType match {
+                        case Some(bt) =>
+                          if (bt == Llp)
+                            updateSessionAndRedirect(
+                              existingSession
+                                .copy(companyRegistrationNumber = Some(validCrn), ctUtrCheckResult = Some(foundMatch))
+                            )(routes.CompanyRegistrationController.showLlpInterrupt())
+                          else
+                            Redirect(routes.BusinessIdentificationController.showNoMatchFound())
+                        case None => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
+                      }
+                    }
                   }
                 case _ => Redirect(routes.UtrController.showUtrForm())
-            }
+              }
           )
       }
     }

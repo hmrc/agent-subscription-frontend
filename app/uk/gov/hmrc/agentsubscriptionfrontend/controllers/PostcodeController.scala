@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
@@ -34,11 +32,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html.postcode
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PostcodeController @Inject()(
+class PostcodeController @Inject() (
   val redirectUrlActions: RedirectUrlActions,
   val authConnector: AuthConnector,
   val sessionStoreService: MongoDBSessionStoreService,
@@ -50,7 +50,8 @@ class PostcodeController @Inject()(
   auditService: AuditService,
   val subscriptionJourneyService: SubscriptionJourneyService,
   mcc: MessagesControllerComponents,
-  postcodeTemplate: postcode)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  postcodeTemplate: postcode
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def showPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
@@ -72,21 +73,21 @@ class PostcodeController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors => Ok(postcodeTemplate(formWithErrors, businessType)),
-            validPostcode => {
+            validPostcode =>
               existingSession.utr match {
                 case Some(utr) => checkSubscriptionStatusAndUpdateSession(utr, validPostcode, existingSession)
                 case None      => Redirect(routes.UtrController.showUtrForm())
               }
-            }
           )
       }
     }
   }
 
-  private def checkSubscriptionStatusAndUpdateSession(utr: Utr, postcode: Postcode, agentSession: AgentSession)(
-    implicit hc: HeaderCarrier,
+  private def checkSubscriptionStatusAndUpdateSession(utr: Utr, postcode: Postcode, agentSession: AgentSession)(implicit
+    hc: HeaderCarrier,
     request: Request[AnyContent],
-    agent: Agent): Future[Result] =
+    agent: Agent
+  ): Future[Result] =
     subscriptionService.getSubscriptionStatus(utr, postcode).flatMap {
       case SubscriptionProcess(subscriptionState, Some(registrationDetails))
           if subscriptionState == Unsubscribed || subscriptionState == SubscribedButNotEnrolled =>
@@ -101,10 +102,11 @@ class PostcodeController @Inject()(
         Redirect(routes.BusinessIdentificationController.showNoMatchFound())
     }
 
-  private def checkAssuranceAndUpdateSession(utr: Utr, postcode: Postcode, registration: Registration, agentSession: AgentSession)(
-    implicit hc: HeaderCarrier,
+  private def checkAssuranceAndUpdateSession(utr: Utr, postcode: Postcode, registration: Registration, agentSession: AgentSession)(implicit
+    hc: HeaderCarrier,
     request: Request[AnyContent],
-    agent: Agent): Future[Result] =
+    agent: Agent
+  ): Future[Result] =
     assuranceService.assureIsAgent(utr).flatMap {
       case RefuseToDealWith(_) =>
         Redirect(routes.StartController.showCannotCreateAccount())
@@ -114,7 +116,8 @@ class PostcodeController @Inject()(
           .flatMap { _ =>
             mark("Count-Subscription-InvasiveCheck-Start")
             updateSessionAndRedirect(agentSession.copy(postcode = Some(postcode), registration = Some(registration)))(
-              routes.AssuranceChecksController.invasiveCheckStart())
+              routes.AssuranceChecksController.invasiveCheckStart()
+            )
           }
       case maybeAssured @ (None | ManuallyAssured(_) | CheckedInvisibleAssuranceAndPassed(_)) =>
         maybeAssured match {
@@ -123,12 +126,13 @@ class PostcodeController @Inject()(
               .sendAgentAssuranceAuditEvent(utr, postcode, assuranceResults)
               .flatMap { _ =>
                 updateSessionAndRedirect(
-                  agentSession.copy(postcode = Some(postcode), registration = Some(registration), isMAA = Some(assuranceResults.isManuallyAssured)))(
-                  getNextPage(agentSession.businessType, maybeAssured))
+                  agentSession.copy(postcode = Some(postcode), registration = Some(registration), isMAA = Some(assuranceResults.isManuallyAssured))
+                )(getNextPage(agentSession.businessType, maybeAssured))
               }
           case None =>
             updateSessionAndRedirect(agentSession.copy(postcode = Some(postcode), registration = Some(registration)))(
-              getNextPage(agentSession.businessType, maybeAssured))
+              getNextPage(agentSession.businessType, maybeAssured)
+            )
         }
       case _ => throw new RuntimeException("match error in checkAssuranceAndUpdateSession")
     }

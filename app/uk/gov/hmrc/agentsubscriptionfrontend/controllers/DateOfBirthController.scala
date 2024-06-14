@@ -16,15 +16,11 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import java.time.LocalDate
-import com.kenshoo.play.metrics.Metrics
-
-import javax.inject.{Inject, Singleton}
-import play.api.{Configuration, Environment}
 import play.api.data.Forms.{mapping, text, tuple}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError, Mapping}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.DateOfBirthController._
@@ -37,12 +33,15 @@ import uk.gov.hmrc.agentsubscriptionfrontend.views.html.date_of_birth
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class DateOfBirthController @Inject()(
+class DateOfBirthController @Inject() (
   val redirectUrlActions: RedirectUrlActions,
   val authConnector: AuthConnector,
   val assuranceService: AssuranceService,
@@ -68,7 +67,8 @@ class DateOfBirthController @Inject()(
             existingSession.lastNameFromCid match {
               case Some(_) => Ok(dateOfBirthTemplate(getForm(existingSession.dateOfBirth), businessType))
               case None    => Redirect(routes.BusinessIdentificationController.showNoMatchFound())
-            } else Ok(dateOfBirthTemplate(getForm(existingSession.dateOfBirth), businessType))
+            }
+          else Ok(dateOfBirthTemplate(getForm(existingSession.dateOfBirth), businessType))
         }
       }
     }
@@ -86,11 +86,12 @@ class DateOfBirthController @Inject()(
                 if (existingSession.dateOfBirthFromCid.contains(validDob)) {
                   companiesHouseKnownFactCheck(existingSession) {
                     updateSessionAndRedirect(existingSession.copy(dateOfBirth = Some(validDob)))(
-                      routes.VatDetailsController.showRegisteredForVatForm())
+                      routes.VatDetailsController.showRegisteredForVatForm()
+                    )
                   }
                 } else {
                   Redirect(routes.BusinessIdentificationController.showNoMatchFound())
-              }
+                }
             )
         }
       }
@@ -128,7 +129,7 @@ class DateOfBirthController @Inject()(
     result: (BusinessType => Future[Result])
   )(implicit request: Request[_]): Future[Result] =
     agentSession.businessType match {
-      case b @ (Some(SoleTrader | Partnership | Llp)) =>
+      case b @ Some(SoleTrader | Partnership | Llp) =>
         (agent.authNino, agentSession.nino, agentSession.dateOfBirthFromCid) match {
           case (None, _, _) if !b.contains(Llp) => Redirect(routes.VatDetailsController.showRegisteredForVatForm())
           case (_, Some(_), Some(_))            => result(b.get)

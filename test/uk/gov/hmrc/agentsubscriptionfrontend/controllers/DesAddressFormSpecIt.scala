@@ -74,7 +74,8 @@ class DesAddressFormSpecIt extends UnitSpec with ResettingMockitoSugar with Eith
       val addressLookupFrontendAddress = testAddressLookupFrontendAddress(
         lines = Seq(validLine, validLine2, validLine3, validLine4),
         postcode = Some(validPostcode),
-        country = testCountry(code = validCountryCode))
+        country = testCountry(code = validCountryCode)
+      )
 
       val validatedForm = desAddressForm.bindAddressLookupFrontendAddress(utr, addressLookupFrontendAddress)
 
@@ -88,7 +89,8 @@ class DesAddressFormSpecIt extends UnitSpec with ResettingMockitoSugar with Eith
           addressLine4 = Some(validLine4),
           postcode = validPostcode,
           countryCode = validCountryCode
-        ))
+        )
+      )
     }
 
     "not throw an error when there is only one line" in {
@@ -190,7 +192,8 @@ class DesAddressFormSpecIt extends UnitSpec with ResettingMockitoSugar with Eith
     "validate all lines + postcode and accumulate errors" in {
       val addressLookupFrontendAddress = testAddressLookupFrontendAddress(
         lines = Seq(tooLongAndNonMatchingLine, nonMatchingLine, tooLongLine, nonMatchingLine),
-        postcode = Some(denylistedPostcode))
+        postcode = Some(denylistedPostcode)
+      )
 
       val validatedForm = desAddressForm.bindAddressLookupFrontendAddress(utr, addressLookupFrontendAddress)
 

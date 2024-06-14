@@ -15,8 +15,6 @@
  */
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
@@ -27,11 +25,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.utr_details
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class UtrController @Inject()(
+class UtrController @Inject() (
   val redirectUrlActions: RedirectUrlActions,
   val authConnector: AuthConnector,
   val metrics: Metrics,
@@ -40,7 +40,8 @@ class UtrController @Inject()(
   val env: Environment,
   val subscriptionJourneyService: SubscriptionJourneyService,
   mcc: MessagesControllerComponents,
-  utrDetailsTemplate: utr_details)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  utrDetailsTemplate: utr_details
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def showUtrForm(): Action[AnyContent] = Action.async { implicit request =>
@@ -65,9 +66,7 @@ class UtrController @Inject()(
         utrForm(businessType.key)
           .bindFromRequest()
           .fold(
-            formWithErrors => {
-              Ok(utrDetailsTemplate(formWithErrors, businessType))
-            },
+            formWithErrors => Ok(utrDetailsTemplate(formWithErrors, businessType)),
             validUtr => updateSessionAndRedirect(existingSession.copy(utr = Some(validUtr)))(routes.PostcodeController.showPostcodeForm())
           )
       }

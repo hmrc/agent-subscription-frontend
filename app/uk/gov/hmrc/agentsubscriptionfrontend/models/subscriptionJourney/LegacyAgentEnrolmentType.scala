@@ -18,10 +18,8 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney
 
 import play.api.libs.json._
 
-/**
-  * A comprehensive list of all the old (pre-MTD) agent enrolment types
-  * IR-SA-AGENT is the only legacy code we actually use in authentication
-  * others are captured for future use
+/** A comprehensive list of all the old (pre-MTD) agent enrolment types IR-SA-AGENT is the only legacy code we actually use in authentication others
+  * are captured for future use
   */
 sealed abstract class LegacyAgentEnrolmentType {
   def key: String = this match {

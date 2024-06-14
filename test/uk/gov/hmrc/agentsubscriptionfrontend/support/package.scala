@@ -25,6 +25,7 @@ package object support {
   def testAddressLookupFrontendAddress(
     lines: Seq[String] = Seq("1 Test Street"),
     postcode: Option[String] = Some("AA1 1AA"),
-    country: Country = testCountry()) =
+    country: Country = testCountry()
+  ) =
     AddressLookupFrontendAddress(lines = lines, postcode = postcode, country = country)
 }

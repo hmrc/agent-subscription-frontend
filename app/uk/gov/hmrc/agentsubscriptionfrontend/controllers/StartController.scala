@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
@@ -25,14 +23,17 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.ContinueId
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService, SubscriptionService}
+import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{cannot_create_account, not_agent, sign_in_check}
 import uk.gov.hmrc.auth.core.AuthConnector
-import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
+
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class StartController @Inject()(
+class StartController @Inject() (
   val authConnector: AuthConnector,
   val redirectUrlActions: RedirectUrlActions,
   val metrics: Metrics,
@@ -44,7 +45,8 @@ class StartController @Inject()(
   mcc: MessagesControllerComponents,
   notAgentTemplate: not_agent,
   signInCheckTemplate: sign_in_check,
-  cannotCreateAccountTemplate: cannot_create_account)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  cannotCreateAccountTemplate: cannot_create_account
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._
@@ -60,7 +62,8 @@ class StartController @Inject()(
       Redirect(
         routes.StartController
           .signInCheck()
-          .toURLWithParams("continue" -> urlOpt))
+          .toURLWithParams("continue" -> urlOpt)
+      )
     }
   }
 

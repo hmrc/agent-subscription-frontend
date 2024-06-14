@@ -15,34 +15,34 @@
  */
 
 import com.google.inject.name.Named
-import play.api.Logger
-
-import javax.inject.{Inject, Singleton}
 import play.api.http.Status.FORBIDDEN
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results._
 import play.api.mvc.{Request, RequestHeader, Result}
-import play.api.{Configuration, Environment, Logging, Mode}
+import play.api._
 import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+import uk.gov.hmrc.agentsubscriptionfrontend.util.AuthRedirects
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{ErrorTemplate, ErrorTemplate5xx}
 import uk.gov.hmrc.auth.core.{InsufficientEnrolments, NoActiveSession}
 import uk.gov.hmrc.http.{JsValidationException, NotFoundException}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.bootstrap.config.{AuthRedirects, HttpAuditEvent}
+import uk.gov.hmrc.play.bootstrap.config.HttpAuditEvent
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ErrorHandler @Inject()(
+class ErrorHandler @Inject() (
   val env: Environment,
   val messagesApi: MessagesApi,
   val auditConnector: AuditConnector,
   errorTemplate: ErrorTemplate,
   errorTemplate5xx: ErrorTemplate5xx,
-  @Named("appName") val appName: String)(implicit val config: Configuration, ec: ExecutionContext, appConfig: AppConfig)
+  @Named("appName") val appName: String
+)(implicit val config: Configuration, ec: ExecutionContext, appConfig: AppConfig)
     extends FrontendErrorHandler with AuthRedirects with ErrorAuditing with Logging {
 
   def theLogger: Logger = this.logger // for testing
@@ -117,7 +117,9 @@ trait ErrorAuditing extends HttpAuditEvent {
     }
     auditConnector.sendEvent(
       dataEvent(eventType, transactionName, request, Map(TransactionFailureReason -> ex.getMessage))(
-        HeaderCarrierConverter.fromRequestAndSession(request, request.session)))
+        HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+      )
+    )
     ()
   }
 
@@ -127,11 +129,15 @@ trait ErrorAuditing extends HttpAuditEvent {
       case NOT_FOUND =>
         auditConnector.sendEvent(
           dataEvent(ResourceNotFound, notFoundError, request, Map(TransactionFailureReason -> message))(
-            HeaderCarrierConverter.fromRequestAndSession(request, request.session)))
+            HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+          )
+        )
       case BAD_REQUEST =>
         auditConnector.sendEvent(
           dataEvent(ServerValidationError, badRequestError, request, Map(TransactionFailureReason -> message))(
-            HeaderCarrierConverter.fromRequestAndSession(request, request.session)))
+            HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+          )
+        )
       case _ =>
     }
     ()

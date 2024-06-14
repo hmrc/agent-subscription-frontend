@@ -16,14 +16,10 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import java.time.LocalDate
-
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
-import play.api.data.Forms.{mapping, of, optional, text, _}
+import play.api.data.Forms._
 import play.api.data.format.Formats._
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import play.api.data.{Form, Mapping, _}
+import play.api.data._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentmtdidentifiers.model.Vrn
@@ -39,12 +35,15 @@ import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators.{checkO
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{registered_for_vat, vat_details}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class VatDetailsController @Inject()(
+class VatDetailsController @Inject() (
   val redirectUrlActions: RedirectUrlActions,
   val authConnector: AuthConnector,
   val metrics: Metrics,
@@ -55,7 +54,8 @@ class VatDetailsController @Inject()(
   val subscriptionJourneyService: SubscriptionJourneyService,
   mcc: MessagesControllerComponents,
   registeredForVatTemplate: registered_for_vat,
-  vatDetailsTemplate: vat_details)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+  vatDetailsTemplate: vat_details
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def showRegisteredForVatForm(): Action[AnyContent] = Action.async { implicit request =>
@@ -78,9 +78,8 @@ class VatDetailsController @Inject()(
     }
   }
 
-  /**
-    * In-case of SoleTrader or Partnerships, we should display NI and DOB pages based on if nino and dob exist or not.
-    * We need to force users to go through these pages, hence the below checks
+  /** In-case of SoleTrader or Partnerships, we should display NI and DOB pages based on if nino and dob exist or not. We need to force users to go
+    * through these pages, hence the below checks
     */
   private def withAAChecks(agent: Agent, existingSession: AgentSession)(result: Result): Result =
     existingSession.businessType match {
@@ -151,15 +150,15 @@ class VatDetailsController @Inject()(
           .bindFromRequest()
           .fold(
             formWithErrors => Ok(vatDetailsTemplate(formWithRefinedErrors(formWithErrors))),
-            validForm => {
+            validForm =>
               subscriptionService.matchVatKnownFacts(validForm.vrn, validForm.regDate).flatMap { foundMatch =>
                 if (foundMatch)
                   updateSessionAndRedirect(existingSession.copy(vatDetails = Some(validForm)))(
-                    routes.BusinessIdentificationController.showConfirmBusinessForm())
+                    routes.BusinessIdentificationController.showConfirmBusinessForm()
+                  )
                 else
                   Redirect(routes.BusinessIdentificationController.showNoMatchFound())
               }
-            }
           )
       }
     }
@@ -167,17 +166,15 @@ class VatDetailsController @Inject()(
 
   private def getBackLink(agent: Agent, businessType: BusinessType)(agentSession: AgentSession) =
     businessType match {
-      case SoleTrader | Partnership => {
+      case SoleTrader | Partnership =>
         agent.authNino match {
           case Some(_) => routes.DateOfBirthController.showDateOfBirthForm().url
           case None    => routes.PostcodeController.showPostcodeForm().url
         }
-      }
-      case Llp => {
+      case Llp =>
         if (agentSession.dateOfBirth.isDefined) routes.DateOfBirthController.showDateOfBirthForm().url
         else routes.CompanyRegistrationController.showCompanyRegNumberForm().url
 
-      }
       case LimitedCompany => routes.CompanyRegistrationController.showCompanyRegNumberForm().url
     }
 
@@ -188,8 +185,10 @@ object VatDetailsController {
   val registeredForVatForm: Form[RegisteredForVat] =
     Form[RegisteredForVat](
       mapping("registeredForVat" -> optional(text).verifying(radioInputSelected("registered-for-vat.error.no-radio-selected")))(answer =>
-        RegisteredForVat(RadioInputAnswer.apply(answer.getOrElse(""))))(answer => Some(RadioInputAnswer.unapply(answer.confirm)))
-        .verifying("registered-for-vat.confirm-business-value.invalid", submittedAnswer => Seq(Yes, No).contains(submittedAnswer.confirm)))
+        RegisteredForVat(RadioInputAnswer.apply(answer.getOrElse("")))
+      )(answer => Some(RadioInputAnswer.unapply(answer.confirm)))
+        .verifying("registered-for-vat.confirm-business-value.invalid", submittedAnswer => Seq(Yes, No).contains(submittedAnswer.confirm))
+    )
 
   val normalizedText: Mapping[String] = of[String].transform(_.replaceAll("\\s", ""), identity)
 

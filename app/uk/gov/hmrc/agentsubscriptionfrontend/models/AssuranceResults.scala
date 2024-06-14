@@ -22,7 +22,8 @@ case class AssuranceResults(
   hasAcceptableNumberOfPayeClients: Option[Boolean],
   hasAcceptableNumberOfSAClients: Option[Boolean],
   hasAcceptableNumberOfVatDecOrgClients: Option[Boolean],
-  hasAcceptableNumberOfIRCTClients: Option[Boolean])
+  hasAcceptableNumberOfIRCTClients: Option[Boolean]
+)
 
 object AssuranceResults {
   object RefuseToDealWith {

@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import com.kenshoo.play.metrics.Metrics
-import javax.inject.Inject
-import play.api.{Configuration, Environment}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.businessTypeForm
@@ -29,10 +27,12 @@ import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.business_type
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class BusinessTypeController @Inject()(
+class BusinessTypeController @Inject() (
   val redirectUrlActions: RedirectUrlActions,
   val authConnector: AuthConnector,
   val sessionStoreService: MongoDBSessionStoreService,
@@ -76,13 +76,12 @@ class BusinessTypeController @Inject()(
         .bindFromRequest()
         .fold(
           formWithErrors => Ok(businessTypeTemplate(formWithErrors)),
-          validatedBusinessType => {
+          validatedBusinessType =>
             sessionStoreService.fetchAgentSession
               .map(_.getOrElse(AgentSession()))
               .flatMap { agentSession =>
                 updateSessionAndRedirect(agentSession.copy(businessType = Some(validatedBusinessType)))(routes.UtrController.showUtrForm())
               }
-          }
         )
     }
   }

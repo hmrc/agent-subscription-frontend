@@ -59,7 +59,7 @@ trait AppConfig {
 }
 
 @Singleton
-class FrontendAppConfig @Inject()(servicesConfig: ServicesConfig) extends AppConfig {
+class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppConfig {
 
   override val appName = "agent-subscription-frontend"
 

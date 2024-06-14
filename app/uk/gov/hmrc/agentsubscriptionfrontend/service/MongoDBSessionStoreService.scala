@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
 
 import javax.inject.{Inject, Singleton}
@@ -27,9 +27,9 @@ import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MongoDBSessionStoreService @Inject()(sessionCache: SessionCacheRepository) {
+class MongoDBSessionStoreService @Inject() (sessionCache: SessionCacheRepository) {
 
-  implicit val format = Json.format[RedirectUrl]
+  implicit val format: OFormat[RedirectUrl] = Json.format[RedirectUrl]
 
   val continueUrlCache: SessionCache[RedirectUrl] = new SessionCache[RedirectUrl] {
     override val sessionName: String = "continueUrl"

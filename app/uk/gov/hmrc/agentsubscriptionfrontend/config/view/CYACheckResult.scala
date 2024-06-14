@@ -50,7 +50,8 @@ object CYACheckResult {
       sjr.contactEmailData,
       sjr.contactTradingNameData,
       sjr.contactTradingAddressData,
-      sjr.contactTelephoneData) match {
+      sjr.contactTelephoneData
+    ) match {
 
       case (Some(reg), _, Some(email), Some(tradingName), Some(tradingAddress), Some(telephone)) =>
         checkContactDetails(email, tradingName, tradingAddress, telephone)(reg, sjr.amlsData)
@@ -66,7 +67,8 @@ object CYACheckResult {
     emailData: ContactEmailData,
     tradingNameData: ContactTradingNameData,
     tradingAddressData: ContactTradingAddressData,
-    telephoneData: ContactTelephoneData)(reg: Registration, maybeAmls: Option[AmlsData]): CYACheckResult =
+    telephoneData: ContactTelephoneData
+  )(reg: Registration, maybeAmls: Option[AmlsData]): CYACheckResult =
     if (emailData.contactEmail.isEmpty) FailedContactEmail
     else if (!tradingNameData.hasTradingName && tradingNameData.contactTradingName.isEmpty)
       FailedContactTradingName
