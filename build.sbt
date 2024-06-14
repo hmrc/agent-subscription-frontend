@@ -3,7 +3,7 @@ import uk.gov.hmrc.{DefaultBuildSettings, SbtAutoBuildPlugin}
 
 val appName = "agent-subscription-frontend"
 
-ThisBuild / majorVersion := 1
+ThisBuild / majorVersion := 2
 ThisBuild / scalaVersion := "2.13.12"
 
 val scalaCOptions = Seq(
@@ -28,7 +28,6 @@ lazy val root = (project in file("."))
   .settings(
     name := appName,
     organization := "uk.gov.hmrc",
-    majorVersion := 2,
     PlayKeys.playDefaultPort := 9437,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     resolvers ++= Seq(Resolver.typesafeRepo("releases")),
