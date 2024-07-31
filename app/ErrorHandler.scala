@@ -79,7 +79,7 @@ class ErrorHandler @Inject() (
   }
 
   override def internalServerErrorTemplate(implicit request: Request[_]): Html = {
-    logger.error(s"internalServerError ${request.body}")
+    logger.error(s"internalServerError")
     errorTemplate5xx()
   }
 
