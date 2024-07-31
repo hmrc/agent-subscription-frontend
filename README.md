@@ -30,7 +30,6 @@ Task list:
 
 After submission the agent should be assigned the HMRC-AS-AGENT enrolment if successful. They can then access the Agent Services Account.
 
-
 ### Running the tests
 
     sbt test it:test
@@ -52,8 +51,7 @@ It should then be listening on port 9437
 Alternatively use task list functionality:
 
     browse http://localhost:9437/agent-subscription/task-list  
-  
-    
+
 ## Continue URL
 
 Agent Subscription journey can be integrated as part of external journey using `continue` url
@@ -62,7 +60,6 @@ parameter:
 http://www.tax.service.gov.uk/agent-subscription/start?continue=/your-service/path?paramA=valueA
 ```
 After successful subscription user will be redirected to Agent Services Account page and presented with `Continue with your journey` button.
-
 
 ### License 
 

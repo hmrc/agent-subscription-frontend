@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ object TaxIdentifierFormatters {
   private val UtrMaxLength = 10
 
   def normalizeUtr(utrStr: String): Option[Utr] = {
-    val formattedUtr = utrStr.replace(" ", "")
+    val formattedUtr: String = utrStr.replace(" ", "")
     def isNumber(str: String): Boolean = str.map(_.isDigit).reduceOption(_ && _).getOrElse(false)
 
-    if (isNumber(formattedUtr) && formattedUtr.size == UtrMaxLength) Some(Utr(formattedUtr))
+    if (isNumber(formattedUtr) && formattedUtr.length == UtrMaxLength) Some(Utr(formattedUtr))
     else None
   }
 

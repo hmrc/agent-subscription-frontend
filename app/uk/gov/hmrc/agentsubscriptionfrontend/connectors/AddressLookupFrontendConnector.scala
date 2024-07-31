@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import play.api.http.HeaderNames.LOCATION
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.Lang
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.Call
 import uk.gov.hmrc.agentsubscriptionfrontend.config.{AddressLookupConfig, AppConfig}
@@ -36,7 +36,6 @@ class AddressLookupFrontendConnector @Inject() (
   http: HttpClient,
   val metrics: Metrics,
   addressLookupConfig: AddressLookupConfig,
-  messagesApi: MessagesApi,
   appConfig: AppConfig
 )(implicit val ec: ExecutionContext)
     extends HttpAPIMonitor {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.businessTypeForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
-import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService, SubscriptionService}
+import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.business_type
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -40,7 +40,6 @@ class BusinessTypeController @Inject() (
   val config: Configuration,
   val env: Environment,
   val subscriptionJourneyService: SubscriptionJourneyService,
-  subscriptionService: SubscriptionService,
   mcc: MessagesControllerComponents,
   businessTypeTemplate: business_type
 )(implicit val appConfig: AppConfig, val ec: ExecutionContext)
@@ -85,5 +84,4 @@ class BusinessTypeController @Inject() (
         )
     }
   }
-
 }

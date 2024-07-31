@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@ package uk.gov.hmrc.agentsubscriptionfrontend.util
 
 import play.api.data.{Field, Form}
 import play.api.i18n.Messages
-//import uk.gov.hmrc.agentsubscriptionfrontend.config.view.AnswerRow
 import uk.gov.hmrc.govukfrontend.views.html.components.{RadioItem, Text}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioOption
-//import uk.gov.hmrc.govukfrontend.views.Aliases.{ActionItem, Actions, HtmlContent, Key, SummaryListRow, Value}
 
 object ViewUtils {
 
@@ -39,27 +37,5 @@ object ViewUtils {
       )
     }
 
-//  def mapAnswerRowToSummaryListRow(field: Field, answerRow: Seq[AnswerRow])(implicit messages: Messages): Seq[SummaryListRow] =
-//    answerRow.map(
-//      a => {
-//        SummaryListRow(
-//          key = Key(
-//            content = Text(a.question)
-//          ),
-//          value = Value(
-//            content = HtmlContent(@for(line <- a.answerLines) { @line<br> })
-//        ),
-//        actions = Some(Actions(
-//          items = Seq(
-//            ActionItem(
-//              href = a.changeLink,
-//              content = Text(a.buttonText),
-//              visuallyHiddenText = Some(a.question)
-//            )
-//          )
-//        ))
-//        )
-//      }
-//    )
   //   TODO add DateErrorFormatter here
 }
