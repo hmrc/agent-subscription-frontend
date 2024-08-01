@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 
 class AddressLookupConfig @Inject() (appConfig: AppConfig, messagesApi: MessagesApi) {
 
-  def config(continueUrl: String)(implicit lang: Lang) = {
+  def config(continueUrl: String)(implicit lang: Lang): JsObject = {
 
     val cy = Lang("CY")
 

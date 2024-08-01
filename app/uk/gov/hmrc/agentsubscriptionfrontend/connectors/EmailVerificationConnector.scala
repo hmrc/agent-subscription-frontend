@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class EmailVerificationConnector @Inject() (http: HttpClient, val metrics: Metri
         response.status match {
           case 201 => Some(response.json.as[VerifyEmailResponse])
           case status =>
-            logger.error(s"verifyEmail error for $request; HTTP status: $status, message: $response")
+            logger.error(s"verifyEmail error; HTTP status: $status, message: $response")
             None
         }
       }

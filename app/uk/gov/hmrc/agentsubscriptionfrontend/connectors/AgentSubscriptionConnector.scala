@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ class AgentSubscriptionConnector @Inject() (
         s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/corporation-tax-utr/${encodePathSegment(utr.value)}/crn/${encodePathSegment(crn.value)}"
 
       http
-        .GET[HttpResponse](url.toString)
+        .GET[HttpResponse](url)
         .map { response =>
           response.status match {
             case OK            => true
@@ -116,7 +116,7 @@ class AgentSubscriptionConnector @Inject() (
         s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/vat-known-facts/vrn/${encodePathSegment(vrn.value)}/dateOfRegistration/${encodePathSegment(vatRegistrationDate.toString)}"
 
       http
-        .GET[HttpResponse](url.toString)
+        .GET[HttpResponse](url)
         .map { response =>
           response.status match {
             case OK            => true

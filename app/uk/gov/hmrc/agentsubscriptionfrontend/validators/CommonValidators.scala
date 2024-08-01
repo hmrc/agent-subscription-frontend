@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import play.api.data.validation._
 import play.api.data.{FormError, Mapping}
 import play.api.i18n.Messages
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedPostcodes.PostcodesLoader
 import uk.gov.hmrc.domain.Nino
 
 import scala.annotation.tailrec
@@ -50,7 +50,7 @@ object CommonValidators {
   private val crnLength = 8
   private val crnRegex = "[A-Z]{2}[0-9]{6}|[0-9]{8}"
 
-  def saAgentCode = text verifying saAgentCodeConstraint
+  def saAgentCode: Mapping[String] = text verifying saAgentCodeConstraint
 
   def utr: Mapping[String] = text verifying utrConstraint()
 
@@ -187,7 +187,7 @@ object CommonValidators {
 
   // Same as play.api.data.format.Formats.stringFormat but with a custom message instead of error.required
   private def stringFormatWithMessage(messageKey: String): Formatter[String] = new Formatter[String] {
-    def bind(key: String, data: Map[String, String]) = data.get(key).toRight(Seq(FormError(key, messageKey, Nil)))
+    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = data.get(key).toRight(Seq(FormError(key, messageKey, Nil)))
 
     def unbind(key: String, value: String) = Map(key -> value)
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ final case class SubscriptionJourneyRecord(
     case Some(ced) if ced.useBusinessEmail => businessDetails.registration.flatMap(_.emailAddress)
     case Some(ced)                         => ced.contactEmail
   }
-  def emailNeedsVerifying(authEmail: Option[String]) =
+  def emailNeedsVerifying(authEmail: Option[String]): Boolean =
     if (effectiveEmail.map(_.toLowerCase) == authEmail.map(_.toLowerCase)) false
     else effectiveEmail.exists(email => !verifiedEmails.contains(email))
 }

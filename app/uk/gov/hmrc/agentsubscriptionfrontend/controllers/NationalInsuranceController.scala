@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ class NationalInsuranceController @Inject() (
                     .map(_.person)
                     .flatMap {
                       case Some(person) if person.deceased.contains(true) =>
-                        logger.warn(s"Could not register agent as the NINO (${agent.authNino}) is marked as deceased.")
+                        logger.warn(s"Could not register agent as the NINO is marked as deceased.")
                         Redirect(routes.BusinessIdentificationController.showCannotConfirmIdentity())
                       case Some(person) if person.dateOfBirth.isEmpty && businessType != Llp =>
                         logger.warn("no DateOfBirth in the /citizen-details response for logged in agent")

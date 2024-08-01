@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,16 +44,16 @@ object HttpClientConverter extends Logging {
     future.map { response =>
       response.status match {
         case s if is2xx(s) =>
-          response.body.length > 0 match {
-            case true =>
-              Try(response.json.as[A]) match {
-                case Success(value) =>
-                  Option(value)
-                case Failure(ex) =>
-                  logger.error(ex.getMessage, ex)
-                  throw ex
-              }
-            case false => None
+          if (response.body.nonEmpty) {
+            Try(response.json.as[A]) match {
+              case Success(value) =>
+                Option(value)
+              case Failure(ex) =>
+                logger.error(ex.getMessage, ex)
+                throw ex
+            }
+          } else {
+            None
           }
         case s => throw UpstreamErrorResponse(response.body, s)
       }

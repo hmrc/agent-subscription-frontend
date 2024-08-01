@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,17 +41,13 @@ class DesAddressForm(logger: LoggerLike, denylistedPostcodes: Set[String]) {
     }
     form.bind(
       Map(
-        "addressLine1" -> lineIfPresent(addressLookupFrontendAddress.lines, 0).getOrElse(""),
-        "addressLine2" -> lineIfPresent(addressLookupFrontendAddress.lines, 1).getOrElse(""),
-        "addressLine3" -> lineIfPresent(addressLookupFrontendAddress.lines, 2).getOrElse(""),
-        "addressLine4" -> lineIfPresent(addressLookupFrontendAddress.lines, 3).getOrElse(""),
+        "addressLine1" -> addressLookupFrontendAddress.lines.headOption.getOrElse(""),
+        "addressLine2" -> addressLookupFrontendAddress.lines.lift(1).getOrElse(""),
+        "addressLine3" -> addressLookupFrontendAddress.lines.lift(2).getOrElse(""),
+        "addressLine4" -> addressLookupFrontendAddress.lines.lift(3).getOrElse(""),
         "postcode"     -> addressLookupFrontendAddress.postcode.getOrElse(""),
         "countryCode"  -> addressLookupFrontendAddress.country.code
       )
     )
   }
-
-  private def lineIfPresent(lines: Seq[String], index: Int): Option[String] =
-    if (lines.length > index) Some(lines(index))
-    else None
 }

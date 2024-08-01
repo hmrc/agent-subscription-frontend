@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.Lang
 import play.api.mvc.Call
-import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedPostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -73,7 +73,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
   override val denylistedPostcodes: Set[String] =
     PostcodesLoader.load("/po_box_postcodes_abp_49.csv").map(x => x.toUpperCase.replace(" ", "")).toSet
   override val agentServicesAccountUrl: String = s"$servicesAccountUrl$servicesAccountPath"
-  override lazy val agentAssuranceBaseUrl = servicesConfig.baseUrl("agent-assurance")
+  override lazy val agentAssuranceBaseUrl: String = servicesConfig.baseUrl("agent-assurance")
   override val agentAssuranceRun: Boolean = servicesConfig.getBoolean("features.agent-assurance-run")
   override val surveyRedirectUrl: String = getConf("surveyRedirectUrl")
   override val agentSubscriptionFrontendExternalUrl: String = getConf("microservice.services.agent-subscription-frontend.external-url")
@@ -108,7 +108,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
     "cymraeg" -> Lang("cy")
   )
 
-  override def routeToSwitchLanguage =
+  override def routeToSwitchLanguage: String => Call =
     (lang: String) => routes.AgentSubscriptionLanguageController.switchToLanguage(lang)
 
   override val companiesHouseUrl: String = getConf("companies-house.url")
