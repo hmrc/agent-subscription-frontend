@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalatest.{Assertion, EitherValues}
 import play.api.data.validation.{Invalid, Valid, ValidationError}
 import play.api.data.{FormError, Mapping}
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedPostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 

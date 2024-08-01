@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes
+package uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedPostcodes
 
 import scala.util.{Failure, Success, Try}
 

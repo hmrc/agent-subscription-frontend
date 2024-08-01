@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes
+package uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedPostcodes
 
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader.PostcodeLoaderException
+import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedPostcodes.PostcodesLoader.PostcodeLoaderException
 import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
 
 class PostcodesLoaderSpecIt extends UnitSpec with MockitoSugar {

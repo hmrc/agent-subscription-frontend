@@ -24,7 +24,7 @@ import play.api.data.validation._
 import play.api.data.{FormError, Mapping}
 import play.api.i18n.Messages
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.config.blacklistedpostcodes.PostcodesLoader
+import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedPostcodes.PostcodesLoader
 import uk.gov.hmrc.domain.Nino
 
 import scala.annotation.tailrec
