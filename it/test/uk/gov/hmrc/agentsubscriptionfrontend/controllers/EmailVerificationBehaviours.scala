@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import play.api.mvc.Result
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{SubscriptionJourneyRecord, VerifiedEmails}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.givenSubscriptionJourneyRecordExists
 import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpecIt
 
@@ -35,7 +35,7 @@ trait EmailVerificationBehaviours { this: BaseISpecIt =>
         AuthProviderId("12345-credId"),
         sjr.copy(
           contactEmailData = None,
-          verifiedEmails = Set.empty
+          verifiedEmails = VerifiedEmails()
         )
       )
       val result = await(f())
@@ -47,7 +47,7 @@ trait EmailVerificationBehaviours { this: BaseISpecIt =>
         AuthProviderId("12345-credId"),
         sjr.copy(
           contactEmailData = Some(ContactEmailData(useBusinessEmail = true, contactEmail = None)),
-          verifiedEmails = Set.empty
+          verifiedEmails = VerifiedEmails()
         )
       )
       val result = await(f())
@@ -61,7 +61,7 @@ trait EmailVerificationBehaviours { this: BaseISpecIt =>
         sjr.copy(
           contactEmailData = Some(ContactEmailData(useBusinessEmail = false, contactEmail = Some("other@email.com"))),
           // the business email is verified, but the new one is not
-          verifiedEmails = Set(sjr.businessDetails.registration.get.emailAddress.get)
+          verifiedEmails = VerifiedEmails(Set(sjr.businessDetails.registration.get.emailAddress.get))
         )
       )
       val result = await(f())
@@ -74,7 +74,7 @@ trait EmailVerificationBehaviours { this: BaseISpecIt =>
         AuthProviderId("12345-credId"),
         sjr.copy(
           contactEmailData = Some(ContactEmailData(useBusinessEmail = true, contactEmail = None)),
-          verifiedEmails = Set(sjr.businessDetails.registration.get.emailAddress.get)
+          verifiedEmails = VerifiedEmails(Set(sjr.businessDetails.registration.get.emailAddress.get))
         )
       )
       val result = await(f())
@@ -86,7 +86,7 @@ trait EmailVerificationBehaviours { this: BaseISpecIt =>
         AuthProviderId("12345-credId"),
         sjr.copy(
           contactEmailData = Some(ContactEmailData(useBusinessEmail = false, contactEmail = Some("other@email.com"))),
-          verifiedEmails = Set("other@email.com")
+          verifiedEmails = VerifiedEmails(Set("other@email.com"))
         )
       )
       val result = await(f())

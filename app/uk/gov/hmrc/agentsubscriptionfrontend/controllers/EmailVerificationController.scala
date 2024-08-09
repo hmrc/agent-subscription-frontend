@@ -22,7 +22,7 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{SubscriptionJourneyRecord, VerifiedEmails}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{EmailVerificationService, MongoDBSessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.hmrcfrontend.config.AccessibilityStatementConfig
@@ -70,11 +70,12 @@ class EmailVerificationController @Inject() (
       throw new IllegalStateException("A verify email call has been made but no email to verify is present.")
     }
 
-  override def isAlreadyVerified(session: RelevantState, email: String): Boolean = session.subscriptionJourneyRecord.verifiedEmails.contains(email)
+  override def isAlreadyVerified(session: RelevantState, email: String): Boolean =
+    session.subscriptionJourneyRecord.verifiedEmails.emails.contains(email)
 
   override def markEmailAsVerified(session: RelevantState, email: String)(implicit hc: HeaderCarrier): Future[RelevantState] = {
-    val updatedVerifiedEmails = session.subscriptionJourneyRecord.verifiedEmails + email
-    val updatedSjr = session.subscriptionJourneyRecord.copy(verifiedEmails = updatedVerifiedEmails)
+    val updatedVerifiedEmails = session.subscriptionJourneyRecord.verifiedEmails.emails + email
+    val updatedSjr = session.subscriptionJourneyRecord.copy(verifiedEmails = VerifiedEmails(updatedVerifiedEmails))
     subscriptionJourneyService.saveJourneyRecord(updatedSjr).map(_ => session.copy(subscriptionJourneyRecord = updatedSjr))
   }
 
