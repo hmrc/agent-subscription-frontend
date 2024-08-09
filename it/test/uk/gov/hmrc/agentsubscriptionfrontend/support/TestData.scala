@@ -21,7 +21,7 @@ import java.time.LocalDate
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, BusinessDetails, SubscriptionJourneyRecord, UserMapping}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, BusinessDetails, SubscriptionJourneyRecord, UserMapping, VerifiedEmails}
 import uk.gov.hmrc.domain.{AgentCode, Nino}
 
 object TestData {
@@ -145,11 +145,11 @@ object TestData {
     contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),
     contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
     contactTelephoneData = Some(ContactTelephoneData(true, Some(phoneNumber))),
-    verifiedEmails = Set("email@email.com")
+    verifiedEmails = VerifiedEmails(Set("email@email.com"))
   )
   val completeJourneyRecordWithMappingsNoVerifiedEmails: SubscriptionJourneyRecord = completeJourneyRecordNoMappings
     .copy(
-      verifiedEmails = Set("")
+      verifiedEmails = VerifiedEmails()
     )
 
   val completeJourneyRecordWithMappings: SubscriptionJourneyRecord = completeJourneyRecordNoMappings

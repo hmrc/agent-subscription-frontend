@@ -38,16 +38,16 @@ final case class SubscriptionJourneyRecord(
   contactTradingNameData: Option[ContactTradingNameData] = None,
   contactTradingAddressData: Option[ContactTradingAddressData] = None,
   contactTelephoneData: Option[ContactTelephoneData] = None,
-  verifiedEmails: Set[String] = Set.empty
+  verifiedEmails: VerifiedEmails = VerifiedEmails(verifiedEmails = Set.empty)
 ) {
   def effectiveEmail: Option[String] = contactEmailData match {
     case None                              => None
     case Some(ced) if ced.useBusinessEmail => businessDetails.registration.flatMap(_.emailAddress)
     case Some(ced)                         => ced.contactEmail
   }
-  def emailNeedsVerifying(authEmail: Option[String]) =
+  def emailNeedsVerifying(authEmail: Option[String]): Boolean =
     if (effectiveEmail.map(_.toLowerCase) == authEmail.map(_.toLowerCase)) false
-    else effectiveEmail.exists(email => !verifiedEmails.contains(email))
+    else effectiveEmail.exists(email => !verifiedEmails.verifiedEmails.contains(email))
 }
 
 object SubscriptionJourneyRecord {
@@ -68,7 +68,7 @@ object SubscriptionJourneyRecord {
       (JsPath \ "contactTradingAddressData").formatNullable[ContactTradingAddressData] and
       (JsPath \ "contactTelephoneData").formatNullable[ContactTelephoneData] and
       (JsPath \ "verifiedEmails")
-        .formatWithDefault[Set[String]](Set.empty[String]))(SubscriptionJourneyRecord.apply, unlift(SubscriptionJourneyRecord.unapply))
+        .formatWithDefault[VerifiedEmails](VerifiedEmails()))(SubscriptionJourneyRecord.apply, unlift(SubscriptionJourneyRecord.unapply))
 
   def fromAgentSession(
     agentSession: AgentSession,
