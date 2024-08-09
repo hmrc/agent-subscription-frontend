@@ -38,7 +38,7 @@ final case class SubscriptionJourneyRecord(
   contactTradingNameData: Option[ContactTradingNameData] = None,
   contactTradingAddressData: Option[ContactTradingAddressData] = None,
   contactTelephoneData: Option[ContactTelephoneData] = None,
-  verifiedEmails: VerifiedEmails = VerifiedEmails(verifiedEmails = Set.empty)
+  verifiedEmails: VerifiedEmails = VerifiedEmails(emails = Set.empty)
 ) {
   def effectiveEmail: Option[String] = contactEmailData match {
     case None                              => None
@@ -47,7 +47,7 @@ final case class SubscriptionJourneyRecord(
   }
   def emailNeedsVerifying(authEmail: Option[String]): Boolean =
     if (effectiveEmail.map(_.toLowerCase) == authEmail.map(_.toLowerCase)) false
-    else effectiveEmail.exists(email => !verifiedEmails.verifiedEmails.contains(email))
+    else effectiveEmail.exists(email => !verifiedEmails.emails.contains(email))
 }
 
 object SubscriptionJourneyRecord {

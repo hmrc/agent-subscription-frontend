@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney
 
 import play.api.libs.json.{Json, OFormat}
 
-case class VerifiedEmails(verifiedEmails: Set[String] = Set.empty)
+case class VerifiedEmails(emails: Set[String] = Set.empty)
 
 object VerifiedEmails {
   implicit val format: OFormat[VerifiedEmails] = Json.format[VerifiedEmails]
