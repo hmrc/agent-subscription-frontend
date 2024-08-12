@@ -25,6 +25,7 @@ import play.api.mvc.{AnyContent, Cookie, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.VerifiedEmails
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, _}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
@@ -241,7 +242,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         AuthProviderId("12345-credId"),
         completeJourneyRecordNoMappings.copy(
           contactEmailData = Some(ContactEmailData(useBusinessEmail = false, contactEmail = Some("email@email.com"))),
-          verifiedEmails = Set.empty
+          verifiedEmails = VerifiedEmails()
         )
       )
       implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
@@ -700,7 +701,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         AuthProviderId("12345-credId"),
         completeJourneyRecordNoMappings.copy(
           contactEmailData = Some(ContactEmailData(useBusinessEmail = false, contactEmail = Some("email@email.com"))),
-          verifiedEmails = Set.empty
+          verifiedEmails = VerifiedEmails()
         )
       )
 
