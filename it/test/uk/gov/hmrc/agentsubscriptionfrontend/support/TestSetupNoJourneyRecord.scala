@@ -39,8 +39,8 @@ trait TestSetupWithCompleteJourneyRecord {
       continueId = None,
       businessDetails = BusinessDetails(
         SoleTrader,
-        Utr("8699323569"),
-        Postcode("GU95 5MT"),
+        "8699323569",
+        "GU95 5MT",
         Some(
           Registration(
             Some("tax name"),
@@ -61,10 +61,14 @@ trait TestSetupWithCompleteJourneyRecord {
         )
       ),
       cleanCredsAuthProviderId = Some(AuthProviderId("1234-creds")),
-      contactEmailData = Some(ContactEmailData(true, Some("abc@xyz.com"))),
-      contactTradingNameData = Some(ContactTradingNameData(false, None)),
-      contactTradingAddressData =
-        Some(ContactTradingAddressData(true, Some(BusinessAddress("line 1", Some("line 2"), Some("line 3"), Some("line 4"), Some("POST"), "GB"))))
+      contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("abc@xyz.com"))),
+      contactTradingNameData = Some(ContactTradingNameData(hasTradingName = false, None)),
+      contactTradingAddressData = Some(
+        ContactTradingAddressData(
+          useBusinessAddress = true,
+          Some(BusinessAddress("line 1", Some("line 2"), Some("line 3"), Some("line 4"), Some("POST"), "GB"))
+        )
+      )
     )
   )
 

@@ -20,7 +20,6 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
 import play.api.libs.json.Json
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
 import uk.gov.hmrc.play.encoding.UriPathEncoding.encodePathSegment
@@ -56,9 +55,9 @@ object AgentSubscriptionJourneyStub {
         )
     )
 
-  def givenSubscriptionJourneyRecordExists(utr: Utr, subscriptionJourneyRecord: SubscriptionJourneyRecord): StubMapping =
+  def givenSubscriptionJourneyRecordExists(utr: String, subscriptionJourneyRecord: SubscriptionJourneyRecord): StubMapping =
     stubFor(
-      get(urlEqualTo(s"/agent-subscription/subscription/journey/utr/${encodePathSegment(utr.value)}"))
+      get(urlEqualTo(s"/agent-subscription/subscription/journey/utr/${encodePathSegment(utr)}"))
         .willReturn(
           aResponse()
             .withStatus(Status.OK)
@@ -66,9 +65,9 @@ object AgentSubscriptionJourneyStub {
         )
     )
 
-  def givenNoSubscriptionJourneyRecordExists(utr: Utr): StubMapping =
+  def givenNoSubscriptionJourneyRecordExists(utr: String): StubMapping =
     stubFor(
-      get(urlEqualTo(s"/agent-subscription/subscription/journey/utr/${encodePathSegment(utr.value)}"))
+      get(urlEqualTo(s"/agent-subscription/subscription/journey/utr/${encodePathSegment(utr)}"))
         .willReturn(
           aResponse()
             .withStatus(Status.NO_CONTENT)
@@ -84,35 +83,39 @@ object AgentSubscriptionJourneyStub {
         )
     )
 
-  def givenSubscriptionRecordCreated(authProviderId: AuthProviderId, subscriptionJourneyRecord: SubscriptionJourneyRecord) =
+  def givenSubscriptionRecordCreated(authProviderId: AuthProviderId, subscriptionJourneyRecord: SubscriptionJourneyRecord): StubMapping =
     stubFor(
       post(urlEqualTo(s"/agent-subscription/subscription/journey/primaryId/${encodePathSegment(authProviderId.id)}"))
         .withRequestBody(equalToJson(Json.toJson(subscriptionJourneyRecord).toString(), true, true))
         .willReturn(aResponse().withStatus(Status.NO_CONTENT))
     )
 
-  def givenSubscriptionRecordNotCreated(authProviderId: AuthProviderId, subscriptionJourneyRecord: SubscriptionJourneyRecord, status: Int) =
+  def givenSubscriptionRecordNotCreated(
+    authProviderId: AuthProviderId,
+    subscriptionJourneyRecord: SubscriptionJourneyRecord,
+    status: Int
+  ): StubMapping =
     stubFor(
       post(urlEqualTo(s"/agent-subscription/subscription/journey/primaryId/${encodePathSegment(authProviderId.id)}"))
         .withRequestBody(equalToJson(Json.toJson(subscriptionJourneyRecord).toString(), true, true))
         .willReturn(aResponse().withStatus(status))
     )
 
-  def givenSubscriptionRecordDeleted(authProviderId: AuthProviderId) =
+  def givenSubscriptionRecordDeleted(authProviderId: AuthProviderId): StubMapping =
     stubFor(
       delete(
         urlEqualTo(s"/agent-subscription/subscription/journey/primaryId/${encodePathSegment(authProviderId.id)}")
       ).willReturn(aResponse().withStatus(Status.NO_CONTENT))
     )
 
-  def givenSubscriptionRecordNotDeleted(authProviderId: AuthProviderId) =
+  def givenSubscriptionRecordNotDeleted(authProviderId: AuthProviderId): StubMapping =
     stubFor(
       delete(
         urlEqualTo(s"/agent-subscription/subscription/journey/primaryId/${encodePathSegment(authProviderId.id)}")
       ).willReturn(aResponse().withStatus(Status.BAD_GATEWAY))
     )
 
-  def givenConflictingSubscriptionJourneyRecordExists(authProviderId: AuthProviderId) =
+  def givenConflictingSubscriptionJourneyRecordExists(authProviderId: AuthProviderId): StubMapping =
     stubFor(
       post(urlEqualTo(s"/agent-subscription/subscription/journey/primaryId/${encodePathSegment(authProviderId.id)}"))
         .willReturn(

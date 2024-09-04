@@ -28,7 +28,7 @@ import scala.concurrent.Future
 // these are not stand-alone tests, they are designed to be called with 'behave like' from other specs
 trait EmailVerificationBehaviours { this: BaseISpecIt =>
 
-  def checksIfEmailIsVerified(sjr: SubscriptionJourneyRecord, isExpectedResult: Result => Boolean)(f: () => Future[Result]) = {
+  def checksIfEmailIsVerified(sjr: SubscriptionJourneyRecord, isExpectedResult: Result => Boolean)(f: () => Future[Result]): Unit = {
 
     "behave normally if the user has not yet made a decision which email address to use" in {
       givenSubscriptionJourneyRecordExists(

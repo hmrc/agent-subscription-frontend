@@ -17,15 +17,13 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestData}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import play.api.test.{FakeRequest, Helpers}
+import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.givenAgentIsNotManuallyAssured
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.givenSubscriptionJourneyRecordExists
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingCleanAgentWithoutEnrolments
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.id
-import play.api.test.Helpers
-import play.api.test.Helpers._
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestData}
 
 import scala.concurrent.duration._
 
@@ -35,10 +33,10 @@ class AgentSubscriptionLanguageControllerISpecIt extends BaseISpecIt {
 
   implicit val timeout: FiniteDuration = 2.seconds
 
-  val utr = Utr("2000000000")
+  val utr = "2000000000"
   trait Setup {
     implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-    givenAgentIsNotManuallyAssured(utr.value)
+    givenAgentIsNotManuallyAssured(utr)
     givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecord(id))
   }
 

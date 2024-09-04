@@ -16,16 +16,15 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.config.view
 
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, BusinessDetails, SubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
-import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 
 class CYACheckResultSpecIt extends UnitSpec {
 
   val id = AuthProviderId("12345-credId")
-  val validUtr = Utr("2000000000")
+  val validUtr = "2000000000"
   val validPostcode = "AA1 1AA"
   val registrationName = "My Agency"
   val tradingName = "My Trading Name"
@@ -33,9 +32,9 @@ class CYACheckResultSpecIt extends UnitSpec {
     BusinessAddress("AddressLine1 A", Some("AddressLine2 A"), Some("AddressLine3 A"), Some("AddressLine4 A"), Some("AA11AA"), "GB")
   val telephoneNumber = "01273111111"
 
-  val amlsData = AmlsData.registeredUserNoDataEntered
+  val amlsData: AmlsData = AmlsData.registeredUserNoDataEntered
 
-  val testRegistration =
+  val testRegistration: Registration =
     Registration(
       Some(registrationName),
       isSubscribedToAgentServices = false,
@@ -52,7 +51,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
-        businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
         amlsData = Some(amlsData),
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
@@ -75,7 +74,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
-        businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
@@ -98,7 +97,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
-        businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = None),
+        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = None),
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
@@ -113,7 +112,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
-        businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
         amlsData = None,
         contactEmailData = None,
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
@@ -128,7 +127,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
-        businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, None)),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
@@ -143,7 +142,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
-        businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = None,
@@ -158,7 +157,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
-        businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(false, None)),
@@ -173,7 +172,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
-        businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
         amlsData = None,
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
@@ -188,7 +187,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
-        businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
         amlsData = Some(amlsData),
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
@@ -204,7 +203,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
     val sjr = SubscriptionJourneyRecord(
       authProviderId = id,
-      businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+      businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
       amlsData = None,
       contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
       contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
@@ -219,7 +218,7 @@ class CYACheckResultSpecIt extends UnitSpec {
 
     val sjr = SubscriptionJourneyRecord(
       authProviderId = id,
-      businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = Some(testRegistration)),
+      businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
       amlsData = Some(amlsData),
       contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
       contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),

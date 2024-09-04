@@ -37,12 +37,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.util._
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.BusinessDetailsValidator
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import java.time.format.DateTimeFormatter
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -72,7 +73,7 @@ class BusinessIdentificationController @Inject() (
   alreadySubscribedTemplate: already_subscribed,
   updateBusinessAddressTemplate: update_business_address,
   postcodeNotAllowedTemplate: postcode_not_allowed
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with AuthActions with SessionBehaviour with I18nSupport with Logging {
 
   import BusinessIdentificationForms._

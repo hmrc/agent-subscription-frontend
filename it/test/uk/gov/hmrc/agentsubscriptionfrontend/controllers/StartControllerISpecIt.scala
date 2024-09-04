@@ -51,7 +51,7 @@ class StartControllerISpecIt extends BaseISpecIt {
       AgentSession(
         Some(BusinessType.SoleTrader),
         utr = Some(validUtr),
-        postcode = Some(Postcode(testPostcode)),
+        postcode = Some(testPostcode),
         registration = Some(testRegistration)
       )
 
@@ -72,7 +72,7 @@ class StartControllerISpecIt extends BaseISpecIt {
 
   "context root" should {
     "redirect to start page" in {
-      implicit val request = FakeRequest()
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       val result = await(controller.root(request))
 
       status(result) shouldBe 303
@@ -97,7 +97,7 @@ class StartControllerISpecIt extends BaseISpecIt {
     "the current user is logged in" should {
 
       "display the non-agent next steps page" in {
-        implicit val request = authenticatedAs(individual)
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(individual)
         val result = await(controller.showNotAgent(request))
 
         status(result) shouldBe OK
@@ -133,7 +133,7 @@ class StartControllerISpecIt extends BaseISpecIt {
     "the current user is logged in" should {
 
       "display the sign in check page with correct links" in new SetupUnsubscribed {
-        implicit val request = FakeRequest("GET", "/agent-subscription/sign-in-check?continue=/go/somewhere")
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/agent-subscription/sign-in-check?continue=/go/somewhere")
           .withSession(SessionKeys.authToken -> "Bearer XYZ")
         val result: Result = await(controller.signInCheck(request))
 
@@ -147,7 +147,7 @@ class StartControllerISpecIt extends BaseISpecIt {
       }
 
       "redirect to business type if the user has clean creds" in new SetupUnsubscribed {
-        implicit val request = FakeRequest("GET", "/agent-subscription/sign-in-check")
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/agent-subscription/sign-in-check")
           .withSession(SessionKeys.authToken -> "Bearer XYZ")
         override implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
         val result: Result = await(controller.signInCheck(request))
@@ -170,7 +170,7 @@ class StartControllerISpecIt extends BaseISpecIt {
     "given a valid subscription journey record" when {
 
       "redirect to the /task-list page and update journey record with new clean creds id" in new SetupUnsubscribed {
-        implicit val request = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
 
         val result: Result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
 
@@ -180,7 +180,7 @@ class StartControllerISpecIt extends BaseISpecIt {
 
       "redirect to the /task-list page when there is no continueId" in new SetupUnsubscribed {
         givenNoSubscriptionJourneyRecordExists(id)
-        implicit val request = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
 
         val result: Result = await(controller.returnAfterGGCredsCreated()(request))
 
@@ -195,7 +195,8 @@ class StartControllerISpecIt extends BaseISpecIt {
         CompletePartialSubscriptionBody(validUtr, knownFacts = SubscriptionRequestKnownFacts(validPostcode), langForEmail = Some(Lang("en"))),
         arn = "TARN00023"
       )
-      implicit val request = FakeRequest().withCookies(Cookie("PLAY_LANG", "en")).withSession(SessionKeys.authToken -> "Bearer XYZ")
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] =
+        FakeRequest().withCookies(Cookie("PLAY_LANG", "en")).withSession(SessionKeys.authToken -> "Bearer XYZ")
 
       val result: Result = await(controller.returnAfterGGCredsCreated(id = Some(continueId.value))(request))
 
@@ -209,7 +210,7 @@ class StartControllerISpecIt extends BaseISpecIt {
     "given a valid subscription journey record" when {
 
       "redirect to the /task-list page and update journey record with mappingComplete as true" in {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
         givenSubscriptionJourneyRecordExists(id, record)
         givenSubscriptionRecordCreated(record.authProviderId, record.copy(continueId = None, mappingComplete = true))
 
@@ -232,7 +233,7 @@ class StartControllerISpecIt extends BaseISpecIt {
 
   "GET /cannot-create-account" should {
     "display the cannot create account page" in {
-      implicit val request = FakeRequest()
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
       val result = await(controller.showCannotCreateAccount()(request))
 

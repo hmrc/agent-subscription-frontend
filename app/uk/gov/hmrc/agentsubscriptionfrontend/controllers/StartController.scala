@@ -26,10 +26,11 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{cannot_create_account, not_agent, sign_in_check}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -46,7 +47,7 @@ class StartController @Inject() (
   notAgentTemplate: not_agent,
   signInCheckTemplate: sign_in_check,
   cannotCreateAccountTemplate: cannot_create_account
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps._

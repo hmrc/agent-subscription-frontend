@@ -35,6 +35,7 @@ import play.twirl.api.HtmlFormat.escape
 import uk.gov.hmrc.agentsubscriptionfrontend.service.MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.DataStreamStubs
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -43,10 +44,14 @@ import scala.concurrent.Future
 abstract class BaseISpecIt
     extends AnyWordSpecLike with Matchers with OptionValues with ScalaFutures with GuiceOneAppPerSuite with WireMockSupport with EndpointBehaviours
     with DataStreamStubs with MetricTestSupport {
+
+  // Note: This is simply a randomly-chosen secret key to run tests
+  val aesCrypto: Encrypter with Decrypter =
+    SymmetricCryptoFactory.aesCrypto(secretKey = "hWmZq3t6w9zrCeF5JiNcRfUjXn2r5u7x")
   def status(result: Result): Int = result.header.status
   def status(result: Future[Result]): Int = Helpers.status(result)
   def bodyOf(result: Result): String = Helpers.contentAsString(Future.successful(result))
-  def redirectLocation(result: Result) = Helpers.redirectLocation(Future.successful(result))
+  def redirectLocation(result: Result): Option[String] = Helpers.redirectLocation(Future.successful(result))
   def contentAsString(result: Result): String = Helpers.contentAsString(Future.successful(result))
   def contentAsJson(result: Result): JsValue = Helpers.contentAsJson(Future.successful(result))
   def contentType(result: Result): Option[String] =

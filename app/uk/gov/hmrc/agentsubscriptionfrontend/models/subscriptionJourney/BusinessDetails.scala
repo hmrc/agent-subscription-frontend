@@ -17,8 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{BusinessType, CompanyRegistrationNumber, DateOfBirth, Postcode, Registration, VatDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.domain.Nino
 
 /** Information about the agent's business. They must always provide a business type, UTR and postcode. But other data points are only required for
@@ -27,8 +26,8 @@ import uk.gov.hmrc.domain.Nino
   */
 case class BusinessDetails(
   businessType: BusinessType,
-  utr: Utr, // CT or SA
-  postcode: Postcode,
+  utr: String, // CT or SA
+  postcode: String,
   registration: Option[Registration] = None,
   nino: Option[Nino] = None,
   companyRegistrationNumber: Option[CompanyRegistrationNumber] = None,

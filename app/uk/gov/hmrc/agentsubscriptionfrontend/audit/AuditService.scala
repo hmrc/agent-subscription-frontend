@@ -16,20 +16,18 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.audit
 
-import java.util.concurrent.ConcurrentHashMap
-
 import com.google.inject.Singleton
-import javax.inject.Inject
 import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AssuranceCheckInput, AssuranceResults, Postcode}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AssuranceCheckInput, AssuranceResults}
 import uk.gov.hmrc.domain.TaxIdentifier
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
@@ -74,8 +72,8 @@ class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: E
   )
 
   def sendAgentAssuranceAuditEvent(
-    utr: Utr,
-    postcode: Postcode,
+    utr: String,
+    postcode: String,
     assuranceResults: AssuranceResults,
     assuranceCheckInput: Option[AssuranceCheckInput] = None
   )(implicit request: Request[AnyContent], agent: Agent, hc: HeaderCarrier): Future[Unit] = {
@@ -83,7 +81,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: E
 
     auditData
       .set("utr", utr)
-      .set("postcode", postcode.value)
+      .set("postcode", postcode)
 
     assuranceResults.hasAcceptableNumberOfSAClients.foreach(auditData.set("passSaAgentAssuranceCheck", _))
     assuranceResults.hasAcceptableNumberOfPayeClients.foreach(auditData.set("passPayeAgentAssuranceCheck", _))

@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney
 
-import java.time.LocalDateTime
-import java.util.UUID
-
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, OFormat}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
+import uk.gov.hmrc.domain.Nino
+
+import java.time.LocalDateTime
+import java.util.UUID
 
 /** A Mongo record which represents the user's current journey in setting up a new MTD Agent Services account, with their existing relationships.
   */
@@ -83,7 +84,7 @@ object SubscriptionJourneyRecord {
         utr = agentSession.utr.getOrElse(throw new RuntimeException("no utr found in agent session")),
         postcode = agentSession.postcode.getOrElse(throw new RuntimeException("no postcode found in agent session")),
         registration = agentSession.registration,
-        nino = agentSession.nino,
+        nino = agentSession.nino.map(Nino(_)),
         companyRegistrationNumber = agentSession.companyRegistrationNumber,
         dateOfBirth = agentSession.dateOfBirth
       ),

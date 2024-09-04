@@ -17,8 +17,10 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.Helpers
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
+import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, Postcode}
@@ -46,26 +48,26 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
 
   "GET /postcode" should {
     "display the postcode page with content tailored to the business type - Sole Trader" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(postcode = None, nino = None))
-      val result = await(controller.showPostcodeForm()(request))
+      val result: Result = await(controller.showPostcodeForm()(request))
 
       status(result) shouldBe 200
 
-      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      val html: Document = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
       html.title() shouldBe "What is the postcode of the address you registered with HMRC for Self Assessment? - Create an agent services account - GOV.UK"
       html.select("label[for=postcode]").text() shouldBe "What is the postcode of the address you registered with HMRC for Self Assessment?"
       html.select("#postcode-hint").text() shouldBe "This could be a home address."
     }
 
     "display the postcode page with content tailored to the business type - Limited Company" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(LimitedCompany), postcode = None, nino = None))
-      val result = await(controller.showPostcodeForm()(request))
+      val result: Result = await(controller.showPostcodeForm()(request))
 
       status(result) shouldBe 200
 
-      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      val html: Document = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
       html.select("label[for=postcode]").text() shouldBe "What is the postcode of your registered office?"
       html
         .select("#postcode-hint")
@@ -73,13 +75,13 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
     }
 
     "display the postcode page with content tailored to the business type - Limited Liability Partnership" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Llp), postcode = None, nino = None))
-      val result = await(controller.showPostcodeForm()(request))
+      val result: Result = await(controller.showPostcodeForm()(request))
 
       status(result) shouldBe 200
 
-      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      val html: Document = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
       html.title() shouldBe "What is the postcode of your registered office? - Create an agent services account - GOV.UK"
       html.select("label[for=postcode]").text() shouldBe "What is the postcode of your registered office?"
       html
@@ -88,13 +90,13 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
     }
 
     "display the postcode page with content tailored to the business type - Partnership" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Partnership), postcode = None, nino = None))
-      val result = await(controller.showPostcodeForm()(request))
+      val result: Result = await(controller.showPostcodeForm()(request))
 
       status(result) shouldBe 200
 
-      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      val html: Document = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
       html.title() shouldBe "What is the postcode of the address you registered with HMRC for Self Assessment? - " +
         "Create an agent services account - GOV.UK"
       html.select("label[for=postcode]").text() shouldBe "What is the postcode of the address you registered with HMRC for Self Assessment?"
@@ -110,8 +112,8 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-SA")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("HMCE-VATDEC-ORG")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-CT")
-      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
-      if (isMAA) givenAgentIsManuallyAssured(validUtr.value) else givenAgentIsNotManuallyAssured(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr)
+      if (isMAA) givenAgentIsManuallyAssured(validUtr) else givenAgentIsNotManuallyAssured(validUtr)
     }
 
     "businessType is SoleTrader or Partnership" should {
@@ -119,7 +121,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       "redirect to /national-insurance-number page if nino exists" in new TestSetupNoJourneyRecord {
         List(SoleTrader, Partnership).foreach { businessType =>
           stubs()
-          implicit val request =
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
             authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
               .withFormUrlEncodedBody("postcode" -> validPostcode)
 
@@ -135,7 +137,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
             Some(
               agentSession.copy(
                 businessType = Some(businessType),
-                postcode = Some(Postcode(validPostcode)),
+                postcode = Some(validPostcode),
                 nino = None,
                 registration = Some(testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)),
                 isMAA = Some(false)
@@ -147,7 +149,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       "redirect to /registered-for-vat page if nino doesn't exist" in new TestSetupNoJourneyRecord {
         List(SoleTrader, Partnership).foreach { businessType =>
           stubs()
-          implicit val request =
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
             authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
 
           sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(businessType), postcode = None, nino = None))
@@ -162,7 +164,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
             Some(
               agentSession.copy(
                 businessType = Some(businessType),
-                postcode = Some(Postcode(validPostcode)),
+                postcode = Some(validPostcode),
                 nino = None,
                 registration = Some(testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)),
                 isMAA = Some(false)
@@ -177,11 +179,11 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       "redirect to /company-registration-number" in new TestSetupNoJourneyRecord {
 
         stubs()
-        implicit val request =
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
           authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(LimitedCompany), postcode = None, nino = None))
 
-        val result = await(controller.submitPostcodeForm()(request))
+        val result: Result = await(controller.submitPostcodeForm()(request))
 
         status(result) shouldBe 303
 
@@ -197,11 +199,11 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
     "business type is Llp" should {
       "redirect to /confirm-business when the agent is on the manually assured list" in new TestSetupNoJourneyRecord {
         stubs(true)
-        implicit val request =
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
           authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Llp), postcode = None, nino = None))
 
-        val result = await(controller.submitPostcodeForm()(request))
+        val result: Result = await(controller.submitPostcodeForm()(request))
 
         status(result) shouldBe 303
 
@@ -215,11 +217,11 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
 
       "redirect to /company-registration-number when the agent is not on the manually assured list" in new TestSetupNoJourneyRecord {
         stubs(false)
-        implicit val request =
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
           authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Llp), postcode = None, nino = None))
 
-        val result = await(controller.submitPostcodeForm()(request))
+        val result: Result = await(controller.submitPostcodeForm()(request))
 
         status(result) shouldBe 303
 
@@ -238,14 +240,14 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-SA")
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("HMCE-VATDEC-ORG")
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-CT")
-      givenRefusalToDealWithUtrIsNotForbidden(validUtr.value)
-      givenAgentIsNotManuallyAssured(validUtr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(validUtr)
+      givenAgentIsNotManuallyAssured(validUtr)
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("postcode" -> validPostcode)
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
-      val result = await(controller.submitPostcodeForm()(request))
+      val result: Result = await(controller.submitPostcodeForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.AssuranceChecksController.invasiveCheckStart().url)
@@ -256,14 +258,14 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
         passIRCTAgentAssuranceCheck = Some(false)
       )
 
-      await(sessionStoreService.fetchAgentSession).get.registration.get.taxpayerName shouldBe Some(registrationName)
+      await(sessionStoreService.fetchAgentSession(request, global, aesCrypto)).get.registration.get.taxpayerName shouldBe Some(registrationName)
     }
 
     "redirect to /business-type if businessType is not found in session" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> "AA12 1JN")
 
-      val result = await(controller.submitPostcodeForm()(request))
+      val result: Result = await(controller.submitPostcodeForm()(request))
 
       status(result) shouldBe 303
 
@@ -271,11 +273,11 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
     }
 
     "redirect to /utr if there is no utr in the session" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> "AA12 1JN")
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(postcode = None, nino = None, utr = None))
 
-      val result = await(controller.submitPostcodeForm()(request))
+      val result: Result = await(controller.submitPostcodeForm()(request))
 
       status(result) shouldBe 303
 
@@ -283,14 +285,14 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
     }
 
     "redirect to cannot create account if user is on the refusal to deal with list" in new TestSetupNoJourneyRecord {
-      givenRefusalToDealWithUtrIsForbidden(validUtr.value)
+      givenRefusalToDealWithUtrIsForbidden(validUtr)
       withMatchingUtrAndPostcode(validUtr, validPostcode)
 
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(postcode = None, nino = None))
 
-      val result = await(controller.submitPostcodeForm()(request))
+      val result: Result = await(controller.submitPostcodeForm()(request))
 
       status(result) shouldBe 303
 
@@ -298,16 +300,16 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
     }
 
     "handle for with invalid postcodes" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> "sdsds")
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader))))
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader)))(request, global, aesCrypto))
 
-      val result = await(controller.submitPostcodeForm()(request))
+      val result: Result = await(controller.submitPostcodeForm()(request))
 
       status(result) shouldBe 200
 
       private val content: String = Helpers.contentAsString(Future.successful(result))
-      val html = Jsoup.parse(content)
+      val html: Document = Jsoup.parse(content)
       html.title() shouldBe "Error: What is the postcode of the address you registered with HMRC for Self Assessment? - Create an agent services account - GOV.UK"
       html.select("#postcode-hint").text() shouldBe "This could be a home address."
       html.select(labelFor("postcode")).text() shouldBe "What is the postcode of the address you registered with HMRC for Self Assessment?"

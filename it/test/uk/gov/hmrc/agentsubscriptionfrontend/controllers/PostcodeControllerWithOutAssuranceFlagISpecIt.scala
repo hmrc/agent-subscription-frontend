@@ -18,6 +18,8 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import play.api.i18n.Lang
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, CompletePartialSubscriptionBody, SubscriptionRequestKnownFacts}
@@ -48,8 +50,9 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
         List(SoleTrader, Partnership).foreach { businessType =>
           withMatchingUtrAndPostcode(validUtr, validPostcode)
 
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
-            .withFormUrlEncodedBody("postcode" -> validPostcode)
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+            authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
+              .withFormUrlEncodedBody("postcode" -> validPostcode)
           sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(businessType), postcode = None, nino = None))
 
           val result = await(controller.submitPostcodeForm()(request))
@@ -68,7 +71,7 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
         List(SoleTrader, Partnership).foreach { businessType =>
           withMatchingUtrAndPostcode(validUtr, validPostcode)
 
-          implicit val request =
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
             authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
           sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(businessType), postcode = None, nino = None))
 
@@ -90,7 +93,7 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
         List(LimitedCompany, Llp).foreach { businessType =>
           withMatchingUtrAndPostcode(validUtr, validPostcode)
 
-          implicit val request =
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
             authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
           sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(businessType), postcode = None, nino = None))
 
@@ -111,11 +114,11 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
     "redirect to already subscribed page when the business registration found by agent-subscription is already subscribed" in new TestSetupNoJourneyRecord {
       withMatchingUtrAndPostcode(validUtr, validPostcode, isSubscribedToAgentServices = true, isSubscribedToETMP = true)
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("postcode" -> validPostcode)
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(SoleTrader), postcode = None, nino = None))
 
-      val result = await(controller.submitPostcodeForm()(request))
+      val result: Result = await(controller.submitPostcodeForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showAlreadySubscribed().url)
@@ -128,29 +131,30 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
         arn = "TARN00023"
       )
 
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments.copy(nino = Some("AE123456C")), POST)
-        .withFormUrlEncodedBody("postcode" -> validPostcode)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments.copy(nino = Some("AE123456C")), POST)
+          .withFormUrlEncodedBody("postcode" -> validPostcode)
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
-      val result = await(controller.submitPostcodeForm()(request))
+      val result: Result = await(controller.submitPostcodeForm()(request))
       redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
     }
 
     "redirect to no match found when the subscription status is strange" in new TestSetupNoJourneyRecord {
       withNonMatchingUtrAndPostcode(validUtr, validPostcode)
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody("postcode" -> validPostcode)
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
-      val result = await(controller.submitPostcodeForm()(request))
+      val result: Result = await(controller.submitPostcodeForm()(request))
       redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNoMatchFound().url)
     }
 
     "redirect to /business-type if businessType is not found in session" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> "AA12 1JN")
 
-      val result = await(controller.submitPostcodeForm()(request))
+      val result: Result = await(controller.submitPostcodeForm()(request))
 
       status(result) shouldBe 303
 
@@ -158,11 +162,11 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
     }
 
     "handle for with invalid postcodes" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> "sdsds")
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader))))
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader)))(request, global, aesCrypto))
 
-      val result = await(controller.submitPostcodeForm()(request))
+      val result: Result = await(controller.submitPostcodeForm()(request))
 
       status(result) shouldBe 200
 

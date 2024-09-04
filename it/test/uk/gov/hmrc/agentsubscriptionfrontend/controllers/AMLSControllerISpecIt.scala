@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import java.time.LocalDate
 import org.jsoup.Jsoup
-import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
+import org.jsoup.nodes.{Document, Element}
+import org.jsoup.select.Elements
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.amls.AMLSLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSForms.{HMRC_AMLS_ERROR, HMRC_AMLS_Empty_ERROR}
@@ -31,18 +31,20 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub.givenAgentIsNotManuallyAssured
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenNoSubscriptionJourneyRecordExists, givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.{givenAmlsRecordFound, givenAmlsRecordNotFound}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestData}
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub.{givenAmlsRecordFound, givenAmlsRecordNotFound}
+
+import java.time.LocalDate
 
 class AMLSControllerISpecIt extends BaseISpecIt {
 
   lazy val controller: AMLSController = app.injector.instanceOf[AMLSController]
-  val appConfig = app.injector.instanceOf[AppConfig]
+  val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
-  val utr = Utr("2000000000")
-  val businessAddress =
+  val utr = "2000000000"
+  val businessAddress: BusinessAddress =
     BusinessAddress("AddressLine1 A", Some("AddressLine2 A"), Some("AddressLine3 A"), Some("AddressLine4 A"), Some("AA11AA"), "GB")
 
   val validAmlsRegistrationNumber = "XAML00000200000"
@@ -50,13 +52,13 @@ class AMLSControllerISpecIt extends BaseISpecIt {
   trait Setup {
     implicit def authenticatedRequest(method: String = GET): FakeRequest[AnyContentAsEmpty.type] =
       authenticatedAs(subscribingCleanAgentWithoutEnrolments, method)
-    givenAgentIsNotManuallyAssured(utr.value)
+    givenAgentIsNotManuallyAssured(utr)
     givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecord(id))
   }
 
   trait SetupUnclean {
     implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-    givenAgentIsNotManuallyAssured(utr.value)
+    givenAgentIsNotManuallyAssured(utr)
     givenNoSubscriptionJourneyRecordExists(id)
   }
 
@@ -76,7 +78,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.showAmlsRegisteredPage(_))
 
     "contain page with expected content" in new Setup {
-      val result = await(controller.showAmlsRegisteredPage(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsRegisteredPage(authenticatedRequest()))
 
       result should containMessages(
         "check-amls.title",
@@ -90,7 +92,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "pre-populate radio button on page when it is present in the BE store" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
 
-      val result = await(controller.showAmlsRegisteredPage(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsRegisteredPage(authenticatedRequest()))
 
       result should containMessages(
         "check-amls.title",
@@ -114,7 +116,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "redirect to /money-laundering-compliance when user selects yes and continues" in new Setup {
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.registeredUserNoDataEntered)))
 
-      val result =
+      val result: Result =
         await(controller.submitAmlsRegistered(authenticatedRequest("POST").withFormUrlEncodedBody("registeredAmls" -> "yes", "submit" -> "continue")))
 
       status(result) shouldBe 303
@@ -123,7 +125,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "redirect to /progress-saved when user selects yes and save and come back later" in new Setup {
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.registeredUserNoDataEntered)))
 
-      val result =
+      val result: Result =
         await(controller.submitAmlsRegistered(authenticatedRequest(POST).withFormUrlEncodedBody("registeredAmls" -> "yes", "submit" -> "save")))
 
       status(result) shouldBe 303
@@ -133,7 +135,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "redirect to /check-money-laundering-application when user selects no and continues" in new Setup {
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.nonRegisteredUserNoDataEntered)))
 
-      val result =
+      val result: Result =
         await(controller.submitAmlsRegistered(authenticatedRequest(POST).withFormUrlEncodedBody("registeredAmls" -> "no", "submit" -> "continue")))
 
       status(result) shouldBe 303
@@ -142,7 +144,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "redirect to /money-laundering-compliance page and clear amls data in store when field is pre-populated with no " +
       "but user changes answer to yes and continues" in new Setup {
-        val completeAmlsData = AmlsData(
+        val completeAmlsData: AmlsData = AmlsData(
           false,
           None,
           Some(
@@ -158,7 +160,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
         givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData(amlsRegistered = true, None, None))))
 
-        val result =
+        val result: Result =
           await(controller.submitAmlsRegistered(authenticatedRequest(POST).withFormUrlEncodedBody("registeredAmls" -> "yes", "submit" -> "continue")))
 
         status(result) shouldBe 303
@@ -167,7 +169,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "redirect to /progress-saved page and clear amls data in store when field is pre-populated with no " +
       "but user changes answer to yes and saves" in new Setup {
-        val completeAmlsData = AmlsData(
+        val completeAmlsData: AmlsData = AmlsData(
           amlsRegistered = false,
           None,
           Some(
@@ -183,7 +185,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
         givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData(amlsRegistered = true, None, None))))
 
-        val result =
+        val result: Result =
           await(controller.submitAmlsRegistered(authenticatedRequest(POST).withFormUrlEncodedBody("registeredAmls" -> "yes", "submit" -> "save")))
 
         status(result) shouldBe 303
@@ -191,7 +193,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       }
 
     "redirect to /money-laundering-compliance page and clear amls data in store when user submits pre-populated field and continues" in new Setup {
-      val completeAmlsData = AmlsData(
+      val completeAmlsData: AmlsData = AmlsData(
         amlsRegistered = true,
         None,
         Some(
@@ -207,7 +209,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       givenSubscriptionJourneyRecordExists(id, record.copy(amlsData = Some(completeAmlsData)))
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(completeAmlsData)))
 
-      val result =
+      val result: Result =
         await(controller.submitAmlsRegistered(authenticatedRequest(POST).withFormUrlEncodedBody("registeredAmls" -> "yes", "submit" -> "continue")))
 
       status(result) shouldBe 303
@@ -215,7 +217,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     }
 
     "handle form with errors - user does not make a choice and tries to continue" in new Setup {
-      val result =
+      val result: Result =
         await(controller.submitAmlsRegistered(authenticatedRequest(POST).withFormUrlEncodedBody("registeredAmls" -> "")))
 
       status(result) shouldBe 200
@@ -229,7 +231,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     }
 
     "handle form with errors - user manipulates the value and tries to continue" in new Setup {
-      val result =
+      val result: Result =
         await(controller.submitAmlsRegistered(authenticatedRequest(POST).withFormUrlEncodedBody("registeredAmls" -> "blah")))
 
       status(result) shouldBe 200
@@ -249,7 +251,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "contain page with expected content" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
 
-      val result = await(controller.showCheckAmlsAlreadyAppliedForm(authenticatedRequest()))
+      val result: Result = await(controller.showCheckAmlsAlreadyAppliedForm(authenticatedRequest()))
 
       result should containMessages(
         "amlsAppliedFor.title",
@@ -269,7 +271,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
           .copy(amlsData = Some(AmlsData(amlsRegistered = false, amlsAppliedFor = Some(true), None)))
       )
 
-      val result = await(controller.showCheckAmlsAlreadyAppliedForm(authenticatedRequest()))
+      val result: Result = await(controller.showCheckAmlsAlreadyAppliedForm(authenticatedRequest()))
 
       result should containMessages(
         "amlsAppliedFor.title",
@@ -300,7 +302,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.registeredUserNoDataEntered.copy(amlsAppliedFor = Some(true)))))
 
-      val result = await(
+      val result: Result = await(
         controller.submitCheckAmlsAlreadyAppliedForm(authenticatedRequest(POST).withFormUrlEncodedBody("amlsAppliedFor" -> "yes", "submit" -> "save"))
       )
 
@@ -314,7 +316,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.registeredUserNoDataEntered.copy(amlsAppliedFor = Some(false)))))
 
-      val result = await(
+      val result: Result = await(
         controller.submitCheckAmlsAlreadyAppliedForm(
           authenticatedRequest(POST).withFormUrlEncodedBody("amlsAppliedFor" -> "no", "submit" -> "continue")
         )
@@ -328,7 +330,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenSubscriptionRecordCreated(id, record.copy(amlsData = Some(AmlsData.registeredUserNoDataEntered.copy(amlsAppliedFor = Some(false)))))
 
-      val result = await(
+      val result: Result = await(
         controller.submitCheckAmlsAlreadyAppliedForm(authenticatedRequest(POST).withFormUrlEncodedBody("amlsAppliedFor" -> "no", "submit" -> "save"))
       )
 
@@ -347,7 +349,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     }
 
     "handle form with errors - user does not make a choice and tries to continue" in new Setup {
-      val result = await(controller.submitCheckAmlsAlreadyAppliedForm(authenticatedRequest(POST).withFormUrlEncodedBody("amlsAppliedFor" -> "")))
+      val result: Result =
+        await(controller.submitCheckAmlsAlreadyAppliedForm(authenticatedRequest(POST).withFormUrlEncodedBody("amlsAppliedFor" -> "")))
 
       status(result) shouldBe 200
 
@@ -360,7 +363,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     }
 
     "handle form with errors - user manipulates the value and tries to continue" in new Setup {
-      val result = await(controller.submitCheckAmlsAlreadyAppliedForm(authenticatedRequest(POST).withFormUrlEncodedBody("amlsAppliedFor" -> "blah")))
+      val result: Result =
+        await(controller.submitCheckAmlsAlreadyAppliedForm(authenticatedRequest(POST).withFormUrlEncodedBody("amlsAppliedFor" -> "blah")))
 
       status(result) shouldBe 200
 
@@ -380,7 +384,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "contain page titles and content" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
 
-      val result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
 
       result should containMessages(
         "moneyLaunderingCompliance.title",
@@ -394,16 +398,16 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "ask for a money laundering supervisory body name from a list of acceptable values" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
 
-      val result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
       result should containMessages("moneyLaunderingCompliance.amls.title")
 
-      val doc = Jsoup.parse(bodyOf(result))
+      val doc: Document = Jsoup.parse(bodyOf(result))
 
-      val elAmlsSelect = doc.getElementById("amlsCode")
+      val elAmlsSelect: Element = doc.getElementById("amlsCode")
       elAmlsSelect should not be null
       elAmlsSelect.tagName() shouldBe "select"
 
-      val amlsBodies = AMLSLoader.load("/amls.csv")
+      val amlsBodies: Map[String, String] = AMLSLoader.load("/amls.csv")
       amlsBodies.foreach { case (expectedCode, expectedName) =>
         val elChoice = elAmlsSelect.getElementById(s"amlsCode-$expectedCode")
         elChoice should not be null
@@ -416,7 +420,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "ask for membership number" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
 
-      val result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
 
       result should containMessages("moneyLaunderingCompliance.membershipNumber.title")
       result should containInputElement("membershipNumber", "text")
@@ -425,7 +429,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "ask for membership expiry date" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
 
-      val result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
 
       result should containMessages(
         "moneyLaunderingCompliance.expiry.title",
@@ -442,7 +446,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "contain continue and save buttons" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
 
-      val result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
 
       result should containSubmitButton(
         expectedMessageKey = "button.saveContinue",
@@ -458,10 +462,10 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "contain a form that would POST to /money-laundering-compliance" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
 
-      val result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
-      val doc = Jsoup.parse(bodyOf(result))
+      val result: Result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
+      val doc: Document = Jsoup.parse(bodyOf(result))
 
-      val elForm = doc.select("form")
+      val elForm: Elements = doc.select("form")
       elForm should not be null
       elForm.attr("action") shouldBe "/agent-subscription/money-laundering-compliance"
       elForm.attr("method") shouldBe "POST"
@@ -469,10 +473,10 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "pre-populate amls form if they are coming from /check_answers and also go to /check-money-laundering-compliance page when user clicks on 'Go Back' link" in
       new Setup {
-        def minimalSubscriptionJourneyRecordWithAmls(authProviderId: AuthProviderId) =
+        def minimalSubscriptionJourneyRecordWithAmls(authProviderId: AuthProviderId): SubscriptionJourneyRecord =
           SubscriptionJourneyRecord(
             authProviderId,
-            businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode)),
+            businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode),
             amlsData = Some(
               AmlsData(
                 amlsRegistered = true,
@@ -495,7 +499,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
         sessionStoreService.currentSession.goBackUrl = Some(routes.SubscriptionController.showCheckAnswers().url)
 
-        val result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
+        val result: Result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
 
         contentAsString(result) should (include(
           """<a href="/agent-subscription/check-money-laundering-compliance" class="govuk-back-link">Back</a>"""
@@ -516,7 +520,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     val amlsBodies = AMLSLoader.load("/amls.csv")
 
     "store AMLS form in temporary store after successful submission, and redirect to task list when change flag is false" in new Setup {
-      val amlsBody = amlsBodies.getOrElse("AAT", throw new Exception("Invalid AMLS code"))
+      val amlsBody: String = amlsBodies.getOrElse("AAT", throw new Exception("Invalid AMLS code"))
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenSubscriptionRecordCreated(
         id,
@@ -541,13 +545,13 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
     }
 
     "store AMLS form in temporary store when the AMLS body is HMRC and the registration number is valid" in new Setup {
-      val amlsBody = amlsBodies.getOrElse("HMRC", throw new Exception("Invalid AMLS code"))
+      val amlsBody: String = amlsBodies.getOrElse("HMRC", throw new Exception("Invalid AMLS code"))
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenAmlsRecordFound(validAmlsRegistrationNumber, Approved)
       givenSubscriptionRecordCreated(
@@ -580,7 +584,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
     }
@@ -590,7 +594,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenAmlsRecordFound(validAmlsRegistrationNumber, Approved)
 
-      val wrongDate = LocalDate.now().plusDays(4)
+      val wrongDate: LocalDate = LocalDate.now().plusDays(4)
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedRequest(POST).withFormUrlEncodedBody(
         "amlsCode"         -> "HMRC",
@@ -603,7 +607,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.AMLSController.showAmlsDetailsNotFound().url
     }
@@ -624,7 +628,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.AMLSController.showAmlsRecordIneligibleStatus().url
     }
@@ -645,7 +649,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.AMLSController.showAmlsDetailsNotFound().url
     }
@@ -666,7 +670,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.AMLSController.showAmlsRecordIneligibleStatus().url
     }
@@ -697,7 +701,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
       sessionStoreService.currentSession.changingAnswers = Some(true)
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
     }
@@ -711,7 +715,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> expiryYear
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.amls.title", "error.moneyLaunderingCompliance.amlscode.empty")
     }
@@ -725,7 +729,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> expiryYear
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.amls.title", "error.moneyLaunderingCompliance.amlscode.invalid")
     }
@@ -739,7 +743,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> expiryYear
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.membershipNumber.title", "error.moneyLaunderingCompliance.membershipNumber.empty")
     }
@@ -753,7 +757,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> expiryYear
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.date.invalid")
     }
@@ -767,7 +771,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> expiryYear
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.day.empty")
     }
@@ -781,7 +785,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> expiryYear
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.month.empty")
     }
@@ -795,7 +799,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> ""
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.year.empty")
     }
@@ -809,7 +813,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> expiryYear
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.day.month.empty")
       result shouldNot containMessages("error.moneyLaunderingCompliance.day.empty", "error.moneyLaunderingCompliance.month.empty")
@@ -824,7 +828,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> ""
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.day.year.empty")
       result shouldNot containMessages("error.moneyLaunderingCompliance.day.empty", "error.moneyLaunderingCompliance.year.empty")
@@ -839,7 +843,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> ""
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("moneyLaunderingCompliance.expiry.title", "error.moneyLaunderingCompliance.month.year.empty")
       result shouldNot containMessages("error.moneyLaunderingCompliance.month.empty", "error.moneyLaunderingCompliance.year.empty")
@@ -854,7 +858,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         "expiry.year"      -> expiryYear
       )
 
-      val result = await(controller.submitAmlsDetailsForm(request))
+      val result: Result = await(controller.submitAmlsDetailsForm(request))
       status(result) shouldBe 200
       result should containMessages("error.moneyLaunderingCompliance.membershipNumber.invalid")
     }
@@ -864,7 +868,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "display page with correct content" in new Setup {
 
-      val result = await(controller.showAmlsNotAppliedPage(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsNotAppliedPage(authenticatedRequest()))
 
       result should containMessages(
         "amls-not-applied.title",
@@ -883,7 +887,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     "display page with correct content" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
 
-      val result = await(controller.showAmlsApplicationEnterNumberPage(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsApplicationEnterNumberPage(authenticatedRequest()))
 
       result should containMessages("moneyLaunderingCompliance.enter-number.title")
 
@@ -907,7 +911,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
           )
       )
 
-      val result = await(controller.showAmlsApplicationEnterNumberPage(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsApplicationEnterNumberPage(authenticatedRequest()))
 
       result should containMessages("moneyLaunderingCompliance.enter-number.title")
 
@@ -921,14 +925,14 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("membershipNumber" -> "invalid")
 
-      val result = await(controller.submitAmlsApplicationEnterNumberPage(request))
+      val result: Result = await(controller.submitAmlsApplicationEnterNumberPage(request))
       status(result) shouldBe 200
       result should containMessages(HMRC_AMLS_ERROR)
     }
     "show validation error when the form is submitted with empty data" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedRequest(POST).withFormUrlEncodedBody("membershipNumber" -> "")
 
-      val result = await(controller.submitAmlsApplicationEnterNumberPage(request))
+      val result: Result = await(controller.submitAmlsApplicationEnterNumberPage(request))
       status(result) shouldBe 200
       result should containMessages(HMRC_AMLS_Empty_ERROR)
     }
@@ -960,7 +964,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("membershipNumber" -> validAmlsRegistrationNumber, "submit" -> "continue")
 
-      val result = await(controller.submitAmlsApplicationEnterNumberPage(request))
+      val result: Result = await(controller.submitAmlsApplicationEnterNumberPage(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
     }
@@ -991,7 +995,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("membershipNumber" -> validAmlsRegistrationNumber, "submit" -> "continue")
 
-      val result = await(controller.submitAmlsApplicationEnterNumberPage(request))
+      val result: Result = await(controller.submitAmlsApplicationEnterNumberPage(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.AMLSController.showAmlsApplicationEnterDatePage().url
     }
@@ -1022,7 +1026,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("membershipNumber" -> validAmlsRegistrationNumber, "submit" -> "continue")
 
-      val result = await(controller.submitAmlsApplicationEnterNumberPage(request))
+      val result: Result = await(controller.submitAmlsApplicationEnterNumberPage(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.AMLSController.showAmlsNumberNotFound().url
     }
@@ -1062,7 +1066,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       sessionStoreService.currentSession.changingAnswers = Some(false)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", None))
 
-      val result = await(controller.submitAmlsApplicationDatePage(request))
+      val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.TaskListController.showTaskList().url
     }
@@ -1086,14 +1090,14 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         )
       )
       givenAmlsRecordFound("12345", Approved, None, expiryDate)
-      val wrongDay = expiryDate.plusDays(2).getDayOfMonth.toString
+      val wrongDay: String = expiryDate.plusDays(2).getDayOfMonth.toString
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedRequest(POST)
         .withFormUrlEncodedBody("expiry.day" -> wrongDay, "expiry.month" -> month, "expiry.year" -> year, "submit" -> "continue")
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", None))
 
-      val result = await(controller.submitAmlsApplicationDatePage(request))
+      val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.AMLSController.showAmlsDateNotMatched().url
     }
@@ -1124,7 +1128,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       sessionStoreService.currentSession.changingAnswers = Some(true)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", Some("123456")))
 
-      val result = await(controller.submitAmlsApplicationDatePage(request))
+      val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.SubscriptionController.showCheckAnswers().url
     }
@@ -1133,7 +1137,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> month, "expiry.year" -> year)
 
-      val result = await(controller.submitAmlsApplicationDatePage(request))
+      val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
       result should containMessages("amls.enter-renewal-date.title", "error.amls.enter-renewal-date.day.empty")
     }
@@ -1142,7 +1146,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "123", "expiry.month" -> month, "expiry.year" -> year)
 
-      val result = await(controller.submitAmlsApplicationDatePage(request))
+      val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
       result should containMessages("error.moneyLaunderingCompliance.date.invalid")
     }
@@ -1151,7 +1155,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> day, "expiry.month" -> "", "expiry.year" -> year)
 
-      val result = await(controller.submitAmlsApplicationDatePage(request))
+      val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
       result should containMessages("error.amls.enter-renewal-date.month.empty")
     }
@@ -1160,7 +1164,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> day, "expiry.month" -> month, "expiry.year" -> "")
 
-      val result = await(controller.submitAmlsApplicationDatePage(request))
+      val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
       result should containMessages("error.amls.enter-renewal-date.year.empty")
     }
@@ -1169,7 +1173,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> "", "expiry.year" -> year)
 
-      val result = await(controller.submitAmlsApplicationDatePage(request))
+      val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
       result should containMessages("error.amls.enter-renewal-date.day.month.empty")
       result shouldNot containMessages("error.amls.enter-renewal-date.day.empty", "error.amls.enter-renewal-date.month.empty")
@@ -1179,7 +1183,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> month, "expiry.year" -> "")
 
-      val result = await(controller.submitAmlsApplicationDatePage(request))
+      val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
       result should containMessages("error.amls.enter-renewal-date.day.year.empty")
       result shouldNot containMessages("error.amls.enter-renewal-date.day.empty", "error.amls.enter-renewal-date.year.empty")
@@ -1189,7 +1193,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> day, "expiry.month" -> "", "expiry.year" -> "")
 
-      val result = await(controller.submitAmlsApplicationDatePage(request))
+      val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
       result should containMessages("error.amls.enter-renewal-date.month.year.empty")
       result shouldNot containMessages("error.amls.enter-renewal-date.month.empty", "error.amls.enter-renewal-date.year.empty")
@@ -1199,7 +1203,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
   "GET /money-laundering-details-not-found" should {
     "display the correct content" in new Setup {
-      val result = await(controller.showAmlsDetailsNotFound(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsDetailsNotFound(authenticatedRequest()))
 
       result should containMessages(
         "amls-details-not-found.title",
@@ -1212,7 +1216,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
   "GET /money-laundering-not-eligible" should {
     "display the correct content" in new Setup {
-      val result = await(controller.showAmlsRecordIneligibleStatus(authenticatedRequest()))
+      val result: Result = await(controller.showAmlsRecordIneligibleStatus(authenticatedRequest()))
 
       result should containMessages(
         "amls-ineligible-status.title",

@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 
 case class SubscriptionDetails(
-  utr: Utr,
+  utr: String,
   knownFactsPostcode: String,
   name: String,
   email: String,
@@ -33,12 +32,12 @@ object SubscriptionDetails {
   implicit val formatDesAddress: Format[DesAddress] = Json.format[DesAddress]
   implicit val formatSubscriptionDetails: Format[SubscriptionDetails] = Json.format[SubscriptionDetails]
 
-  implicit def mapper(utr: Utr, postcode: Postcode, agency: Agency, amlsData: Option[AmlsData]): SubscriptionDetails = {
+  implicit def mapper(utr: String, postcode: String, agency: Agency, amlsData: Option[AmlsData]): SubscriptionDetails = {
     val desAddress = agency.address
 
     SubscriptionDetails(
       utr,
-      postcode.value,
+      postcode,
       agency.name,
       agency.email,
       desAddress,

@@ -23,10 +23,11 @@ import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService, TaskListService}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{saved_progress, task_list}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
 
 class TaskListController @Inject() (
@@ -42,7 +43,7 @@ class TaskListController @Inject() (
   mcc: MessagesControllerComponents,
   savedProgressTemplate: saved_progress,
   taskListTemplate: task_list
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def showTaskList: Action[AnyContent] = Action.async { implicit request =>

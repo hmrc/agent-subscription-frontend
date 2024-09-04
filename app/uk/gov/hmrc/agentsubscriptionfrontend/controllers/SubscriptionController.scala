@@ -31,11 +31,12 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{HttpError, MongoDBSessionS
 import uk.gov.hmrc.agentsubscriptionfrontend.util.{toFuture, valueOps}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.http.HttpException
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -58,7 +59,7 @@ class SubscriptionController @Inject() (
   signInNewIdTemplate: sign_in_new_id,
   cannotVerifyEmailLockedTemplate: cannot_verify_email_locked,
   cannotVerifyEmailTechnicalTemplate: cannot_verify_email_technical
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions with Logging {
 
   private val denylistedPostCodes: Set[String] = appConfig.denylistedPostcodes
@@ -228,7 +229,7 @@ class SubscriptionController @Inject() (
                       registration = Some(
                         sjr.businessDetails.registration
                           .getOrElse(throw new RuntimeException("missing registration data"))
-                          .copy(address = BusinessAddress(validDesAddress))
+                          .copy(address = BusinessAddress.fromDesAddress(validDesAddress), encrypted = None)
                       )
                     )
                   )
@@ -252,7 +253,7 @@ class SubscriptionController @Inject() (
             formWithErrors => Future successful Ok(addressFormWithErrorsTemplate(formWithErrors)),
             validDesAddress => {
               val updatedReg = existingSession.registration match {
-                case Some(reg) => reg.copy(address = BusinessAddress(validDesAddress))
+                case Some(reg) => reg.copy(address = BusinessAddress.fromDesAddress(validDesAddress))
                 case None =>
                   throw new IllegalStateException("expecting registration in the session, but not found")
               }

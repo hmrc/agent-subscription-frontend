@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.stubs
 
-import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
 import play.api.libs.json.Json
-import uk.gov.hmrc.agentmtdidentifiers.model.{Utr, Vrn}
+import uk.gov.hmrc.agentmtdidentifiers.model.Vrn
 import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.FormBundleStatus
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.encoding.UriPathEncoding.encodePathSegment
+
+import java.time.LocalDate
 
 object AgentSubscriptionStub {
   private def response(isSubscribedToAgentServices: Boolean, isSubscribedToETMP: Boolean) =
@@ -64,7 +65,7 @@ object AgentSubscriptionStub {
        |}""".stripMargin
 
   def withMatchingUtrAndPostcode(
-    utr: Utr,
+    utr: String,
     postcode: String,
     isSubscribedToAgentServices: Boolean = false,
     isSubscribedToETMP: Boolean = false
@@ -72,7 +73,7 @@ object AgentSubscriptionStub {
     withMatchingUtrAndPostcodeAndBody(utr, postcode, response(isSubscribedToAgentServices, isSubscribedToETMP))
 
   def withNoOrganisationName(
-    utr: Utr,
+    utr: String,
     postcode: String,
     isSubscribedToAgentServices: Boolean = false,
     isSubscribedToETMP: Boolean = false
@@ -80,16 +81,16 @@ object AgentSubscriptionStub {
     withMatchingUtrAndPostcodeAndBody(utr, postcode, noOrganisationNameResponse(isSubscribedToAgentServices, isSubscribedToETMP))
 
   def withPartiallySubscribedAgent(
-    utr: Utr,
+    utr: String,
     postcode: String,
     isSubscribedToAgentServices: Boolean = false,
     isSubscribedToETMP: Boolean = true
   ): StubMapping =
     withMatchingUtrAndPostcodeAndBody(utr, postcode, response(isSubscribedToAgentServices, isSubscribedToETMP))
 
-  private def withMatchingUtrAndPostcodeAndBody(utr: Utr, postcode: String, responseBody: String): StubMapping =
+  private def withMatchingUtrAndPostcodeAndBody(utr: String, postcode: String, responseBody: String): StubMapping =
     stubFor(
-      get(urlEqualTo(s"/agent-subscription/registration/${encodePathSegment(utr.value)}/postcode/${encodePathSegment(postcode)}"))
+      get(urlEqualTo(s"/agent-subscription/registration/${encodePathSegment(utr)}/postcode/${encodePathSegment(postcode)}"))
         .willReturn(
           aResponse()
             .withStatus(Status.OK)
@@ -97,45 +98,45 @@ object AgentSubscriptionStub {
         )
     )
 
-  def withNonMatchingUtrAndPostcode(utr: Utr, postcode: String): StubMapping =
+  def withNonMatchingUtrAndPostcode(utr: String, postcode: String): StubMapping =
     stubFor(
-      get(urlEqualTo(s"/agent-subscription/registration/${encodePathSegment(utr.value)}/postcode/${encodePathSegment(postcode)}"))
+      get(urlEqualTo(s"/agent-subscription/registration/${encodePathSegment(utr)}/postcode/${encodePathSegment(postcode)}"))
         .willReturn(
           aResponse()
             .withStatus(Status.NOT_FOUND)
         )
     )
 
-  def withErrorForUtrAndPostcode(utr: Utr, postcode: String): StubMapping =
+  def withErrorForUtrAndPostcode(utr: String, postcode: String): StubMapping =
     stubFor(
-      get(urlEqualTo(s"/agent-subscription/registration/${encodePathSegment(utr.value)}/postcode/${encodePathSegment(postcode)}"))
+      get(urlEqualTo(s"/agent-subscription/registration/${encodePathSegment(utr)}/postcode/${encodePathSegment(postcode)}"))
         .willReturn(
           aResponse()
             .withStatus(Status.INTERNAL_SERVER_ERROR)
         )
     )
 
-  def withMatchingCtUtrAndCrn(ctUtr: Utr, crn: CompanyRegistrationNumber): StubMapping =
+  def withMatchingCtUtrAndCrn(ctUtr: String, crn: CompanyRegistrationNumber): StubMapping =
     stubFor(
-      get(urlEqualTo(s"/agent-subscription/corporation-tax-utr/${encodePathSegment(ctUtr.value)}/crn/${encodePathSegment(crn.value)}"))
+      get(urlEqualTo(s"/agent-subscription/corporation-tax-utr/${encodePathSegment(ctUtr)}/crn/${encodePathSegment(crn.value)}"))
         .willReturn(
           aResponse()
             .withStatus(Status.OK)
         )
     )
 
-  def withNonMatchingCtUtrAndCrn(ctUtr: Utr, crn: CompanyRegistrationNumber): StubMapping =
+  def withNonMatchingCtUtrAndCrn(ctUtr: String, crn: CompanyRegistrationNumber): StubMapping =
     stubFor(
-      get(urlEqualTo(s"/agent-subscription/corporation-tax-utr/${encodePathSegment(ctUtr.value)}/crn/${encodePathSegment(crn.value)}"))
+      get(urlEqualTo(s"/agent-subscription/corporation-tax-utr/${encodePathSegment(ctUtr)}/crn/${encodePathSegment(crn.value)}"))
         .willReturn(
           aResponse()
             .withStatus(Status.NOT_FOUND)
         )
     )
 
-  def withErrorForCtUtrAndCrn(ctUtr: Utr, crn: CompanyRegistrationNumber): StubMapping =
+  def withErrorForCtUtrAndCrn(ctUtr: String, crn: CompanyRegistrationNumber): StubMapping =
     stubFor(
-      get(urlEqualTo(s"/agent-subscription/corporation-tax-utr/${encodePathSegment(ctUtr.value)}/crn/${encodePathSegment(crn.value)}"))
+      get(urlEqualTo(s"/agent-subscription/corporation-tax-utr/${encodePathSegment(ctUtr)}/crn/${encodePathSegment(crn.value)}"))
         .willReturn(
           aResponse()
             .withStatus(Status.INTERNAL_SERVER_ERROR)
@@ -222,7 +223,7 @@ object AgentSubscriptionStub {
         )
     )
 
-  def subscriptionWillSucceed(utr: Utr, request: SubscriptionRequest, arn: String = "ARN00001"): StubMapping =
+  def subscriptionWillSucceed(utr: String, request: SubscriptionRequest, arn: String = "ARN00001"): StubMapping =
     stubFor(
       subscriptionRequestFor(utr, request)
         .willReturn(
@@ -236,7 +237,7 @@ object AgentSubscriptionStub {
         )
     )
 
-  def subscriptionWillFailForTerminatedAgent(utr: Utr, request: SubscriptionRequest, arn: String = "ARN00001"): StubMapping =
+  def subscriptionWillFailForTerminatedAgent(utr: String, request: SubscriptionRequest, arn: String = "ARN00001"): StubMapping =
     stubFor(
       subscriptionRequestFor(utr, request)
         .willReturn(
@@ -252,7 +253,7 @@ object AgentSubscriptionStub {
         )
     )
 
-  def subscriptionWillConflict(utr: Utr, request: SubscriptionRequest): StubMapping =
+  def subscriptionWillConflict(utr: String, request: SubscriptionRequest): StubMapping =
     stubFor(
       subscriptionRequestFor(utr, request)
         .willReturn(
@@ -261,7 +262,7 @@ object AgentSubscriptionStub {
         )
     )
 
-  def subscriptionWillBeForbidden(utr: Utr, request: SubscriptionRequest): StubMapping =
+  def subscriptionWillBeForbidden(utr: String, request: SubscriptionRequest): StubMapping =
     stubFor(
       subscriptionRequestFor(utr, request)
         .willReturn(
@@ -270,7 +271,7 @@ object AgentSubscriptionStub {
         )
     )
 
-  def subscriptionAttemptWillReturnHttpCode(utr: Utr, request: SubscriptionRequest, code: Int): StubMapping =
+  def subscriptionAttemptWillReturnHttpCode(utr: String, request: SubscriptionRequest, code: Int): StubMapping =
     stubFor(
       subscriptionRequestFor(utr, request)
         .willReturn(
@@ -279,7 +280,7 @@ object AgentSubscriptionStub {
         )
     )
 
-  def subscriptionAttemptWillFail(utr: Utr, request: SubscriptionRequest): StubMapping =
+  def subscriptionAttemptWillFail(utr: String, request: SubscriptionRequest): StubMapping =
     stubFor(
       subscriptionRequestFor(utr, request)
         .willReturn(
@@ -390,13 +391,13 @@ object AgentSubscriptionStub {
       ).willReturn(aResponse().withStatus(statusResponse))
     )
 
-  private def subscriptionRequestFor(utr: Utr, request: SubscriptionRequest) = {
+  private def subscriptionRequestFor(utr: String, request: SubscriptionRequest) = {
     val agency = request.agency
     val address = agency.address
     post(urlEqualTo(s"/agent-subscription/subscription"))
       .withRequestBody(equalToJson(s"""
                                       |{
-                                      |  "utr": "${utr.value}",
+                                      |  "utr": "$utr",
                                       |  "knownFacts": {
                                       |    "postcode": "${request.knownFacts.postcode}"
                                       |  },
@@ -422,7 +423,7 @@ object AgentSubscriptionStub {
     put(urlEqualTo(s"/agent-subscription/subscription"))
       .withRequestBody(equalToJson(s"""
                                       |{
-                                      |  "utr": "${request.utr.value}",
+                                      |  "utr": "${request.utr}",
                                       |  "knownFacts": {
                                       |    "postcode": "${request.knownFacts.postcode}"
                                       |   },

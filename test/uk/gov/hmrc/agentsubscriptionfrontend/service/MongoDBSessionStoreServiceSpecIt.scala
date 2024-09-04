@@ -20,22 +20,23 @@ import org.scalamock.scalatest.MockFactory
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, Postcode}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class MongoDBSessionStoreServiceSpecIt extends UnitSpec with MockFactory {
 
-  val utr = Utr("2000000000")
+  val utr = "2000000000"
   val testPostcode = "AA1 1AA"
 
-  val mockSessionStoreService = mock[MongoDBSessionStoreService]
+  val mockSessionStoreService: MongoDBSessionStoreService = mock[MongoDBSessionStoreService]
   implicit lazy val req: Request[_] = FakeRequest()
+  implicit val crypto: Encrypter with Decrypter = aesCrypto
 
   "cacheContinueUrl and fetchContinueUrl" should {
     "cache a continue url and fetch it back" in {
@@ -82,7 +83,7 @@ class MongoDBSessionStoreServiceSpecIt extends UnitSpec with MockFactory {
         .expects(req, *)
         .returns(Future(Some(true)))
 
-      mockSessionStoreService.cacheIsChangingAnswers(true)
+      mockSessionStoreService.cacheIsChangingAnswers(changing = true)
       val result = await(mockSessionStoreService.fetchIsChangingAnswers)
       result shouldBe Some(true)
     }
@@ -90,15 +91,15 @@ class MongoDBSessionStoreServiceSpecIt extends UnitSpec with MockFactory {
 
   "cacheAgentSession and fetchAgentSession" should {
     val agentSession =
-      AgentSession(businessType = Some(SoleTrader), utr = Some(utr), postcode = Some(Postcode(testPostcode)))
+      AgentSession(businessType = Some(SoleTrader), utr = Some(utr), postcode = Some(testPostcode))
     "cache an agent session and fetch it back" in {
       (mockSessionStoreService
-        .cacheAgentSession(_: AgentSession)(_: Request[_], _: ExecutionContext))
-        .expects(agentSession, req, *)
+        .cacheAgentSession(_: AgentSession)(_: Request[_], _: ExecutionContext, _: Encrypter with Decrypter))
+        .expects(agentSession, req, *, aesCrypto)
         .returns(Future(()))
       (mockSessionStoreService
-        .fetchAgentSession(_: Request[_], _: ExecutionContext))
-        .expects(req, *)
+        .fetchAgentSession(_: Request[_], _: ExecutionContext, _: Encrypter with Decrypter))
+        .expects(req, *, aesCrypto)
         .returns(Future(Some(agentSession)))
 
       mockSessionStoreService.cacheAgentSession(agentSession)

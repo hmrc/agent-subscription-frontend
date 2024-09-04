@@ -31,12 +31,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators.checkOneAtATime
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.date_of_birth
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
@@ -53,7 +54,7 @@ class DateOfBirthController @Inject() (
   val subscriptionJourneyService: SubscriptionJourneyService,
   mcc: MessagesControllerComponents,
   dateOfBirthTemplate: date_of_birth
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   /** In-case of SoleTrader or Partnerships, we should display NI and DOB pages based on if nino and dob exist or not. We need to force users to go

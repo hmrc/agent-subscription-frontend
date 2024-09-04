@@ -20,6 +20,7 @@ import play.api.mvc.Request
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AmlsSession}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util._
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
 import uk.gov.hmrc.play.bootstrap.binders.{RedirectUrl, UnsafePermitAll}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -80,10 +81,12 @@ class TestSessionStoreService extends MongoDBSessionStoreService(null) {
   override def fetchIsChangingAnswers(implicit req: Request[Any], ec: ExecutionContext): Future[Option[Boolean]] =
     fetchFromSession(currentSession.changingAnswers)
 
-  override def cacheAgentSession(agentSession: AgentSession)(implicit req: Request[Any], ec: ExecutionContext): Future[Unit] =
+  override def cacheAgentSession(
+    agentSession: AgentSession
+  )(implicit req: Request[Any], ec: ExecutionContext, crypto: Encrypter with Decrypter): Future[Unit] =
     (currentSession.agentSession = Some(agentSession)).toFuture
 
-  override def fetchAgentSession(implicit req: Request[Any], ec: ExecutionContext): Future[Option[AgentSession]] =
+  override def fetchAgentSession(implicit req: Request[Any], ec: ExecutionContext, crypto: Encrypter with Decrypter): Future[Option[AgentSession]] =
     fetchFromSession(currentSession.agentSession)
 
   override def cacheAmlsSession(amlsDetails: AmlsSession)(implicit req: Request[Any], ec: ExecutionContext): Future[Unit] =

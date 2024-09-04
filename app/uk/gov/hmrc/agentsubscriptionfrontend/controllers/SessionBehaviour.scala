@@ -22,6 +22,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.Subscrip
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,7 +32,7 @@ trait SessionBehaviour {
   val sessionStoreService: MongoDBSessionStoreService
   implicit val ec: ExecutionContext
   val subscriptionJourneyService: SubscriptionJourneyService
-
+  implicit val crypto: Encrypter with Decrypter
   protected def withValidSession(body: (BusinessType, AgentSession) => Future[Result])(implicit request: Request[_]): Future[Result] =
     sessionStoreService.fetchAgentSession.flatMap {
       case Some(agentSession) =>

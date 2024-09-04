@@ -17,15 +17,19 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers.business
 
 import org.jsoup.Jsoup
+import org.jsoup.nodes.{Document, Element}
+import org.jsoup.select.Elements
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{BusinessIdentificationController, routes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AuthProviderId, BusinessType, Postcode}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestSetupNoJourneyRecord}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingCleanAgentWithoutEnrolments
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{validUtr, _}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AuthProviderId, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub._
+import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingCleanAgentWithoutEnrolments
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestSetupNoJourneyRecord}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -37,42 +41,42 @@ class BusinessEmailISpecIt extends BaseISpecIt {
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.showBusinessEmailForm(request))
 
     "display business email form" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
-      val result = await(controller.showBusinessEmailForm(request))
+      val result: Result = await(controller.showBusinessEmailForm(request))
       result should containMessages("businessEmail.title", "businessEmail.description", "button.continue")
-      val doc = Jsoup.parse(bodyOf(result))
+      val doc: Document = Jsoup.parse(bodyOf(result))
       doc.getElementById("email").`val` shouldBe "test@gmail.com"
 
-      val backLink = doc.getElementsByClass("govuk-back-link")
+      val backLink: Elements = doc.getElementsByClass("govuk-back-link")
       backLink.attr("href") shouldBe routes.SubscriptionController.showCheckAnswers().url
 
-      val form = doc.select("form").first()
+      val form: Element = doc.select("form").first()
       form.attr("method") shouldBe "POST"
       form.attr("action") shouldBe routes.BusinessIdentificationController.submitBusinessEmailForm().url
     }
 
     "display business email form when email address in initial details is empty" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration.copy(emailAddress = None))))
 
-      val result = await(controller.showBusinessEmailForm(request))
+      val result: Result = await(controller.showBusinessEmailForm(request))
       result should containMessages("businessEmail.title", "businessEmail.description", "button.continue")
-      val doc = Jsoup.parse(bodyOf(result))
+      val doc: Document = Jsoup.parse(bodyOf(result))
       doc.getElementById("email").`val` shouldBe ""
 
-      val form = doc.select("form").first()
+      val form: Element = doc.select("form").first()
       form.attr("method") shouldBe "POST"
       form.attr("action") shouldBe routes.BusinessIdentificationController.submitBusinessEmailForm().url
     }
 
     "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-      val result = await(controller.showBusinessNameForm(request))
+      val result: Result = await(controller.showBusinessNameForm(request))
 
       redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
     }
@@ -82,36 +86,38 @@ class BusinessEmailISpecIt extends BaseISpecIt {
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.submitBusinessEmailForm(request))
 
     "update business email after submission, redirect to task list when there is a continue url" in new TestSetupNoJourneyRecord {
-      val agentSession =
-        AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration), postcode = Some(Postcode("AA11AA")))
-      givenAgentIsNotManuallyAssured(validUtr.value)
+      val agentSession: AgentSession =
+        AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration), postcode = Some("AA11AA"))
+      givenAgentIsNotManuallyAssured(validUtr)
 
-      val sjr = SubscriptionJourneyRecord.fromAgentSession(agentSession, AuthProviderId("12345-credId"))
-      val newsjr = sjr.copy(
+      val sjr: SubscriptionJourneyRecord = SubscriptionJourneyRecord.fromAgentSession(agentSession, AuthProviderId("12345-credId"))
+      val newsjr: SubscriptionJourneyRecord = sjr.copy(
         continueId = None,
         businessDetails = sjr.businessDetails.copy(registration = Some(testRegistration.copy(emailAddress = Some("newagent@example.com"))))
       )
 
       givenSubscriptionRecordCreated(AuthProviderId("12345-credId"), newsjr)
 
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("email" -> "newagent@example.com")
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("email" -> "newagent@example.com")
       sessionStoreService.currentSession.agentSession = Some(agentSession)
       sessionStoreService.currentSession.continueUrl = Some("/continue/url")
 
-      val result = await(controller.submitBusinessEmailForm(request))
+      val result: Result = await(controller.submitBusinessEmailForm(request))
       status(result) shouldBe 303
       redirectLocation(result).head shouldBe routes.TaskListController.showTaskList().url
 
-      await(sessionStoreService.fetchAgentSession).get.registration.get.emailAddress shouldBe Some("newagent@example.com")
+      await(sessionStoreService.fetchAgentSession(request, global, aesCrypto)).get.registration.get.emailAddress shouldBe Some("newagent@example.com")
     }
 
     "update business email after submission and redirect to /check-answers if user is changing answers" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("email" -> "newagent@example.com")
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("email" -> "newagent@example.com")
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
       sessionStoreService.currentSession.changingAnswers = Some(true)
 
-      val result = await(controller.submitBusinessEmailForm(request))
+      val result: Result = await(controller.submitBusinessEmailForm(request))
       status(result) shouldBe 303
       redirectLocation(result).head shouldBe routes.SubscriptionController.showCheckAnswers().url
 
@@ -119,20 +125,20 @@ class BusinessEmailISpecIt extends BaseISpecIt {
     }
 
     "show validation error when the form is submitted with empty email" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("email" -> "")
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
-      val result = await(controller.submitBusinessEmailForm(request))
+      val result: Result = await(controller.submitBusinessEmailForm(request))
 
       result should containMessages("businessEmail.title", "error.business-email.empty")
     }
 
     "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-      val result = await(controller.showBusinessNameForm(request))
+      val result: Result = await(controller.showBusinessNameForm(request))
 
       redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
     }

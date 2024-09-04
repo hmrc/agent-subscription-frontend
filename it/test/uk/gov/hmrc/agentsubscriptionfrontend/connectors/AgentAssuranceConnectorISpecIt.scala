@@ -93,22 +93,22 @@ class AgentAssuranceConnectorISpecIt extends BaseISpecIt with MetricTestSupport 
   }
 
   "getR2DWAgents" should {
-    val utr = Utr("2000000009")
+    val utr = "2000000009"
     "return true is utr found in r2dw list" in {
-      givenRefusalToDealWithUtrIsForbidden(utr.value)
+      givenRefusalToDealWithUtrIsForbidden(utr)
       await(connector.isR2DWAgent(utr)) shouldBe true
     }
     "return false is utr not found in r2dw list" in {
-      givenRefusalToDealWithUtrIsNotForbidden(utr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(utr)
       await(connector.isR2DWAgent(utr)) shouldBe false
     }
     "return false is r2dw list is empty" in {
-      givenRefusalToDealWithUtrIsNotForbidden(utr.value)
+      givenRefusalToDealWithUtrIsNotForbidden(utr)
       await(connector.isR2DWAgent(utr)) shouldBe false
     }
     "return illegal state exception when " in {
-      val utr1 = Utr("1234567")
-      givenRefusalToDealWithReturns404(utr1.value)
+      val utr1 = "1234567"
+      givenRefusalToDealWithReturns404(utr1)
       intercept[IllegalStateException] {
         await(connector.isR2DWAgent(utr1))
       }
@@ -117,70 +117,70 @@ class AgentAssuranceConnectorISpecIt extends BaseISpecIt with MetricTestSupport 
   }
 
   "getAmlsData" should {
-    val utr = Utr("2000000009")
+    val utr = "2000000009"
 
     "return AMLS data when agent-assurance responds with 200" in {
-      givenAmlsDataIsFound(utr.value)
+      givenAmlsDataIsFound(utr)
       val maybeAmlsDetails = await(connector.getAmlsData(utr))
       maybeAmlsDetails.isDefined shouldBe true
     }
 
     "return AMLS data when agent-assurance responds with 200 without appliedOn" in {
-      givenAmlsDataIsFoundWithoutAppliedOn(utr.value)
+      givenAmlsDataIsFoundWithoutAppliedOn(utr)
       val maybeAmlsDetails = await(connector.getAmlsData(utr))
       maybeAmlsDetails.get.isPending shouldBe true
       maybeAmlsDetails.get.amlsSafeId shouldBe None
     }
 
     "return None when agent-assurance response with 400" in {
-      givenAmlsDataIsNotFound(utr.value)
+      givenAmlsDataIsNotFound(utr)
       val maybeAmlsDetails = await(connector.getAmlsData(utr))
       maybeAmlsDetails.isDefined shouldBe false
     }
   }
 
   "getManuallyAssuredAgents" should {
-    val utr = Utr("2000000009")
+    val utr = "2000000009"
     "return true is utr found in the manually assured agents list" in {
-      givenAgentIsManuallyAssured(utr.value)
+      givenAgentIsManuallyAssured(utr)
       await(connector.isManuallyAssuredAgent(utr)) shouldBe true
     }
     "return false if utr not found in the manually assured agents list" in {
-      givenAgentIsNotManuallyAssured(utr.value)
+      givenAgentIsNotManuallyAssured(utr)
       await(connector.isManuallyAssuredAgent(utr)) shouldBe false
     }
     "return false if the manually assured agents list is empty" in {
-      givenAgentIsNotManuallyAssured(utr.value)
+      givenAgentIsNotManuallyAssured(utr)
       await(connector.isManuallyAssuredAgent(utr)) shouldBe false
     }
     "throw illegal state exception when agent-assurance responds with 404" in {
-      givenManuallyAssuredAgentsReturns(utr.value, 404)
+      givenManuallyAssuredAgentsReturns(utr, 404)
       intercept[IllegalStateException] {
         await(connector.isManuallyAssuredAgent(utr))
       }
     }
     "throw Upstream4xxResponse when agent-assurance responds with 401" in {
-      givenManuallyAssuredAgentsReturns(utr.value, 401)
+      givenManuallyAssuredAgentsReturns(utr, 401)
       intercept[UpstreamErrorResponse] {
         await(connector.isManuallyAssuredAgent(utr))
       }
     }
     "throw Upstream5xxResponse when agent-assurance responds with 500" in {
-      givenManuallyAssuredAgentsReturns(utr.value, 500)
+      givenManuallyAssuredAgentsReturns(utr, 500)
       intercept[UpstreamErrorResponse] {
         await(connector.isManuallyAssuredAgent(utr))
       }
     }
     "monitor with metric ConsumedAPI-AgentAssurance-getManuallyAssuredAgents-GET" in {
       withMetricsTimerUpdate("ConsumedAPI-AgentAssurance-getManuallyAssuredAgents-GET") {
-        givenAgentIsManuallyAssured(utr.value)
+        givenAgentIsManuallyAssured(utr)
 
         await(connector.isManuallyAssuredAgent(utr))
       }
     }
   }
 
-  def testAcceptableNumberOfClientsEndpoint(service: String)(method: => Future[Boolean]) = {
+  def testAcceptableNumberOfClientsEndpoint(service: String)(method: => Future[Boolean]): Unit = {
     s"return true when the current logged in user has an acceptable number of $service clients" in {
       givenUserIsAnAgentWithAnAcceptableNumberOfClients(service)
       await(method) shouldBe true

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
@@ -36,20 +36,20 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
 
   lazy val controller: BusinessIdentificationController = app.injector.instanceOf[BusinessIdentificationController]
 
-  val utr = Utr("2000000000")
-  val businessAddress =
+  val utr = "2000000000"
+  val businessAddress: BusinessAddress =
     BusinessAddress("AddressLine1 A", Some("AddressLine2 A"), Some("AddressLine3 A"), Some("AddressLine4 A"), Some("AA11AA"), "GB")
 
   trait Setup {
     implicit def authenticatedRequest(method: String = GET): FakeRequest[AnyContentAsEmpty.type] =
       authenticatedAs(subscribingCleanAgentWithoutEnrolments, method)
-    givenAgentIsNotManuallyAssured(utr.value)
+    givenAgentIsNotManuallyAssured(utr)
     givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecord(id))
   }
 
   "show existing journey found for utr route" should {
     "display warning page" in new TestSetupNoJourneyRecord {
-      val result = await(controller.showExistingJourneyFound(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
+      val result: Result = await(controller.showExistingJourneyFound(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
       result should containMessages("existingJourneyFound.p1")
     }
   }
@@ -60,7 +60,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
     behave like aPageWithFeedbackLinks(controller.showCreateNewAccount(_), authenticatedAs(subscribingCleanAgentWithoutEnrolments))
 
     "display the has other enrolments page if the current user is logged in and has affinity group = Agent" in new TestSetupNoJourneyRecord {
-      val result = await(controller.showCreateNewAccount(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
+      val result: Result = await(controller.showCreateNewAccount(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
 
       result should containMessages("createNewAccount.title")
     }
@@ -72,7 +72,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
     behave like aPageWithFeedbackLinks(request => controller.showNoMatchFound(request), authenticatedAs(subscribingCleanAgentWithoutEnrolments))
 
     "display the no agency found page if the current user is logged in and has affinity group = Agent" in new TestSetupNoJourneyRecord {
-      val result = await(controller.showNoMatchFound(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
+      val result: Result = await(controller.showNoMatchFound(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
       result should containMessages("noAgencyFound.title", "noAgencyFound.p1", "noAgencyFound.p2", "button.tryAgain")
     }
@@ -89,7 +89,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
 
         await(sessionStoreService.cacheContinueUrl(RedirectUrl("/someContinueUrl")))
 
-        val result = await(controller.showAlreadySubscribed(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
+        val result: Result = await(controller.showAlreadySubscribed(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
         result should containMessages("alreadySubscribed.title")
         result should containLink("link.finishSignOut", "/someContinueUrl")
@@ -98,7 +98,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
     "display the already subscribed page with href to showBusinessTypeForm if the current user is logged" +
       " in and has affinity group = Agent and no continueUrl cached" in new TestSetupNoJourneyRecord {
 
-        val result = await(controller.showAlreadySubscribed(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
+        val result: Result = await(controller.showAlreadySubscribed(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
         result should containMessages("alreadySubscribed.title")
         result should containLink("link.finishSignOut", routes.SignedOutController.redirectToBusinessTypeForm().url)
@@ -110,7 +110,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.changeBusinessName(_))
     "contain page with expected content" in new Setup {
 
-      val result = await(controller.changeBusinessName(authenticatedRequest()))
+      val result: Result = await(controller.changeBusinessName(authenticatedRequest()))
 
       result should containMessages(
         "businessName.title"
@@ -122,7 +122,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
     "pre-populate the business name data into the form when it is present in the BE store" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.completeJourneyRecordNoMappings)
 
-      val result = await(controller.changeBusinessName(authenticatedRequest()))
+      val result: Result = await(controller.changeBusinessName(authenticatedRequest()))
 
       result should containSubstrings("My Agency")
     }
@@ -135,7 +135,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
       givenSubscriptionJourneyRecordExists(id, TestData.completeJourneyRecordNoMappings)
       givenSubscriptionRecordCreated(id, TestData.completeJourneyRecordWithUpdatedBusinessName("New Agency Name"))
 
-      val result = await(
+      val result: Result = await(
         controller.submitChangeBusinessName(authenticatedRequest(POST).withFormUrlEncodedBody("name" -> "New Agency Name", "submit" -> "continue"))
       )
 
@@ -147,7 +147,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
       givenSubscriptionJourneyRecordExists(id, TestData.completeJourneyRecordNoMappings)
       givenSubscriptionRecordCreated(id, TestData.completeJourneyRecordWithUpdatedBusinessName("New Agency Name"))
 
-      val result =
+      val result: Result =
         await(controller.submitChangeBusinessName(authenticatedRequest(POST).withFormUrlEncodedBody("name" -> "New Agency Name", "submit" -> "save")))
 
       status(result) shouldBe 303
@@ -162,7 +162,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.changeBusinessEmail(_))
     "contain page with expected content" in new Setup {
 
-      val result = await(controller.changeBusinessEmail(authenticatedRequest()))
+      val result: Result = await(controller.changeBusinessEmail(authenticatedRequest()))
 
       result should containMessages(
         "businessEmail.title",
@@ -176,7 +176,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
     "pre-populate the business email data into the form when it is present in the BE store" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.completeJourneyRecordNoMappings)
 
-      val result = await(controller.changeBusinessEmail(authenticatedRequest()))
+      val result: Result = await(controller.changeBusinessEmail(authenticatedRequest()))
 
       result should containSubstrings("test@gmail.com")
     }
@@ -189,7 +189,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
       givenSubscriptionJourneyRecordExists(id, TestData.completeJourneyRecordNoMappings)
       givenSubscriptionRecordCreated(id, TestData.completeJourneyRecordWithUpdatedBusinessEmail("new@gmail.com"))
 
-      val result = await(
+      val result: Result = await(
         controller.submitChangeBusinessEmail(authenticatedRequest(POST).withFormUrlEncodedBody("email" -> "new@gmail.com", "submit" -> "continue"))
       )
 
@@ -201,7 +201,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
       givenSubscriptionJourneyRecordExists(id, TestData.completeJourneyRecordNoMappings)
       givenSubscriptionRecordCreated(id, TestData.completeJourneyRecordWithUpdatedBusinessEmail("new@gmail.com"))
 
-      val result =
+      val result: Result =
         await(controller.submitChangeBusinessEmail(authenticatedRequest(POST).withFormUrlEncodedBody("email" -> "new@gmail.com", "submit" -> "save")))
 
       status(result) shouldBe 303
@@ -215,7 +215,8 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
   "POST /confirm-business" should {
     "continue to task list when an Agent tries to return to the subscription journey with a different credential" in {
 
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("confirmBusiness" -> "yes")
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody("confirmBusiness" -> "yes")
 
       val existingAuthId = AuthProviderId("67890-credId")
       givenSubscriptionJourneyRecordExists(utr, minimalSubscriptionJourneyRecord(existingAuthId))
@@ -229,9 +230,9 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
             businessType = Some(SoleTrader),
             utr = Some(validUtr),
             registration = Some(testRegistration.copy(isSubscribedToETMP = true)),
-            postcode = Some(Postcode(validPostcode))
+            postcode = Some(validPostcode)
           )
-        )
+        )(request, global, aesCrypto)
       )
 
       val result: Result = await(controller.submitConfirmBusinessForm(request))

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
 import play.api.i18n.Lang
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import play.api.libs.json._
 
 case class Agency(name: String, address: DesAddress, telephone: Option[String], email: String)
@@ -34,7 +33,7 @@ object SubscriptionRequestKnownFacts {
 }
 
 case class SubscriptionRequest(
-  utr: Utr,
+  utr: String,
   knownFacts: SubscriptionRequestKnownFacts,
   agency: Agency,
   langForEmail: Option[Lang],
@@ -45,7 +44,7 @@ object SubscriptionRequest {
   implicit val format: Format[SubscriptionRequest] = Json.format[SubscriptionRequest]
 }
 
-case class CompletePartialSubscriptionBody(utr: Utr, knownFacts: SubscriptionRequestKnownFacts, langForEmail: Option[Lang])
+case class CompletePartialSubscriptionBody(utr: String, knownFacts: SubscriptionRequestKnownFacts, langForEmail: Option[Lang])
 
 object CompletePartialSubscriptionBody {
   implicit val format: Format[CompletePartialSubscriptionBody] = Json.format[CompletePartialSubscriptionBody]

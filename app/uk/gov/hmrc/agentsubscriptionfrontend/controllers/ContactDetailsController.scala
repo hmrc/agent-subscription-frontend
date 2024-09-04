@@ -30,10 +30,11 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -55,7 +56,7 @@ class ContactDetailsController @Inject() (
   addressFormWithErrorsTemplate: address_form_with_errors,
   contactPhoneCheckTemplate: contact_phone_check,
   contactTelephoneTemplate: contact_telephone
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions with Logging {
 
   private val denylistedPostCodes: Set[String] = appConfig.denylistedPostcodes
@@ -395,11 +396,18 @@ class ContactDetailsController @Inject() (
               desAddressForm
                 .bindAddressLookupFrontendAddress(utr, address)
                 .fold(
-                  formWithErrors => Future successful Ok(addressFormWithErrorsTemplate(formWithErrors, true)),
+                  formWithErrors => Future successful Ok(addressFormWithErrorsTemplate(formWithErrors, isTradingAddress = true)),
                   validDesAddress => {
                     mark("Count-Subscription-AddressLookup-Success")
                     val updatedSjr =
-                      sjr.copy(contactTradingAddressData = Some(ContactTradingAddressData(true, Some(BusinessAddress(validDesAddress)))))
+                      sjr.copy(contactTradingAddressData =
+                        Some(
+                          ContactTradingAddressData(
+                            useBusinessAddress = true,
+                            Some(BusinessAddress.fromDesAddress(validDesAddress))
+                          )
+                        )
+                      )
 
                     val call: Call =
                       if (isChanging.getOrElse(false)) routes.SubscriptionController.showCheckAnswers()
