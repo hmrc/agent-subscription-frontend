@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import play.api.i18n.Lang
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logging}
-import uk.gov.hmrc.agentmtdidentifiers.model.Arn
+import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.view._
@@ -169,7 +169,7 @@ class SubscriptionController @Inject() (
               for {
                 agencyDetails <- updateSessionAndReturnAgencyBeforeSubscribing(registration)(email, name, address, telephone, userMappings)
                 langForEmail = extractLangPreferenceFromCookie
-                _      <- subscriptionService.subscribe(utr, postcode, agencyDetails, langForEmail, amlsData)
+                _      <- subscriptionService.subscribe(Utr(utr), Postcode(postcode), agencyDetails, langForEmail, amlsData)
                 result <- redirectSubscriptionResponse
               } yield result
             } recoverWith {

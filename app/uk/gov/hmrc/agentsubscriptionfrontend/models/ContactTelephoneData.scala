@@ -16,11 +16,36 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, JsResult, JsValue, Json}
+import uk.gov.hmrc.agentsubscriptionfrontend.util.EncryptionUtils.decryptOptString
+import uk.gov.hmrc.crypto.json.JsonEncryption.stringEncrypter
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
-case class ContactTelephoneData(useBusinessTelephone: Boolean, telephoneNumber: Option[String])
+case class ContactTelephoneData(useBusinessTelephone: Boolean, telephoneNumber: Option[String], encrypted: Option[Boolean] = None)
 
 object ContactTelephoneData {
+  def databaseFormat(implicit crypto: Encrypter with Decrypter): Format[ContactTelephoneData] = {
 
-  implicit val format: OFormat[ContactTelephoneData] = Json.format[ContactTelephoneData]
+    def reads(json: JsValue): JsResult[ContactTelephoneData] =
+      for {
+        isEncrypted          <- (json \ "encrypted").validateOpt[Boolean]
+        useBusinessTelephone <- (json \ "useBusinessTelephone").validate[Boolean]
+        telephoneNumber = decryptOptString("telephoneNumber", isEncrypted, json)
+      } yield ContactTelephoneData(
+        useBusinessTelephone,
+        telephoneNumber,
+        isEncrypted
+      )
+
+    def writes(contactTelephoneData: ContactTelephoneData): JsValue =
+      Json.obj(
+        "useBusinessTelephone" -> contactTelephoneData.useBusinessTelephone,
+        "telephoneNumber"      -> contactTelephoneData.telephoneNumber.map(stringEncrypter.writes),
+        "encrypted"            -> Some(true)
+      )
+
+    Format(reads(_), contactTelephoneData => writes(contactTelephoneData))
+  }
+
+  implicit val format: Format[ContactTelephoneData] = Json.format[ContactTelephoneData]
 }

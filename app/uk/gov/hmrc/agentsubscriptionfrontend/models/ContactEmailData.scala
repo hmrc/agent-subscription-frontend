@@ -16,10 +16,32 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, JsResult, JsValue, Json}
+import uk.gov.hmrc.agentsubscriptionfrontend.util.EncryptionUtils.decryptOptString
+import uk.gov.hmrc.crypto.json.JsonEncryption.stringEncrypter
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
-case class ContactEmailData(useBusinessEmail: Boolean, contactEmail: Option[String])
+case class ContactEmailData(useBusinessEmail: Boolean, contactEmail: Option[String], encrypted: Option[Boolean] = None)
 
 object ContactEmailData {
+  def databaseFormat(implicit crypto: Encrypter with Decrypter): Format[ContactEmailData] = {
+
+    def reads(json: JsValue): JsResult[ContactEmailData] =
+      for {
+        isEncrypted      <- (json \ "encrypted").validateOpt[Boolean]
+        useBusinessEmail <- (json \ "useBusinessEmail").validate[Boolean]
+        contactEmail = decryptOptString("contactEmail", isEncrypted, json)
+      } yield ContactEmailData(useBusinessEmail, contactEmail, isEncrypted)
+
+    def writes(contactEmailData: ContactEmailData): JsValue =
+      Json.obj(
+        "useBusinessEmail" -> contactEmailData.useBusinessEmail,
+        "contactEmail"     -> contactEmailData.contactEmail.map(stringEncrypter.writes),
+        "encrypted"        -> Some(true)
+      )
+
+    Format(reads(_), contactEmailData => writes(contactEmailData))
+  }
+
   implicit val format: Format[ContactEmailData] = Json.format[ContactEmailData]
 }

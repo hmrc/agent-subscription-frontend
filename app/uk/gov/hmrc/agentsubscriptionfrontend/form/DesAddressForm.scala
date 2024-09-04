@@ -19,9 +19,8 @@ package uk.gov.hmrc.agentsubscriptionfrontend.form
 import play.api.LoggerLike
 import play.api.data.Form
 import play.api.data.Forms._
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AddressLookupFrontendAddress, DesAddress}
+import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators._
 
 class DesAddressForm(logger: LoggerLike, denylistedPostcodes: Set[String]) {
   val form = Form[DesAddress](
@@ -35,9 +34,9 @@ class DesAddressForm(logger: LoggerLike, denylistedPostcodes: Set[String]) {
     )(DesAddress.apply)(DesAddress.unapply)
   )
 
-  def bindAddressLookupFrontendAddress(utr: Utr, addressLookupFrontendAddress: AddressLookupFrontendAddress): Form[DesAddress] = {
+  def bindAddressLookupFrontendAddress(utr: String, addressLookupFrontendAddress: AddressLookupFrontendAddress): Form[DesAddress] = {
     if (addressLookupFrontendAddress.lines.length > 4) {
-      logger.warn(s"More than 4 address lines for UTR: ${utr.value}, discarding lines 5 and up")
+      logger.warn(s"More than 4 address lines for UTR: $utr, discarding lines 5 and up")
     }
     form.bind(
       Map(

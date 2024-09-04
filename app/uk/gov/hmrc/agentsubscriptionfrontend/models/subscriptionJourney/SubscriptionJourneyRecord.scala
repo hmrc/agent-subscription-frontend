@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney
 
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import uk.gov.hmrc.agentsubscriptionfrontend.models._
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
+
 import java.time.LocalDateTime
 import java.util.UUID
-
-import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsPath, OFormat}
-import uk.gov.hmrc.agentsubscriptionfrontend.models._
 
 /** A Mongo record which represents the user's current journey in setting up a new MTD Agent Services account, with their existing relationships.
   */
@@ -54,21 +55,58 @@ object SubscriptionJourneyRecord {
 
   import MongoLocalDateTimeFormat._
 
-  implicit val subscriptionJourneyFormat: OFormat[SubscriptionJourneyRecord] =
-    ((JsPath \ "authProviderId").format[AuthProviderId] and
-      (JsPath \ "continueId").formatNullable[String] and
-      (JsPath \ "businessDetails").format[BusinessDetails] and
-      (JsPath \ "amlsData").formatNullable[AmlsData] and
-      (JsPath \ "userMappings").format[List[UserMapping]] and
-      (JsPath \ "mappingComplete").format[Boolean] and
-      (JsPath \ "cleanCredsAuthProviderId").formatNullable[AuthProviderId] and
-      (JsPath \ "lastModifiedDate").formatNullable[LocalDateTime] and
-      (JsPath \ "contactEmailData").formatNullable[ContactEmailData] and
-      (JsPath \ "contactTradingNameData").formatNullable[ContactTradingNameData] and
-      (JsPath \ "contactTradingAddressData").formatNullable[ContactTradingAddressData] and
-      (JsPath \ "contactTelephoneData").formatNullable[ContactTelephoneData] and
+  def databaseWrites(crypto: Encrypter with Decrypter): Writes[SubscriptionJourneyRecord] =
+    ((JsPath \ "authProviderId").write[AuthProviderId] and
+      (JsPath \ "continueId").writeNullable[String] and
+      (JsPath \ "businessDetails").write[BusinessDetails](BusinessDetails.databaseFormat(crypto)) and
+      (JsPath \ "amlsData").writeNullable[AmlsData] and
+      (JsPath \ "userMappings").write[List[UserMapping]] and
+      (JsPath \ "mappingComplete").write[Boolean] and
+      (JsPath \ "cleanCredsAuthProviderId").writeNullable[AuthProviderId] and
+      (JsPath \ "lastModifiedDate").writeNullable[LocalDateTime] and
+      (JsPath \ "contactEmailData").writeNullable[ContactEmailData](ContactEmailData.databaseFormat(crypto)) and
+      (JsPath \ "contactTradingNameData").writeNullable[ContactTradingNameData](
+        ContactTradingNameData.databaseFormat(crypto)
+      ) and
+      (JsPath \ "contactTradingAddressData").writeNullable[ContactTradingAddressData](
+        ContactTradingAddressData.databaseFormat(crypto)
+      ) and
+      (JsPath \ "contactTelephoneData").writeNullable[ContactTelephoneData](
+        ContactTelephoneData.databaseFormat(crypto)
+      ) and
+      (JsPath \ "verifiedEmails").write[VerifiedEmails](
+        VerifiedEmails.databaseFormat(crypto)
+      ))(
+      unlift(SubscriptionJourneyRecord.unapply)
+    )
+
+  def databaseReads(crypto: Encrypter with Decrypter): Reads[SubscriptionJourneyRecord] =
+    ((JsPath \ "authProviderId").read[AuthProviderId] and
+      (JsPath \ "continueId").readNullable[String] and
+      (JsPath \ "businessDetails").read[BusinessDetails](BusinessDetails.databaseFormat(crypto)) and
+      (JsPath \ "amlsData").readNullable[AmlsData] and
+      (JsPath \ "userMappings").read[List[UserMapping]] and
+      (JsPath \ "mappingComplete").read[Boolean] and
+      (JsPath \ "cleanCredsAuthProviderId").readNullable[AuthProviderId] and
+      (JsPath \ "lastModifiedDate").readNullable[LocalDateTime] and
+      (JsPath \ "contactEmailData").readNullable[ContactEmailData](ContactEmailData.databaseFormat(crypto)) and
+      (JsPath \ "contactTradingNameData").readNullable[ContactTradingNameData](
+        ContactTradingNameData.databaseFormat(crypto)
+      ) and
+      (JsPath \ "contactTradingAddressData").readNullable[ContactTradingAddressData](
+        ContactTradingAddressData.databaseFormat(crypto)
+      ) and
+      (JsPath \ "contactTelephoneData").readNullable[ContactTelephoneData](
+        ContactTelephoneData.databaseFormat(crypto)
+      ) and
       (JsPath \ "verifiedEmails")
-        .formatWithDefault[VerifiedEmails](VerifiedEmails()))(SubscriptionJourneyRecord.apply, unlift(SubscriptionJourneyRecord.unapply))
+        .read[VerifiedEmails](VerifiedEmails.databaseFormat(crypto)))(SubscriptionJourneyRecord.apply _)
+
+  def databaseFormat(crypto: Encrypter with Decrypter): Format[SubscriptionJourneyRecord] =
+    Format(databaseReads(crypto), sjr => databaseWrites(crypto).writes(sjr))
+
+  implicit val writes: Writes[SubscriptionJourneyRecord] = Json.writes[SubscriptionJourneyRecord]
+  implicit val reads: Reads[SubscriptionJourneyRecord] = Json.reads[SubscriptionJourneyRecord]
 
   def fromAgentSession(
     agentSession: AgentSession,
@@ -80,10 +118,10 @@ object SubscriptionJourneyRecord {
       continueId = Some(UUID.randomUUID().toString.replace("-", "")),
       businessDetails = BusinessDetails(
         businessType = agentSession.businessType.getOrElse(throw new RuntimeException("no business type found in agent session")),
-        utr = agentSession.utr.getOrElse(throw new RuntimeException("no utr found in agent session")),
-        postcode = agentSession.postcode.getOrElse(throw new RuntimeException("no postcode found in agent session")),
+        utr = agentSession.utr.map(_.value).getOrElse(throw new RuntimeException("no utr found in agent session")),
+        postcode = agentSession.postcode.map(_.value).getOrElse(throw new RuntimeException("no postcode found in agent session")),
         registration = agentSession.registration,
-        nino = agentSession.nino,
+        nino = agentSession.nino.map(_.value),
         companyRegistrationNumber = agentSession.companyRegistrationNumber,
         dateOfBirth = agentSession.dateOfBirth
       ),

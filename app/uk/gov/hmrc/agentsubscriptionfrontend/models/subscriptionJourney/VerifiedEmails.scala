@@ -16,10 +16,41 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json._
+import uk.gov.hmrc.crypto.json.JsonEncryption.stringEncrypter
+import uk.gov.hmrc.crypto.{Crypted, Decrypter, Encrypter}
 
-case class VerifiedEmails(emails: Set[String] = Set.empty)
+case class VerifiedEmails(emails: Set[String] = Set.empty, encrypted: Option[Boolean] = None)
 
 object VerifiedEmails {
-  implicit val format: OFormat[VerifiedEmails] = Json.format[VerifiedEmails]
+  def databaseFormat(implicit crypto: Encrypter with Decrypter): Format[VerifiedEmails] = {
+
+    def reads(json: JsValue): JsResult[VerifiedEmails] =
+      for {
+        isEncrypted <- (json \ "encrypted").validateOpt[Boolean]
+        emails = isEncrypted match {
+                   case Some(true) =>
+                     (json \ "emails")
+                       .validate[Set[String]] match {
+                       case JsSuccess(emails, _) => emails.map(str => crypto.decrypt(Crypted(str)).value)
+                       case JsError(_)           => Set[String]()
+                     }
+                   case _ =>
+                     (json \ "emails").validate[Set[String]] match {
+                       case JsSuccess(emails, _) => emails
+                       case JsError(_)           => Set[String]()
+                     }
+                 }
+      } yield VerifiedEmails(emails, isEncrypted)
+
+    def writes(verifiedEmails: VerifiedEmails): JsValue =
+      Json.obj(
+        "emails"    -> verifiedEmails.emails.map(stringEncrypter.writes),
+        "encrypted" -> Some(true)
+      )
+
+    Format(reads(_), verifiedEmails => writes(verifiedEmails))
+  }
+
+  implicit val format: Format[VerifiedEmails] = Json.format[VerifiedEmails]
 }

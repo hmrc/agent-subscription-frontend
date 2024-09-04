@@ -43,8 +43,8 @@ class AssuranceService @Inject() (
   def assureIsAgent(utr: Utr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[AssuranceResults]] =
     if (appConfig.agentAssuranceRun) {
       for {
-        isOnRefusalToDealWithList <- assuranceConnector.isR2DWAgent(utr)
-        isManuallyAssured <- if (!isOnRefusalToDealWithList) assuranceConnector.isManuallyAssuredAgent(utr)
+        isOnRefusalToDealWithList <- assuranceConnector.isR2DWAgent(utr.value)
+        isManuallyAssured <- if (!isOnRefusalToDealWithList) assuranceConnector.isManuallyAssuredAgent(utr.value)
                              else Future successful false
         assuranceResults <- if (isOnRefusalToDealWithList || isManuallyAssured) {
                               Future.successful(

@@ -143,7 +143,7 @@ class SubscriptionService @Inject() (
   ): Future[Result] =
     for {
       record             <- subscriptionJourneyService.getMandatoryJourneyRecord(continueId)
-      subscriptionStatus <- getSubscriptionStatus(record.businessDetails.utr, record.businessDetails.postcode)
+      subscriptionStatus <- getSubscriptionStatus(Utr(record.businessDetails.utr), Postcode(record.businessDetails.postcode))
       // if user is partially subscribed when they come back with a new user ID can complete partial subscription with clean creds
       completePartialSubscriptionOrTaskList <- subscriptionStatus match {
                                                  case SubscriptionProcess(SubscribedButNotEnrolled, Some(_)) =>
@@ -155,8 +155,8 @@ class SubscriptionService @Inject() (
                                                      )
                                                      .flatMap(_ =>
                                                        completePartialSubscriptionAndGoToComplete(
-                                                         record.businessDetails.utr,
-                                                         record.businessDetails.postcode
+                                                         Utr(record.businessDetails.utr),
+                                                         Postcode(record.businessDetails.postcode)
                                                        )
                                                      )
 

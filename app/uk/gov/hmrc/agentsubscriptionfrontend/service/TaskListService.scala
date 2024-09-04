@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector, AgentSubscriptionConnector}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, SubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, SubscriptionJourneyRecord}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
