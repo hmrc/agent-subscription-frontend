@@ -90,7 +90,7 @@ trait DataStreamStubs extends Eventually {
       1,
       AgentAssurance,
       detail = Map(
-        "utr"                         -> validUtr.value,
+        "utr"                         -> validUtr,
         "postcode"                    -> validPostcode,
         "isEnrolledSAAgent"           -> "false",
         "passSaAgentAssuranceCheck"   -> "false",
@@ -121,7 +121,7 @@ trait DataStreamStubs extends Eventually {
       1,
       AgentAssurance,
       detail = Map(
-        "utr"               -> validUtr.value,
+        "utr"               -> validUtr,
         "postcode"          -> validPostcode,
         "isEnrolledSAAgent" -> "true",
         "saAgentRef"        -> "FOO1234",

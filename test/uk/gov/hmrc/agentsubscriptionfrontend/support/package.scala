@@ -20,12 +20,12 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.{AddressLookupFrontendAddres
 
 package object support {
 
-  def testCountry(code: String = "GB", name: Option[String] = None) = Country(code = code, name = name)
+  def testCountry(code: String = "GB", name: Option[String] = None): Country = Country(code = code, name = name)
 
   def testAddressLookupFrontendAddress(
     lines: Seq[String] = Seq("1 Test Street"),
     postcode: Option[String] = Some("AA1 1AA"),
     country: Country = testCountry()
-  ) =
+  ): AddressLookupFrontendAddress =
     AddressLookupFrontendAddress(lines = lines, postcode = postcode, country = country)
 }

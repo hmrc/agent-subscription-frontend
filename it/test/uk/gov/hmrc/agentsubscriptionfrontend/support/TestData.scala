@@ -16,45 +16,44 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 import org.apache.commons.lang3.RandomStringUtils
-
-import java.time.LocalDate
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, BusinessDetails, SubscriptionJourneyRecord, UserMapping, VerifiedEmails}
-import uk.gov.hmrc.domain.{AgentCode, Nino}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
+import uk.gov.hmrc.domain.AgentCode
+
+import java.time.LocalDate
 
 object TestData {
 
   val validBusinessTypes: Seq[BusinessType] =
     Seq(BusinessType.SoleTrader, BusinessType.LimitedCompany, BusinessType.Partnership, BusinessType.Llp)
 
-  val validUtr = Utr("2000000000")
+  val validUtr = "2000000000"
   val validPostcode = "AA1 1AA"
   val invalidPostcode = "11AAAA"
   val denylistedPostcode = "AB10 1ZT"
   val phoneNumber = "01273111111"
-  val utr = Utr("2000000000")
+  val utr = "2000000000"
   val testPostcode = "AA1 1AA"
   val registrationName = "My Agency"
   val tradingName = "My Trading Name"
-  val emailTooLong = RandomStringUtils.randomAlphanumeric(250).concat("@a.a")
-  val businessAddress =
+  val emailTooLong: String = RandomStringUtils.randomAlphanumeric(250).concat("@a.a")
+  val businessAddress: BusinessAddress =
     BusinessAddress("AddressLine1 A", Some("AddressLine2 A"), Some("AddressLine3 A"), Some("AddressLine4 A"), Some("AA11AA"), "GB")
 
-  val tradingAddress =
+  val tradingAddress: BusinessAddress =
     BusinessAddress("TradingAddress1 A", Some("TradingAddress2 A"), Some("TradingAddress3 A"), Some("TradingAddress4 A"), Some("TT11TT"), "GB")
 
   val configuredGovernmentGatewayUrl = "http://configured-government-gateway.gov.uk/"
 
   val agentSession: AgentSession =
-    AgentSession(businessType = Some(SoleTrader), utr = Some(validUtr), postcode = Some(Postcode("bn13 1hn")), nino = Some(Nino("AE123456C")))
+    AgentSession(businessType = Some(SoleTrader), utr = Some(validUtr), postcode = Some("bn13 1hn"), nino = Some("AE123456C"))
 
   val agentSessionForLimitedCompany: AgentSession = agentSession.copy(businessType = Some(LimitedCompany))
 
   val agentSessionForLimitedPartnership: AgentSession = agentSession.copy(businessType = Some(Llp))
 
-  val testRegistration = Registration(
+  val testRegistration: Registration = Registration(
     Some(registrationName),
     isSubscribedToAgentServices = false,
     isSubscribedToETMP = false,
@@ -64,20 +63,20 @@ object TestData {
     Some("safeId")
   )
 
-  val id = AuthProviderId("12345-credId")
+  val id: AuthProviderId = AuthProviderId("12345-credId")
 
   val record: SubscriptionJourneyRecord = TestData.minimalSubscriptionJourneyRecord(id)
 
-  def minimalSubscriptionJourneyRecord(authProviderId: AuthProviderId) =
-    SubscriptionJourneyRecord(authProviderId, businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode)))
+  def minimalSubscriptionJourneyRecord(authProviderId: AuthProviderId): SubscriptionJourneyRecord =
+    SubscriptionJourneyRecord(authProviderId, businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode))
 
-  val couldBePartiallySubscribedJourneyRecord =
+  val couldBePartiallySubscribedJourneyRecord: SubscriptionJourneyRecord =
     SubscriptionJourneyRecord(
       id,
       businessDetails = BusinessDetails(
         LimitedCompany,
         validUtr,
-        Postcode(validPostcode),
+        validPostcode,
         registration = Some(
           Registration(
             Some(registrationName),
@@ -105,20 +104,20 @@ object TestData {
       contactTelephoneData = None
     )
 
-  def minimalSubscriptionJourneyRecordWithAmls(authProviderId: AuthProviderId) =
+  def minimalSubscriptionJourneyRecordWithAmls(authProviderId: AuthProviderId): SubscriptionJourneyRecord =
     SubscriptionJourneyRecord(
       authProviderId,
-      businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode)),
+      businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode),
       amlsData = Some(AmlsData.registeredUserNoDataEntered)
     )
 
-  val completeJourneyRecordNoMappings = SubscriptionJourneyRecord(
+  val completeJourneyRecordNoMappings: SubscriptionJourneyRecord = SubscriptionJourneyRecord(
     authProviderId = AuthProviderId("12345-credId"),
     continueId = None,
     businessDetails = BusinessDetails(
       SoleTrader,
       validUtr,
-      Postcode(validPostcode),
+      validPostcode,
       registration = Some(
         Registration(
           Some(registrationName),
@@ -141,10 +140,10 @@ object TestData {
       )
     ),
     cleanCredsAuthProviderId = Some(id),
-    contactEmailData = Some(ContactEmailData(false, Some("email@email.com"))),
-    contactTradingNameData = Some(ContactTradingNameData(true, Some(tradingName))),
-    contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
-    contactTelephoneData = Some(ContactTelephoneData(true, Some(phoneNumber))),
+    contactEmailData = Some(ContactEmailData(useBusinessEmail = false, Some("email@email.com"))),
+    contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(tradingName))),
+    contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(businessAddress))),
+    contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = true, Some(phoneNumber))),
     verifiedEmails = VerifiedEmails(Set("email@email.com"))
   )
   val completeJourneyRecordWithMappingsNoVerifiedEmails: SubscriptionJourneyRecord = completeJourneyRecordNoMappings
@@ -160,12 +159,15 @@ object TestData {
       )
     )
 
-  def completeJourneyRecordWithMappingsAndNewTradingDetails(tradingName: Option[String], tradingAddress: Option[BusinessAddress]) =
+  def completeJourneyRecordWithMappingsAndNewTradingDetails(
+    tradingName: Option[String],
+    tradingAddress: Option[BusinessAddress]
+  ): SubscriptionJourneyRecord =
     completeJourneyRecordWithMappings
       .copy(
-        contactTradingNameData = Some(ContactTradingNameData(true, tradingName)),
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
-        contactTelephoneData = Some(ContactTelephoneData(true, Some(phoneNumber)))
+        contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, tradingName)),
+        contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(businessAddress))),
+        contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = true, Some(phoneNumber)))
       )
 
   def completeJourneyRecordWithUpdatedBusinessName(newBusinessName: String): SubscriptionJourneyRecord =
@@ -173,7 +175,7 @@ object TestData {
       BusinessDetails(
         SoleTrader,
         validUtr,
-        Postcode(validPostcode),
+        validPostcode,
         Some(
           Registration(
             Some(newBusinessName),
@@ -193,7 +195,7 @@ object TestData {
       BusinessDetails(
         SoleTrader,
         validUtr,
-        Postcode(validPostcode),
+        validPostcode,
         Some(
           Registration(
             Some(registrationName),

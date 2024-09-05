@@ -20,7 +20,7 @@ import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
 import play.utils.UriEncoding
-import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr, Vrn}
+import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
@@ -66,9 +66,9 @@ class AgentSubscriptionConnector @Inject() (
       transformOptionResponse[SubscriptionJourneyRecord](http.GET[HttpResponse](url.toString))
     }
 
-  def getJourneyByUtr(utr: Utr)(implicit hc: HeaderCarrier): Future[Option[SubscriptionJourneyRecord]] =
+  def getJourneyByUtr(utr: String)(implicit hc: HeaderCarrier): Future[Option[SubscriptionJourneyRecord]] =
     monitor(s"ConsumedAPI-Agent-Subscription-getJourneyByUtr-GET") {
-      val url = s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription/journey/utr/${encodePathSegment(utr.value)}"
+      val url = s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription/journey/utr/${encodePathSegment(utr)}"
       transformOptionResponse[SubscriptionJourneyRecord](http.GET[HttpResponse](url))
     }
 
@@ -87,16 +87,16 @@ class AgentSubscriptionConnector @Inject() (
         }
     }
 
-  def getRegistration(utr: Utr, postcode: String)(implicit hc: HeaderCarrier): Future[Option[Registration]] =
+  def getRegistration(utr: String, postcode: String)(implicit hc: HeaderCarrier): Future[Option[Registration]] =
     monitor(s"ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET") {
       val url = getRegistrationUrlFor(utr, postcode)
       http.GET[Option[Registration]](url)
     }
 
-  def matchCorporationTaxUtrWithCrn(utr: Utr, crn: CompanyRegistrationNumber)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def matchCorporationTaxUtrWithCrn(utr: String, crn: CompanyRegistrationNumber)(implicit hc: HeaderCarrier): Future[Boolean] =
     monitor(s"ConsumedAPI-Agent-Subscription-matchCorporationTaxUtrWithCrn-GET") {
       val url =
-        s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/corporation-tax-utr/${encodePathSegment(utr.value)}/crn/${encodePathSegment(crn.value)}"
+        s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/corporation-tax-utr/${encodePathSegment(utr)}/crn/${encodePathSegment(crn.value)}"
 
       http
         .GET[HttpResponse](url)
@@ -194,6 +194,6 @@ class AgentSubscriptionConnector @Inject() (
 
   private val subscriptionUrl = s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription"
 
-  private def getRegistrationUrlFor(utr: Utr, postcode: String) =
-    s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/registration/${encodePathSegment(utr.value)}/postcode/${encodePathSegment(postcode)}"
+  private def getRegistrationUrlFor(utr: String, postcode: String) =
+    s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/registration/${encodePathSegment(utr)}/postcode/${encodePathSegment(postcode)}"
 }

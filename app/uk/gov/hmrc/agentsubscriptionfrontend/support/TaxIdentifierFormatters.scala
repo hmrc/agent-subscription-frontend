@@ -35,12 +35,12 @@ object TaxIdentifierFormatters {
 
   val normalizedText: Mapping[String] = of[String].transform(_.replaceAll("\\s", ""), identity)
 
-  def prettify(utr: Utr): String =
-    if (utr.value.trim.length == 10) {
-      val (first, last) = utr.value.trim.splitAt(5)
+  def prettify(utr: String): String =
+    if (utr.trim.length == 10) {
+      val (first, last) = utr.trim.splitAt(5)
       s"$first $last"
     } else {
-      throw new Exception(s"The utr contains an invalid value ${utr.value}")
+      throw new Exception(s"The utr contains an invalid value $utr")
     }
 
   def normalizeNino(ninoStr: String): Option[Nino] = {

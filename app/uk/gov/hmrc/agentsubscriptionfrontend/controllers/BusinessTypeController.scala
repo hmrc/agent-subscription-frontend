@@ -26,10 +26,11 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.business_type
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
 
 class BusinessTypeController @Inject() (
@@ -42,7 +43,7 @@ class BusinessTypeController @Inject() (
   val subscriptionJourneyService: SubscriptionJourneyService,
   mcc: MessagesControllerComponents,
   businessTypeTemplate: business_type
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with AuthActions with SessionBehaviour {
 
   def redirectToBusinessTypeForm: Action[AnyContent] = Action.async {

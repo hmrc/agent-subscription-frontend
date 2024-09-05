@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import org.jsoup.Jsoup
+import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.{FakeRequest, Helpers}
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AuthProviderId}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub._
@@ -37,7 +38,7 @@ class BusinessTypeControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
   "redirectToBusinessTypeForm" should {
     "redirect to the business type form page" in {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       val result = await(controller.redirectToBusinessTypeForm(request))
 
       status(result) shouldBe 303
@@ -54,16 +55,16 @@ class BusinessTypeControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     )
 
     "contain page titles and header content" in new TestSetupNoJourneyRecord {
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      val result = await(controller.showBusinessTypeForm(request))
+      val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val result: Result = await(controller.showBusinessTypeForm(request))
 
       result should containMessages("businessType.title", "businessType.progressive.title", "businessType.progressive.content.p1")
     }
 
     "contain radio options for Sole Trader, Limited Company, Partnership, and LLP" in new TestSetupNoJourneyRecord {
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      val result = await(controller.showBusinessTypeForm(request))
-      val doc = Jsoup.parse(bodyOf(result))
+      val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val result: Result = await(controller.showBusinessTypeForm(request))
+      val doc: Document = Jsoup.parse(bodyOf(result))
 
       // Check form's radio inputs have correct values
       doc.getElementById("businessType").`val`() shouldBe "limited_company"
@@ -73,12 +74,12 @@ class BusinessTypeControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     }
 
     "contain a link to sign out" in new TestSetupNoJourneyRecord {
-      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      val result = await(controller.showBusinessTypeForm(request))
+      val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      val result: Result = await(controller.showBusinessTypeForm(request))
 
       status(result) shouldBe 200
 
-      val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
+      val html: Document = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
       html.title() shouldBe "What type of business are you? - Create an agent services account - GOV.UK"
       private val signOutLink: Elements = html.select("a#sign-out")
       signOutLink.text() shouldBe "Finish and sign out"
@@ -87,12 +88,12 @@ class BusinessTypeControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
     "pre-populate the business type if one is already stored in the session" in new TestSetupNoJourneyRecord {
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader))))
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader)))(request, global, aesCrypto))
 
-      val result = await(controller.showBusinessTypeForm()(request))
+      val result: Result = await(controller.showBusinessTypeForm()(request))
 
-      val doc = Jsoup.parse(bodyOf(result))
-      val link = doc.getElementById("businessType-2")
+      val doc: Document = Jsoup.parse(bodyOf(result))
+      val link: Element = doc.getElementById("businessType-2")
       link.hasAttr("checked") shouldBe true
     }
 
@@ -120,18 +121,19 @@ class BusinessTypeControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
     validBusinessTypes.foreach { validBusinessTypeIdentifier =>
       s"redirect to /business-details when valid businessTypeIdentifier: $validBusinessTypeIdentifier" in new TestSetupNoJourneyRecord {
-        val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+        val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("businessType" -> validBusinessTypeIdentifier.key)
 
-        val result = await(controller.submitBusinessTypeForm(request))
+        val result: Result = await(controller.submitBusinessTypeForm(request))
         result.header.headers(LOCATION) shouldBe routes.UtrController.showUtrForm().url
       }
     }
 
     "choice is invalid" should {
       "return 200 and redisplay the /business-type page with an error message for invalid choice - the user manipulated the submit value" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("businessType" -> "invalid")
-        val result = await(controller.submitBusinessTypeForm(request))
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+          authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("businessType" -> "invalid")
+        val result: Result = await(controller.submitBusinessTypeForm(request))
         result should containMessages("businessType.error.invalid-choice")
       }
     }

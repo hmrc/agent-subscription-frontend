@@ -18,12 +18,12 @@ package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
-
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AmlsSession}
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.{SessionCache, SessionCacheRepository}
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -74,11 +74,13 @@ class MongoDBSessionStoreService @Inject() (sessionCache: SessionCacheRepository
   def fetchIsChangingAnswers(implicit request: Request[Any], ec: ExecutionContext): Future[Option[Boolean]] =
     isChangingAnswersCache.fetch
 
-  def cacheAgentSession(agentSession: AgentSession)(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
-    agentSessionCache.save(agentSession).map(_ => ())
+  def cacheAgentSession(
+    agentSession: AgentSession
+  )(implicit request: Request[Any], ec: ExecutionContext, crypto: Encrypter with Decrypter): Future[Unit] =
+    agentSessionCache.save(agentSession)(request, AgentSession.databaseFormat(crypto), ec).map(_ => ())
 
-  def fetchAgentSession(implicit request: Request[Any], ec: ExecutionContext): Future[Option[AgentSession]] =
-    agentSessionCache.fetch
+  def fetchAgentSession(implicit request: Request[Any], ec: ExecutionContext, crypto: Encrypter with Decrypter): Future[Option[AgentSession]] =
+    agentSessionCache.fetch(request, AgentSession.databaseFormat(crypto), ec)
 
   def cacheAmlsSession(amlsSession: AmlsSession)(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
     amlsSessionCache.save(amlsSession).map(_ => ())

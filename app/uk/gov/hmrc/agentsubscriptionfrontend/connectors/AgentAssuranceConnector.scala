@@ -17,7 +17,6 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import play.api.http.Status._
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AmlsDetails
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
@@ -62,9 +61,9 @@ class AgentAssuranceConnector @Inject() (http: HttpClient, val metrics: Metrics,
         }
     }
 
-  def isR2DWAgent(utr: Utr)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def isR2DWAgent(utr: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     monitor(s"ConsumedAPI-AgentAssurance-getR2DWAgents-GET") {
-      val endpoint = s"/agent-assurance/refusal-to-deal-with/utr/${utr.value}"
+      val endpoint = s"/agent-assurance/refusal-to-deal-with/utr/$utr"
       http
         .GET[HttpResponse](s"${appConfig.agentAssuranceBaseUrl}$endpoint")
         .map { response =>
@@ -80,9 +79,9 @@ class AgentAssuranceConnector @Inject() (http: HttpClient, val metrics: Metrics,
         }
     }
 
-  def isManuallyAssuredAgent(utr: Utr)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def isManuallyAssuredAgent(utr: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     monitor(s"ConsumedAPI-AgentAssurance-getManuallyAssuredAgents-GET") {
-      val endpoint = s"/agent-assurance/manually-assured/utr/${utr.value}"
+      val endpoint = s"/agent-assurance/manually-assured/utr/$utr"
       http
         .GET[HttpResponse](s"${appConfig.agentAssuranceBaseUrl}$endpoint")
         .map { response =>
@@ -98,9 +97,9 @@ class AgentAssuranceConnector @Inject() (http: HttpClient, val metrics: Metrics,
         }
     }
 
-  def getAmlsData(utr: Utr)(implicit hc: HeaderCarrier): Future[Option[AmlsDetails]] =
+  def getAmlsData(utr: String)(implicit hc: HeaderCarrier): Future[Option[AmlsDetails]] =
     monitor(s"ConsumedAPI-AgentAssurance-getAmlsData-GET") {
-      val endpoint = s"/agent-assurance/amls/utr/${utr.value}"
+      val endpoint = s"/agent-assurance/amls/utr/$utr"
       transformOptionResponse[AmlsDetails](http.GET[HttpResponse](s"${appConfig.agentAssuranceBaseUrl}$endpoint"))
         .recover {
           case e: UpstreamErrorResponse if e.statusCode == 404 => None

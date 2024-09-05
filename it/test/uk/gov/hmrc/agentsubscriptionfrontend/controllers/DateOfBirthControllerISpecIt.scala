@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import java.time.LocalDate
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Llp, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, CompanyRegistrationNumber, DateOfBirth}
@@ -26,6 +27,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestSetupNoJourneyRecord}
 import uk.gov.hmrc.domain.Nino
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DateOfBirthControllerISpecIt extends BaseISpecIt with SessionDataMissingSpec {
@@ -35,36 +37,38 @@ class DateOfBirthControllerISpecIt extends BaseISpecIt with SessionDataMissingSp
   "GET /date-of-birth page" should {
 
     "redirect to /registered-for-vat if nino doesn't exist from auth" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader))))
-      val result = await(controller.showDateOfBirthForm()(request))
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader)))(request, global, aesCrypto))
+      val result: Result = await(controller.showDateOfBirthForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.VatDetailsController.showRegisteredForVatForm().url)
     }
 
     "redirect to /national-insurance-number if there is no authNino and no session nino and the businessType is LLP" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(Llp))))
-      val result = await(controller.showDateOfBirthForm()(request))
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(Llp)))(request, global, aesCrypto))
+      val result: Result = await(controller.showDateOfBirthForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
     }
 
     "redirect to /national-insurance-number page if nino exists from auth but user hasn't assured it yet" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")))
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(Llp))))
-      val result = await(controller.showDateOfBirthForm()(request))
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")))
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(Llp)))(request, global, aesCrypto))
+      val result: Result = await(controller.showDateOfBirthForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
     }
 
     "redirect to /registered-for-vat when user has assured their nino but No DOB exists in citizen-details" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")))
-      await(sessionStoreService.cacheAgentSession(AgentSession(businessType = Some(SoleTrader), nino = Some(Nino("AE123456C")))))
-      val result = await(controller.showDateOfBirthForm()(request))
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")))
+      await(
+        sessionStoreService.cacheAgentSession(AgentSession(businessType = Some(SoleTrader), nino = Some("AE123456C")))(request, global, aesCrypto)
+      )
+      val result: Result = await(controller.showDateOfBirthForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.VatDetailsController.showRegisteredForVatForm().url)
@@ -72,32 +76,32 @@ class DateOfBirthControllerISpecIt extends BaseISpecIt with SessionDataMissingSp
 
     "display the page with expected content when dob exists in citizen-details" in new TestSetupNoJourneyRecord {
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")))
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")))
       await(
         sessionStoreService.cacheAgentSession(
-          AgentSession(businessType = Some(SoleTrader), nino = Some(Nino("AE123456C")), dateOfBirthFromCid = Some(DateOfBirth(LocalDate.now())))
-        )
+          AgentSession(businessType = Some(SoleTrader), nino = Some("AE123456C"), dateOfBirthFromCid = Some(DateOfBirth(LocalDate.now())))
+        )(request, global, aesCrypto)
       )
-      val result = await(controller.showDateOfBirthForm()(request))
+      val result: Result = await(controller.showDateOfBirthForm()(request))
 
       result should containMessages("date-of-birth.title", "date-of-birth.hint")
     }
 
     "pre-populate the date-of-birth if one is already stored in the session" in new TestSetupNoJourneyRecord {
-      val dob = LocalDate.of(2010, 1, 1)
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")))
+      val dob: LocalDate = LocalDate.of(2010, 1, 1)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")))
       await(
         sessionStoreService.cacheAgentSession(
           AgentSession(
             businessType = Some(SoleTrader),
-            nino = Some(Nino("AE123456C")),
+            nino = Some("AE123456C"),
             dateOfBirthFromCid = Some(DateOfBirth(LocalDate.now())),
             dateOfBirth = Some(DateOfBirth(dob))
           )
-        )
+        )(request, global, aesCrypto)
       )
 
-      val result = await(controller.showDateOfBirthForm()(request))
+      val result: Result = await(controller.showDateOfBirthForm()(request))
 
       result should containInputElement("dob.day", "text", Some("1"))
       result should containInputElement("dob.month", "text", Some("1"))
@@ -107,13 +111,14 @@ class DateOfBirthControllerISpecIt extends BaseISpecIt with SessionDataMissingSp
 
   "POST /date-of-birth form" should {
     "read the dob as expected and save it to the session" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
-        .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
-      val dob = DateOfBirth(LocalDate.of(1950, 1, 1))
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
+          .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
+      val dob: DateOfBirth = DateOfBirth(LocalDate.of(1950, 1, 1))
       AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456C"), Some("Matchmaker"), dob)
-      sessionStoreService.currentSession.agentSession = Some(agentSession.copy(nino = Some(Nino("AE123456C")), dateOfBirthFromCid = Some(dob)))
+      sessionStoreService.currentSession.agentSession = Some(agentSession.copy(nino = Some("AE123456C"), dateOfBirthFromCid = Some(dob)))
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.VatDetailsController.showRegisteredForVatForm().url)
@@ -122,9 +127,9 @@ class DateOfBirthControllerISpecIt extends BaseISpecIt with SessionDataMissingSp
     }
 
     "read the dob as expected and save it to the session for an LLP" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
-      val dob = DateOfBirth(LocalDate.of(1950, 1, 1))
+      val dob: DateOfBirth = DateOfBirth(LocalDate.of(1950, 1, 1))
       AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456C"), Some("Ferguson"), dob)
       AgentSubscriptionStub.givenCompaniesHouseNameCheckReturnsStatus(CompanyRegistrationNumber("01234567"), "FERGUSON", 200)
       sessionStoreService.currentSession.agentSession = Some(
@@ -132,13 +137,13 @@ class DateOfBirthControllerISpecIt extends BaseISpecIt with SessionDataMissingSp
           .copy(
             businessType = Some(Llp),
             companyRegistrationNumber = Some(CompanyRegistrationNumber("01234567")),
-            nino = Some(Nino("AE123456C")),
+            nino = Some("AE123456C"),
             dateOfBirthFromCid = Some(dob),
             lastNameFromCid = Some("Ferguson")
           )
       )
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.VatDetailsController.showRegisteredForVatForm().url)
@@ -147,9 +152,9 @@ class DateOfBirthControllerISpecIt extends BaseISpecIt with SessionDataMissingSp
     }
 
     "redirect to /no-match-found if for an LLP the companies house check fails" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
-      val dob = DateOfBirth(LocalDate.of(1950, 1, 1))
+      val dob: DateOfBirth = DateOfBirth(LocalDate.of(1950, 1, 1))
       AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456C"), Some("Ferguson"), dob)
       AgentSubscriptionStub.givenCompaniesHouseNameCheckReturnsStatus(CompanyRegistrationNumber("01234567"), "FERGUSON", 404)
       sessionStoreService.currentSession.agentSession = Some(
@@ -157,13 +162,13 @@ class DateOfBirthControllerISpecIt extends BaseISpecIt with SessionDataMissingSp
           .copy(
             businessType = Some(Llp),
             companyRegistrationNumber = Some(CompanyRegistrationNumber("01234567")),
-            nino = Some(Nino("AE123456C")),
+            nino = Some("AE123456C"),
             dateOfBirthFromCid = Some(dob),
             lastNameFromCid = Some("Ferguson")
           )
       )
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNoMatchFound().url)
@@ -171,98 +176,106 @@ class DateOfBirthControllerISpecIt extends BaseISpecIt with SessionDataMissingSp
       sessionStoreService.currentSession.agentSession.flatMap(_.dateOfBirth) shouldBe None
     }
     "show /no-match-found page when dob from citizen details and user entered input do not match" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
-        .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
-      val dob = DateOfBirth(LocalDate.of(1950, 1, 1))
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
+          .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
+      val dob: DateOfBirth = DateOfBirth(LocalDate.of(1950, 1, 1))
       AgentSubscriptionStub.givenDesignatoryDetailsForNino(Nino("AE123456C"), Some("Matchmaker"), dob)
       sessionStoreService.currentSession.agentSession =
-        Some(agentSession.copy(nino = Some(Nino("AE123456C")), dateOfBirthFromCid = Some(DateOfBirth(LocalDate.of(1980, 1, 1)))))
+        Some(agentSession.copy(nino = Some("AE123456C"), dateOfBirthFromCid = Some(DateOfBirth(LocalDate.of(1980, 1, 1)))))
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNoMatchFound().url)
     }
 
     "Redirect to enter nino page when the nino is not found in the session" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
-        .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
+          .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1950")
 
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader), nino = None)))
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader), nino = None))(request, global, aesCrypto))
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
     }
 
     "handle forms with date-of-birth in future" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
-        .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "2030")
-      val dobCid = DateOfBirth(LocalDate.of(1950, 1, 1))
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
+          .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "2030")
+      val dobCid: DateOfBirth = DateOfBirth(LocalDate.of(1950, 1, 1))
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(dateOfBirthFromCid = Some(dobCid)))
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 200
       result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.must.be.past")
     }
 
     "handle forms with date-of-birth earlier than 1900" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
-        .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1899")
-      val dobCid = DateOfBirth(LocalDate.of(1950, 1, 1))
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
+          .withFormUrlEncodedBody("dob.day" -> "01", "dob.month" -> "01", "dob.year" -> "1899")
+      val dobCid: DateOfBirth = DateOfBirth(LocalDate.of(1950, 1, 1))
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(dateOfBirthFromCid = Some(dobCid)))
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 200
       result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.must.be.later.than.1900")
     }
 
     "handle forms with date-of-birth fields as non-digits" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
-        .withFormUrlEncodedBody("dob.day" -> "xx", "dob.month" -> "11", "dob.year" -> "2010")
-      val dobCid = DateOfBirth(LocalDate.of(1950, 1, 1))
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
+          .withFormUrlEncodedBody("dob.day" -> "xx", "dob.month" -> "11", "dob.year" -> "2010")
+      val dobCid: DateOfBirth = DateOfBirth(LocalDate.of(1950, 1, 1))
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(dateOfBirthFromCid = Some(dobCid)))
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 200
       result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.invalid")
     }
 
     "display consolidated error when month and year are empty" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
-        .withFormUrlEncodedBody("dob.day" -> "1")
-      val dobCid = DateOfBirth(LocalDate.of(1950, 1, 1))
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
+          .withFormUrlEncodedBody("dob.day" -> "1")
+      val dobCid: DateOfBirth = DateOfBirth(LocalDate.of(1950, 1, 1))
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(dateOfBirthFromCid = Some(dobCid)))
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 200
       result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.month-year.empty")
     }
 
     "display consolidated error when day and year are empty" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
-        .withFormUrlEncodedBody("dob.month" -> "1")
-      val dobCid = DateOfBirth(LocalDate.of(1950, 1, 1))
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
+          .withFormUrlEncodedBody("dob.month" -> "1")
+      val dobCid: DateOfBirth = DateOfBirth(LocalDate.of(1950, 1, 1))
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(dateOfBirthFromCid = Some(dobCid)))
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 200
       result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.day-year.empty")
     }
 
     "display consolidated error when day and month are empty" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
-        .withFormUrlEncodedBody("dob.year" -> "1980")
-      val dobCid = DateOfBirth(LocalDate.of(1950, 1, 1))
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingAgentEnrolledForNonMTD.copy(nino = Some("AE123456C")), POST)
+          .withFormUrlEncodedBody("dob.year" -> "1980")
+      val dobCid: DateOfBirth = DateOfBirth(LocalDate.of(1950, 1, 1))
       sessionStoreService.currentSession.agentSession = Some(agentSession.copy(dateOfBirthFromCid = Some(dobCid)))
 
-      val result = await(controller.submitDateOfBirthForm()(request))
+      val result: Result = await(controller.submitDateOfBirthForm()(request))
 
       status(result) shouldBe 200
       result should containMessages("date-of-birth.title", "date-of-birth.hint", "date-of-birth.day-month.empty")

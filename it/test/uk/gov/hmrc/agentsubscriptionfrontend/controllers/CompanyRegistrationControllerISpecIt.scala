@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{Llp, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, CompanyRegistrationNumber}
@@ -34,20 +36,25 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
 
     "display the page with expected content" in new TestSetupNoJourneyRecord {
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader))))
-      val result = await(controller.showCompanyRegNumberForm()(request))
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader)))(request, global, aesCrypto))
+      val result: Result = await(controller.showCompanyRegNumberForm()(request))
 
       result should containMessages("crn.title", "crn.hint")
     }
 
     "pre-populate the crn if one is already stored in the session" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       await(
-        sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader), companyRegistrationNumber = Some(CompanyRegistrationNumber("12345"))))
+        sessionStoreService
+          .cacheAgentSession(AgentSession(Some(SoleTrader), companyRegistrationNumber = Some(CompanyRegistrationNumber("12345"))))(
+            request,
+            global,
+            aesCrypto
+          )
       )
 
-      val result = await(controller.showCompanyRegNumberForm()(request))
+      val result: Result = await(controller.showCompanyRegNumberForm()(request))
 
       result should containInputElement("crn", "text", Some("12345"))
     }
@@ -56,9 +63,9 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
   "POST /company-registration-number" should {
 
     "read the crn as expected and save it to the session when supplied utr matches with DES utr (retrieved using crn) and the company has active status" in new TestSetupNoJourneyRecord {
-      val crn = CompanyRegistrationNumber("12345678")
+      val crn: CompanyRegistrationNumber = CompanyRegistrationNumber("12345678")
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "12345678")
 
       AgentSubscriptionStub.withMatchingCtUtrAndCrn(agentSessionForLimitedCompany.utr.get, crn)
@@ -66,7 +73,7 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)
 
-      val result = await(controller.submitCompanyRegNumberForm()(request))
+      val result: Result = await(controller.submitCompanyRegNumberForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.VatDetailsController.showRegisteredForVatForm().url)
@@ -77,9 +84,9 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
     }
 
     "redirect to /company-not-allowed when supplied utr matches with DES utr (retrieved using crn) but the company is inactive" in new TestSetupNoJourneyRecord {
-      val crn = CompanyRegistrationNumber("12345678")
+      val crn: CompanyRegistrationNumber = CompanyRegistrationNumber("12345678")
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "12345678")
 
       AgentSubscriptionStub.withMatchingCtUtrAndCrn(agentSessionForLimitedCompany.utr.get, crn)
@@ -87,7 +94,7 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)
 
-      val result = await(controller.submitCompanyRegNumberForm()(request))
+      val result: Result = await(controller.submitCompanyRegNumberForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showCompanyNotAllowed().url)
@@ -96,16 +103,16 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
 
     "redirect to /no-match page when supplied utr does not matches with DES utr (retrieved using crn)" +
       "when businessType is NOT LLP" in new TestSetupNoJourneyRecord {
-        val crn = CompanyRegistrationNumber("12345678")
+        val crn: CompanyRegistrationNumber = CompanyRegistrationNumber("12345678")
 
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("crn" -> "12345678")
 
         AgentSubscriptionStub.withNonMatchingCtUtrAndCrn(agentSessionForLimitedCompany.utr.get, crn)
 
         sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)
 
-        val result = await(controller.submitCompanyRegNumberForm()(request))
+        val result: Result = await(controller.submitCompanyRegNumberForm()(request))
 
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.BusinessIdentificationController.showNoMatchFound().url)
@@ -115,16 +122,16 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
 
     "redirect to /interrupt page when supplied utr does not matches with DES utr (retrieved using crn) and" +
       "businessType is Llp" in new TestSetupNoJourneyRecord {
-        val crn = CompanyRegistrationNumber("12345678")
+        val crn: CompanyRegistrationNumber = CompanyRegistrationNumber("12345678")
 
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("crn" -> "12345678")
 
         AgentSubscriptionStub.withNonMatchingCtUtrAndCrn(agentSessionForLimitedPartnership.utr.get, crn)
 
         sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedPartnership)
 
-        val result = await(controller.submitCompanyRegNumberForm()(request))
+        val result: Result = await(controller.submitCompanyRegNumberForm()(request))
 
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.CompanyRegistrationController.showLlpInterrupt().url)
@@ -137,24 +144,24 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
 
     "redirect to /unique-taxpayer-reference page utr is not available in agent session" in new TestSetupNoJourneyRecord {
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "12345678")
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany.copy(utr = None))
 
-      val result = await(controller.submitCompanyRegNumberForm()(request))
+      val result: Result = await(controller.submitCompanyRegNumberForm()(request))
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.UtrController.showUtrForm().url)
     }
 
     "handle forms with empty field" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "")
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)
 
-      val result = await(controller.submitCompanyRegNumberForm()(request))
+      val result: Result = await(controller.submitCompanyRegNumberForm()(request))
 
       status(result) shouldBe 200
 
@@ -162,12 +169,12 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
     }
 
     "handle forms with a crn that's too short" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "1234567")
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)
 
-      val result = await(controller.submitCompanyRegNumberForm()(request))
+      val result: Result = await(controller.submitCompanyRegNumberForm()(request))
 
       status(result) shouldBe 200
 
@@ -175,12 +182,12 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
     }
 
     "handle forms with a crn that's too long" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "123456789")
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)
 
-      val result = await(controller.submitCompanyRegNumberForm()(request))
+      val result: Result = await(controller.submitCompanyRegNumberForm()(request))
 
       status(result) shouldBe 200
 
@@ -188,12 +195,12 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
     }
 
     "handle forms with an invalid crn" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("crn" -> "1AA23456")
 
       sessionStoreService.currentSession.agentSession = Some(agentSessionForLimitedCompany)
 
-      val result = await(controller.submitCompanyRegNumberForm()(request))
+      val result: Result = await(controller.submitCompanyRegNumberForm()(request))
 
       status(result) shouldBe 200
 
@@ -205,9 +212,9 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
 
     "display the page with expected content" in new TestSetupNoJourneyRecord {
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(Llp))))
-      val result = await(controller.showLlpInterrupt()(request))
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(Llp)))(request, global, aesCrypto))
+      val result: Result = await(controller.showLlpInterrupt()(request))
 
       result should containMessages("llp-interrupt.title", "llp-interrupt.p1", "llp-interrupt.p2")
 
@@ -218,9 +225,9 @@ class CompanyRegistrationControllerISpecIt extends BaseISpecIt with SessionDataM
 
     "redirect to /business-type if businessType is not LLP" in new TestSetupNoJourneyRecord {
 
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader))))
-      val result = await(controller.showLlpInterrupt()(request))
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(SoleTrader)))(request, global, aesCrypto))
+      val result: Result = await(controller.showLlpInterrupt()(request))
 
       status(result) shouldBe 303
 

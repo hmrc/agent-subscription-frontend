@@ -27,11 +27,12 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{company_registration, llp_interrupt}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -47,7 +48,7 @@ class CompanyRegistrationController @Inject() (
   mcc: MessagesControllerComponents,
   companyRegistrationTemplate: company_registration,
   llpInterruptTemplate: llp_interrupt
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def showCompanyRegNumberForm(): Action[AnyContent] = Action.async { implicit request =>

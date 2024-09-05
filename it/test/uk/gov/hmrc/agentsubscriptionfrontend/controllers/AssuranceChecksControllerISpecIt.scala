@@ -22,10 +22,10 @@ import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType, Postcode}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingCleanAgentWithoutEnrolments
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{testRegistration, validUtr, _}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestSetupNoJourneyRecord}
 import uk.gov.hmrc.domain.Nino
 
@@ -202,7 +202,7 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
           AgentSession(
             Some(BusinessType.SoleTrader),
             utr = Some(validUtr),
-            postcode = Some(Postcode(testPostcode)),
+            postcode = Some(testPostcode),
             registration = Some(testRegistration)
           )
         )
@@ -253,7 +253,7 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
         AgentSession(
           Some(BusinessType.SoleTrader),
           utr = Some(validUtr),
-          postcode = Some(Postcode(testPostcode)),
+          postcode = Some(testPostcode),
           registration = Some(testRegistration)
         )
       )
@@ -322,7 +322,7 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
         .withFormUrlEncodedBody(("variant", "utr"), ("utr", "4000000009"))
         .withSession("saAgentReferenceToCheck" -> "SA6012")
 
-      sessionStoreService.currentSession.agentSession = Some(agentSession.copy(utr = Some(validUtr), postcode = Some(Postcode(validPostcode))))
+      sessionStoreService.currentSession.agentSession = Some(agentSession.copy(utr = Some(validUtr), postcode = Some(validPostcode)))
 
       private val result = await(controller.submitClientDetailsForm(request))
 
@@ -348,7 +348,7 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
           .withFormUrlEncodedBody(("variant", "utr"), ("utr", "   40000      00     009  "))
           .withSession("saAgentReferenceToCheck" -> "SA6012")
       sessionStoreService.currentSession.agentSession = Some(
-        agentSession.copy(utr = Some(validUtr), postcode = Some(Postcode(validPostcode)))
+        agentSession.copy(utr = Some(validUtr), postcode = Some(validPostcode))
       )
 
       private val result = await(controller.submitClientDetailsForm(request))
@@ -378,7 +378,7 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
           AgentSession(
             Some(BusinessType.SoleTrader),
             utr = Some(validUtr),
-            postcode = Some(Postcode(testPostcode)),
+            postcode = Some(testPostcode),
             registration = Some(testRegistration)
           )
         )

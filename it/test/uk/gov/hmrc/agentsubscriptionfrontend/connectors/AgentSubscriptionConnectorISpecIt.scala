@@ -20,7 +20,7 @@ import org.scalatest.Assertion
 import play.api.http.Status
 import play.api.i18n.Lang
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr, Vrn}
+import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DesignatoryDetails.Person
@@ -42,7 +42,7 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
   private lazy val connector: AgentSubscriptionConnector =
     new AgentSubscriptionConnector(app.injector.instanceOf[HttpClient], app.injector.instanceOf[Metrics], app.injector.instanceOf[AppConfig])
 
-  private val utr = Utr("0123456789")
+  private val utr = "0123456789"
   private val crn = CompanyRegistrationNumber("SC123456")
   private val vrn = Vrn("888913457")
   private val dateOfReg = LocalDate.parse("2010-03-31")
@@ -55,7 +55,7 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
         TestData.minimalSubscriptionJourneyRecordWithAmls(authProviderId)
       )
       val result: Option[SubscriptionJourneyRecord] = await(connector.getJourneyById(authProviderId))
-      result.get.businessDetails shouldBe BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode))
+      result.get.businessDetails shouldBe BusinessDetails(SoleTrader, validUtr, validPostcode)
       result.get.amlsData shouldBe Some(AmlsData.registeredUserNoDataEntered)
     }
 
@@ -73,7 +73,7 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
         TestData.minimalSubscriptionJourneyRecordWithAmls(authProviderId).copy(continueId = Some("continue"))
       )
       val result: Option[SubscriptionJourneyRecord] = await(connector.getJourneyByContinueId(ContinueId("continue")))
-      result.get.businessDetails shouldBe BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode))
+      result.get.businessDetails shouldBe BusinessDetails(SoleTrader, validUtr, validPostcode)
       result.get.amlsData shouldBe Some(AmlsData.registeredUserNoDataEntered)
     }
 
@@ -91,7 +91,7 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
         TestData.minimalSubscriptionJourneyRecordWithAmls(authProviderId)
       )
       val result: Option[SubscriptionJourneyRecord] = await(connector.getJourneyByUtr(validUtr))
-      result.get.businessDetails shouldBe BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode))
+      result.get.businessDetails shouldBe BusinessDetails(SoleTrader, validUtr, validPostcode)
       result.get.amlsData shouldBe Some(AmlsData.registeredUserNoDataEntered)
     }
     "return None when there is no existing subscription journey record associated with a utr" in {
@@ -165,9 +165,9 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
 
     "URL-path-encode path parameters" in {
       withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET") {
-        AgentSubscriptionStub.withMatchingUtrAndPostcode(Utr("01234/56789"), "AA1 1AA/&")
+        AgentSubscriptionStub.withMatchingUtrAndPostcode("01234/56789", "AA1 1AA/&")
 
-        val result: Option[Registration] = await(connector.getRegistration(Utr("01234/56789"), "AA1 1AA/&"))
+        val result: Option[Registration] = await(connector.getRegistration("01234/56789", "AA1 1AA/&"))
         result.isDefined shouldBe true
       }
     }

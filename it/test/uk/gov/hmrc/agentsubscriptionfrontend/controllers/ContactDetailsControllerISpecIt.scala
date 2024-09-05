@@ -21,13 +21,13 @@ import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.BusinessDetails
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.BusinessDetails
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Css.ERROR_SUMMARY_LINK
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingAgentEnrolledForNonMTD
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{businessAddress, phoneNumber, registrationName, validPostcode, validUtr}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestData}
 import uk.gov.hmrc.http.BadRequestException
 
@@ -38,7 +38,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
   lazy val controller: ContactDetailsController = app.injector.instanceOf[ContactDetailsController]
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
-  val id = AuthProviderId("12345-credId")
+  val id: AuthProviderId = AuthProviderId("12345-credId")
 
   val returnFromAddressLookupUrl: String = routes.ContactDetailsController.returnFromAddressLookup().url
 
@@ -55,7 +55,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -102,7 +102,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
               businessDetails = BusinessDetails(
                 SoleTrader,
                 validUtr,
-                Postcode(validPostcode),
+                validPostcode,
                 registration = Some(
                   Registration(
                     Some(registrationName),
@@ -149,7 +149,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -184,7 +184,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -220,7 +220,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -259,7 +259,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -296,7 +296,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -333,7 +333,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -372,7 +372,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -408,7 +408,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -431,7 +431,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -463,7 +463,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -498,7 +498,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -538,7 +538,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -585,7 +585,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -631,7 +631,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
               businessDetails = BusinessDetails(
                 SoleTrader,
                 validUtr,
-                Postcode(validPostcode),
+                validPostcode,
                 registration = Some(
                   Registration(
                     Some(registrationName),
@@ -678,7 +678,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration =
                 Some(Registration(None, isSubscribedToAgentServices = false, isSubscribedToETMP = true, businessAddress, None, None, Some("safeId")))
             )
@@ -704,7 +704,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -740,7 +740,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -779,7 +779,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -816,7 +816,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -853,7 +853,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -899,7 +899,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
               businessDetails = BusinessDetails(
                 SoleTrader,
                 validUtr,
-                Postcode(validPostcode),
+                validPostcode,
                 registration = Some(
                   Registration(
                     Some(registrationName),
@@ -944,7 +944,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
         TestData
           .minimalSubscriptionJourneyRecordWithAmls(id)
           .copy(
-            businessDetails = BusinessDetails(SoleTrader, validUtr, Postcode(validPostcode), registration = None)
+            businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = None)
           )
       )
 
@@ -967,7 +967,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -1006,7 +1006,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -1045,7 +1045,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -1082,7 +1082,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -1163,7 +1163,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -1197,7 +1197,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -1233,7 +1233,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -1272,7 +1272,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -1306,7 +1306,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -1325,7 +1325,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
       givenSubscriptionRecordCreated(
         id,
         sjr.copy(
-          contactTelephoneData = Some(ContactTelephoneData(true, Some(phoneNumber)))
+          contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = true, Some(phoneNumber)))
         )
       )
 
@@ -1345,7 +1345,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -1364,7 +1364,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
       givenSubscriptionRecordCreated(
         id,
         sjr.copy(
-          contactTelephoneData = Some(ContactTelephoneData(false, None))
+          contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = false, None))
         )
       )
 
@@ -1384,7 +1384,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -1427,7 +1427,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
             businessDetails = BusinessDetails(
               SoleTrader,
               validUtr,
-              Postcode(validPostcode),
+              validPostcode,
               registration = Some(
                 Registration(
                   Some(registrationName),
@@ -1464,7 +1464,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -1483,7 +1483,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
       givenSubscriptionRecordCreated(
         id,
         sjr.copy(
-          contactTelephoneData = Some(ContactTelephoneData(false, Some("01273111111")))
+          contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = false, Some("01273111111")))
         )
       )
 
@@ -1503,7 +1503,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),
@@ -1540,7 +1540,7 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
           businessDetails = BusinessDetails(
             SoleTrader,
             validUtr,
-            Postcode(validPostcode),
+            validPostcode,
             registration = Some(
               Registration(
                 Some(registrationName),

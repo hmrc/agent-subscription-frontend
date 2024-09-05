@@ -18,7 +18,6 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -30,11 +29,12 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service._
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.postcode
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -51,7 +51,7 @@ class PostcodeController @Inject() (
   val subscriptionJourneyService: SubscriptionJourneyService,
   mcc: MessagesControllerComponents,
   postcodeTemplate: postcode
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def showPostcodeForm(): Action[AnyContent] = Action.async { implicit request =>
@@ -59,7 +59,7 @@ class PostcodeController @Inject() (
       withValidSession { (businessType, existingSession) =>
         existingSession.postcode match {
           case Some(postcode) =>
-            Ok(postcodeTemplate(postcodeForm.fill(postcode), businessType))
+            Ok(postcodeTemplate(postcodeForm.fill(Postcode(postcode)), businessType))
           case None => Ok(postcodeTemplate(postcodeForm, businessType))
         }
       }
@@ -75,7 +75,7 @@ class PostcodeController @Inject() (
             formWithErrors => Ok(postcodeTemplate(formWithErrors, businessType)),
             validPostcode =>
               existingSession.utr match {
-                case Some(utr) => checkSubscriptionStatusAndUpdateSession(utr, validPostcode, existingSession)
+                case Some(utr) => checkSubscriptionStatusAndUpdateSession(utr, validPostcode.value, existingSession)
                 case None      => Redirect(routes.UtrController.showUtrForm())
               }
           )
@@ -83,7 +83,7 @@ class PostcodeController @Inject() (
     }
   }
 
-  private def checkSubscriptionStatusAndUpdateSession(utr: Utr, postcode: Postcode, agentSession: AgentSession)(implicit
+  private def checkSubscriptionStatusAndUpdateSession(utr: String, postcode: String, agentSession: AgentSession)(implicit
     hc: HeaderCarrier,
     request: Request[AnyContent],
     agent: Agent
@@ -102,7 +102,7 @@ class PostcodeController @Inject() (
         Redirect(routes.BusinessIdentificationController.showNoMatchFound())
     }
 
-  private def checkAssuranceAndUpdateSession(utr: Utr, postcode: Postcode, registration: Registration, agentSession: AgentSession)(implicit
+  private def checkAssuranceAndUpdateSession(utr: String, postcode: String, registration: Registration, agentSession: AgentSession)(implicit
     hc: HeaderCarrier,
     request: Request[AnyContent],
     agent: Agent

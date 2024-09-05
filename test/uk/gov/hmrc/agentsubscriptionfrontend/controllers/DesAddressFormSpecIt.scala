@@ -21,12 +21,10 @@ import org.scalatest.EitherValues
 import org.slf4j.Logger
 import play.api.LoggerLike
 import play.api.data.FormError
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.denylistedPostcodes.PostcodesLoader
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DesAddress
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{ResettingMockitoSugar, testAddressLookupFrontendAddress, testCountry}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.UnitSpec
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{ResettingMockitoSugar, UnitSpec, testAddressLookupFrontendAddress, testCountry}
 
 class DesAddressFormSpecIt extends UnitSpec with ResettingMockitoSugar with EitherValues {
 
@@ -61,7 +59,7 @@ class DesAddressFormSpecIt extends UnitSpec with ResettingMockitoSugar with Eith
       .map(PostcodesLoader.formatPostcode(_).get)
 
   private val validCountryCode = "GB"
-  private val utr = Utr("1234567890")
+  private val utr = "1234567890"
   private val slf4jLogger = resettingMock[Logger]
   private val logger = new LoggerLike {
     override val logger: Logger = slf4jLogger
@@ -133,7 +131,7 @@ class DesAddressFormSpecIt extends UnitSpec with ResettingMockitoSugar with Eith
       desAddress.addressLine2 shouldBe Some(validLine)
       desAddress.addressLine3 shouldBe Some(validLine)
       desAddress.addressLine4 shouldBe Some(validLine)
-      verify(slf4jLogger).warn(s"More than 4 address lines for UTR: ${utr.value}, discarding lines 5 and up")
+      verify(slf4jLogger).warn(s"More than 4 address lines for UTR: $utr, discarding lines 5 and up")
     }
 
     "fail when address line 1 is present but invalid" in {

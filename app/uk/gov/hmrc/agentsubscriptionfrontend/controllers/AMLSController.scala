@@ -29,12 +29,13 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{AmlsService, MongoDBSessio
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -58,7 +59,7 @@ class AMLSController @Inject() (
   amlsNumberNotFoundTemplate: amls_number_not_found,
   amlsDateNotMatchedTemplate: amls_date_not_matched,
   amlsRecordIneligibleStatusTemplate: amls_record_ineligible_status
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   import AMLSForms._

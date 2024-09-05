@@ -16,56 +16,55 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.ScalaFutures
 import play.api.i18n.Lang
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{AnyContent, Cookie, Request}
+import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.VerifiedEmails
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, _}
+import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.{givenSubscriptionJourneyRecordExists, givenSubscriptionRecordCreated}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionStub, AuthStub}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{utr, _}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestSetupNoJourneyRecord}
 import uk.gov.hmrc.http.SessionKeys
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait TestSetupWithCompleteJourneyRecord {
   givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordNoMappings)
-  givenAgentIsNotManuallyAssured(utr.value)
+  givenAgentIsNotManuallyAssured(utr)
 }
 
 trait TestSetupWithCouldBePartiallySubscribedRecord {
   givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), couldBePartiallySubscribedJourneyRecord)
-  givenAgentIsNotManuallyAssured(utr.value)
+  givenAgentIsNotManuallyAssured(utr)
 }
 
 trait TestSetupWithMinimalSubscriptionJourneyRecord {
   givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), minimalSubscriptionJourneyRecord(AuthProviderId("12345-credId")))
-  givenAgentIsNotManuallyAssured(utr.value)
+  givenAgentIsNotManuallyAssured(utr)
 }
 
 trait TestSetupWithMinimalSubscriptionJourneyRecordAndRegistration {
   givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordNoMappings.copy(amlsData = None))
-  givenAgentIsNotManuallyAssured(utr.value)
+  givenAgentIsNotManuallyAssured(utr)
 }
 
 trait TestSetupWithCompleteJourneyRecordWithMapping {
   givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings)
-  givenAgentIsNotManuallyAssured(utr.value)
+  givenAgentIsNotManuallyAssured(utr)
 }
 
 trait TestSetupWithCompleteJourneyRecordAndCreate {
   givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordNoMappings)
-  givenAgentIsNotManuallyAssured(utr.value)
+  givenAgentIsNotManuallyAssured(utr)
   givenSubscriptionRecordCreated(id, completeJourneyRecordNoMappings)
 }
 
@@ -74,7 +73,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
   override protected def appBuilder: GuiceApplicationBuilder =
     super.appBuilder
 
-  protected val utr = Utr("2000000000")
+  protected val utr = "2000000000"
   protected val knownFactsPostcode = "AA1 2AA"
 
   protected val returnFromAddressLookupUrl: String = "/agent-subscription/return-from-address-lookup"
@@ -84,29 +83,29 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
   protected lazy val redirectUrl = "https://www.gov.uk/"
 
-  val amlsDetails =
+  val amlsDetails: AmlsDetails =
     AmlsDetails("supervisory", membershipNumber = Some("123456789"), appliedOn = None, membershipExpiresOn = Some(LocalDate.now().plusDays(10)))
 
-  val agentSession = Some(
-    AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), postcode = Some(Postcode("AA1 2AA")), registration = Some(testRegistration))
+  val agentSession: Some[AgentSession] = Some(
+    AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), postcode = Some("AA1 2AA"), registration = Some(testRegistration))
   )
 
   "showCheckAnswers" should {
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.showCheckAnswers(request))
 
     "redirect to sign in with a new user ID page if user has enrolled in any other services" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
-      val result = await(controller.showCheckAnswers(request))
+      val result: Result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
       result.header.headers("Location") should include("/agent-subscription/sign-in-with-new-user-id")
       noMetricExpectedAtThisPoint()
     }
 
     "redirect to /business-type if no registration data found" in new TestSetupWithMinimalSubscriptionJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-      val result = await(controller.showCheckAnswers(request))
+      val result: Result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
 
       redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
@@ -115,9 +114,9 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
     "redirect to /check-money-laundering-compliance if not manually assured and no amls data found" in
       new TestSetupWithMinimalSubscriptionJourneyRecordAndRegistration {
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-        val result = await(controller.showCheckAnswers(request))
+        val result: Result = await(controller.showCheckAnswers(request))
         status(result) shouldBe 303
 
         redirectLocation(result) shouldBe Some(routes.AMLSController.showAmlsRegisteredPage().url)
@@ -127,8 +126,8 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     "redirect to /contact-email-check if no contact email address found" in {
 
       givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings.copy(contactEmailData = None))
-      givenAgentIsNotManuallyAssured(utr.value)
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      givenAgentIsNotManuallyAssured(utr)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       val result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
@@ -140,8 +139,8 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     "redirect to /trading-name if no contact trading name data found" in {
 
       givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings.copy(contactTradingNameData = None))
-      givenAgentIsNotManuallyAssured(utr.value)
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      givenAgentIsNotManuallyAssured(utr)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       val result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
@@ -153,8 +152,8 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     "redirect to /check-main-trading-address if no contact trading address data found" in {
 
       givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings.copy(contactTradingAddressData = None))
-      givenAgentIsNotManuallyAssured(utr.value)
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      givenAgentIsNotManuallyAssured(utr)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       val result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
@@ -165,9 +164,9 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
     "show subscription answers page if user has not already subscribed and has clean creds and also cache the goBack url" in
       new TestSetupWithCompleteJourneyRecord {
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-        val result = await(controller.showCheckAnswers(request))
+        val result: Result = await(controller.showCheckAnswers(request))
         result should containMessages(
           "checkAnswers.title",
           "checkAnswers.description.p3",
@@ -188,10 +187,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       }
 
     "show subscription answers page without AMLS section if the agent is on the manually assured list" in new TestSetupWithCompleteJourneyRecord {
-      givenAgentIsManuallyAssured(validUtr.value)
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      givenAgentIsManuallyAssured(validUtr)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-      val result = await(controller.showCheckAnswers(request))
+      val result: Result = await(controller.showCheckAnswers(request))
       result should containMessages(
         "checkAnswers.title",
         "checkAnswers.change.button",
@@ -208,8 +207,8 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
     "show subscription answers page with mapping " in {
       givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings.copy(continueId = Some("continue-id")))
-      givenAgentIsManuallyAssured(validUtr.value)
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      givenAgentIsManuallyAssured(validUtr)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       val result = await(controller.showCheckAnswers(request))
       result should containMessages(
@@ -230,7 +229,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     }
 
     "throw an exception when there is no continue url in the record" in new TestSetupWithCompleteJourneyRecordWithMapping {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
       intercept[RuntimeException] {
         await(controller.showCheckAnswers(request))
@@ -245,9 +244,9 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           verifiedEmails = VerifiedEmails()
         )
       )
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-      val result = await(controller.showCheckAnswers(request))
+      val result: Result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.EmailVerificationController.verifyEmail().url)
     }
@@ -257,9 +256,9 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.submitCheckAnswers(request))
 
     "redirect to sign in with a new user id page if user has enrolled in any other services" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
 
-      val result = await(controller.submitCheckAnswers(request))
+      val result: Result = await(controller.submitCheckAnswers(request))
       status(result) shouldBe 303
       result.header.headers("Location") should include("/agent-subscription/sign-in-with-new-user-id")
       noMetricExpectedAtThisPoint()
@@ -269,9 +268,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       "agency is already subscribed to MTD" in new TestSetupWithCompleteJourneyRecord {
         AgentSubscriptionStub.subscriptionWillConflict(validUtr, subscriptionRequestWithNoEdit())
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] =
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
 
-        val result = await(controller.submitCheckAnswers(request))
+        val result: Result = await(controller.submitCheckAnswers(request))
 
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.BusinessIdentificationController.showAlreadySubscribed().url
@@ -287,21 +287,21 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       val arn = "AARN0000001"
       AuthStub.authenticatedAgent(arn, "12345-credId")
 
-      implicit val request = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(SessionKeys.authToken -> "Bearer XYZ")
     }
     def resultOf(request: Request[AnyContent]) = controller.showSubscriptionComplete(request)
 
     behave like aPageWithFeedbackLinks(resultOf, new AuthRequest {}.request)
 
     "display the ARN in a raw format (without dashes)" in new AuthRequest with TestSetupWithCompleteJourneyRecord {
-      val expectedArn = arn
+      val expectedArn: String = arn
       expectedArn shouldBe "AARN0000001"
       resultOf(request).futureValue should containSubstrings(expectedArn)
     }
 
     "display the static page content" in new AuthRequest with TestSetupWithCompleteJourneyRecordWithMapping {
 
-      val result = await(resultOf(request))
+      val result: Result = await(resultOf(request))
 
       result should containMessages(
         "subscriptionComplete.title",
@@ -317,7 +317,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
     "display the correct content when the user is partially-subscribed (has skipped task-list)" in new AuthRequest
       with TestSetupWithCouldBePartiallySubscribedRecord {
-      val result = await(resultOf(request))
+      val result: Result = await(resultOf(request))
 
       result should containMessages(
         "subscriptionComplete.title",
@@ -332,7 +332,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     }
 
     "continue button redirects to agent services account" in new AuthRequest with TestSetupWithCompleteJourneyRecord {
-      val result = await(resultOf(request))
+      val result: Result = await(resultOf(request))
       result should containMessages(
         "subscriptionComplete.button.continueToASAccount"
       )
@@ -368,15 +368,15 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
         givenAddressLookupInit(returnFromAddressLookupUrl)
 
-        implicit val request = subscriptionDetailsRequest()
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = subscriptionDetailsRequest()
 
-        val result = await(controller.showBusinessAddressForm(request))
+        val result: Result = await(controller.showBusinessAddressForm(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe returnFromAddressLookupUrl
 
         val addressId = "addr1"
         stubAddressLookupReturnedAddress(addressId, subscriptionRequest())
-        val result2 =
+        val result2: Result =
           await(controller.returnFromAddressLookup(addressId)(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
         status(result2) shouldBe 303
@@ -409,15 +409,15 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
         givenAddressLookupInit(returnFromAddressLookupUrl)
 
-        implicit val request = subscriptionDetailsRequest()
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = subscriptionDetailsRequest()
 
-        val result = await(controller.showBusinessAddressForm(request))
+        val result: Result = await(controller.showBusinessAddressForm(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe returnFromAddressLookupUrl
 
         val addressId = "addr1"
         stubAddressLookupReturnedAddress(addressId, subscriptionRequest(), Seq("Line 4", "Line 5"))
-        val result2 =
+        val result2: Result =
           await(controller.returnFromAddressLookup(addressId)(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
         status(result2) shouldBe 303
@@ -446,16 +446,16 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           )
         )
 
-        implicit val request = subscriptionDetailsRequest()
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = subscriptionDetailsRequest()
         AgentSubscriptionStub.subscriptionWillSucceed(utr, subscriptionRequest(town = None))
 
         givenAddressLookupInit(returnFromAddressLookupUrl)
-        val result = await(controller.showBusinessAddressForm(request))
+        val result: Result = await(controller.showBusinessAddressForm(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe returnFromAddressLookupUrl
 
         stubAddressLookupReturnedAddress("addr1", subscriptionRequest(town = None))
-        val result2 =
+        val result2: Result =
           await(controller.returnFromAddressLookup("addr1")(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
         status(result2) shouldBe 303
@@ -488,15 +488,15 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
       givenAddressLookupInit(returnFromAddressLookupUrl)
 
-      implicit val detailsRequest = subscriptionDetailsRequest()
+      implicit val detailsRequest: FakeRequest[AnyContentAsFormUrlEncoded] = subscriptionDetailsRequest()
 
-      val result = await(controller.showBusinessAddressForm(detailsRequest))
+      val result: Result = await(controller.showBusinessAddressForm(detailsRequest))
       status(result) shouldBe 303
       redirectLocation(result).head shouldBe returnFromAddressLookupUrl
 
       val addressId = "addr1"
       stubAddressLookupReturnedAddress(addressId, subscriptionRequest(countryCode = "AR"))
-      val result2 =
+      val result2: Result =
         await(controller.returnFromAddressLookup(addressId)(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
       status(result2) shouldBe 303
@@ -525,39 +525,39 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       )
       givenSubscriptionJourneyRecordExists(AuthProviderId("54321-credId"), completeJourneyRecordNoMappings)
 
-      val request = subscriptionRequest()
+      val request: SubscriptionRequest = subscriptionRequest()
       AgentSubscriptionStub.subscriptionWillSucceed(utr, request)
 
       givenAddressLookupInit(returnFromAddressLookupUrl)
 
-      implicit val fakeRequest1 = subscriptionDetailsRequest()
+      implicit val fakeRequest1: FakeRequest[AnyContentAsFormUrlEncoded] = subscriptionDetailsRequest()
 
-      val user1Result1 = await(controller.showBusinessAddressForm(fakeRequest1))
+      val user1Result1: Result = await(controller.showBusinessAddressForm(fakeRequest1))
       status(user1Result1) shouldBe 303
       redirectLocation(user1Result1).head shouldBe returnFromAddressLookupUrl
 
-      val request2 = subscriptionRequest2()
+      val request2: SubscriptionRequest = subscriptionRequest2()
       AgentSubscriptionStub.subscriptionWillSucceed(utr, request2, "ARN00002")
 
-      val fakeRequest2 = subscriptionDetailsRequest2()
+      val fakeRequest2: FakeRequest[AnyContentAsFormUrlEncoded] = subscriptionDetailsRequest2()
 
-      val user2Result1 = await(controller.showBusinessAddressForm(fakeRequest2))
+      val user2Result1: Result = await(controller.showBusinessAddressForm(fakeRequest2))
       status(user2Result1) shouldBe 303
       redirectLocation(user2Result1).head shouldBe returnFromAddressLookupUrl
 
       stubAddressLookupReturnedAddress("addr1", request)
 
-      val fakeRequest3 = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      val fakeRequest3: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-      val user1Result2 =
+      val user1Result2: Result =
         await(controller.returnFromAddressLookup("addr1")(fakeRequest3))
 
       status(user1Result2) shouldBe 303
       redirectLocation(user1Result2).head shouldBe routes.SubscriptionController.showCheckAnswers().url
 
       stubAddressLookupReturnedAddress("addr2", request2)
-      val fakeRequest4 = authenticatedAs(user = subscribing2ndCleanAgentWithoutEnrolments)
-      val user2Result2 = await(controller.returnFromAddressLookup("addr2")(fakeRequest4))
+      val fakeRequest4: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(user = subscribing2ndCleanAgentWithoutEnrolments)
+      val user2Result2: Result = await(controller.returnFromAddressLookup("addr2")(fakeRequest4))
 
       status(user2Result2) shouldBe 303
       redirectLocation(user2Result2).head shouldBe routes.SubscriptionController.showCheckAnswers().url
@@ -565,31 +565,31 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
     "display address_form_with_errors and report related errors" when {
       "postcode is denylisted" in new TestSetupWithCompleteJourneyRecord {
-        implicit val request = subscriptionDetailsRequest()
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = subscriptionDetailsRequest()
 
         givenAddressLookupInit(returnFromAddressLookupUrl)
-        val result0 = await(controller.showBusinessAddressForm(request))
+        val result0: Result = await(controller.showBusinessAddressForm(request))
         status(result0) shouldBe 303
         redirectLocation(result0).head shouldBe returnFromAddressLookupUrl
 
         givenAddressLookupReturnsAddress("addr1", postcode = "AB10 1ZT")
-        val result =
+        val result: Result =
           await(controller.returnFromAddressLookup("addr1")(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
         result should containMessages("error.postcode.denylisted", "invalidAddress.title")
       }
 
       "the address is not valid according to DES's rules" in new TestSetupWithCompleteJourneyRecord {
-        implicit val request = subscriptionDetailsRequest()
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = subscriptionDetailsRequest()
 
         givenAddressLookupInit(returnFromAddressLookupUrl)
-        val result0 = await(controller.showBusinessAddressForm(request))
+        val result0: Result = await(controller.showBusinessAddressForm(request))
         status(result0) shouldBe 303
         redirectLocation(result0).head shouldBe returnFromAddressLookupUrl
 
         val tooLongLine = "123456789012345678901234567890123456"
         givenAddressLookupReturnsAddress("addr1", addressLine1 = tooLongLine)
-        val result =
+        val result: Result =
           await(controller.returnFromAddressLookup("addr1")(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
         result should containSubstrings(htmlEscapedMessage("error.addressline.1.maxlength", 35))
@@ -602,18 +602,18 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     "subscribe and redirect to /check-answers if there are no form errors" in new TestSetupNoJourneyRecord {
       AgentSubscriptionStub.subscriptionWillSucceed(utr, subscriptionRequest())
 
-      implicit val request = desAddressForm()
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = desAddressForm()
       sessionStoreService.currentSession.agentSession = agentSession
 
-      val result = await(controller.submitModifiedAddress()(request))
+      val result: Result = await(controller.submitModifiedAddress()(request))
 
       status(result) shouldBe 303
       redirectLocation(result).head shouldBe routes.SubscriptionController.showCheckAnswers().url
     }
 
     "redirect to /business-type if there is no valid session" in new TestSetupNoJourneyRecord {
-      implicit val request = desAddressForm()
-      val result = await(controller.submitModifiedAddress()(request))
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = desAddressForm()
+      val result: Result = await(controller.submitModifiedAddress()(request))
 
       resultShouldBeSessionDataMissing(result)
       noMetricExpectedAtThisPoint()
@@ -622,10 +622,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     "redisplay address_form_with_errors and show errors" when {
       "the address is not valid according to DES's rules" in new TestSetupNoJourneyRecord {
         val tooLongAddressLine = "12345678901234567890123456789012345678901234567890"
-        implicit val request = desAddressForm(addressLine1 = tooLongAddressLine)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = desAddressForm(addressLine1 = tooLongAddressLine)
         sessionStoreService.currentSession.agentSession = agentSession
 
-        val result = await(controller.submitModifiedAddress()(request))
+        val result: Result = await(controller.submitModifiedAddress()(request))
 
         result should containSubstrings(htmlEscapedMessage("error.addressline.1.maxlength", 35), tooLongAddressLine)
       }
@@ -637,10 +637,11 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       "all fields are supplied" in new TestSetupWithCompleteJourneyRecordAndCreate {
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] =
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.continueUrl = Some("/some/url")
 
-        val result = await(controller.submitCheckAnswers(request))
+        val result: Result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
 
@@ -651,10 +652,11 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       "some fields are supplied" in new TestSetupWithCompleteJourneyRecordAndCreate {
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] =
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.continueUrl = Some("/some/url")
 
-        val result = await(controller.submitCheckAnswers(request))
+        val result: Result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
 
@@ -665,9 +667,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       "amlsDetails are passed in" in new TestSetupWithCompleteJourneyRecordAndCreate {
         AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit())
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] =
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.continueUrl = Some("/some/url")
-        val result = await(controller.submitCheckAnswers(request))
+        val result: Result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
 
@@ -680,9 +683,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       "agent has been terminated" in new TestSetupWithCompleteJourneyRecordAndCreate {
         AgentSubscriptionStub.subscriptionWillFailForTerminatedAgent(validUtr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] =
+          authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.continueUrl = Some("/some/url")
-        val result = await(controller.submitCheckAnswers(request))
+        val result: Result = await(controller.submitCheckAnswers(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.StartController.showCannotCreateAccount().url
 
@@ -694,7 +698,8 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     "redirect to email verification if the email is not verified" in new TestSetupWithCompleteJourneyRecordAndCreate {
       AgentSubscriptionStub.subscriptionWillSucceed(validUtr, subscriptionRequestWithNoEdit(), arn = "TARN00023")
 
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] =
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withCookies(Cookie("PLAY_LANG", "en"))
       sessionStoreService.currentSession.continueUrl = Some("/some/url")
 
       givenSubscriptionJourneyRecordExists(
@@ -705,7 +710,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         )
       )
 
-      val result = await(controller.submitCheckAnswers(request))
+      val result: Result = await(controller.submitCheckAnswers(request))
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.EmailVerificationController.verifyEmail().url)
     }
@@ -713,9 +718,9 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
   "GET /sign-in-with-new-user-id" should {
     "show the sign in with new user id error page" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
 
-      val result = await(controller.showSignInWithNewID(request))
+      val result: Result = await(controller.showSignInWithNewID(request))
 
       status(result) shouldBe 200
       checkHtmlResultWithBodyText(
@@ -750,7 +755,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
   private def subscriptionDetailsRequest(keyToRemove: String = "", additionalParameters: Seq[(String, String)] = Seq()) =
     authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
       Seq(
-        "utr"                -> utr.value,
+        "utr"                -> utr,
         "knownFactsPostcode" -> knownFactsPostcode,
         "name"               -> "My Agency",
         "email"              -> "agency@example.com",
@@ -785,7 +790,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       amlsDetails = Some(amlsDetails)
     )
 
-  protected def subscriptionRequestWithNoEdit() =
+  protected def subscriptionRequestWithNoEdit(): SubscriptionRequest =
     SubscriptionRequest(
       utr = validUtr,
       knownFacts = SubscriptionRequestKnownFacts(validPostcode),
@@ -809,7 +814,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
   private def subscriptionDetailsRequest2(keyToRemove: String = "", additionalParameters: Seq[(String, String)] = Seq()) =
     authenticatedAs(user = subscribing2ndCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
       Seq(
-        "utr"                -> utr.value,
+        "utr"                -> utr,
         "knownFactsPostcode" -> "BA1 2AA",
         "name"               -> "My Agency 2",
         "email"              -> "agency2@example.com",
@@ -855,7 +860,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       unsupportedAddressLines
     )
 
-  protected def verifySubscriptionRequestSent(subscriptionRequest: SubscriptionRequest) =
+  protected def verifySubscriptionRequestSent(subscriptionRequest: SubscriptionRequest): Unit =
     verify(
       postRequestedFor(urlEqualTo("/agent-subscription/subscription"))
         .withRequestBody(containing(subscriptionRequest.agency.address.addressLine1))

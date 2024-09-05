@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AuthProviderId, ContinueId}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -32,7 +31,7 @@ class SubscriptionJourneyService @Inject() (agentSubscriptionConnector: AgentSub
   def getMandatoryJourneyRecord(continueId: ContinueId)(implicit hc: HeaderCarrier): Future[SubscriptionJourneyRecord] =
     agentSubscriptionConnector.getJourneyByContinueId(continueId).map(extractMandatoryRecord)
 
-  def existsJourneyForUtr(utr: Utr)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def existsJourneyForUtr(utr: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     agentSubscriptionConnector.getJourneyByUtr(utr).map(_.isDefined)
 
   def getJourneyRecord(internalId: AuthProviderId)(implicit hc: HeaderCarrier): Future[Option[SubscriptionJourneyRecord]] =
@@ -41,7 +40,7 @@ class SubscriptionJourneyService @Inject() (agentSubscriptionConnector: AgentSub
   def getMandatoryJourneyRecord(internalId: AuthProviderId)(implicit hc: HeaderCarrier): Future[SubscriptionJourneyRecord] =
     agentSubscriptionConnector.getJourneyById(internalId).map(extractMandatoryRecord)
 
-  def getJourneyByUtr(utr: Utr)(implicit hc: HeaderCarrier): Future[Option[SubscriptionJourneyRecord]] =
+  def getJourneyByUtr(utr: String)(implicit hc: HeaderCarrier): Future[Option[SubscriptionJourneyRecord]] =
     agentSubscriptionConnector.getJourneyByUtr(utr)
 
   private def extractMandatoryRecord(record: Option[SubscriptionJourneyRecord]): SubscriptionJourneyRecord =

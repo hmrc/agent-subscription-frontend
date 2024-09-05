@@ -65,7 +65,7 @@ trait EndpointBehaviours {
     request: => Request[AnyContent] = FakeRequest("GET", "url").withSession(SessionKeys.authToken -> "Bearer XYZ")
   ): Unit =
     "have a 'is this page not working properly?' link" in new TestSetupWithCompleteJourneyRecord {
-      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(request, global))
+      await(sessionStoreService.cacheAgentSession(AgentSession(Some(BusinessType.SoleTrader)))(request, global, aesCrypto))
       val result = action(request)
 
       bodyOf(result.futureValue) should include("Is this page not working properly?")
@@ -81,7 +81,7 @@ trait EndpointBehaviours {
   ): Unit = {
     def doRequestWithContinueUrl(continueUrl: String) = {
       implicit val request = FakeRequest("GET", s"?continue=${urlencoded(continueUrl)}").withSession(sessionKeys: _*)
-      await(sessionStoreService.cacheAgentSession(AgentSession(businessType = Some(BusinessType.SoleTrader))))
+      await(sessionStoreService.cacheAgentSession(AgentSession(businessType = Some(BusinessType.SoleTrader)))(request, global, aesCrypto))
       val result = action(request)
       (request, result)
     }
@@ -125,7 +125,7 @@ trait EndpointBehaviours {
 
     "not include a continue URL if it's not provided" in new TestSetupNoJourneyRecord {
       implicit val request = FakeRequest("GET", "/").withSession(sessionKeys: _*)
-      await(sessionStoreService.cacheAgentSession(AgentSession(businessType = Some(BusinessType.SoleTrader))))
+      await(sessionStoreService.cacheAgentSession(AgentSession(businessType = Some(BusinessType.SoleTrader)))(request, global, aesCrypto))
       val result = action(request)
       assertContinueUrlNotKept(request, result.futureValue, None)
     }

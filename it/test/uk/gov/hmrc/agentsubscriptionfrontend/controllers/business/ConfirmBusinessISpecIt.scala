@@ -17,18 +17,17 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers.business
 
 import play.api.i18n.Lang
-import play.api.mvc.{AnyContentAsFormUrlEncoded, Cookie}
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Cookie, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{BusinessIdentificationController, routes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
-import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub._
+import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.{subscribingAgentEnrolledForNonMTD, subscribingCleanAgentWithoutEnrolments}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{businessAddress, testPostcode, utr, _}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestSetupNoJourneyRecord}
 import uk.gov.hmrc.http.BadRequestException
 
@@ -40,15 +39,15 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.showConfirmBusinessForm(request))
 
     "display the confirm business page if the current user is logged in and has affinity group = Agent" in new TestSetupNoJourneyRecord {
-      val utr = Utr("0123456789")
+      val utr = "0123456789"
       val postcode = "AA11AA"
       val registrationName = "My Agency"
 
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(utr), registration = Some(testRegistration)))
 
-      val result = await(controller.showConfirmBusinessForm(request))
+      val result: Result = await(controller.showConfirmBusinessForm(request))
 
       result should containMessages("confirmBusiness.title", "button.back", "confirmBusiness.option.yes", "confirmBusiness.option.no")
 
@@ -64,44 +63,44 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
     }
 
     "show utr in the correct format" in new TestSetupNoJourneyRecord {
-      val utr = Utr("0123456789")
+      val utr = "0123456789"
 
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(utr), registration = Some(testRegistration)))
 
-      val result = await(controller.showConfirmBusinessForm(request))
+      val result: Result = await(controller.showConfirmBusinessForm(request))
 
       result should containSubstrings("01234 56789")
     }
 
     "redirect to GET /business-type when no businessType in session" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       redirectLocation(await(controller.showConfirmBusinessForm(request))).get shouldBe routes.BusinessTypeController
         .showBusinessTypeForm()
         .url
     }
 
     "show a back button correct when they are NOT registered for vat" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] =
         authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(utr), registeredForVat = Some("No"), registration = Some(testRegistration)))
 
-      val result = await(controller.showConfirmBusinessForm(request))
+      val result: Result = await(controller.showConfirmBusinessForm(request))
 
       result should containSubstrings(routes.VatDetailsController.showRegisteredForVatForm().url)
     }
 
     "show a back button correct when they are registered for vat and provided vat details" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] =
         authenticatedAs(subscribingAgentEnrolledForNonMTD)
 
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(utr), registeredForVat = Some("Yes"), registration = Some(testRegistration)))
 
-      val result = await(controller.showConfirmBusinessForm(request))
+      val result: Result = await(controller.showConfirmBusinessForm(request))
 
       result should containSubstrings(routes.VatDetailsController.showVatDetailsForm().url)
     }
@@ -113,68 +112,68 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
 
     "User chooses Yes" should {
       "redirect to showAlreadySubscribed if the user is already subscribed and isSubscribedToAgentServices=true" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes")
         sessionStoreService.currentSession.agentSession = Some(
           AgentSession(Some(BusinessType.SoleTrader), utr = Some(utr), registration = Some(testRegistration.copy(isSubscribedToAgentServices = true)))
         )
 
-        val result = await(controller.submitConfirmBusinessForm(request))
+        val result: Result = await(controller.submitConfirmBusinessForm(request))
 
         result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController.showAlreadySubscribed().url
         metricShouldExistAndBeUpdated("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
       }
 
       "redirect to task list if the user has clean creds and isSubscribedToAgentServices=false" in new TestSetupNoJourneyRecord {
-        val agentSession = AgentSession(
+        val agentSession: AgentSession = AgentSession(
           Some(BusinessType.SoleTrader),
           utr = Some(utr),
           registration = Some(testRegistration.copy(isSubscribedToAgentServices = false)),
-          postcode = Some(Postcode("AA1 1AA"))
+          postcode = Some("AA1 1AA")
         )
 
-        val sjr = SubscriptionJourneyRecord.fromAgentSession(agentSession, AuthProviderId("12345-credId"))
+        val sjr: SubscriptionJourneyRecord = SubscriptionJourneyRecord.fromAgentSession(agentSession, AuthProviderId("12345-credId"))
 
         givenSubscriptionRecordCreated(AuthProviderId("12345-credId"), sjr.copy(continueId = None))
 
-        givenAgentIsNotManuallyAssured(utr.value)
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+        givenAgentIsNotManuallyAssured(utr)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes")
         sessionStoreService.currentSession.agentSession = Some(agentSession)
 
-        val result = await(controller.submitConfirmBusinessForm(request))
+        val result: Result = await(controller.submitConfirmBusinessForm(request))
 
         result.header.headers(LOCATION) shouldBe routes.TaskListController.showTaskList().url
       }
 
       "redirect to task list if user has clean creds " +
         "and isSubscribedToAgentServices=false and is a MAA" in new TestSetupNoJourneyRecord {
-          val agentSession = AgentSession(
+          val agentSession: AgentSession = AgentSession(
             Some(BusinessType.SoleTrader),
             utr = Some(utr),
             registration = Some(testRegistration.copy(isSubscribedToAgentServices = false)),
-            postcode = Some(Postcode("AA11AA"))
+            postcode = Some("AA11AA")
           )
 
-          val sjr = SubscriptionJourneyRecord.fromAgentSession(agentSession, AuthProviderId("12345-credId"))
+          val sjr: SubscriptionJourneyRecord = SubscriptionJourneyRecord.fromAgentSession(agentSession, AuthProviderId("12345-credId"))
           givenSubscriptionRecordCreated(AuthProviderId("12345-credId"), sjr.copy(continueId = None))
-          givenAgentIsManuallyAssured(utr.value)
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+          givenAgentIsManuallyAssured(utr)
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(agentSession)
 
-          val result = await(controller.submitConfirmBusinessForm(request))
+          val result: Result = await(controller.submitConfirmBusinessForm(request))
 
           result.header.headers(LOCATION) shouldBe routes.TaskListController.showTaskList().url
         }
       "redirect to subscription complete if user is partially subscribed with clean creds" in new TestSetupNoJourneyRecord {
-        givenAgentIsNotManuallyAssured(utr.value)
+        givenAgentIsNotManuallyAssured(utr)
         withPartiallySubscribedAgent(utr, testPostcode)
         partialSubscriptionWillSucceed(
           CompletePartialSubscriptionBody(utr = utr, knownFacts = SubscriptionRequestKnownFacts(testPostcode), langForEmail = Some(Lang("en")))
         )
 
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           .withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.agentSession = Some(
@@ -182,18 +181,18 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
             Some(BusinessType.SoleTrader),
             utr = Some(utr),
             registration = Some(testRegistration.copy(isSubscribedToETMP = true)),
-            postcode = Some(Postcode(testPostcode))
+            postcode = Some(testPostcode)
           )
         )
 
-        val result = await(controller.submitConfirmBusinessForm(request))
+        val result: Result = await(controller.submitConfirmBusinessForm(request))
 
         result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showSubscriptionComplete().url
 
       }
 
       "redirect to showCannotCreateAccount if the subscribing agent has been terminated" in new TestSetupNoJourneyRecord {
-        givenAgentIsNotManuallyAssured(utr.value)
+        givenAgentIsNotManuallyAssured(utr)
         withPartiallySubscribedAgent(
           utr,
           testPostcode
@@ -201,7 +200,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
         partialSubscriptionWillFailAgentTerminated(
           CompletePartialSubscriptionBody(utr = utr, knownFacts = SubscriptionRequestKnownFacts(testPostcode), langForEmail = Some(Lang("en")))
         )
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           .withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.agentSession = Some(
@@ -209,25 +208,25 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
             Some(BusinessType.SoleTrader),
             utr = Some(utr),
             registration = Some(testRegistration.copy(isSubscribedToETMP = true)),
-            postcode = Some(Postcode(testPostcode))
+            postcode = Some(testPostcode)
           )
         )
 
-        val result = await(controller.submitConfirmBusinessForm(request))
+        val result: Result = await(controller.submitConfirmBusinessForm(request))
 
         result.header.headers(LOCATION) shouldBe routes.StartController.showCannotCreateAccount().url
       }
 
       "redirect to sign in with new user ID if the user is partially subscribed with unclean creds" in new TestSetupNoJourneyRecord {
-        val agentSession = AgentSession(
+        val agentSession: AgentSession = AgentSession(
           Some(BusinessType.SoleTrader),
           utr = Some(utr),
           registration = Some(testRegistration.copy(isSubscribedToETMP = true)),
-          postcode = Some(Postcode(testPostcode))
+          postcode = Some(testPostcode)
         )
-        givenAgentIsNotManuallyAssured(utr.value)
+        givenAgentIsNotManuallyAssured(utr)
         withPartiallySubscribedAgent(utr, testPostcode)
-        val sjr = SubscriptionJourneyRecord.fromAgentSession(agentSession, AuthProviderId("12345-credId"))
+        val sjr: SubscriptionJourneyRecord = SubscriptionJourneyRecord.fromAgentSession(agentSession, AuthProviderId("12345-credId"))
         givenSubscriptionRecordCreated(AuthProviderId("12345-credId"), sjr.copy(continueId = None))
 
         implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
@@ -235,14 +234,14 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
           .withCookies(Cookie("PLAY_LANG", "en"))
         sessionStoreService.currentSession.agentSession = Some(agentSession)
 
-        val result = await(controller.submitConfirmBusinessForm(request))
+        val result: Result = await(controller.submitConfirmBusinessForm(request))
 
         result.header.headers(LOCATION) shouldBe routes.SubscriptionController.showSignInWithNewID().url
       }
 
       "redirect to showBusinessEmailForm if the user has clean creds and isSubscribedToAgentServices=false and ETMP " +
         "record contains empty email" in new TestSetupNoJourneyRecord {
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(
             AgentSession(
@@ -252,14 +251,14 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
             )
           )
 
-          val result = await(controller.submitConfirmBusinessForm(request))
+          val result: Result = await(controller.submitConfirmBusinessForm(request))
 
           result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController.showBusinessEmailForm().url
         }
 
       "redirect to showBusinessNameForm if the user has clean creds and isSubscribedToAgentServices=false and ETMP " +
         "record contains invalid name" in new TestSetupNoJourneyRecord {
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(
             AgentSession(
@@ -268,14 +267,14 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
             )
           )
 
-          val result = await(controller.submitConfirmBusinessForm(request))
+          val result: Result = await(controller.submitConfirmBusinessForm(request))
 
           result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController.showBusinessNameForm().url
         }
 
       "redirect to showUpdateBusinessAddressForm if the user has clean creds and isSubscribedToAgentServices=false " +
         "and ETMP record contains invalid address" in new TestSetupNoJourneyRecord {
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(
             AgentSession(
@@ -285,7 +284,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
             )
           )
 
-          val result = await(controller.submitConfirmBusinessForm(request))
+          val result: Result = await(controller.submitConfirmBusinessForm(request))
 
           result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController
             .showUpdateBusinessAddressForm()
@@ -294,7 +293,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
 
       "redirect to showUpdateBusinessAddressForm if the user has clean creds and isSubscribedToAgentServices=false and" when {
         "ETMP record contains denylisted postcode" in new TestSetupNoJourneyRecord {
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(
             AgentSession(
@@ -305,7 +304,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
             )
           )
 
-          val result = await(controller.submitConfirmBusinessForm(request))
+          val result: Result = await(controller.submitConfirmBusinessForm(request))
 
           result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController
             .showUpdateBusinessAddressForm()
@@ -313,7 +312,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
         }
 
         "ETMP record contains BFPO postcode starting with BF" in new TestSetupNoJourneyRecord {
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(
             AgentSession(
@@ -323,7 +322,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
             )
           )
 
-          val result = await(controller.submitConfirmBusinessForm(request))
+          val result: Result = await(controller.submitConfirmBusinessForm(request))
 
           result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController
             .showUpdateBusinessAddressForm()
@@ -331,7 +330,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
         }
 
         "ETMP record contains BFPO postcode starting with BFPO" in new TestSetupNoJourneyRecord {
-          implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+          implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
             .withFormUrlEncodedBody("confirmBusiness" -> "yes")
           sessionStoreService.currentSession.agentSession = Some(
             AgentSession(
@@ -343,7 +342,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
             )
           )
 
-          val result = await(controller.submitConfirmBusinessForm(request))
+          val result: Result = await(controller.submitConfirmBusinessForm(request))
 
           result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController
             .showUpdateBusinessAddressForm()
@@ -354,7 +353,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
 
     "User chooses No" should {
       "redirect to show /unique-taxpayer-reference page" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "no")
 
         sessionStoreService.currentSession.agentSession = Some(
@@ -367,7 +366,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
           )
         )
 
-        val result = await(controller.submitConfirmBusinessForm(request))
+        val result: Result = await(controller.submitConfirmBusinessForm(request))
 
         result.header.headers(LOCATION) shouldBe routes.UtrController.showUtrForm().url
       }
@@ -375,11 +374,11 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
 
     "choice is missing" should {
       "return 200 and redisplay the /confirm-business page with an error message for missing choice" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "")
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(registration = Some(testRegistration)))
 
-        val result = await(controller.submitConfirmBusinessForm(request))
+        val result: Result = await(controller.submitConfirmBusinessForm(request))
 
         result should containMessages("confirmBusiness.title", "error.confirm-business-value.invalid")
       }
@@ -387,7 +386,7 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
 
     "form value is invalid" should {
       "result in a BadRequestException" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
           .withFormUrlEncodedBody("confirmBusiness" -> "INVALID")
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(registration = Some(testRegistration)))
 

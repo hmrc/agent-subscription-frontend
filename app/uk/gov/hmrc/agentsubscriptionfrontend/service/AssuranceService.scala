@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
-import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
@@ -26,9 +25,11 @@ import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentAssuranceConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.util.valueOps
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.domain.{Nino, SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 //noinspection ScalaStyle
@@ -40,7 +41,7 @@ class AssuranceService @Inject() (
   sessionStoreService: MongoDBSessionStoreService
 ) {
 
-  def assureIsAgent(utr: Utr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[AssuranceResults]] =
+  def assureIsAgent(utr: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[AssuranceResults]] =
     if (appConfig.agentAssuranceRun) {
       for {
         isOnRefusalToDealWithList <- assuranceConnector.isR2DWAgent(utr)
@@ -90,7 +91,8 @@ class AssuranceService @Inject() (
     hc: HeaderCarrier,
     ec: ExecutionContext,
     request: Request[AnyContent],
-    agent: Agent
+    agent: Agent,
+    crypto: Encrypter with Decrypter
   ): Future[Boolean] =
     assuranceConnector.hasActiveCesaRelationship(userEnteredNinoOrUtr, name, saAgentReference).map { relationshipExists =>
       val (userEnteredNino, userEnteredUtr) = userEnteredNinoOrUtr match {

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.api.{Configuration, Environment}
+import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.utrForm
@@ -24,10 +25,11 @@ import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.utr_details
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -41,7 +43,7 @@ class UtrController @Inject() (
   val subscriptionJourneyService: SubscriptionJourneyService,
   mcc: MessagesControllerComponents,
   utrDetailsTemplate: utr_details
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   def showUtrForm(): Action[AnyContent] = Action.async { implicit request =>
@@ -50,7 +52,7 @@ class UtrController @Inject() (
         case Some(agentSession) =>
           (agentSession.businessType, agentSession.utr) match {
             case (Some(businessType), Some(utr)) =>
-              Ok(utrDetailsTemplate(utrForm(businessType.key).fill(utr), businessType))
+              Ok(utrDetailsTemplate(utrForm(businessType.key).fill(Utr(utr)), businessType))
             case (Some(businessType), None) =>
               Ok(utrDetailsTemplate(utrForm(businessType.key), businessType))
             case _ => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
@@ -67,7 +69,7 @@ class UtrController @Inject() (
           .bindFromRequest()
           .fold(
             formWithErrors => Ok(utrDetailsTemplate(formWithErrors, businessType)),
-            validUtr => updateSessionAndRedirect(existingSession.copy(utr = Some(validUtr)))(routes.PostcodeController.showPostcodeForm())
+            validUtr => updateSessionAndRedirect(existingSession.copy(utr = Some(validUtr.value)))(routes.PostcodeController.showPostcodeForm())
           )
       }
     }

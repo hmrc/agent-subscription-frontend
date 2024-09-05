@@ -29,11 +29,12 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters.nor
 import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.national_insurance_number
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -48,7 +49,7 @@ class NationalInsuranceController @Inject() (
   val subscriptionService: SubscriptionService,
   mcc: MessagesControllerComponents,
   nationalInsuranceNumberTemplate: national_insurance_number
-)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
+)(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
   /** In-case of SoleTrader or Partnerships, we should display NI and DOB pages based on if nino and dob exist or not. We need to force users to go
@@ -60,11 +61,11 @@ class NationalInsuranceController @Inject() (
         withValidBusinessType(existingSession) { businessType =>
           val backUrl = Some(backUrlForBusinessType(businessType))
           if (businessType == Llp)
-            Ok(nationalInsuranceNumberTemplate(getForm(existingSession.nino), businessType, backUrl))
+            Ok(nationalInsuranceNumberTemplate(getForm(existingSession.nino.map(Nino(_))), businessType, backUrl))
           else
             agent.authNino match {
               case Some(_) =>
-                Ok(nationalInsuranceNumberTemplate(getForm(existingSession.nino), businessType, backUrl))
+                Ok(nationalInsuranceNumberTemplate(getForm(existingSession.nino.map(Nino(_))), businessType, backUrl))
               case None => Redirect(routes.VatDetailsController.showRegisteredForVatForm())
             }
         }
@@ -96,16 +97,18 @@ class NationalInsuranceController @Inject() (
                         Redirect(routes.BusinessIdentificationController.showCannotConfirmIdentity())
                       case Some(person) if person.dateOfBirth.isEmpty && businessType != Llp =>
                         logger.warn("no DateOfBirth in the /citizen-details response for logged in agent")
-                        updateSessionAndRedirect(existingSession.copy(nino = Some(validNino)))(routes.VatDetailsController.showRegisteredForVatForm())
+                        updateSessionAndRedirect(existingSession.copy(nino = Some(validNino.value)))(
+                          routes.VatDetailsController.showRegisteredForVatForm()
+                        )
                       case Some(person) if person.dateOfBirth.nonEmpty && businessType != Llp =>
                         updateSessionAndRedirect(
                           existingSession
-                            .copy(nino = Some(validNino), dateOfBirthFromCid = person.dateOfBirth)
+                            .copy(nino = Some(validNino.value), dateOfBirthFromCid = person.dateOfBirth)
                         )(routes.DateOfBirthController.showDateOfBirthForm())
                       case Some(person) if person.lastName.nonEmpty && person.dateOfBirth.nonEmpty =>
                         updateSessionAndRedirect(
                           existingSession
-                            .copy(nino = Some(validNino), dateOfBirthFromCid = person.dateOfBirth, lastNameFromCid = person.lastName)
+                            .copy(nino = Some(validNino.value), dateOfBirthFromCid = person.dateOfBirth, lastNameFromCid = person.lastName)
                         )(routes.DateOfBirthController.showDateOfBirthForm())
                       case _ =>
                         logger.warn(s"business type $businessType no lastName and or no dob from CiD")

@@ -21,7 +21,7 @@ import play.api.http.Status
 import play.api.i18n.Lang
 import play.api.mvc.Results.{Conflict, Redirect}
 import play.api.mvc.{Request, Result}
-import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Utr, Vrn}
+import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
@@ -59,7 +59,7 @@ class SubscriptionService @Inject() (
 
   import SubscriptionDetails._
 
-  def subscribe(utr: Utr, postcode: Postcode, agency: Agency, langForEmail: Option[Lang], amlsData: Option[AmlsData])(implicit
+  def subscribe(utr: String, postcode: String, agency: Agency, langForEmail: Option[Lang], amlsData: Option[AmlsData])(implicit
     hc: HeaderCarrier,
     ec: ExecutionContext
   ): Future[(Arn, String)] = {
@@ -75,7 +75,7 @@ class SubscriptionService @Inject() (
   ): Future[Arn] = {
     val address = if (subscriptionDetails.address.countryCode != "GB") {
       logger.warn(
-        s"Non-GB country code chosen by user for UTR ${subscriptionDetails.utr.value}. " +
+        s"Non-GB country code chosen by user for UTR ${subscriptionDetails.utr}. " +
           s"Overriding with GB. A better fix for this is coming in APB-1288."
       )
       subscriptionDetails.address.copy(countryCode = "GB")
@@ -107,14 +107,14 @@ class SubscriptionService @Inject() (
     }
   }
 
-  def completePartialSubscription(utr: Utr, businessPostCode: Postcode)(implicit
+  def completePartialSubscription(utr: String, businessPostCode: String)(implicit
     request: Request[_],
     hc: HeaderCarrier,
     ec: ExecutionContext
   ): Future[Arn] =
     agentSubscriptionConnector
       .completePartialSubscription(
-        CompletePartialSubscriptionBody(utr, SubscriptionRequestKnownFacts(businessPostCode.value), extractLangPreferenceFromCookie)
+        CompletePartialSubscriptionBody(utr, SubscriptionRequestKnownFacts(businessPostCode), extractLangPreferenceFromCookie)
       )
       .recover {
         case e: UpstreamErrorResponse if Seq(Status.FORBIDDEN, Status.CONFLICT) contains e.statusCode =>
@@ -122,7 +122,7 @@ class SubscriptionService @Inject() (
           throw e
       }
 
-  def completePartialSubscriptionAndGoToComplete(utr: Utr, businessPostCode: Postcode)(implicit
+  def completePartialSubscriptionAndGoToComplete(utr: String, businessPostCode: String)(implicit
     request: Request[_],
     hc: HeaderCarrier,
     ec: ExecutionContext
@@ -169,14 +169,14 @@ class SubscriptionService @Inject() (
                                                }
     } yield completePartialSubscriptionOrTaskList
 
-  def getSubscriptionStatus(utr: Utr, postcode: Postcode)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[SubscriptionProcess] =
-    agentSubscriptionConnector.getRegistration(utr, postcode.value).map {
+  def getSubscriptionStatus(utr: String, postcode: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[SubscriptionProcess] =
+    agentSubscriptionConnector.getRegistration(utr, postcode).map {
 
       case Some(reg) if reg.isSubscribedToAgentServices =>
         SubscriptionProcess(SubscribedAndEnrolled, Some(reg))
 
       case Some(reg) if reg.taxpayerName.isEmpty =>
-        throw new IllegalStateException(s"The agency with UTR ${utr.value} has a missing organisation/individual name.")
+        throw new IllegalStateException(s"The agency with UTR $utr has a missing organisation/individual name.")
 
       case Some(reg) if !reg.isSubscribedToAgentServices && reg.isSubscribedToETMP =>
         SubscriptionProcess(SubscribedButNotEnrolled, Some(reg))
@@ -190,7 +190,7 @@ class SubscriptionService @Inject() (
   def getDesignatoryDetails(nino: Nino)(implicit hc: HeaderCarrier): Future[DesignatoryDetails] =
     agentSubscriptionConnector.getDesignatoryDetails(nino)
 
-  def matchCorporationTaxUtrWithCrn(utr: Utr, crn: CompanyRegistrationNumber)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def matchCorporationTaxUtrWithCrn(utr: String, crn: CompanyRegistrationNumber)(implicit hc: HeaderCarrier): Future[Boolean] =
     agentSubscriptionConnector.matchCorporationTaxUtrWithCrn(utr, crn)
 
   def matchVatKnownFacts(vrn: Vrn, vatRegistrationDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] =
@@ -199,8 +199,8 @@ class SubscriptionService @Inject() (
   def handlePartiallySubscribedAndRedirect(agent: Agent, agentSession: AgentSession)(
     whenNotPartiallySubscribed: => Future[Result]
   )(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
-    val utr = agentSession.utr.getOrElse(Utr(""))
-    val postcode = agentSession.postcode.getOrElse(Postcode(""))
+    val utr = agentSession.utr.getOrElse("")
+    val postcode = agentSession.postcode.getOrElse("")
     for {
       subscriptionProcess <- getSubscriptionStatus(utr, postcode)
       result <- if (subscriptionProcess.state == SubscribedButNotEnrolled)

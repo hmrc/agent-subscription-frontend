@@ -17,7 +17,8 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers.business
 
 import org.jsoup.Jsoup
-import play.api.mvc.AnyContentAsFormUrlEncoded
+import org.jsoup.nodes.{Document, Element}
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{BusinessIdentificationController, routes}
@@ -39,11 +40,11 @@ class BusinessAddressISpecIt extends BaseISpecIt {
     behave like anAgentAffinityGroupOnlyEndpoint(request => controller.showBusinessNameForm(request))
 
     "display update business address form with pre-filled values" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
-      val result = await(controller.showUpdateBusinessAddressForm(request))
+      val result: Result = await(controller.showUpdateBusinessAddressForm(request))
       result should containMessages(
         "updateBusinessAddress.title",
         "updateBusinessAddress.p1",
@@ -56,22 +57,22 @@ class BusinessAddressISpecIt extends BaseISpecIt {
         "button.continue"
       )
 
-      val doc = Jsoup.parse(bodyOf(result))
+      val doc: Document = Jsoup.parse(bodyOf(result))
       doc.getElementById("addressLine1").`val` shouldBe businessAddress.addressLine1
       doc.getElementById("addressLine2").`val` shouldBe businessAddress.addressLine2.get
       doc.getElementById("addressLine3").`val` shouldBe businessAddress.addressLine3.get
       doc.getElementById("addressLine4").`val` shouldBe businessAddress.addressLine4.get
       doc.getElementById("postcode").`val` shouldBe businessAddress.postalCode.get
 
-      val form = doc.select("form").first()
+      val form: Element = doc.select("form").first()
       form.attr("method") shouldBe "POST"
       form.attr("action") shouldBe routes.BusinessIdentificationController.submitUpdateBusinessAddressForm().url
     }
 
     "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in new TestSetupNoJourneyRecord {
-      implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-      val result = await(controller.showBusinessNameForm(request))
+      val result: Result = await(controller.showBusinessNameForm(request))
 
       redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
     }
@@ -82,7 +83,7 @@ class BusinessAddressISpecIt extends BaseISpecIt {
 
     "update business address after submission, redirect to task list when there is a continueUrl" in {
       val agentSession =
-        AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration), postcode = Some(Postcode("AA11AA")))
+        AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration), postcode = Some("AA11AA"))
 
       val authId = AuthProviderId("12345-credId")
       givenNoSubscriptionJourneyRecordExists(authId)
@@ -109,7 +110,7 @@ class BusinessAddressISpecIt extends BaseISpecIt {
 
       givenSubscriptionRecordCreated(authId, newSjr)
 
-      givenAgentIsNotManuallyAssured(validUtr.value)
+      givenAgentIsNotManuallyAssured(validUtr)
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
           "addressLine1" -> "new addressline 1",
@@ -125,7 +126,7 @@ class BusinessAddressISpecIt extends BaseISpecIt {
       status(result) shouldBe 303
       redirectLocation(result).head shouldBe routes.TaskListController.showTaskList().url
 
-      val updatedBusinessAddress = await(sessionStoreService.fetchAgentSession).get.registration.get.address
+      val updatedBusinessAddress = await(sessionStoreService.fetchAgentSession(request, global, aesCrypto)).get.registration.get.address
 
       updatedBusinessAddress.addressLine1 shouldBe "new addressline 1"
       updatedBusinessAddress.addressLine2 shouldBe Some("new addressline 2")
@@ -135,7 +136,7 @@ class BusinessAddressISpecIt extends BaseISpecIt {
     }
 
     "show validation error when the form is submitted with empty address line 1" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
           "addressLine1" -> " ",
           "addressLine2" -> "new addressline 2",
@@ -147,13 +148,13 @@ class BusinessAddressISpecIt extends BaseISpecIt {
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
-      val result = await(controller.submitUpdateBusinessAddressForm(request))
+      val result: Result = await(controller.submitUpdateBusinessAddressForm(request))
 
       result should containMessages("updateBusinessAddress.address_line_1.title", "error.addressline.1.empty")
     }
 
     "show validation error when the form is submitted with invalid address line 3" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
           "addressLine1" -> "address line 1",
           "addressLine2" -> "new addressline 2",
@@ -165,13 +166,13 @@ class BusinessAddressISpecIt extends BaseISpecIt {
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
-      val result = await(controller.submitUpdateBusinessAddressForm(request))
+      val result: Result = await(controller.submitUpdateBusinessAddressForm(request))
 
       result should containMessages("updateBusinessAddress.address_line_3.title", "error.addressline.3.invalid")
     }
 
     "show validation error when the form is submitted with invalid address line 1" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
           "addressLine1" -> "address line 1**",
           "addressLine2" -> "new addressline 2",
@@ -182,13 +183,13 @@ class BusinessAddressISpecIt extends BaseISpecIt {
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
-      val result = await(controller.submitUpdateBusinessAddressForm(request))
+      val result: Result = await(controller.submitUpdateBusinessAddressForm(request))
 
       result should containMessages("updateBusinessAddress.address_line_1.title", "error.addressline.1.invalid")
     }
 
     "show validation error when the form is submitted with postcode which exceed max length" in new TestSetupNoJourneyRecord {
-      implicit val request =
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
           "addressLine1" -> "address line 1",
           "addressLine2" -> "new addressline 2",
@@ -200,14 +201,14 @@ class BusinessAddressISpecIt extends BaseISpecIt {
       sessionStoreService.currentSession.agentSession =
         Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
-      val result = await(controller.submitUpdateBusinessAddressForm(request))
+      val result: Result = await(controller.submitUpdateBusinessAddressForm(request))
 
       result should containMessages("updateBusinessAddress.postcode.title", "error.postcode.maxlength")
     }
 
     "redirect to postcode-not-allowed page" when {
       "postcode entered is denylisted" in new TestSetupNoJourneyRecord {
-        implicit val request =
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
           authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
             "addressLine1" -> "address line 1",
             "addressLine2" -> "new addressline 2",
@@ -219,13 +220,13 @@ class BusinessAddressISpecIt extends BaseISpecIt {
         sessionStoreService.currentSession.agentSession =
           Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
-        val result = await(controller.submitUpdateBusinessAddressForm(request))
+        val result: Result = await(controller.submitUpdateBusinessAddressForm(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.BusinessIdentificationController.showPostcodeNotAllowed().url
       }
 
       "postcode entered is BFPO" in new TestSetupNoJourneyRecord {
-        implicit val request =
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
           authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
             "addressLine1" -> "address line 1",
             "addressLine2" -> "new addressline 2",
@@ -237,13 +238,13 @@ class BusinessAddressISpecIt extends BaseISpecIt {
         sessionStoreService.currentSession.agentSession =
           Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
-        val result = await(controller.submitUpdateBusinessAddressForm(request))
+        val result: Result = await(controller.submitUpdateBusinessAddressForm(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.BusinessIdentificationController.showPostcodeNotAllowed().url
       }
 
       "postcode starts with BFPO" in new TestSetupNoJourneyRecord {
-        implicit val request =
+        implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
           authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST).withFormUrlEncodedBody(
             "addressLine1" -> "address line 1",
             "addressLine2" -> "new addressline 2",
@@ -255,15 +256,15 @@ class BusinessAddressISpecIt extends BaseISpecIt {
         sessionStoreService.currentSession.agentSession =
           Some(AgentSession(Some(BusinessType.SoleTrader), utr = Some(validUtr), registration = Some(testRegistration)))
 
-        val result = await(controller.submitUpdateBusinessAddressForm(request))
+        val result: Result = await(controller.submitUpdateBusinessAddressForm(request))
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.BusinessIdentificationController.showPostcodeNotAllowed().url
       }
 
       "redirect to the /business-type page if there is no InitialDetails in session because the user has returned to a bookmark" in new TestSetupNoJourneyRecord {
-        implicit val request = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-        val result = await(controller.showBusinessNameForm(request))
+        val result: Result = await(controller.showBusinessNameForm(request))
 
         redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
       }
