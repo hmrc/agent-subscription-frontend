@@ -16,48 +16,11 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.util
 
-import play.api.libs.json.{Format, JsSuccess, JsValue}
+import play.api.libs.json.Format
 import uk.gov.hmrc.crypto.json.JsonEncryption
-import uk.gov.hmrc.crypto.{Crypted, Decrypter, Encrypter}
-
-import java.time.LocalDate
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
 object EncryptionUtils {
-  def decryptString(fieldName: String, isEncrypted: Option[Boolean], json: JsValue)(implicit
-    crypto: Encrypter with Decrypter
-  ): String =
-    isEncrypted match {
-      case Some(true) =>
-        (json \ fieldName).validate[String] match {
-          case JsSuccess(value, _) => crypto.decrypt(Crypted(value)).value
-          case _                   => throw new RuntimeException(s"Failed to decrypt $fieldName")
-        }
-      case _ => (json \ fieldName).as[String]
-    }
-
-  def decryptOptString(fieldName: String, isEncrypted: Option[Boolean], json: JsValue)(implicit
-    crypto: Encrypter with Decrypter
-  ): Option[String] =
-    isEncrypted match {
-      case Some(true) =>
-        (json \ fieldName).validateOpt[String] match {
-          case JsSuccess(value, _) => value.map { string: String => crypto.decrypt(Crypted(string)).value }
-          case _                   => throw new RuntimeException(s"Failed to decrypt $fieldName")
-        }
-      case _ => (json \ fieldName).asOpt[String]
-    }
-
-  def decryptLocalDate(fieldName: String, isEncrypted: Option[Boolean], json: JsValue)(implicit
-    crypto: Encrypter with Decrypter
-  ): LocalDate =
-    isEncrypted match {
-      case Some(true) =>
-        (json \ fieldName).validate[String] match {
-          case JsSuccess(value, _) => LocalDate.parse(crypto.decrypt(Crypted(value.toString)).value)
-          case _                   => throw new RuntimeException(s"Failed to decrypt $fieldName")
-        }
-      case _ => (json \ fieldName).as[LocalDate]
-    }
 
   def encryptedStringFormat(implicit crypto: Encrypter with Decrypter): Format[String] =
     JsonEncryption.stringEncrypterDecrypter(crypto)

@@ -229,7 +229,7 @@ class SubscriptionController @Inject() (
                       registration = Some(
                         sjr.businessDetails.registration
                           .getOrElse(throw new RuntimeException("missing registration data"))
-                          .copy(address = BusinessAddress.fromDesAddress(validDesAddress), encrypted = None)
+                          .copy(address = BusinessAddress.fromDesAddress(validDesAddress))
                       )
                     )
                   )

@@ -16,35 +16,16 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 import play.api.libs.json._
-import uk.gov.hmrc.agentsubscriptionfrontend.util.EncryptionUtils.decryptLocalDate
-import uk.gov.hmrc.crypto.json.JsonEncryption.stringEncrypter
-import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Success, Try}
 
-case class DateOfBirth(value: LocalDate, encrypted: Option[Boolean] = None)
+case class DateOfBirth(value: LocalDate)
 
 object DateOfBirth {
 
   val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-  def databaseFormat(implicit crypto: Encrypter with Decrypter): Format[DateOfBirth] = {
-    def reads(json: JsValue): JsResult[DateOfBirth] =
-      for {
-        isEncrypted <- (json \ "encrypted").validateOpt[Boolean]
-        value = decryptLocalDate("value", isEncrypted, json)
-      } yield DateOfBirth(value)
-
-    def writes(dateOfBirth: DateOfBirth): JsValue =
-      Json.obj(
-        "value"     -> stringEncrypter.writes(dateOfBirth.value.format(formatter)),
-        "encrypted" -> Some(true)
-      )
-
-    Format(reads(_), dateOfBirth => writes(dateOfBirth))
-  }
 
   implicit val format: Format[DateOfBirth] = new Format[DateOfBirth] {
     override def writes(o: DateOfBirth): JsValue =

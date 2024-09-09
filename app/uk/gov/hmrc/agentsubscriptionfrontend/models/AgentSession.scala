@@ -16,10 +16,7 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-import play.api.libs.json.{Format, JsResult, JsValue, Json, Reads, Writes}
-import uk.gov.hmrc.agentsubscriptionfrontend.util.EncryptionUtils.decryptOptString
-import uk.gov.hmrc.crypto.json.JsonEncryption.stringEncrypter
-import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
+import play.api.libs.json.{Json, Reads, Writes}
 
 /** Holds data about a non-MTD agent's initial onboarding session before they have a Journey Subscription Record Just holds data about the business
   * identification step, which occurs before the record is created.
@@ -38,69 +35,10 @@ case class AgentSession(
   clientCount: Option[Int] = None,
   lastNameFromCid: Option[String] = None,
   ctUtrCheckResult: Option[Boolean] = None,
-  isMAA: Option[Boolean] = None,
-  encrypted: Option[Boolean] = None
+  isMAA: Option[Boolean] = None
 )
 
 object AgentSession {
-  def databaseFormat(implicit crypto: Encrypter with Decrypter): Format[AgentSession] = {
-
-    def reads(json: JsValue): JsResult[AgentSession] =
-      for {
-        isEncrypted  <- (json \ "encrypted").validateOpt[Boolean]
-        businessType <- (json \ "businessType").validateOpt[BusinessType]
-        utr = decryptOptString("utr", isEncrypted, json)
-        postcode = decryptOptString("postcode", isEncrypted, json)
-        nino = decryptOptString("nino", isEncrypted, json)
-        companyRegistrationNumber <- (json \ "companyRegistrationNumber").validateOpt[CompanyRegistrationNumber]
-        dateOfBirth               <- (json \ "dateOfBirth").validateOpt[DateOfBirth](DateOfBirth.databaseFormat(crypto))
-        registeredForVat          <- (json \ "registeredForVat").validateOpt[String]
-        vatDetails                <- (json \ "vatDetails").validateOpt[VatDetails](VatDetails.databaseFormat(crypto))
-        registration              <- (json \ "registration").validateOpt[Registration](Registration.databaseFormat(crypto))
-        dateOfBirthFromCid        <- (json \ "dateOfBirthFromCid").validateOpt[DateOfBirth](DateOfBirth.databaseFormat(crypto))
-        clientCount               <- (json \ "clientCount").validateOpt[Int]
-        lastNameFromCid = decryptOptString("lastNameFromCid", isEncrypted, json)
-        ctUtrCheckResult <- (json \ "ctUtrCheckResult").validateOpt[Boolean]
-        isMAA            <- (json \ "isMAA").validateOpt[Boolean]
-      } yield AgentSession(
-        businessType,
-        utr,
-        postcode,
-        nino,
-        companyRegistrationNumber,
-        dateOfBirth,
-        registeredForVat,
-        vatDetails,
-        registration,
-        dateOfBirthFromCid,
-        clientCount,
-        lastNameFromCid,
-        ctUtrCheckResult,
-        isMAA,
-        isEncrypted
-      )
-
-    def writes(agentSession: AgentSession): JsValue =
-      Json.obj(
-        "businessType"              -> agentSession.businessType,
-        "utr"                       -> agentSession.utr.map(f => stringEncrypter.writes(f)),
-        "postcode"                  -> agentSession.postcode.map(f => stringEncrypter.writes(f)),
-        "nino"                      -> agentSession.nino.map(f => stringEncrypter.writes(f)),
-        "companyRegistrationNumber" -> agentSession.companyRegistrationNumber,
-        "dateOfBirth"               -> agentSession.dateOfBirth.map(f => DateOfBirth.databaseFormat.writes(f)),
-        "registeredForVat"          -> agentSession.registeredForVat,
-        "vatDetails"                -> agentSession.vatDetails.map(f => VatDetails.databaseFormat.writes(f)),
-        "registration"              -> agentSession.registration.map(f => Registration.databaseFormat.writes(f)),
-        "dateOfBirthFromCid"        -> agentSession.dateOfBirthFromCid.map(f => DateOfBirth.databaseFormat.writes(f)),
-        "clientCount"               -> agentSession.clientCount,
-        "lastNameFromCid"           -> agentSession.lastNameFromCid.map(f => stringEncrypter.writes(f)),
-        "ctUtrCheckResult"          -> agentSession.ctUtrCheckResult,
-        "isMAA"                     -> agentSession.isMAA,
-        "encrypted"                 -> Some(true)
-      )
-
-    Format(reads(_), agentSession => writes(agentSession))
-  }
   implicit val writes: Writes[AgentSession] = Json.writes[AgentSession]
   implicit val reads: Reads[AgentSession] = Json.reads[AgentSession]
 }

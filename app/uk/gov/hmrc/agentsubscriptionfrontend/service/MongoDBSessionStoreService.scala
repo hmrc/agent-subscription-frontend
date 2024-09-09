@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.service
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AmlsSession}
+import uk.gov.hmrc.agentsubscriptionfrontend.repository.storageModels.SensitiveAgentSession
 import uk.gov.hmrc.agentsubscriptionfrontend.repository.{SessionCache, SessionCacheRepository}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
@@ -46,7 +47,7 @@ class MongoDBSessionStoreService @Inject() (sessionCache: SessionCacheRepository
     override val cacheRepository: SessionCacheRepository = sessionCache
   }
 
-  val agentSessionCache: SessionCache[AgentSession] = new SessionCache[AgentSession] {
+  val agentSessionCache: SessionCache[SensitiveAgentSession] = new SessionCache[SensitiveAgentSession] {
     override val sessionName: String = "agentSession"
     override val cacheRepository: SessionCacheRepository = sessionCache
   }
@@ -77,10 +78,10 @@ class MongoDBSessionStoreService @Inject() (sessionCache: SessionCacheRepository
   def cacheAgentSession(
     agentSession: AgentSession
   )(implicit request: Request[Any], ec: ExecutionContext, crypto: Encrypter with Decrypter): Future[Unit] =
-    agentSessionCache.save(agentSession)(request, AgentSession.databaseFormat(crypto), ec).map(_ => ())
+    agentSessionCache.save(SensitiveAgentSession(agentSession))(request, SensitiveAgentSession.format(crypto), ec).map(_ => ())
 
   def fetchAgentSession(implicit request: Request[Any], ec: ExecutionContext, crypto: Encrypter with Decrypter): Future[Option[AgentSession]] =
-    agentSessionCache.fetch(request, AgentSession.databaseFormat(crypto), ec)
+    agentSessionCache.fetch(request, SensitiveAgentSession.format(crypto), ec).map(_.map(_.decryptedValue))
 
   def cacheAmlsSession(amlsSession: AmlsSession)(implicit request: Request[Any], ec: ExecutionContext): Future[Unit] =
     amlsSessionCache.save(amlsSession).map(_ => ())

@@ -17,31 +17,11 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.agentmtdidentifiers.model.Vrn
-import uk.gov.hmrc.agentsubscriptionfrontend.util.EncryptionUtils.decryptLocalDate
-import uk.gov.hmrc.crypto.json.JsonEncryption.stringEncrypter
-import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
 import java.time.LocalDate
 
-case class VatDetails(vrn: Vrn, regDate: LocalDate, encrypted: Option[Boolean] = None)
+case class VatDetails(vrn: Vrn, regDate: LocalDate)
 
 object VatDetails {
-  def databaseFormat(implicit crypto: Encrypter with Decrypter): Format[VatDetails] = {
-    def reads(json: play.api.libs.json.JsValue): play.api.libs.json.JsResult[VatDetails] =
-      for {
-        isEncrypted <- (json \ "encrypted").validateOpt[Boolean]
-        vrn         <- (json \ "vrn").validate[Vrn]
-        regDate = decryptLocalDate("regDate", isEncrypted, json)
-      } yield VatDetails(vrn, regDate)
-
-    def writes(vatDetails: VatDetails): play.api.libs.json.JsValue =
-      Json.obj(
-        "vrn"       -> vatDetails.vrn,
-        "regDate"   -> stringEncrypter.writes(vatDetails.regDate.toString),
-        "encrypted" -> Some(true)
-      )
-
-    Format(reads(_), vatDetails => writes(vatDetails))
-  }
   implicit val format: Format[VatDetails] = Json.format[VatDetails]
 }
