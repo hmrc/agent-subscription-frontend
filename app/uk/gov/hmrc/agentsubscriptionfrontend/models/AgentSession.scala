@@ -38,8 +38,7 @@ case class AgentSession(
   clientCount: Option[Int] = None,
   lastNameFromCid: Option[String] = None,
   ctUtrCheckResult: Option[Boolean] = None,
-  isMAA: Option[Boolean] = None,
-  encrypted: Option[Boolean] = None
+  isMAA: Option[Boolean] = None
 )
 
 object AgentSession {
@@ -47,11 +46,10 @@ object AgentSession {
 
     def reads(json: JsValue): JsResult[AgentSession] =
       for {
-        isEncrypted  <- (json \ "encrypted").validateOpt[Boolean]
         businessType <- (json \ "businessType").validateOpt[BusinessType]
-        utr = decryptOptString("utr", isEncrypted, json)
-        postcode = decryptOptString("postcode", isEncrypted, json)
-        nino = decryptOptString("nino", isEncrypted, json)
+        utr = decryptOptString("utr", json)
+        postcode = decryptOptString("postcode", json)
+        nino = decryptOptString("nino", json)
         companyRegistrationNumber <- (json \ "companyRegistrationNumber").validateOpt[CompanyRegistrationNumber]
         dateOfBirth               <- (json \ "dateOfBirth").validateOpt[DateOfBirth](DateOfBirth.databaseFormat(crypto))
         registeredForVat          <- (json \ "registeredForVat").validateOpt[String]
@@ -59,7 +57,7 @@ object AgentSession {
         registration              <- (json \ "registration").validateOpt[Registration](Registration.databaseFormat(crypto))
         dateOfBirthFromCid        <- (json \ "dateOfBirthFromCid").validateOpt[DateOfBirth](DateOfBirth.databaseFormat(crypto))
         clientCount               <- (json \ "clientCount").validateOpt[Int]
-        lastNameFromCid = decryptOptString("lastNameFromCid", isEncrypted, json)
+        lastNameFromCid = decryptOptString("lastNameFromCid", json)
         ctUtrCheckResult <- (json \ "ctUtrCheckResult").validateOpt[Boolean]
         isMAA            <- (json \ "isMAA").validateOpt[Boolean]
       } yield AgentSession(
@@ -76,8 +74,7 @@ object AgentSession {
         clientCount,
         lastNameFromCid,
         ctUtrCheckResult,
-        isMAA,
-        isEncrypted
+        isMAA
       )
 
     def writes(agentSession: AgentSession): JsValue =
@@ -95,8 +92,7 @@ object AgentSession {
         "clientCount"               -> agentSession.clientCount,
         "lastNameFromCid"           -> agentSession.lastNameFromCid.map(f => stringEncrypter.writes(f)),
         "ctUtrCheckResult"          -> agentSession.ctUtrCheckResult,
-        "isMAA"                     -> agentSession.isMAA,
-        "encrypted"                 -> Some(true)
+        "isMAA"                     -> agentSession.isMAA
       )
 
     Format(reads(_), agentSession => writes(agentSession))

@@ -23,22 +23,20 @@ import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
 import java.time.LocalDate
 
-case class VatDetails(vrn: Vrn, regDate: LocalDate, encrypted: Option[Boolean] = None)
+case class VatDetails(vrn: Vrn, regDate: LocalDate)
 
 object VatDetails {
   def databaseFormat(implicit crypto: Encrypter with Decrypter): Format[VatDetails] = {
     def reads(json: play.api.libs.json.JsValue): play.api.libs.json.JsResult[VatDetails] =
       for {
-        isEncrypted <- (json \ "encrypted").validateOpt[Boolean]
-        vrn         <- (json \ "vrn").validate[Vrn]
-        regDate = decryptLocalDate("regDate", isEncrypted, json)
+        vrn <- (json \ "vrn").validate[Vrn]
+        regDate = decryptLocalDate("regDate", json)
       } yield VatDetails(vrn, regDate)
 
     def writes(vatDetails: VatDetails): play.api.libs.json.JsValue =
       Json.obj(
-        "vrn"       -> vatDetails.vrn,
-        "regDate"   -> stringEncrypter.writes(vatDetails.regDate.toString),
-        "encrypted" -> Some(true)
+        "vrn"     -> vatDetails.vrn,
+        "regDate" -> stringEncrypter.writes(vatDetails.regDate.toString)
       )
 
     Format(reads(_), vatDetails => writes(vatDetails))

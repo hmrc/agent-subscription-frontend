@@ -27,31 +27,22 @@ case class BusinessAddress(
   addressLine3: Option[String] = None,
   addressLine4: Option[String] = None,
   postalCode: Option[String],
-  countryCode: String,
-  encrypted: Option[Boolean] = None
+  countryCode: String
 )
 
 object BusinessAddress {
   def databaseFormat(implicit crypto: Encrypter with Decrypter): Format[BusinessAddress] = {
 
-    def reads(json: JsValue): JsResult[BusinessAddress] =
-      for {
-        isEncrypted <- (json \ "encrypted").validateOpt[Boolean]
-        addressLine1 = decryptString("addressLine1", isEncrypted, json)
-        addressLine2 = decryptOptString("addressLine2", isEncrypted, json)
-        addressLine3 = decryptOptString("addressLine3", isEncrypted, json)
-        addressLine4 = decryptOptString("addressLine4", isEncrypted, json)
-        postalCode = decryptOptString("postalCode", isEncrypted, json)
-        countryCode = decryptString("countryCode", isEncrypted, json)
-      } yield BusinessAddress(
-        addressLine1,
-        addressLine2,
-        addressLine3,
-        addressLine4,
-        postalCode,
-        countryCode,
-        isEncrypted
+    def reads(json: JsValue): JsResult[BusinessAddress] = JsSuccess(
+      BusinessAddress(
+        addressLine1 = decryptString("addressLine1", json),
+        addressLine2 = decryptOptString("addressLine2", json),
+        addressLine3 = decryptOptString("addressLine3", json),
+        addressLine4 = decryptOptString("addressLine4", json),
+        postalCode = decryptOptString("postalCode", json),
+        countryCode = decryptString("countryCode", json)
       )
+    )
 
     def writes(businessAddress: BusinessAddress): JsValue =
       Json.obj(
@@ -60,8 +51,7 @@ object BusinessAddress {
         "addressLine3" -> businessAddress.addressLine3.map(stringEncrypter.writes),
         "addressLine4" -> businessAddress.addressLine4.map(stringEncrypter.writes),
         "postalCode"   -> businessAddress.postalCode.map(stringEncrypter.writes),
-        "countryCode"  -> stringEncrypter.writes(businessAddress.countryCode),
-        "encrypted"    -> Some(true)
+        "countryCode"  -> stringEncrypter.writes(businessAddress.countryCode)
       )
 
     Format(reads(_), businessAddress => writes(businessAddress))
@@ -88,8 +78,7 @@ case class Registration(
   address: BusinessAddress,
   emailAddress: Option[String],
   primaryPhoneNumber: Option[String],
-  safeId: Option[String],
-  encrypted: Option[Boolean] = None
+  safeId: Option[String]
 )
 
 object Registration {
@@ -97,14 +86,13 @@ object Registration {
 
     def reads(json: JsValue): JsResult[Registration] =
       for {
-        isEncrypted <- (json \ "encrypted").validateOpt[Boolean]
-        taxpayerName = decryptOptString("taxpayerName", isEncrypted, json)
-        isSubscribedToAgentServices = (json \ "isSubscribedToAgentServices").as[Boolean]
-        isSubscribedToETMP = (json \ "isSubscribedToETMP").as[Boolean]
+        safeId                      <- (json \ "safeId").validateOpt[String]
+        isSubscribedToAgentServices <- (json \ "isSubscribedToAgentServices").validate[Boolean]
+        isSubscribedToETMP          <- (json \ "isSubscribedToETMP").validate[Boolean]
+        taxpayerName = decryptOptString("taxpayerName", json)
         address = (json \ "address").as[BusinessAddress](BusinessAddress.databaseFormat(crypto))
-        emailAddress = decryptOptString("emailAddress", isEncrypted, json)
-        primaryPhoneNumber = decryptOptString("primaryPhoneNumber", isEncrypted, json)
-        safeId = (json \ "safeId").asOpt[String]
+        emailAddress = decryptOptString("emailAddress", json)
+        primaryPhoneNumber = decryptOptString("primaryPhoneNumber", json)
       } yield Registration(
         taxpayerName,
         isSubscribedToAgentServices,
@@ -112,8 +100,7 @@ object Registration {
         address,
         emailAddress,
         primaryPhoneNumber,
-        safeId,
-        isEncrypted
+        safeId
       )
 
     def writes(registration: Registration): JsValue =
@@ -124,8 +111,7 @@ object Registration {
         "address"                     -> BusinessAddress.databaseFormat.writes(registration.address),
         "emailAddress"                -> registration.emailAddress.map(stringEncrypter.writes),
         "primaryPhoneNumber"          -> registration.primaryPhoneNumber.map(stringEncrypter.writes),
-        "safeId"                      -> registration.safeId,
-        "encrypted"                   -> Some(true)
+        "safeId"                      -> registration.safeId
       )
     Format(reads(_), registration => writes(registration))
   }

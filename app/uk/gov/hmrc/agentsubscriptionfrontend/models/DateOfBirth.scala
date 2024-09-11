@@ -24,23 +24,18 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Success, Try}
 
-case class DateOfBirth(value: LocalDate, encrypted: Option[Boolean] = None)
+case class DateOfBirth(value: LocalDate)
 
 object DateOfBirth {
 
   val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
   def databaseFormat(implicit crypto: Encrypter with Decrypter): Format[DateOfBirth] = {
-    def reads(json: JsValue): JsResult[DateOfBirth] =
-      for {
-        isEncrypted <- (json \ "encrypted").validateOpt[Boolean]
-        value = decryptLocalDate("value", isEncrypted, json)
-      } yield DateOfBirth(value)
+    def reads(json: JsValue): JsResult[DateOfBirth] = JsSuccess(DateOfBirth(decryptLocalDate("value", json)))
 
     def writes(dateOfBirth: DateOfBirth): JsValue =
       Json.obj(
-        "value"     -> stringEncrypter.writes(dateOfBirth.value.format(formatter)),
-        "encrypted" -> Some(true)
+        "value" -> stringEncrypter.writes(dateOfBirth.value.format(formatter))
       )
 
     Format(reads(_), dateOfBirth => writes(dateOfBirth))
