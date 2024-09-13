@@ -120,12 +120,12 @@ class SignOutControllerISpecIt extends BaseISpecIt {
   "signOutWithContinueUrl" should {
 
     "logout and redirect to /gg/sign-in when no continue URL is present in the session" in {
-      testLogoutAndRedirect(expectedRedirectUrl = "http://localhost:9025/gg/sign-in")
+      testLogoutAndRedirect(expectedRedirectUrl = "http://localhost:9099/gg/sign-in")
     }
 
     "logout and redirect to /gg/sign-in?continue=... when continue URL is present in the session" in {
       testLogoutAndRedirect(
-        expectedRedirectUrl = "http://localhost:9025/gg/sign-in?continue=%2Ftest-continue-url",
+        expectedRedirectUrl = "http://localhost:9099/gg/sign-in?continue=%2Ftest-continue-url",
         maybeContinueUrl = Some("/test-continue-url")
       )
     }
