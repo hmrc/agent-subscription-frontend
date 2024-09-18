@@ -31,7 +31,10 @@ object DateOfBirth {
   val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
   def databaseFormat(implicit crypto: Encrypter with Decrypter): Format[DateOfBirth] = {
-    def reads(json: JsValue): JsResult[DateOfBirth] = JsSuccess(DateOfBirth(decryptLocalDate("value", json)))
+    def reads(json: JsValue): JsResult[DateOfBirth] = decryptLocalDate("value", json) match {
+      case date: LocalDate => JsSuccess(DateOfBirth(date))
+      case _   => JsError("Failed to decrypt DateOfBirth")
+    }
 
     def writes(dateOfBirth: DateOfBirth): JsValue =
       Json.obj(
