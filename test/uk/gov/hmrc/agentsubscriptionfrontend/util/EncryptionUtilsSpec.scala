@@ -33,34 +33,19 @@ class EncryptionUtilsSpec extends UnitSpec {
       val secret = "my secret"
       val encrypted = stringEncrypter.writes(secret)
       val json = Json.obj("value" -> encrypted)
-      EncryptionUtils.decryptString("value", Some(true), json) shouldBe secret
-    }
-    "handle a plain string" in {
-      val secret = "my secret"
-      val json = Json.obj("value" -> secret)
-      EncryptionUtils.decryptString("value", Some(false), json) shouldBe secret
+      EncryptionUtils.decryptString("value", json) shouldBe secret
     }
     "decrypt an encrypted optional string" in {
       val secret = "my secret"
       val encrypted = stringEncrypter.writes(secret)
       val json = Json.obj("value" -> encrypted)
-      EncryptionUtils.decryptOptString("value", Some(true), json) shouldBe Some(secret)
-    }
-    "handle a plain optional string" in {
-      val secret = "my secret"
-      val json = Json.obj("value" -> secret)
-      EncryptionUtils.decryptOptString("value", Some(false), json) shouldBe Some(secret)
+      EncryptionUtils.decryptOptString("value", json) shouldBe Some(secret)
     }
     "decrypt an encrypted LocalDate" in {
       val secret: LocalDate = LocalDate.of(2020, 1, 1)
       val encrypted = stringEncrypter.writes(secret.toString)
       val json = Json.obj("value" -> encrypted)
-      EncryptionUtils.decryptLocalDate("value", Some(true), json) shouldBe secret
-    }
-    "handle a plain LocalDate" in {
-      val plain: LocalDate = LocalDate.of(2020, 1, 1)
-      val json = Json.obj("value" -> plain)
-      EncryptionUtils.decryptLocalDate("value", Some(false), json) shouldBe plain
+      EncryptionUtils.decryptLocalDate("value", json) shouldBe secret
     }
   }
 }

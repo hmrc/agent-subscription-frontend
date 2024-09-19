@@ -23,40 +23,28 @@ import uk.gov.hmrc.crypto.{Crypted, Decrypter, Encrypter}
 import java.time.LocalDate
 
 object EncryptionUtils {
-  def decryptString(fieldName: String, isEncrypted: Option[Boolean], json: JsValue)(implicit
+  def decryptString(fieldName: String, json: JsValue)(implicit
     crypto: Encrypter with Decrypter
   ): String =
-    isEncrypted match {
-      case Some(true) =>
-        (json \ fieldName).validate[String] match {
-          case JsSuccess(value, _) => crypto.decrypt(Crypted(value)).value
-          case _                   => throw new RuntimeException(s"Failed to decrypt $fieldName")
-        }
-      case _ => (json \ fieldName).as[String]
+    (json \ fieldName).validate[String] match {
+      case JsSuccess(value, _) => crypto.decrypt(Crypted(value)).value
+      case _                   => throw new RuntimeException(s"Failed to decrypt $fieldName")
     }
 
-  def decryptOptString(fieldName: String, isEncrypted: Option[Boolean], json: JsValue)(implicit
+  def decryptOptString(fieldName: String, json: JsValue)(implicit
     crypto: Encrypter with Decrypter
   ): Option[String] =
-    isEncrypted match {
-      case Some(true) =>
-        (json \ fieldName).validateOpt[String] match {
-          case JsSuccess(value, _) => value.map { string: String => crypto.decrypt(Crypted(string)).value }
-          case _                   => throw new RuntimeException(s"Failed to decrypt $fieldName")
-        }
-      case _ => (json \ fieldName).asOpt[String]
+    (json \ fieldName).validateOpt[String] match {
+      case JsSuccess(value, _) => value.map { string: String => crypto.decrypt(Crypted(string)).value }
+      case _                   => throw new RuntimeException(s"Failed to decrypt $fieldName")
     }
 
-  def decryptLocalDate(fieldName: String, isEncrypted: Option[Boolean], json: JsValue)(implicit
+  def decryptLocalDate(fieldName: String, json: JsValue)(implicit
     crypto: Encrypter with Decrypter
   ): LocalDate =
-    isEncrypted match {
-      case Some(true) =>
-        (json \ fieldName).validate[String] match {
-          case JsSuccess(value, _) => LocalDate.parse(crypto.decrypt(Crypted(value.toString)).value)
-          case _                   => throw new RuntimeException(s"Failed to decrypt $fieldName")
-        }
-      case _ => (json \ fieldName).as[LocalDate]
+    (json \ fieldName).validate[String] match {
+      case JsSuccess(value, _) => LocalDate.parse(crypto.decrypt(Crypted(value.toString)).value)
+      case _                   => throw new RuntimeException(s"Failed to decrypt $fieldName")
     }
 
   def encryptedStringFormat(implicit crypto: Encrypter with Decrypter): Format[String] =
