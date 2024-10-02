@@ -49,6 +49,11 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
   val validAmlsRegistrationNumber = "XAML00000200000"
 
+  val expiryDate: LocalDate = LocalDate.now().plusDays(2)
+  val expiryDay: String = expiryDate.getDayOfMonth.toString
+  val expiryMonth: String = expiryDate.getMonthValue.toString
+  val expiryYear: String = expiryDate.getYear.toString
+
   trait Setup {
     implicit def authenticatedRequest(method: String = GET): FakeRequest[AnyContentAsEmpty.type] =
       authenticatedAs(subscribingCleanAgentWithoutEnrolments, method)
@@ -513,10 +518,6 @@ class AMLSControllerISpecIt extends BaseISpecIt {
   "submitAmlsDetailsForm (POST /money-laundering-compliance)" should {
     behave like anAgentAffinityGroupOnlyEndpoint(controller.submitAmlsDetailsForm(_))
 
-    val expiryDate = LocalDate.now().plusDays(2)
-    val expiryDay = expiryDate.getDayOfMonth.toString
-    val expiryMonth = expiryDate.getMonthValue.toString
-    val expiryYear = expiryDate.getYear.toString
     val amlsBodies = AMLSLoader.load("/amls.csv")
 
     "store AMLS form in temporary store after successful submission, and redirect to task list when change flag is false" in new Setup {
@@ -1032,13 +1033,72 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     }
   }
 
+  "GET /agent-subscription/money-laundering-application-approved" should {
+
+    "display page with correct content" when {
+
+      "an expiry date exists in the AMLS details" in new Setup {
+
+        givenSubscriptionJourneyRecordExists(
+          id,
+          record.copy(
+            amlsData = Some(
+              AmlsData.registeredUserNoDataEntered.copy(
+                amlsDetails = Some(
+                  AmlsDetails(
+                    "HM Revenue and Customs (HMRC)",
+                    membershipNumber = Some("12345"),
+                    membershipExpiresOn = Some(expiryDate),
+                    appliedOn = None
+                  )
+                )
+              )
+            )
+          )
+        )
+
+        val result: Result = await(controller.showAmlsApplicationEnterDatePage(authenticatedRequest()))
+
+        result should containMessages(
+          "amls.enter-renewal-date.title",
+          "amls.enter-renewal-date.form.title",
+          "amls.enter-renewal-date.hint"
+        )
+
+        result should containInputElement("expiry.day", "text", Some(expiryDay))
+        result should containInputElement("expiry.month", "text", Some(expiryMonth))
+        result should containInputElement("expiry.year", "text", Some(expiryYear))
+
+        result should containSubmitButton("button.saveContinue", "amls-details-continue")
+        result should containSubmitButton("button.saveComeBackLater", "amls-details-save")
+
+        Jsoup.parse(bodyOf(result)).getElementsByClass("govuk-error-summary").size() shouldBe 0
+      }
+
+      "no expiry date exists in the AMLS details" in new Setup {
+        givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
+
+        val result: Result = await(controller.showAmlsApplicationEnterDatePage(authenticatedRequest()))
+
+        result should containMessages(
+          "amls.enter-renewal-date.title",
+          "amls.enter-renewal-date.form.title",
+          "amls.enter-renewal-date.hint"
+        )
+
+        result should containInputElement("expiry.day", "text", None)
+        result should containInputElement("expiry.month", "text", None)
+        result should containInputElement("expiry.year", "text", None)
+
+        result should containSubmitButton("button.saveContinue", "amls-details-continue")
+        result should containSubmitButton("button.saveComeBackLater", "amls-details-save")
+
+        Jsoup.parse(bodyOf(result)).getElementsByClass("govuk-error-summary").size() shouldBe 0
+      }
+    }
+  }
+
   "POST /agent-subscription/money-laundering-application-approved" should {
-
-    val expiryDate = LocalDate.now().plusDays(2)
-
-    val day = expiryDate.getDayOfMonth.toString
-    val month = expiryDate.getMonthValue.toString
-    val year = expiryDate.getYear.toString
 
     "store AMLS pending details in temporary store after successful submission, redirect to task list when change flag is false" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
@@ -1061,7 +1121,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       )
       givenAmlsRecordFound("12345", Approved)
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> day, "expiry.month" -> month, "expiry.year" -> year, "submit" -> "continue")
+        authenticatedRequest(POST)
+          .withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear, "submit" -> "continue")
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", None))
@@ -1092,7 +1153,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       givenAmlsRecordFound("12345", Approved, None, expiryDate)
       val wrongDay: String = expiryDate.plusDays(2).getDayOfMonth.toString
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedRequest(POST)
-        .withFormUrlEncodedBody("expiry.day" -> wrongDay, "expiry.month" -> month, "expiry.year" -> year, "submit" -> "continue")
+        .withFormUrlEncodedBody("expiry.day" -> wrongDay, "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear, "submit" -> "continue")
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", None))
@@ -1123,7 +1184,8 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       )
       givenAmlsRecordFound("12345", Approved)
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> day, "expiry.month" -> month, "expiry.year" -> year, "submit" -> "continue")
+        authenticatedRequest(POST)
+          .withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear, "submit" -> "continue")
 
       sessionStoreService.currentSession.changingAnswers = Some(true)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", Some("123456")))
@@ -1135,70 +1197,76 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "show validation error when the form is submitted with empty day field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> month, "expiry.year" -> year)
+        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear)
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
+      Jsoup.parse(bodyOf(result)).getElementsByClass("govuk-error-summary").size() shouldBe 1
       result should containMessages("amls.enter-renewal-date.title", "error.amls.enter-renewal-date.day.empty")
     }
 
     "show validation error when the form is submitted with invalid expiry date" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "123", "expiry.month" -> month, "expiry.year" -> year)
+        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "123", "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear)
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
+      Jsoup.parse(bodyOf(result)).getElementsByClass("govuk-error-summary").size() shouldBe 1
       result should containMessages("error.moneyLaunderingCompliance.date.invalid")
     }
 
     "show validation error when the form is submitted with empty month field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> day, "expiry.month" -> "", "expiry.year" -> year)
+        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> "", "expiry.year" -> expiryYear)
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
+      Jsoup.parse(bodyOf(result)).getElementsByClass("govuk-error-summary").size() shouldBe 1
       result should containMessages("error.amls.enter-renewal-date.month.empty")
     }
 
     "show validation error when the form is submitted with empty year field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> day, "expiry.month" -> month, "expiry.year" -> "")
+        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> expiryMonth, "expiry.year" -> "")
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
+      Jsoup.parse(bodyOf(result)).getElementsByClass("govuk-error-summary").size() shouldBe 1
       result should containMessages("error.amls.enter-renewal-date.year.empty")
     }
 
     "show validation error when the form is submitted with empty day and month field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> "", "expiry.year" -> year)
+        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> "", "expiry.year" -> expiryYear)
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
+      Jsoup.parse(bodyOf(result)).getElementsByClass("govuk-error-summary").size() shouldBe 1
       result should containMessages("error.amls.enter-renewal-date.day.month.empty")
       result shouldNot containMessages("error.amls.enter-renewal-date.day.empty", "error.amls.enter-renewal-date.month.empty")
     }
 
     "show validation error when the form is submitted with empty day and year field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> month, "expiry.year" -> "")
+        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> expiryMonth, "expiry.year" -> "")
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
+      Jsoup.parse(bodyOf(result)).getElementsByClass("govuk-error-summary").size() shouldBe 1
       result should containMessages("error.amls.enter-renewal-date.day.year.empty")
       result shouldNot containMessages("error.amls.enter-renewal-date.day.empty", "error.amls.enter-renewal-date.year.empty")
     }
 
     "show validation error when the form is submitted with empty month and year field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> day, "expiry.month" -> "", "expiry.year" -> "")
+        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> "", "expiry.year" -> "")
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
+      Jsoup.parse(bodyOf(result)).getElementsByClass("govuk-error-summary").size() shouldBe 1
       result should containMessages("error.amls.enter-renewal-date.month.year.empty")
       result shouldNot containMessages("error.amls.enter-renewal-date.month.empty", "error.amls.enter-renewal-date.year.empty")
     }
-
   }
 
   "GET /money-laundering-details-not-found" should {
