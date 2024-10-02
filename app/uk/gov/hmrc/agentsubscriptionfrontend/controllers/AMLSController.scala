@@ -291,15 +291,13 @@ class AMLSController @Inject() (
       agent.getMandatoryAmlsData.amlsDetails.flatMap(_.membershipExpiresOn) match {
         case Some(expiry) =>
           val formData = Map(
-            "amlsCode"     -> hmrcAmlsCode,
             "expiry.day"   -> expiry.getDayOfMonth.toString,
             "expiry.month" -> expiry.getMonthValue.toString,
             "expiry.year"  -> expiry.getYear.toString
           )
           Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm.bind(formData)))
         case None =>
-          val formData = Map("amlsCode" -> hmrcAmlsCode)
-          Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm.bind(formData)))
+          Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm))
       }
     }
   }
