@@ -44,7 +44,13 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
       sessionStoreService.currentSession.agentSession = Some(agentSession)
       private val result = await(controller.invasiveCheckStart(request))
       status(result) shouldBe 200
-      checkHtmlResultWithBodyText(result, "Do you have a Self Assessment agent code?", "We need this information so that we can check your identity.")
+      checkHtmlResultWithBodyText(
+        result,
+        "Do you have a Self Assessment agent code?",
+        "We need this information so that we can check your identity.",
+        "Your Self Assessment agent code will be on the letter you got from HMRC when you registered " +
+          "as an agent for Self Assessment. It’s a 6-character code. For example, SA1234."
+      )
     }
   }
 
