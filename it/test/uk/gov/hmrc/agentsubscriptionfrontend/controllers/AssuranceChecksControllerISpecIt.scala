@@ -443,7 +443,7 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
       bodyOf(result) should include(htmlEscapedMessage("error.client.sautr.blank"))
     }
 
-    "utr invalid send back 200 with error page" in new TestSetupNoJourneyRecord {
+    "utr incorrect format send back 200 with error page" in new TestSetupNoJourneyRecord {
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
@@ -454,10 +454,37 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
       private val result = await(controller.submitClientDetailsForm(request))
 
       status(result) shouldBe 200
+      bodyOf(result) should include(htmlEscapedMessage("error.client.sautr.incorrectFormat"))
+    }
+
+    "utr invalid send back 200 with error page" in new TestSetupNoJourneyRecord {
+
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
+          .withFormUrlEncodedBody(("variant", "utr"), ("utr", "1234567890"))
+          .withSession("saAgentReferenceToCheck" -> "SA6012")
+      sessionStoreService.currentSession.agentSession = Some(agentSession)
+
+      private val result = await(controller.submitClientDetailsForm(request))
+
+      status(result) shouldBe 200
       bodyOf(result) should include(htmlEscapedMessage("error.client.sautr.invalid"))
     }
 
-    "utr wrong length" in new TestSetupNoJourneyRecord {
+    "utr wrong length which is less than 10 numbers" in new TestSetupNoJourneyRecord {
+
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
+        .withFormUrlEncodedBody(("variant", "utr"), ("utr", "40009"))
+        .withSession("saAgentReferenceToCheck" -> "SA6012")
+      sessionStoreService.currentSession.agentSession = Some(agentSession)
+
+      private val result = await(controller.submitClientDetailsForm(request))
+
+      status(result) shouldBe 200
+      bodyOf(result) should include(htmlEscapedMessage("error.client.sautr.incorrectFormat"))
+    }
+
+    "utr wrong length which is more than 10 numbers" in new TestSetupNoJourneyRecord {
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingCleanAgentWithoutEnrolments, POST)
         .withFormUrlEncodedBody(("variant", "utr"), ("utr", "40000000090000000"))
@@ -467,7 +494,7 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
       private val result = await(controller.submitClientDetailsForm(request))
 
       status(result) shouldBe 200
-      bodyOf(result) should include(htmlEscapedMessage("error.client.sautr.invalid"))
+      bodyOf(result) should include(htmlEscapedMessage("error.client.sautr.incorrectFormat"))
     }
 
     "return 200 error when submitting without selected radio option" in new TestSetupNoJourneyRecord {

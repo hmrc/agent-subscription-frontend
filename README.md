@@ -32,11 +32,11 @@ After submission the agent should be assigned the HMRC-AS-AGENT enrolment if suc
 
 ### Running the tests
 
-    sbt test it:test
+    sbt test it/test
     
 ### Running the tests with coverage
 
-    sbt clean coverageOn test it:test coverageReport    
+    sbt clean coverageOn test it/test coverageReport    
 
 ### Running the app locally
 

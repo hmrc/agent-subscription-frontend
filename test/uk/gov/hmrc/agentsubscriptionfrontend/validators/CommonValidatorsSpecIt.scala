@@ -46,27 +46,34 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
       bind(" ").left.value should contain only FormError("testKey", "error.utr.blank")
     }
 
-    "give \"error.utr.invalid\" error" when {
+    "give \"error.utr.incorrectFormat\" error" when {
       "it has more than 10 digits" in {
-        bind("20000000000") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
+        bind("20000000000") should matchPattern { case Left(List(FormError("testKey", List("error.utr.incorrectFormat"), _))) =>
         }
       }
 
       "it has fewer than 10 digits" in {
-        bind("200000") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
+        bind("200000") should matchPattern { case Left(List(FormError("testKey", List("error.utr.incorrectFormat"), _))) =>
         }
 
-        bind("20000000 0") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
+        bind("20000000 0") should matchPattern { case Left(List(FormError("testKey", List("error.utr.incorrectFormat"), _))) =>
         }
       }
 
       "it has non-digit characters" in {
-        bind("200000000B") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
+        bind("200000000B") should matchPattern { case Left(List(FormError("testKey", List("error.utr.incorrectFormat"), _))) =>
         }
       }
 
       "it has non-alphanumeric characters" in {
-        bind("200000000!") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
+        bind("200000000!") should matchPattern { case Left(List(FormError("testKey", List("error.utr.incorrectFormat"), _))) =>
+        }
+      }
+    }
+
+    "give \"error.utr.invalid\" error" when {
+      "it has a correctly formatted but invalid utr" in {
+        bind("1234567890") should matchPattern { case Left(List(FormError("testKey", List("error.utr.invalid"), _))) =>
         }
       }
     }
@@ -610,6 +617,7 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
 
   "amlsCode bind" should {
     val amlsCodeMapping = amlsCode(Set("AA", "BB")).withPrefix("testKey")
+
     def bind(fieldValue: String) = amlsCodeMapping.bind(Map("testKey" -> fieldValue))
 
     "accept valid AMLS code" in {
@@ -627,6 +635,7 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
 
   "membershipNumber bind" should {
     val membershipNumberMapping = membershipNumber.withPrefix("testKey")
+
     def bind(fieldValue: String) = membershipNumberMapping.bind(Map("testKey" -> fieldValue))
 
     "accept valid membership number" in {
@@ -643,7 +652,9 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
       expiryDate.bind(Map("year" -> year, "month" -> month, "day" -> day))
 
     def validDate = LocalDate.now().plusDays(1)
+
     def today = LocalDate.now()
+
     def futureDate = LocalDate.now().plusYears(2)
 
     "accept valid expiry date number" in {
