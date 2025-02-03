@@ -640,7 +640,7 @@ class CommonValidatorsSpecIt extends UnitSpec with EitherValues {
 
   "expiryDate bind" should {
     def bind(year: String, month: String, day: String) =
-      expiryDate.bind(Map("year" -> year, "month" -> month, "day" -> day))
+      renewalDate.bind(Map("year" -> year, "month" -> month, "day" -> day))
 
     def validDate = LocalDate.now().plusDays(1)
     def today = LocalDate.now()

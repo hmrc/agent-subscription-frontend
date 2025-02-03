@@ -32,8 +32,8 @@ object AMLSForm {
   implicit val formatAMLSForm: OFormat[AMLSForm] = Json.format[AMLSForm]
 }
 
-case class EnterAMLSExpiryDateForm(expiry: LocalDate)
+case class EnterAMLSRenewalDateForm(renewal: LocalDate)
 
-object EnterAMLSExpiryDateForm {
-  implicit val format: OFormat[EnterAMLSExpiryDateForm] = Json.format[EnterAMLSExpiryDateForm]
+object EnterAMLSRenewalDateForm {
+  implicit val format: OFormat[EnterAMLSRenewalDateForm] = Json.format[EnterAMLSRenewalDateForm]
 }

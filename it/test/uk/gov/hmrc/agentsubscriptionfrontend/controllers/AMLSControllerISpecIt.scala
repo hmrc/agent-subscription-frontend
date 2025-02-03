@@ -54,6 +54,10 @@ class AMLSControllerISpecIt extends BaseISpecIt {
   val expiryMonth: String = expiryDate.getMonthValue.toString
   val expiryYear: String = expiryDate.getYear.toString
 
+  val renewalDay: String = expiryDate.plusDays(1).getDayOfMonth.toString
+  val renewalMonth: String = expiryDate.plusDays(1).getMonthValue.toString
+  val renewalYear: String = expiryDate.plusDays(1).getYear.toString
+
   trait Setup {
     implicit def authenticatedRequest(method: String = GET): FakeRequest[AnyContentAsEmpty.type] =
       authenticatedAs(subscribingCleanAgentWithoutEnrolments, method)
@@ -538,9 +542,9 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedRequest(POST).withFormUrlEncodedBody(
         "amlsCode"         -> "AAT",
         "membershipNumber" -> "12345",
-        "expiry.day"       -> expiryDay,
-        "expiry.month"     -> expiryMonth,
-        "expiry.year"      -> expiryYear,
+        "renewal.day"      -> renewalDay,
+        "renewal.month"    -> renewalMonth,
+        "renewal.year"     -> renewalYear,
         "submit"           -> "continue"
       )
 
@@ -1185,7 +1189,12 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       givenAmlsRecordFound("12345", Approved)
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST)
-          .withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear, "submit" -> "continue")
+          .withFormUrlEncodedBody(
+            "expiry.day"   -> expiryDay,
+            "expiry.month" -> expiryMonth,
+            "expiry.year"  -> expiryYear,
+            "submit"       -> "continue"
+          )
 
       sessionStoreService.currentSession.changingAnswers = Some(true)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", Some("123456")))

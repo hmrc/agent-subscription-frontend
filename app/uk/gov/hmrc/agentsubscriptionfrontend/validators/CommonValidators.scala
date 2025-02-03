@@ -116,7 +116,7 @@ object CommonValidators {
 
   def membershipNumber: Mapping[String] = nonEmptyTextWithMsg("error.moneyLaunderingCompliance.membershipNumber.empty")
 
-  def expiryDate: Mapping[LocalDate] =
+  def renewalDate: Mapping[LocalDate] =
     tuple(
       "year"  -> text.verifying("year", y => y.trim.nonEmpty || y.matches("^[0-9]{1,4}$")),
       "month" -> text.verifying("month", y => y.trim.nonEmpty || y.matches("^[0-9]{1,2}$")),

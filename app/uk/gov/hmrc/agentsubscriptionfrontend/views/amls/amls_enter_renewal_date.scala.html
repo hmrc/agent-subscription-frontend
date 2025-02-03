@@ -18,9 +18,9 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
-@import uk.gov.hmrc.agentsubscriptionfrontend.models.EnterAMLSExpiryDateForm
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{ SubmitOrSaveButtonGroup}
+@import uk.gov.hmrc.agentsubscriptionfrontend.models.EnterAMLSRenewalDateForm
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.SubmitOrSaveButtonGroup
 @import uk.gov.hmrc.govukfrontend.views.html.components.{ GovukErrorSummary, ErrorSummary, FormWithCSRF}
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
@@ -34,32 +34,32 @@
         submitOrSaveButtonGroup: SubmitOrSaveButtonGroup
 )
 
-@(amlsExpiryDateForm: Form[EnterAMLSExpiryDateForm])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(amlsExpiryDateForm: Form[EnterAMLSRenewalDateForm])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
 
 
 @DayFieldError = @{
-    if(amlsExpiryDateForm("expiry.day").hasErrors)
+    if(amlsExpiryDateForm("renewal.day").hasErrors)
         "day-field-error"
 }
 
 @MonthFieldError = @{
-    if(amlsExpiryDateForm("expiry.month").hasErrors)
+    if(amlsExpiryDateForm("renewal.month").hasErrors)
         "month-field-error"
 }
 
 @YearFieldError = @{
-    if(amlsExpiryDateForm("expiry.year").hasErrors)
+    if(amlsExpiryDateForm("renewal.year").hasErrors)
         "year-field-error"
 }
 
 @DateFieldErrorsAll = @{
-    if(amlsExpiryDateForm("expiry").hasErrors && !amlsExpiryDateForm("expiry.day").hasErrors && !amlsExpiryDateForm("expiry.month").hasErrors && !amlsExpiryDateForm("expiry.year").hasErrors)
+    if(amlsExpiryDateForm("renewal").hasErrors && !amlsExpiryDateForm("renewal.day").hasErrors && !amlsExpiryDateForm("renewal.month").hasErrors && !amlsExpiryDateForm("renewal.year").hasErrors)
         "date-field-errors-all"
 }
 
 @dateFormWithRefinedErrors = @{
-    amlsExpiryDateForm.copy(errors = amlsExpiryDateForm.errors.filterNot(error => error.message == "" || error.key.contains("expiry.day")
-            || error.key.contains("expiry.month") || error.key.contains("expiry.year")))
+    amlsExpiryDateForm.copy(errors = amlsExpiryDateForm.errors.filterNot(error => error.message == "" || error.key.contains("renewal.day")
+            || error.key.contains("renewal.month") || error.key.contains("renewal.year")))
 }
 
 @mainTemplate(
@@ -75,7 +75,7 @@
     @formHelper(action = routes.AMLSController.submitAmlsApplicationDatePage()) {
 
         @inputDate(
-            field = dateFormWithRefinedErrors("expiry"),
+            field = dateFormWithRefinedErrors("renewal"),
             legend = msgs("amls.enter-renewal-date.form.title"),
             hint = Some(msgs("amls.enter-renewal-date.hint"))
         )
