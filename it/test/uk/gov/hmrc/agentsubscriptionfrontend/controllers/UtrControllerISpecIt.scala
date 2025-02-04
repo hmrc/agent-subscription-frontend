@@ -88,10 +88,25 @@ class UtrControllerISpecIt extends BaseISpecIt with SessionDataMissingSpec {
       redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
     }
 
-    "handle form with errors and show the same again" in new TestSetupNoJourneyRecord {
+    "handle form with incorrect formatted utr error and show the same again" in new TestSetupNoJourneyRecord {
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("utr" -> "invalidUtr")
+        authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("utr" -> "abcdefghij")
+      sessionStoreService.currentSession.agentSession = Some(AgentSession(Some(BusinessType.SoleTrader)))
+
+      private val result = await(controller.submitUtrForm()(request))
+
+      status(result) shouldBe 200
+      result should containMessages(
+        s"utr.header.${BusinessType.SoleTrader.key}",
+        "error.sautr.incorrectFormat"
+      )
+    }
+
+    "handle form with invalid utr error and show the same again" in new TestSetupNoJourneyRecord {
+
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
+        authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("utr" -> "1234567890")
       sessionStoreService.currentSession.agentSession = Some(AgentSession(Some(BusinessType.SoleTrader)))
 
       private val result = await(controller.submitUtrForm()(request))
