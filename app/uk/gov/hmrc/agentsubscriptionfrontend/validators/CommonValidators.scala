@@ -38,8 +38,8 @@ object CommonValidators {
     """[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"""
   private val DesTextRegex = "^[A-Za-z0-9 \\-,.&'\\/]*$"
 
-  private type UtrErrors = (String, String)
-  private val DefaultUtrErrors = ("error.utr.blank", "error.utr.invalid")
+  private type UtrErrors = (String, String, String)
+  private val DefaultUtrErrors = ("error.utr.blank", "error.utr.invalid", "error.utr.incorrectFormat")
 
   private val EmailMaxLength = 132
   private val PostcodeMaxLength = 8
@@ -55,18 +55,18 @@ object CommonValidators {
   def utr: Mapping[String] = text verifying utrConstraint()
 
   def clientDetailsUtr: Mapping[String] =
-    text verifying utrConstraint(("error.client.sautr.blank", "error.client.sautr.invalid"))
+    text verifying utrConstraint(("error.client.sautr.blank", "error.client.sautr.invalid", "error.client.sautr.incorrectFormat"))
 
   def businessUtr(businessType: String): Mapping[String] = {
     val utrErrors = businessType match {
       case "sole_trader" =>
-        ("error.sautr.blank", "error.sautr.invalid")
+        ("error.sautr.blank", "error.sautr.invalid", "error.sautr.incorrectFormat")
       case "limited_company" =>
-        ("error.companyutr.blank", "error.companyutr.invalid")
+        ("error.companyutr.blank", "error.companyutr.invalid", "error.companyutr.incorrectFormat")
       case "partnership" =>
-        ("error.partnershiputr.blank", "error.partnershiputr.invalid")
+        ("error.partnershiputr.blank", "error.partnershiputr.invalid", "error.partnershiputr.incorrectFormat")
       case "llp" =>
-        ("error.llputr.blank", "error.llputr.invalid")
+        ("error.llputr.blank", "error.llputr.invalid", "error.llputr.incorrectFormat")
       case _ =>
         DefaultUtrErrors
     }
@@ -296,14 +296,14 @@ object CommonValidators {
 
   private def utrConstraint(errorMessages: UtrErrors = DefaultUtrErrors): Constraint[String] = Constraint[String] { fieldValue: String =>
     val formattedField = fieldValue.replace(" ", "")
-    val (blank, invalid) = errorMessages
+    val (blank, invalid, incorrectFormat) = errorMessages
 
     def isNumber(str: String): Boolean = str.map(_.isDigit).reduceOption(_ && _).getOrElse(false)
 
     Constraints.nonEmpty.apply(formattedField) match {
       case _: Invalid => Invalid(ValidationError(blank))
       case _ if !isNumber(formattedField) || formattedField.length != UtrMaxLength =>
-        Invalid(ValidationError(invalid))
+        Invalid(ValidationError(incorrectFormat))
       case _ if !Utr.isValid(formattedField) =>
         Invalid(ValidationError(invalid))
       case _ => Valid
