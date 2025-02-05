@@ -163,7 +163,7 @@ package object controllers extends Logging {
         mapping(
           "amlsCode"         -> amlsCode(bodies),
           "membershipNumber" -> membershipNumber,
-          "renewal"          -> renewalDate
+          "expiry"           -> expiryDate
         )(AMLSForm.apply)(AMLSForm.unapply).verifying(
           HMRC_AMLS_ERROR,
           (o: AMLSForm) =>
@@ -204,12 +204,12 @@ package object controllers extends Logging {
 
     def formWithRefinedErrors(form: Form[AMLSForm]): Form[AMLSForm] = {
 
-      val renewal = "renewal"
+      val expiry = "expiry"
       val dateFields =
-        (error: FormError) => error.key == s"$renewal.day" || error.key == s"$renewal.month" || error.key == s"$renewal.year"
+        (error: FormError) => error.key == s"$expiry.day" || error.key == s"$expiry.month" || error.key == s"$expiry.year"
 
       def refineErrors(dateFieldErrors: Seq[FormError]): Option[String] =
-        dateFieldErrors.map(_.key).map(k => "renewal.".r.replaceFirstIn(k, "")).sorted match {
+        dateFieldErrors.map(_.key).map(k => "expiry.".r.replaceFirstIn(k, "")).sorted match {
           case List("day", "month", "year") => Some("error.moneyLaunderingCompliance.date.empty")
           case List("day", "month")         => Some("error.moneyLaunderingCompliance.day.month.empty")
           case List("day", "year")          => Some("error.moneyLaunderingCompliance.day.year.empty")
@@ -232,10 +232,10 @@ package object controllers extends Logging {
           })
         case _ =>
           form.copy(errors = form.errors.map { error =>
-            if (error.key.contains("renewal")) {
+            if (error.key.contains("expiry")) {
               FormError(error.key, "", error.args)
             } else error
-          }.toList :+ FormError(key = "renewal", message = refinedMessage, args = Seq()))
+          }.toList :+ FormError(key = "expiry", message = refinedMessage, args = Seq()))
       }
     }
 

@@ -291,9 +291,9 @@ class AMLSController @Inject() (
       agent.getMandatoryAmlsData.amlsDetails.flatMap(_.membershipExpiresOn) match {
         case Some(expiry) =>
           val formData = Map(
-            "expiry.day"   -> expiry.getDayOfMonth.toString,
-            "expiry.month" -> expiry.getMonthValue.toString,
-            "expiry.year"  -> expiry.getYear.toString
+            "renewal.day"   -> expiry.plusDays(1).getDayOfMonth.toString,
+            "renewal.month" -> expiry.plusDays(1).getMonthValue.toString,
+            "renewal.year"  -> expiry.plusDays(1).getYear.toString
           )
           Ok(amlsEnterRenewalDate(enterAmlsRenewalDateForm.bind(formData)))
         case None =>
