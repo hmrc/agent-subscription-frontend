@@ -127,6 +127,17 @@ object CommonValidators {
         (date: LocalDate) => (date.getYear.toString, date.getMonthValue.toString, date.getDayOfMonth.toString)
       )
 
+  def renewalDate: Mapping[LocalDate] =
+    tuple(
+      "year"  -> text.verifying("year", y => y.trim.nonEmpty || y.matches("^[0-9]{1,4}$")),
+      "month" -> text.verifying("month", y => y.trim.nonEmpty || y.matches("^[0-9]{1,2}$")),
+      "day"   -> text.verifying("day", d => d.trim.nonEmpty || d.matches("^[0-9]{1,2}$"))
+    ).verifying(checkOneAtATime(Seq(invalidDateConstraint, pastExpiryDateConstraint, within13MonthsExpiryDateConstraint)))
+      .transform(
+        { case (y, m, d) => LocalDate.of(y.trim.toInt, m.trim.toInt, d.trim.toInt) },
+        (date: LocalDate) => (date.getYear.toString, date.getMonthValue.toString, date.getDayOfMonth.toString)
+      )
+
   def appliedOnDate(implicit messages: Messages): Mapping[LocalDate] =
     tuple(
       "year"  -> text.verifying("year", y => y.trim.nonEmpty || y.matches("^[0-9]{1,4}$")),

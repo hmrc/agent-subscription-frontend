@@ -193,11 +193,11 @@ package object controllers extends Logging {
 
     private def amlsRegex = "X[A-Z]ML00000[0-9]{6}"
 
-    def enterAmlsExpiryDateForm: Form[EnterAMLSExpiryDateForm] =
-      Form[EnterAMLSExpiryDateForm](
+    def enterAmlsRenewalDateForm: Form[EnterAMLSRenewalDateForm] =
+      Form[EnterAMLSRenewalDateForm](
         mapping(
-          "expiry" -> expiryDate
-        )(EnterAMLSExpiryDateForm.apply)(EnterAMLSExpiryDateForm.unapply)
+          "renewal" -> renewalDate
+        )(EnterAMLSRenewalDateForm.apply)(EnterAMLSRenewalDateForm.unapply)
       )
 
     import play.api.data.{Form, FormError}
@@ -239,14 +239,14 @@ package object controllers extends Logging {
       }
     }
 
-    def amlsPendingDetailsFormWithRefinedErrors(form: Form[EnterAMLSExpiryDateForm]): Form[EnterAMLSExpiryDateForm] = {
+    def amlsPendingDetailsFormWithRefinedErrors(form: Form[EnterAMLSRenewalDateForm]): Form[EnterAMLSRenewalDateForm] = {
 
-      val expiry = "expiry"
+      val renewal = "renewal"
       val dateFields =
-        (error: FormError) => error.key == s"$expiry.day" || error.key == s"$expiry.month" || error.key == s"$expiry.year"
+        (error: FormError) => error.key == s"$renewal.day" || error.key == s"$renewal.month" || error.key == s"$renewal.year"
 
       def refineErrors(dateFieldErrors: Seq[FormError]): Option[String] =
-        dateFieldErrors.map(_.key).map(k => "expiry.".r.replaceFirstIn(k, "")).sorted match {
+        dateFieldErrors.map(_.key).map(k => "renewal.".r.replaceFirstIn(k, "")).sorted match {
           case List("day", "month", "year") => Some("error.amls.enter-renewal-date.all.empty")
           case List("day", "month")         => Some("error.amls.enter-renewal-date.day.month.empty")
           case List("day", "year")          => Some("error.amls.enter-renewal-date.day.year.empty")
@@ -265,10 +265,10 @@ package object controllers extends Logging {
         case Nil => form
         case _ =>
           form.copy(errors = form.errors.map { error =>
-            if (error.key.contains(expiry)) {
+            if (error.key.contains(renewal)) {
               FormError(error.key, "", error.args)
             } else error
-          }.toList :+ FormError(key = expiry, message = refinedMessage, args = Seq()))
+          }.toList :+ FormError(key = renewal, message = refinedMessage, args = Seq()))
       }
     }
   }

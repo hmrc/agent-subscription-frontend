@@ -54,6 +54,10 @@ class AMLSControllerISpecIt extends BaseISpecIt {
   val expiryMonth: String = expiryDate.getMonthValue.toString
   val expiryYear: String = expiryDate.getYear.toString
 
+  val renewalDay: String = expiryDate.plusDays(1).getDayOfMonth.toString
+  val renewalMonth: String = expiryDate.plusDays(1).getMonthValue.toString
+  val renewalYear: String = expiryDate.plusDays(1).getYear.toString
+
   trait Setup {
     implicit def authenticatedRequest(method: String = GET): FakeRequest[AnyContentAsEmpty.type] =
       authenticatedAs(subscribingCleanAgentWithoutEnrolments, method)
@@ -1065,9 +1069,9 @@ class AMLSControllerISpecIt extends BaseISpecIt {
           "amls.enter-renewal-date.hint"
         )
 
-        result should containInputElement("expiry.day", "text", Some(expiryDay))
-        result should containInputElement("expiry.month", "text", Some(expiryMonth))
-        result should containInputElement("expiry.year", "text", Some(expiryYear))
+        result should containInputElement("renewal.day", "text", Some(renewalDay))
+        result should containInputElement("renewal.month", "text", Some(renewalMonth))
+        result should containInputElement("renewal.year", "text", Some(renewalYear))
 
         result should containSubmitButton("button.saveContinue", "amls-details-continue")
         result should containSubmitButton("button.saveComeBackLater", "amls-details-save")
@@ -1086,9 +1090,9 @@ class AMLSControllerISpecIt extends BaseISpecIt {
           "amls.enter-renewal-date.hint"
         )
 
-        result should containInputElement("expiry.day", "text", None)
-        result should containInputElement("expiry.month", "text", None)
-        result should containInputElement("expiry.year", "text", None)
+        result should containInputElement("renewal.day", "text", None)
+        result should containInputElement("renewal.month", "text", None)
+        result should containInputElement("renewal.year", "text", None)
 
         result should containSubmitButton("button.saveContinue", "amls-details-continue")
         result should containSubmitButton("button.saveComeBackLater", "amls-details-save")
@@ -1122,7 +1126,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       givenAmlsRecordFound("12345", Approved)
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST)
-          .withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear, "submit" -> "continue")
+          .withFormUrlEncodedBody("renewal.day" -> renewalDay, "renewal.month" -> renewalMonth, "renewal.year" -> renewalYear, "submit" -> "continue")
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", None))
@@ -1151,9 +1155,9 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         )
       )
       givenAmlsRecordFound("12345", Approved, None, expiryDate)
-      val wrongDay: String = expiryDate.plusDays(2).getDayOfMonth.toString
+      val wrongDay: String = expiryDate.plusDays(20).getDayOfMonth.toString
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedRequest(POST)
-        .withFormUrlEncodedBody("expiry.day" -> wrongDay, "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear, "submit" -> "continue")
+        .withFormUrlEncodedBody("renewal.day" -> wrongDay, "renewal.month" -> renewalMonth, "renewal.year" -> renewalYear, "submit" -> "continue")
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", None))
@@ -1185,7 +1189,12 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       givenAmlsRecordFound("12345", Approved)
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
         authenticatedRequest(POST)
-          .withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear, "submit" -> "continue")
+          .withFormUrlEncodedBody(
+            "renewal.day"   -> renewalDay,
+            "renewal.month" -> renewalMonth,
+            "renewal.year"  -> renewalYear,
+            "submit"        -> "continue"
+          )
 
       sessionStoreService.currentSession.changingAnswers = Some(true)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", Some("123456")))
@@ -1197,7 +1206,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "show validation error when the form is submitted with empty day field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear)
+        authenticatedRequest(POST).withFormUrlEncodedBody("renewal.day" -> "", "renewal.month" -> renewalMonth, "renewal.year" -> renewalYear)
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
@@ -1207,7 +1216,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "show validation error when the form is submitted with invalid expiry date" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "123", "expiry.month" -> expiryMonth, "expiry.year" -> expiryYear)
+        authenticatedRequest(POST).withFormUrlEncodedBody("renewal.day" -> "123", "renewal.month" -> renewalMonth, "renewal.year" -> renewalYear)
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
@@ -1217,7 +1226,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "show validation error when the form is submitted with empty month field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> "", "expiry.year" -> expiryYear)
+        authenticatedRequest(POST).withFormUrlEncodedBody("renewal.day" -> renewalDay, "renewal.month" -> "", "renewal.year" -> renewalYear)
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
@@ -1227,7 +1236,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "show validation error when the form is submitted with empty year field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> expiryMonth, "expiry.year" -> "")
+        authenticatedRequest(POST).withFormUrlEncodedBody("renewal.day" -> renewalDay, "renewal.month" -> renewalMonth, "renewal.year" -> "")
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
@@ -1237,7 +1246,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "show validation error when the form is submitted with empty day and month field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> "", "expiry.year" -> expiryYear)
+        authenticatedRequest(POST).withFormUrlEncodedBody("renewal.day" -> "", "renewal.month" -> "", "renewal.year" -> renewalYear)
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
@@ -1248,7 +1257,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "show validation error when the form is submitted with empty day and year field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> "", "expiry.month" -> expiryMonth, "expiry.year" -> "")
+        authenticatedRequest(POST).withFormUrlEncodedBody("renewal.day" -> "", "renewal.month" -> renewalMonth, "renewal.year" -> "")
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
@@ -1259,7 +1268,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
     "show validation error when the form is submitted with empty month and year field" in new Setup {
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
-        authenticatedRequest(POST).withFormUrlEncodedBody("expiry.day" -> expiryDay, "expiry.month" -> "", "expiry.year" -> "")
+        authenticatedRequest(POST).withFormUrlEncodedBody("renewal.day" -> renewalDay, "renewal.month" -> "", "renewal.year" -> "")
 
       val result: Result = await(controller.submitAmlsApplicationDatePage(request))
       status(result) shouldBe 200
