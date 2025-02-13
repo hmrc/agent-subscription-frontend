@@ -1155,9 +1155,14 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         )
       )
       givenAmlsRecordFound("12345", Approved, None, expiryDate)
-      val wrongDay: String = expiryDate.plusDays(20).getDayOfMonth.toString
+      val wrongDate: LocalDate = expiryDate.plusDays(20)
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedRequest(POST)
-        .withFormUrlEncodedBody("renewal.day" -> wrongDay, "renewal.month" -> renewalMonth, "renewal.year" -> renewalYear, "submit" -> "continue")
+        .withFormUrlEncodedBody(
+          "renewal.day"   -> wrongDate.getDayOfMonth.toString,
+          "renewal.month" -> wrongDate.getMonthValue.toString,
+          "renewal.year"  -> wrongDate.getYear.toString,
+          "submit"        -> "continue"
+        )
 
       sessionStoreService.currentSession.changingAnswers = Some(false)
       sessionStoreService.currentSession.amlsSession = Some(AmlsSession("12345", None))
