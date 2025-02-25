@@ -291,13 +291,13 @@ class AMLSController @Inject() (
       agent.getMandatoryAmlsData.amlsDetails.flatMap(_.membershipExpiresOn) match {
         case Some(expiry) =>
           val formData = Map(
-            "renewal.day"   -> expiry.plusDays(1).getDayOfMonth.toString,
-            "renewal.month" -> expiry.plusDays(1).getMonthValue.toString,
-            "renewal.year"  -> expiry.plusDays(1).getYear.toString
+            "expiry.day"   -> expiry.getDayOfMonth.toString,
+            "expiry.month" -> expiry.getMonthValue.toString,
+            "expiry.year"  -> expiry.getYear.toString
           )
-          Ok(amlsEnterRenewalDate(enterAmlsRenewalDateForm.bind(formData)))
+          Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm.bind(formData)))
         case None =>
-          Ok(amlsEnterRenewalDate(enterAmlsRenewalDateForm))
+          Ok(amlsEnterRenewalDate(enterAmlsExpiryDateForm))
       }
     }
   }
@@ -306,7 +306,7 @@ class AMLSController @Inject() (
     withSubscribingAgent { agent =>
       sessionStoreService.fetchAmlsSession.flatMap { maybeAmlsSession =>
         sessionStoreService.fetchIsChangingAnswers.flatMap { isChanging =>
-          enterAmlsRenewalDateForm
+          enterAmlsExpiryDateForm
             .bindFromRequest()
             .fold(
               formWithErrors => {
@@ -318,7 +318,7 @@ class AMLSController @Inject() (
               validForm => {
 
                 val amlsSession = maybeAmlsSession.get
-                val expiryDate = validForm.renewal.minusDays(1)
+                val expiryDate = validForm.expiry
                 val membershipNumber = amlsSession.membershipNumber
                 amlsService.checkAmlsExpiryDate(membershipNumber, expiryDate).flatMap {
                   case ResultOK(amlsSafeId) =>
