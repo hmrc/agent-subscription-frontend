@@ -382,11 +382,11 @@ nonAgent.p1=I fynd yn eich blaen, <a href="{0}">mewngofnodwch gyda Dynodydd Defn
 nonAgent.p2=Os nad oes un gennych, <a href="{0}">crëwch Ddynodydd Defnyddiwr (ID) Porth y Llywodraeth newydd</a>, gan ddewis yr opsiwn ‘Asiant’.
 
 #Subscription complete
-subscriptionComplete.title=Cyfrif gwasanaethau asiant wedi’i greu
-subscriptionComplete.h1=Cyfrif gwasanaethau asiant wedi’i greu
-subscriptionComplete.accountName=Rydych wedi creu cyfrif ar gyfer
-subscriptionComplete.copiedAcross=Rydych hefyd wedi copïo ar draws <strong class="govuk-!-font-weight-bold">{0}</strong> o gleientiaid i’ch cyfrif gwasanaethau asiant newydd.
-subscriptionComplete.p1=Gwnewch nodyn o gyfeirnod eich cyfrif <strong class="govuk-!-font-weight-bold">{0}</strong>. Gwnewch yn siŵr bod gennych chi hyn os ydych yn cysylltu â ni ynglŷn â’ch cyfrif gwasanaethau asiant
+subscriptionComplete.title=Rydych wedi creu cyfrif gwasanaethau asiant
+subscriptionComplete.h1=Rydych wedi creu cyfrif gwasanaethau asiant
+subscriptionComplete.accountName=Cyfeirnod yr asiant:
+subscriptionComplete.copiedAcross=Rydych wedi ychwanegu <strong class="govuk-!-font-weight-bold">{0}</strong> o awdurdodiadau ar gyfer Hunanasesiad at eich cyfrif gwasanaethau asiant newydd.
+subscriptionComplete.p1=Gwnewch nodyn o’ch cyfeirnod yr asiant – byddwn yn gofyn amdano os byddwch yn cysylltu â ni ynghylch eich cyfrif gwasanaethau asiant.
 subscriptionComplete.p2=Rydym wedi anfon e-bost i {0} i gadarnhau’r manylion hyn.
 subscriptionComplete.button.continueToASAccount=Ewch i’ch cyfrif gwasanaethau asiant
 
