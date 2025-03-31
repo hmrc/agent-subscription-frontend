@@ -507,7 +507,7 @@ checkAnswers.contactTradingAddress.label=Cyfeiriad
 checkAnswers.amls.h2=Manylion cydymffurfiad gwyngalchu arian
 checkAnswers.businessDetails.h2=Manylion y busnes
 checkAnswers.contactDetails.h2=Manylion y cyfrif gwasanaethau asiant
-checkAnswers.mapping.h2=Perthnasoedd â chleientiaid presennol
+checkAnswers.mapping.h2=Awdurdodiadau presennol gan gleientiaid
 checkAnswers.tradingName.none=Dim
 
 businessName.title=Beth yw enw eich busnes?
