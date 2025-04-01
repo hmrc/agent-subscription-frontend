@@ -486,7 +486,7 @@ amls-ineligible-status.link=Read about how to challenge an HMRC decision to refu
 
 # Pending AMLS Details page
 amls.enter-renewal-date.title=We have approved your money laundering supervision registration
-amls.enter-renewal-date.hint=You can find this in your AMLS dashboard. For example, 31 03 2024
+amls.enter-renewal-date.hint=You\\ can find this in your AMLS dashboard. For example, 31 03 2024
 
 checkAnswers.title=Check your answers before creating your account
 checkAnswers.description.p3=By setting up this account, you confirm that, to the best of your knowledge, the details you provided are correct.
@@ -497,7 +497,7 @@ checkAnswers.confirm.button=Confirm details and create account
 checkAnswers.change.button=Change
 checkAnswers.amlsDetails.label=Money laundering compliance details and expiry date
 checkAnswers.amlsDetails.pending.label=Date you applied to register for money laundering supervision with HMRC
-checkAnswers.userMapping.label=Number of client relationships copied
+checkAnswers.userMapping.label=Number of client authorisations added
 checkAnswers.addMore.button=Add more
 checkAnswers.ggId.label=Government Gateway user IDs entered
 checkAnswers.ggId.xs=XXXX-XXXX-{0}
