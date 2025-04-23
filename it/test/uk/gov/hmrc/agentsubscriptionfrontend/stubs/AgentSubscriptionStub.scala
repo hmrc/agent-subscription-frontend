@@ -384,6 +384,15 @@ object AgentSubscriptionStub {
       ).willReturn(aResponse().withStatus(404))
     )
 
+  def givenAmlsRecordNonSuceesfulCase(amlsRegistrationNumber: String, status: Int): StubMapping =
+    stubFor(
+      get(
+        urlEqualTo(
+          s"/agent-subscription/amls-subscription/$amlsRegistrationNumber"
+        )
+      ).willReturn(aResponse().withStatus(status))
+    )
+
   def givenCompaniesHouseStatusCheck(crn: String, statusResponse: Int): StubMapping =
     stubFor(
       get(

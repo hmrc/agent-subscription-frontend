@@ -24,6 +24,7 @@ import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DesignatoryDetails.Person
+import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.Approved
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, BusinessDetails, SubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionJourneyStub, AgentSubscriptionStub}
@@ -33,7 +34,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import java.time.LocalDate
+import java.time.{LocalDate, Month}
 import scala.concurrent.ExecutionContext.Implicits.global
 class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSupport {
 
@@ -376,6 +377,32 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
       }
 
       e.statusCode shouldBe 500
+    }
+  }
+
+  "getAmlsSubscriptionRecord" should {
+    "return amls Subscription Record" in {
+      AgentSubscriptionStub.givenAmlsRecordFound("12345", Approved)
+      val result = await(connector.getAmlsSubscriptionRecord("12345"))
+
+      result shouldBe Some(
+        AmlsSubscriptionRecord(Approved, "111234567890123", Some(LocalDate.of(2021, Month.JANUARY, 1)), Some(LocalDate.now().plusDays(2)), None)
+      )
+    }
+
+    " return None when agent subscription record returns a 404 response" in {
+      AgentSubscriptionStub.givenAmlsRecordNotFound("12345")
+      val result = await(connector.getAmlsSubscriptionRecord("12345"))
+
+      result shouldBe None
+    }
+
+    "throw Upstream4xxResponse if details doesn't match records" in {
+      AgentSubscriptionStub.givenAmlsRecordNonSuceesfulCase("12345", 400)
+
+      intercept[UpstreamErrorResponse] {
+        await(connector.getAmlsSubscriptionRecord("12345"))
+      }
     }
   }
 
