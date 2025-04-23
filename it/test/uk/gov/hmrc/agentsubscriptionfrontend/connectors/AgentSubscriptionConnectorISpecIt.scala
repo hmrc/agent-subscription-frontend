@@ -397,7 +397,7 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
       result shouldBe None
     }
 
-    "throw Upstream4xxResponse if details doesn't match records" in {
+    "throw an UpstreamErrorResponse exception when agent subscription returns an unexpected status" in {
       AgentSubscriptionStub.givenAmlsRecordNonSuceesfulCase("12345", 400)
 
       intercept[UpstreamErrorResponse] {
