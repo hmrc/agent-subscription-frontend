@@ -15,16 +15,15 @@
  */
 
 import com.google.inject.name.Named
+import play.api._
 import play.api.http.Status.FORBIDDEN
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results._
 import play.api.mvc.{Request, RequestHeader, Result}
-import play.api._
-import play.twirl.api.{Html, HtmlFormat}
+import play.twirl.api.Html
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.util.AuthRedirects
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{ErrorTemplate, ErrorTemplate5xx}
-import uk.gov.hmrc.auth.core.{InsufficientEnrolments, NoActiveSession}
 import uk.gov.hmrc.http.{JsValidationException, NotFoundException}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.config.HttpAuditEvent
@@ -42,48 +41,35 @@ class ErrorHandler @Inject() (
   errorTemplate: ErrorTemplate,
   errorTemplate5xx: ErrorTemplate5xx,
   @Named("appName") val appName: String
-)(implicit val config: Configuration, ec: ExecutionContext, appConfig: AppConfig)
+)(implicit val config: Configuration, val ec: ExecutionContext, appConfig: AppConfig)
     extends FrontendErrorHandler with AuthRedirects with ErrorAuditing with Logging {
 
   def theLogger: Logger = this.logger // for testing
 
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
     auditClientError(request, statusCode, message)
-
-    if (statusCode == FORBIDDEN)
-      Future.successful(Forbidden(standardErrorTemplate("global.error.403.title", "global.error.403.heading", "global.error.403.message")(request)))
-    else {
-      logger.error(s"onClientError $message")
-      super.onClientError(request, statusCode, message)
-    }
+    logger.error(s"onClientError $message | status: $statusCode request: $request")
+    super.onClientError(request, statusCode, message)
   }
 
-  override def resolveError(request: RequestHeader, exception: Throwable): Result = {
+  override def resolveError(request: RequestHeader, exception: Throwable): Future[Result] = {
     auditServerError(request, exception)
-
-    exception match {
-      case e: NoActiveSession =>
-        logger.warn(s"NoActiveSession ${e.getMessage}")
-        toGGLogin(if (env.mode.equals(Mode.Dev)) s"http://${request.host}${request.uri}" else s"${request.uri}")
-      case _: InsufficientEnrolments =>
-        Forbidden(standardErrorTemplate("global.error.403.title", "global.error.403.heading", "global.error.403.message")(request))
-      case _ =>
-        logger.error(s"resolveError ${exception.getMessage}")
-        super.resolveError(request, exception)
-    }
+    implicit val r = Request(request, "")
+    logger.error(s"resolveError $exception")
+    Future.successful(Ok(errorTemplate5xx()))
   }
 
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): HtmlFormat.Appendable = {
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit
+    request: RequestHeader
+  ): Future[Html] = {
     logger.error(s"$message")
-    errorTemplate(Messages(pageTitle), Messages(heading), Messages(message))
+    Future.successful(errorTemplate(Messages(pageTitle), Messages(heading), Messages(message)))
   }
 
-  override def internalServerErrorTemplate(implicit request: Request[_]): Html = {
+  override def internalServerErrorTemplate(implicit request: RequestHeader): Future[Html] = {
     logger.error(s"internalServerError")
-    errorTemplate5xx()
+    Future.successful(errorTemplate5xx())
   }
-
-  private implicit def rhToRequest(rh: RequestHeader): Request[_] = Request(rh, "")
 }
 
 object EventTypes {
