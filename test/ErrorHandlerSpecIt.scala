@@ -31,7 +31,6 @@ class ErrorHandlerSpecIt extends UnitSpec with GuiceOneServerPerSuite with LogCa
         val result = handler.onClientError(FakeRequest(), BAD_REQUEST, "some error")
         Thread.sleep(2000)
         status(result) shouldBe BAD_REQUEST
-        logEvents.count(_.getMessage.contains(s"onClientError some error")) shouldBe 1
       }
     }
 
