@@ -16,7 +16,6 @@
 
 import com.google.inject.name.Named
 import play.api._
-import play.api.http.Status.FORBIDDEN
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results._
 import play.api.mvc.{Request, RequestHeader, Result}
@@ -46,11 +45,7 @@ class ErrorHandler @Inject() (
 
   def theLogger: Logger = this.logger // for testing
 
-  override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] =
-    super.onClientError(request, statusCode, message)
-
   override def resolveError(request: RequestHeader, exception: Throwable): Future[Result] = {
-    auditServerError(request, exception)
     implicit val r = Request(request, "")
     logger.error(s"resolveError $exception")
     Future.successful(Ok(errorTemplate5xx()))
