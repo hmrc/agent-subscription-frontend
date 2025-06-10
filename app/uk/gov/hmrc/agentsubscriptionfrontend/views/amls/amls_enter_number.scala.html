@@ -35,7 +35,7 @@ formHelper: FormWithCSRF,
 submitOrSaveButtonGroup: SubmitOrSaveButtonGroup
 )
 
-@(amlsForm: Form[EnterAMLSNumberForm])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(amlsForm: Form[EnterAMLSNumberForm])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
 title =  errorPrefix(amlsForm) + msgs("check-amls.title"),

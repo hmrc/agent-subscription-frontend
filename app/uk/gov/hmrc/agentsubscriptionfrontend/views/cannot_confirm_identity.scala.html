@@ -21,7 +21,7 @@
 
 @this(mainTemplate: MainTemplate, h1: h1, p: p, button_link: link_as_button)
 
-@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@()(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = msgs("cannotConfirmIdentity.h1")) {
 

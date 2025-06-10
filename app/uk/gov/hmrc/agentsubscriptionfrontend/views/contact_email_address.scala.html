@@ -31,7 +31,7 @@
     inputText: InputText
 )
 
-@(contactEmailForm: Form[BusinessEmail])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(contactEmailForm: Form[BusinessEmail])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
     title = errorPrefix(contactEmailForm) + msgs("contactEmailAddress.title"),

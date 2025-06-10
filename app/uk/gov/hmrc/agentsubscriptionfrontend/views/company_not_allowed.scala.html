@@ -19,7 +19,7 @@
 
 @this(mainTemplate: MainTemplate)
 
-@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@()(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = msgs("companyNotAllowed.title")) {
 

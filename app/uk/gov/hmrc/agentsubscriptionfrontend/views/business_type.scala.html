@@ -35,7 +35,7 @@
     a:a
 )
 
-@(businessTypeRadioForm: Form[BusinessType])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(businessTypeRadioForm: Form[BusinessType])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @detailsContent = {
     @p("businessType.progressive.content.p1")

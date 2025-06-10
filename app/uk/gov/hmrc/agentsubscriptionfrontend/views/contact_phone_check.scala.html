@@ -32,7 +32,7 @@
         submitButton: SubmitButton,
 )
 
-@(contactPhoneCheckForm: Form[ContactPhoneCheck], businessPhone: String, isChanging: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(contactPhoneCheckForm: Form[ContactPhoneCheck], businessPhone: String, isChanging: Boolean)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @backLinkCall = @{if(isChanging){routes.SubscriptionController.showCheckAnswers()} else {routes.TaskListController.showTaskList()}}
 

@@ -32,7 +32,7 @@
     submitButton: SubmitButton
 )
 
-@(utrForm: Form[Utr], businessType: BusinessType)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(utrForm: Form[Utr], businessType: BusinessType)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @utrHint = {
 @msgs("utr.description.start")

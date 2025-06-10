@@ -31,7 +31,7 @@
     submitButton: SubmitButton
 )
 
-@(crnForm: Form[CompanyRegistrationNumber])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(crnForm: Form[CompanyRegistrationNumber])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(title =  errorPrefix(crnForm) + msgs("crn.title"),
 backLinkHref = Some(routes.PostcodeController.showPostcodeForm().url)

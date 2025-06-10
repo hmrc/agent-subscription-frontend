@@ -20,7 +20,7 @@ import play.api.Logging
 import play.api.http.Status
 import play.api.i18n.Lang
 import play.api.mvc.Results.{Conflict, Redirect}
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{RequestHeader, Result}
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
@@ -60,7 +60,7 @@ class SubscriptionService @Inject() (
   import SubscriptionDetails._
 
   def subscribe(utr: String, postcode: String, agency: Agency, langForEmail: Option[Lang], amlsData: Option[AmlsData])(implicit
-    hc: HeaderCarrier,
+    rh: RequestHeader,
     ec: ExecutionContext
   ): Future[(Arn, String)] = {
     val subscriptionDetails = mapper(utr, postcode, agency, amlsData)
@@ -70,7 +70,7 @@ class SubscriptionService @Inject() (
   }
 
   def subscribeAgencyToMtd(subscriptionDetails: SubscriptionDetails, langForEmail: Option[Lang])(implicit
-    hc: HeaderCarrier,
+    rh: RequestHeader,
     ec: ExecutionContext
   ): Future[Arn] = {
     val address = if (subscriptionDetails.address.countryCode != "GB") {
@@ -108,8 +108,7 @@ class SubscriptionService @Inject() (
   }
 
   def completePartialSubscription(utr: String, businessPostCode: String)(implicit
-    request: Request[_],
-    hc: HeaderCarrier,
+    rh: RequestHeader,
     ec: ExecutionContext
   ): Future[Arn] =
     agentSubscriptionConnector
@@ -123,8 +122,7 @@ class SubscriptionService @Inject() (
       }
 
   def completePartialSubscriptionAndGoToComplete(utr: String, businessPostCode: String)(implicit
-    request: Request[_],
-    hc: HeaderCarrier,
+    rh: RequestHeader,
     ec: ExecutionContext
   ): Future[Result] =
     completePartialSubscription(utr, businessPostCode).map { _ =>
@@ -137,7 +135,7 @@ class SubscriptionService @Inject() (
     }
 
   def redirectAfterGGCredsCreatedBasedOnStatus(continueId: ContinueId, agent: Agent)(implicit
-    request: Request[_],
+    request: RequestHeader,
     hc: HeaderCarrier,
     ex: ExecutionContext
   ): Future[Result] =
@@ -169,7 +167,7 @@ class SubscriptionService @Inject() (
                                                }
     } yield completePartialSubscriptionOrTaskList
 
-  def getSubscriptionStatus(utr: String, postcode: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[SubscriptionProcess] =
+  def getSubscriptionStatus(utr: String, postcode: String)(implicit rh: RequestHeader, ec: ExecutionContext): Future[SubscriptionProcess] =
     agentSubscriptionConnector.getRegistration(utr, postcode).map {
 
       case Some(reg) if reg.isSubscribedToAgentServices =>
@@ -187,18 +185,18 @@ class SubscriptionService @Inject() (
       case None => SubscriptionProcess(NoRegistrationFound, None)
     }
 
-  def getDesignatoryDetails(nino: Nino)(implicit hc: HeaderCarrier): Future[DesignatoryDetails] =
+  def getDesignatoryDetails(nino: Nino)(implicit rh: RequestHeader): Future[DesignatoryDetails] =
     agentSubscriptionConnector.getDesignatoryDetails(nino)
 
-  def matchCorporationTaxUtrWithCrn(utr: String, crn: CompanyRegistrationNumber)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def matchCorporationTaxUtrWithCrn(utr: String, crn: CompanyRegistrationNumber)(implicit rh: RequestHeader): Future[Boolean] =
     agentSubscriptionConnector.matchCorporationTaxUtrWithCrn(utr, crn)
 
-  def matchVatKnownFacts(vrn: Vrn, vatRegistrationDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def matchVatKnownFacts(vrn: Vrn, vatRegistrationDate: LocalDate)(implicit rh: RequestHeader): Future[Boolean] =
     agentSubscriptionConnector.matchVatKnownFacts(vrn, vatRegistrationDate)
 
   def handlePartiallySubscribedAndRedirect(agent: Agent, agentSession: AgentSession)(
     whenNotPartiallySubscribed: => Future[Result]
-  )(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
+  )(implicit request: RequestHeader, ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
     val utr = agentSession.utr.getOrElse("")
     val postcode = agentSession.postcode.getOrElse("")
     for {
@@ -219,13 +217,13 @@ class SubscriptionService @Inject() (
     } yield result
   }
 
-  def companiesHouseKnownFactCheck(crn: CompanyRegistrationNumber, name: String)(implicit hc: HeaderCarrier): Future[Int] =
+  def companiesHouseKnownFactCheck(crn: CompanyRegistrationNumber, name: String)(implicit rh: RequestHeader): Future[Int] =
     agentSubscriptionConnector.companiesHouseKnownFactCheck(crn, name)
 
-  def checkCompanyStatus(crn: CompanyRegistrationNumber)(implicit hc: HeaderCarrier): Future[Int] =
+  def checkCompanyStatus(crn: CompanyRegistrationNumber)(implicit rh: RequestHeader): Future[Int] =
     agentSubscriptionConnector.companiesHouseStatusCheck(crn)
 
-  private def extractLangPreferenceFromCookie(implicit request: Request[_]): Option[Lang] =
+  private def extractLangPreferenceFromCookie(implicit request: RequestHeader): Option[Lang] =
     request.cookies
       .get("PLAY_LANG")
       .map(x => Lang(x.value))

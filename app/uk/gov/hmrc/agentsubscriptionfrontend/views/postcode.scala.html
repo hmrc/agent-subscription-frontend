@@ -31,7 +31,7 @@
     submitButton: SubmitButton
 )
 
-@(postcodeForm: Form[Postcode], businessType: BusinessType)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(postcodeForm: Form[Postcode], businessType: BusinessType)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
     title = errorPrefix(postcodeForm) + msgs(s"postcode.${businessType.key}.title"),

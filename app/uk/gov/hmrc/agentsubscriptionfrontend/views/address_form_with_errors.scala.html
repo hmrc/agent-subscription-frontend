@@ -31,7 +31,7 @@
     ukAddress: UkAddress,
     submitButton: SubmitButton
 )
-@(detailsForm: Form[DesAddress], isTradingAddress: Boolean = false)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(detailsForm: Form[DesAddress], isTradingAddress: Boolean = false)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @submitCall = @{
     if(isTradingAddress){

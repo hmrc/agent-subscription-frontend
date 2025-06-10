@@ -33,7 +33,7 @@
     submitButton: SubmitButton
 )
 
-@(radioResponseForm: Form[RadioInvasiveStartSaAgentCode])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(radioResponseForm: Form[RadioInvasiveStartSaAgentCode])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @textSaCode = {
     @inputText(

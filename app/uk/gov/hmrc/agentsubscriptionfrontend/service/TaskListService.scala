@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
+import play.api.mvc.RequestHeader
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector, AgentSubscriptionConnector}
@@ -32,7 +34,9 @@ class TaskListService @Inject() (
   appConfig: AppConfig
 ) {
 
-  def createTasks(subscriptionJourneyRecord: SubscriptionJourneyRecord)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[List[Task]] =
+  def createTasks(
+    subscriptionJourneyRecord: SubscriptionJourneyRecord
+  )(implicit hc: HeaderCarrier, rh: RequestHeader, ec: ExecutionContext): Future[List[Task]] =
     for {
       amlsOpt <- agentAssuranceConnector.getAmlsData(subscriptionJourneyRecord.businessDetails.utr)
     } yield {

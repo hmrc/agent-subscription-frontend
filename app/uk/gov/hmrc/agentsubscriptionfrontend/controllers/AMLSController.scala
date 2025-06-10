@@ -342,7 +342,7 @@ class AMLSController @Inject() (
     agent: Agent,
     updateExistingAmlsData: AmlsData => Option[AmlsData],
     maybeCreateNewAmlsData: Option[AmlsData] = None
-  )(implicit hc: HeaderCarrier): Future[Unit] = {
+  )(implicit rh: RequestHeader): Future[Unit] = {
 
     val record = agent.getMandatorySubscriptionRecord
     val updatedRecord = {

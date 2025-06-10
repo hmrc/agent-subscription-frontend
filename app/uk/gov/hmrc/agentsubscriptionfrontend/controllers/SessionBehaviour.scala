@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
-import play.api.mvc.{Call, Request, Result}
 import play.api.mvc.Results._
+import play.api.mvc.{Call, Request, RequestHeader, Result}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService}
@@ -50,6 +50,7 @@ trait SessionBehaviour {
       .map(_ => Redirect(redirectTo))
 
   protected def updateSubscriptionJourneyRecordAndRedirect(subscriptionJourneyRecord: SubscriptionJourneyRecord)(redirectTo: Call)(implicit
+    rh: RequestHeader,
     hc: HeaderCarrier
   ): Future[Result] =
     subscriptionJourneyService.saveJourneyRecord(subscriptionJourneyRecord).map(_ => Redirect(redirectTo))
