@@ -53,15 +53,11 @@ class ErrorHandler @Inject() (
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit
     request: RequestHeader
-  ): Future[Html] = {
-    logger.error(s"$message")
+  ): Future[Html] =
     Future.successful(errorTemplate(Messages(pageTitle), Messages(heading), Messages(message)))
-  }
 
-  override def internalServerErrorTemplate(implicit request: RequestHeader): Future[Html] = {
-    logger.error(s"internalServerError")
+  override def internalServerErrorTemplate(implicit request: RequestHeader): Future[Html] =
     Future.successful(errorTemplate5xx())
-  }
 }
 
 object EventTypes {

@@ -41,7 +41,6 @@ import java.time.{LocalDate, Month}
 import scala.concurrent.ExecutionContext.Implicits.global
 class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSupport {
 
-  // private implicit val hc: HeaderCarrier = HeaderCarrier()
   private implicit val request: RequestHeader = FakeRequest()
 
   private lazy val connector: AgentSubscriptionConnector =

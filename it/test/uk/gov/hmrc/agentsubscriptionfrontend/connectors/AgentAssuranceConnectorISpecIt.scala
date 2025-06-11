@@ -33,7 +33,6 @@ import scala.concurrent.Future
 
 class AgentAssuranceConnectorISpecIt extends BaseISpecIt with MetricTestSupport {
 
-  // private implicit val hc: HeaderCarrier = HeaderCarrier()
   private implicit val request: RequestHeader = FakeRequest()
 
   private lazy val connector =
