@@ -44,15 +44,13 @@ class AssuranceService @Inject() (
   def assureIsAgent(utr: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[AssuranceResults]] =
     if (appConfig.agentAssuranceRun) {
       for {
-        isOnRefusalToDealWithList <- assuranceConnector.isR2DWAgent(utr)
-        isManuallyAssured <- if (!isOnRefusalToDealWithList) assuranceConnector.isManuallyAssuredAgent(utr)
-                             else Future successful false
-        assuranceResults <- if (isOnRefusalToDealWithList || isManuallyAssured) {
+        agentChecksResponse <- assuranceConnector.agentChecks(utr)
+        assuranceResults <- if (agentChecksResponse.isRefusalToDealWith || agentChecksResponse.isManuallyAssured) {
                               Future.successful(
                                 Some(
                                   AssuranceResults(
-                                    isOnRefusalToDealWithList = isOnRefusalToDealWithList,
-                                    isManuallyAssured = isManuallyAssured,
+                                    isOnRefusalToDealWithList = agentChecksResponse.isRefusalToDealWith,
+                                    isManuallyAssured = agentChecksResponse.isManuallyAssured,
                                     hasAcceptableNumberOfPayeClients = None,
                                     hasAcceptableNumberOfSAClients = None,
                                     hasAcceptableNumberOfVatDecOrgClients = None,
@@ -73,8 +71,8 @@ class AssuranceService @Inject() (
                                                                          .map(Some(_))
                               } yield Some(
                                 AssuranceResults(
-                                  isOnRefusalToDealWithList = isOnRefusalToDealWithList,
-                                  isManuallyAssured = isManuallyAssured,
+                                  isOnRefusalToDealWithList = agentChecksResponse.isRefusalToDealWith,
+                                  isManuallyAssured = agentChecksResponse.isManuallyAssured,
                                   hasAcceptableNumberOfPayeClients = hasAcceptableNumberOfPayeClientsOpt,
                                   hasAcceptableNumberOfSAClients = hasAcceptableNumberOfSAClientsOpt,
                                   hasAcceptableNumberOfVatDecOrgClients = hasAcceptableNumberOfVatDecOrgClientsOpt,

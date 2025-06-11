@@ -20,10 +20,10 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, Partnership, SoleTrader}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, Postcode}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Css.{errorForField, errorSummaryForField, labelFor}
@@ -112,8 +112,8 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-SA")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("HMCE-VATDEC-ORG")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-CT")
-      givenRefusalToDealWithUtrIsNotForbidden(validUtr)
-      if (isMAA) givenAgentIsManuallyAssured(validUtr) else givenAgentIsNotManuallyAssured(validUtr)
+      if (isMAA) givenCustomAgentChecks(validUtr, isManuallyAssured = true, isRefusalToDealWith = false)
+      else givenCustomAgentChecks(validUtr, isManuallyAssured = false, isRefusalToDealWith = false)
     }
 
     "businessType is SoleTrader or Partnership" should {
@@ -240,7 +240,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-SA")
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("HMCE-VATDEC-ORG")
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-CT")
-      givenRefusalToDealWithUtrIsNotForbidden(validUtr)
+      givenAgentIsNotOnRefusalToDealWithUtrList(validUtr)
       givenAgentIsNotManuallyAssured(validUtr)
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
@@ -285,7 +285,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
     }
 
     "redirect to cannot create account if user is on the refusal to deal with list" in new TestSetupNoJourneyRecord {
-      givenRefusalToDealWithUtrIsForbidden(validUtr)
+      givenAgentIsOnRefusalToDealList(validUtr)
       withMatchingUtrAndPostcode(validUtr, validPostcode)
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
