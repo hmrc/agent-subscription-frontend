@@ -17,14 +17,12 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import play.api.mvc.RequestHeader
-
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector, AgentSubscriptionConnector}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, SubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, SubscriptionJourneyRecord}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -36,7 +34,7 @@ class TaskListService @Inject() (
 
   def createTasks(
     subscriptionJourneyRecord: SubscriptionJourneyRecord
-  )(implicit hc: HeaderCarrier, rh: RequestHeader, ec: ExecutionContext): Future[List[Task]] =
+  )(implicit rh: RequestHeader, ec: ExecutionContext): Future[List[Task]] =
     for {
       amlsOpt <- agentAssuranceConnector.getAmlsData(subscriptionJourneyRecord.businessDetails.utr)
     } yield {

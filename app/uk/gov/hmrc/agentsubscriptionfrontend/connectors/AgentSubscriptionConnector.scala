@@ -20,7 +20,6 @@ import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.RequestHeader
-import play.utils.UriEncoding
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
@@ -51,7 +50,7 @@ class AgentSubscriptionConnector @Inject() (
   def getJourneyById(internalId: AuthProviderId)(implicit rh: RequestHeader): Future[Option[SubscriptionJourneyRecord]] =
     monitor(s"ConsumedAPI-Agent-Subscription-getJourneyByPrimaryId-GET") {
       http
-        .get(url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription/journey/id/${encodePathSegment(internalId.id)}")
+        .get(url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription/journey/id/${internalId.id}")
         .execute[HttpResponse]
         .map(response =>
           response.status match {
@@ -66,7 +65,7 @@ class AgentSubscriptionConnector @Inject() (
     monitor(s"ConsumedAPI-Agent-Subscription-getJourneyByContinueId-GET") {
       transformOptionResponse[SubscriptionJourneyRecord](
         http
-          .get(url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription/journey/continueId/${encodePathSegment(continueId.value)}")
+          .get(url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription/journey/continueId/${continueId.value}")
           .execute[HttpResponse]
       )
     }
@@ -75,7 +74,7 @@ class AgentSubscriptionConnector @Inject() (
     monitor(s"ConsumedAPI-Agent-Subscription-getJourneyByUtr-GET") {
       transformOptionResponse[SubscriptionJourneyRecord](
         http
-          .get(url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription/journey/utr/${encodePathSegment(utr)}")
+          .get(url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription/journey/utr/$utr")
           .execute[HttpResponse]
       )
     }
@@ -84,7 +83,7 @@ class AgentSubscriptionConnector @Inject() (
     monitor("ConsumedAPI-Agent-Subscription-createOrUpdate-POST") {
       http
         .post(
-          url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription/journey/primaryId/${encodePathSegment(journeyRecord.authProviderId.id)}"
+          url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription/journey/primaryId/${journeyRecord.authProviderId.id}"
         )
         .withBody(Json.toJson(journeyRecord))
         .execute[HttpResponse]
@@ -109,7 +108,7 @@ class AgentSubscriptionConnector @Inject() (
     monitor(s"ConsumedAPI-Agent-Subscription-matchCorporationTaxUtrWithCrn-GET") {
       http
         .get(
-          url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/corporation-tax-utr/${encodePathSegment(utr)}/crn/${encodePathSegment(crn.value)}"
+          url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/corporation-tax-utr/$utr/crn/${crn.value}"
         )
         .execute[HttpResponse]
         .map { response =>
@@ -126,7 +125,7 @@ class AgentSubscriptionConnector @Inject() (
     monitor(s"ConsumedAPI-Agent-Subscription-matchVatKnownFacts-GET") {
       http
         .get(
-          url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/vat-known-facts/vrn/${encodePathSegment(vrn.value)}/dateOfRegistration/${encodePathSegment(vatRegistrationDate.toString)}"
+          url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/vat-known-facts/vrn/${vrn.value}/dateOfRegistration/${vatRegistrationDate.toString}"
         )
         .execute[HttpResponse]
         .map { response =>
@@ -143,7 +142,7 @@ class AgentSubscriptionConnector @Inject() (
     monitor(s"ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST") {
       transformResponse[JsValue](
         http
-          .post(url"$subscriptionUrl")
+          .post(subscriptionUrl)
           .withBody(Json.toJson(subscriptionRequest))
           .execute[HttpResponse]
       )
@@ -153,7 +152,7 @@ class AgentSubscriptionConnector @Inject() (
   def completePartialSubscription(details: CompletePartialSubscriptionBody)(implicit rh: RequestHeader): Future[Arn] =
     monitor(s"ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT") {
       transformResponse[JsValue](
-        http.put(url"$subscriptionUrl").withBody(Json.toJson(details)).execute[HttpResponse]
+        http.put(subscriptionUrl).withBody(Json.toJson(details)).execute[HttpResponse]
       )
         .map(js => (js \ "arn").as[Arn])
     }
@@ -172,10 +171,10 @@ class AgentSubscriptionConnector @Inject() (
 
   def companiesHouseKnownFactCheck(crn: CompanyRegistrationNumber, surname: String)(implicit rh: RequestHeader): Future[Int] =
     monitor(s"ConsumedAPI-Agent-Subscription-getCompanyOfficers-GET") {
-      val encodedCrn = UriEncoding.encodePathSegment(crn.value, "UTF-8")
-      val encodedName = UriEncoding.encodePathSegment(surname.toUpperCase, "UTF-8")
       http
-        .get(url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/companies-house-api-proxy/company/$encodedCrn/officers/$encodedName")
+        .get(
+          url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/companies-house-api-proxy/company/${crn.value}/officers/${surname.toUpperCase}"
+        )
         .execute[HttpResponse]
         .map { response =>
           response.status match {
@@ -187,9 +186,8 @@ class AgentSubscriptionConnector @Inject() (
 
   def companiesHouseStatusCheck(crn: CompanyRegistrationNumber)(implicit rh: RequestHeader): Future[Int] =
     monitor(s"ConsumedAPI-Agent-Subscription-getCompanyStatus-GET") {
-      val encodedCrn = UriEncoding.encodePathSegment(crn.value, "UTF-8")
       http
-        .get(url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/companies-house-api-proxy/company/$encodedCrn/status")
+        .get(url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/companies-house-api-proxy/company/${crn.value}/status")
         .execute[HttpResponse]
         .map { response =>
           response.status match {
@@ -213,7 +211,7 @@ class AgentSubscriptionConnector @Inject() (
         }
     }
 
-  private val subscriptionUrl = s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription"
+  private val subscriptionUrl = url"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/subscription"
 
   private def getRegistrationUrlFor(utr: String, postcode: String) =
     s"${appConfig.agentSubscriptionBaseUrl}/agent-subscription/registration/${encodePathSegment(utr)}/postcode/${encodePathSegment(postcode)}"

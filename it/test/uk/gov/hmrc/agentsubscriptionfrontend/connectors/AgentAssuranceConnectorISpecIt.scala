@@ -16,13 +16,16 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
+import play.api.mvc.RequestHeader
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, MetricTestSupport}
 import uk.gov.hmrc.domain.{Nino, SaAgentReference}
-import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,11 +33,12 @@ import scala.concurrent.Future
 
 class AgentAssuranceConnectorISpecIt extends BaseISpecIt with MetricTestSupport {
 
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
+  // private implicit val hc: HeaderCarrier = HeaderCarrier()
+  private implicit val request: RequestHeader = FakeRequest()
 
   private lazy val connector =
     new AgentAssuranceConnector(
-      app.injector.instanceOf[HttpClient],
+      app.injector.instanceOf[HttpClientV2],
       app.injector.instanceOf[Metrics],
       app.injector.instanceOf[AppConfig]
     )

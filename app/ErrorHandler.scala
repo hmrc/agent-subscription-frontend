@@ -47,7 +47,7 @@ class ErrorHandler @Inject() (
 
   override def resolveError(request: RequestHeader, exception: Throwable): Future[Result] = {
     implicit val r = Request(request, "")
-    logger.error(s"resolveError $exception")
+    logger.error(s"resolveError", exception)
     Future.successful(Ok(errorTemplate5xx()))
   }
 

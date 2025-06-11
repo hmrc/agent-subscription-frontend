@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import play.api.Logger
-import play.api.mvc.{AnyContent, Request}
+import play.api.mvc.{AnyContent, Request, RequestHeader}
 import uk.gov.hmrc.agentmtdidentifiers.model.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.audit.AuditService
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
@@ -41,7 +41,7 @@ class AssuranceService @Inject() (
   sessionStoreService: MongoDBSessionStoreService
 ) {
 
-  def assureIsAgent(utr: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[AssuranceResults]] =
+  def assureIsAgent(utr: String)(implicit rh: RequestHeader, ec: ExecutionContext): Future[Option[AssuranceResults]] =
     if (appConfig.agentAssuranceRun) {
       for {
         isOnRefusalToDealWithList <- assuranceConnector.isR2DWAgent(utr)

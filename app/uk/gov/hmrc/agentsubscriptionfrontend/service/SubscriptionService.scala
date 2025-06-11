@@ -136,7 +136,6 @@ class SubscriptionService @Inject() (
 
   def redirectAfterGGCredsCreatedBasedOnStatus(continueId: ContinueId, agent: Agent)(implicit
     request: RequestHeader,
-    hc: HeaderCarrier,
     ex: ExecutionContext
   ): Future[Result] =
     for {
