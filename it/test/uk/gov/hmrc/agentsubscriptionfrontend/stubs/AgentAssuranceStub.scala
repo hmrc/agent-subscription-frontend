@@ -36,7 +36,7 @@ object AgentAssuranceStub {
 
   def verifyCheckForAcceptableNumberOfClients(service: String, times: Int) =
     verify(times, getRequestedFor(urlEqualTo(checkForAcceptableNumberOfClientsUrl(service))))
-  val agentChecksUrl = (utr: String) => urlEqualTo(s"/agent-assurance/restricted-collection-check/utr/$utr")
+  val agentChecksUrl = (utr: String) => urlEqualTo(s"/agent-assurance/restricted-collection-check/utr/$utr?nameRequired=false")
 
   def givenCustomAgentChecks(utr: String, isManuallyAssured: Boolean, isRefusalToDealWith: Boolean): StubMapping =
     stubFor(

@@ -68,7 +68,7 @@ class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics
 
   def agentChecks(utr: String)(implicit hc: HeaderCarrier): Future[AgentChecksResponse] =
     monitor(s"ConsumedAPI-AgentAssurance-getAgentChecks-GET") {
-      val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/restricted-collection-check/utr/$utr"
+      val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/restricted-collection-check/utr/$utr?nameRequired=false"
       httpClientV2
         .get(url"$urlString")
         .execute[HttpResponse]
