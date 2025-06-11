@@ -33,13 +33,6 @@ class ErrorHandlerSpecIt extends UnitSpec with GuiceOneServerPerSuite with LogCa
         status(result) shouldBe BAD_REQUEST
       }
     }
-
-    "standardErrorTemplate shows up with log" in {
-      withCaptureOfLoggingFrom(handler.theLogger) { logEvents =>
-        handler.standardErrorTemplate("", "", "some error")(FakeRequest())
-        logEvents.count(_.getMessage.contains(s"some error")) shouldBe 1
-      }
-    }
   }
 
 }

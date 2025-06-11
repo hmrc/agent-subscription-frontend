@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
+import play.api.mvc.RequestHeader
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AddressLookupFrontendAddress, Country}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs.givenAddressLookupReturnsAddress
@@ -27,6 +29,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class AddressLookupFrontendConnectorSpecIt extends BaseISpecIt with MetricTestSupport {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val rh: RequestHeader = FakeRequest()
 
   "getAddressDetails" should {
     "convert the JSON returned by address-lookup-frontend into an object" in {
