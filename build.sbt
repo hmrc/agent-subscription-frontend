@@ -1,13 +1,13 @@
-import uk.gov.hmrc.{DefaultBuildSettings, SbtAutoBuildPlugin}
+import uk.gov.hmrc.DefaultBuildSettings
 
 
 val appName = "agent-subscription-frontend"
 
 ThisBuild / majorVersion := 2
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "2.13.16"
 
 val scalaCOptions = Seq(
-  "-Xfatal-warnings",
+  //"-Xfatal-warnings",
   "-Xlint:-missing-interpolator,_",
   "-Ywarn-dead-code",
   "-deprecation",

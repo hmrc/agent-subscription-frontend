@@ -73,7 +73,7 @@ class EmailVerificationController @Inject() (
   override def isAlreadyVerified(session: RelevantState, email: String): Boolean =
     session.subscriptionJourneyRecord.verifiedEmails.emails.contains(email)
 
-  override def markEmailAsVerified(session: RelevantState, email: String)(implicit hc: HeaderCarrier): Future[RelevantState] = {
+  override def markEmailAsVerified(session: RelevantState, email: String)(implicit rh: RequestHeader): Future[RelevantState] = {
     val updatedVerifiedEmails = session.subscriptionJourneyRecord.verifiedEmails.emails + email
     val updatedSjr = session.subscriptionJourneyRecord.copy(verifiedEmails = VerifiedEmails(updatedVerifiedEmails))
     subscriptionJourneyService.saveJourneyRecord(updatedSjr).map(_ => session.copy(subscriptionJourneyRecord = updatedSjr))

@@ -33,7 +33,7 @@
     submitButton: SubmitButton
 )
 
-@(vatDetailsForm: Form[VatDetails])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(vatDetailsForm: Form[VatDetails])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @DayFieldError = @{
     if(vatDetailsForm("regDate.day").hasErrors)

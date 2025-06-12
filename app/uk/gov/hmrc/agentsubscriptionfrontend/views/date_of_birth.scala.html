@@ -33,7 +33,7 @@
     submitButton: SubmitButton
 )
 
-@(dobForm: Form[DateOfBirth], businessType: BusinessType)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(dobForm: Form[DateOfBirth], businessType: BusinessType)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
     @DayFieldError = @{
         if(dobForm("dob.day").hasErrors)

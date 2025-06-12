@@ -35,7 +35,7 @@
     submitButton: SubmitButton
 )
 
-@(businessEmailForm: Form[BusinessEmail], invalidDesEmail: Boolean, isChange: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(businessEmailForm: Form[BusinessEmail], invalidDesEmail: Boolean, isChange: Boolean)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @hint = {
     @govukInsetText(InsetText(

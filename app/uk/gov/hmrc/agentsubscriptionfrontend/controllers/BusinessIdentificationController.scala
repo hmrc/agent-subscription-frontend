@@ -192,7 +192,7 @@ class BusinessIdentificationController @Inject() (
         )
     }
 
-  private def createRecordAndRedirectToTasklist(existingSession: AgentSession, agent: Agent)(implicit hc: HeaderCarrier): Future[Result] =
+  private def createRecordAndRedirectToTasklist(existingSession: AgentSession, agent: Agent)(implicit rh: RequestHeader): Future[Result] =
     subscriptionJourneyService
       .createJourneyRecord(existingSession, agent)
       .map(_ => Redirect(routes.TaskListController.showTaskList()))

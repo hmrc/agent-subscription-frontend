@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import java.time.LocalDate
 import play.api.i18n.Lang
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{AnyContentAsEmpty, Cookie, Result}
+import play.api.mvc.{AnyContentAsEmpty, Cookie, RequestHeader, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, _}
@@ -39,6 +39,7 @@ class StartControllerISpecIt extends BaseISpecIt {
   private val id = AuthProviderId("12345-credId")
   private val continueId = ContinueId("foobar")
   private val record = TestData.minimalSubscriptionJourneyRecord(id)
+  private lazy val rh: RequestHeader = FakeRequest()
 
   override protected def appBuilder: GuiceApplicationBuilder =
     super.appBuilder

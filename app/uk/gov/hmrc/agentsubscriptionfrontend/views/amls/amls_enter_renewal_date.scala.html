@@ -34,7 +34,7 @@
         submitOrSaveButtonGroup: SubmitOrSaveButtonGroup
 )
 
-@(amlsExpiryDateForm: Form[EnterAMLSExpiryDateForm])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(amlsExpiryDateForm: Form[EnterAMLSExpiryDateForm])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 
 @DayFieldError = @{

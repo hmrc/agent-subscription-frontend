@@ -18,19 +18,19 @@ package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import com.google.inject.AbstractModule
 import org.jsoup.Jsoup
-import org.scalatest.{Assertion, OptionValues}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{Assertion, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.JsValue
 import play.api.mvc.{AnyContentAsEmpty, Request, Result}
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import play.twirl.api.HtmlFormat.escape
 import uk.gov.hmrc.agentsubscriptionfrontend.service.MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub.userIsAuthenticated

@@ -33,7 +33,7 @@
     formHelper: FormWithCSRF
 )
 
-@(amlsForm: Form[AMLSForm], amlsBodies: Map[String, String], mayBeGoBackUrl: Option[String] = None)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(amlsForm: Form[AMLSForm], amlsBodies: Map[String, String], mayBeGoBackUrl: Option[String] = None)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @*TODO review date validation*@
 

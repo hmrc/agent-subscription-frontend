@@ -23,7 +23,7 @@
 govukPanel: GovukPanel
 )
 
-@(arn: String, agencyName: String, agencyEmail: String, copiedAcross: Int)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(arn: String, agencyName: String, agencyEmail: String, copiedAcross: Int)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @panelContent = {
 @msgs("subscriptionComplete.accountName")

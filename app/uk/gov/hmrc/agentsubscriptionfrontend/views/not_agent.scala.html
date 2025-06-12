@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 
 @this(mainTemplate: MainTemplate)
-@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@()(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = msgs("nonAgent.title")) {
 

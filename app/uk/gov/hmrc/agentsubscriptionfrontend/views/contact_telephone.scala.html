@@ -31,7 +31,7 @@
         inputText: InputText
 )
 
-@(form: Form[String], backCall: Call)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(form: Form[String], backCall: Call)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
   title = errorPrefix(form) + msgs("contactTelephone.title"),

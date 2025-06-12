@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AuthProviderId, ContinueId}
-import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -28,19 +28,19 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SubscriptionJourneyService @Inject() (agentSubscriptionConnector: AgentSubscriptionConnector)(implicit ec: ExecutionContext) {
 
-  def getMandatoryJourneyRecord(continueId: ContinueId)(implicit hc: HeaderCarrier): Future[SubscriptionJourneyRecord] =
+  def getMandatoryJourneyRecord(continueId: ContinueId)(implicit rh: RequestHeader): Future[SubscriptionJourneyRecord] =
     agentSubscriptionConnector.getJourneyByContinueId(continueId).map(extractMandatoryRecord)
 
-  def existsJourneyForUtr(utr: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def existsJourneyForUtr(utr: String)(implicit rh: RequestHeader): Future[Boolean] =
     agentSubscriptionConnector.getJourneyByUtr(utr).map(_.isDefined)
 
-  def getJourneyRecord(internalId: AuthProviderId)(implicit hc: HeaderCarrier): Future[Option[SubscriptionJourneyRecord]] =
+  def getJourneyRecord(internalId: AuthProviderId)(implicit rh: RequestHeader): Future[Option[SubscriptionJourneyRecord]] =
     agentSubscriptionConnector.getJourneyById(internalId)
 
-  def getMandatoryJourneyRecord(internalId: AuthProviderId)(implicit hc: HeaderCarrier): Future[SubscriptionJourneyRecord] =
+  def getMandatoryJourneyRecord(internalId: AuthProviderId)(implicit rh: RequestHeader): Future[SubscriptionJourneyRecord] =
     agentSubscriptionConnector.getJourneyById(internalId).map(extractMandatoryRecord)
 
-  def getJourneyByUtr(utr: String)(implicit hc: HeaderCarrier): Future[Option[SubscriptionJourneyRecord]] =
+  def getJourneyByUtr(utr: String)(implicit rh: RequestHeader): Future[Option[SubscriptionJourneyRecord]] =
     agentSubscriptionConnector.getJourneyByUtr(utr)
 
   private def extractMandatoryRecord(record: Option[SubscriptionJourneyRecord]): SubscriptionJourneyRecord =
@@ -49,10 +49,10 @@ class SubscriptionJourneyService @Inject() (agentSubscriptionConnector: AgentSub
       case None    => throw new RuntimeException("Journey record expected")
     }
 
-  def saveJourneyRecord(subscriptionJourneyRecord: SubscriptionJourneyRecord)(implicit hc: HeaderCarrier): Future[Int] =
+  def saveJourneyRecord(subscriptionJourneyRecord: SubscriptionJourneyRecord)(implicit rh: RequestHeader): Future[Int] =
     agentSubscriptionConnector.createOrUpdateJourney(subscriptionJourneyRecord)
 
-  def createJourneyRecord(agentSession: AgentSession, agent: Agent)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def createJourneyRecord(agentSession: AgentSession, agent: Agent)(implicit rh: RequestHeader): Future[Unit] = {
     val sjr =
       SubscriptionJourneyRecord
         .fromAgentSession(agentSession, agent.authProviderId, agent.maybeCleanCredsAuthProviderId)

@@ -32,7 +32,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.validators.CommonValidators.checkOn
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.date_of_birth
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
@@ -99,7 +99,7 @@ class DateOfBirthController @Inject() (
     }
   }
 
-  private def companiesHouseKnownFactCheck(agentSession: AgentSession)(f: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] =
+  private def companiesHouseKnownFactCheck(agentSession: AgentSession)(f: => Future[Result])(implicit rh: RequestHeader): Future[Result] =
     agentSession.businessType match {
       case Some(bt) =>
         if (bt == Llp) {

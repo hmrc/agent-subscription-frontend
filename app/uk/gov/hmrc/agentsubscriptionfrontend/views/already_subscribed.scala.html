@@ -19,7 +19,7 @@
 
 @this(mainTemplate:MainTemplate, p:p, a:a, h1:h1)
 
-@(continueUrl: String)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(continueUrl: String)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = msgs("alreadySubscribed.title")) {
 

@@ -37,7 +37,7 @@
     ninoForm: Form[Nino],
     businessType: BusinessType,
     backUrl: Option[String]
-)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
     title = errorPrefix(ninoForm) + msgs("nino.title"),
