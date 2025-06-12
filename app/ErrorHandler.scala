@@ -18,7 +18,7 @@ import com.google.inject.name.Named
 import play.api._
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results._
-import play.api.mvc.{Request, RequestHeader, Result}
+import play.api.mvc.{RequestHeader, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.util.AuthRedirects
@@ -46,7 +46,7 @@ class ErrorHandler @Inject() (
   def theLogger: Logger = this.logger // for testing
 
   override def resolveError(request: RequestHeader, exception: Throwable): Future[Result] = {
-    implicit val r = Request(request, "")
+    implicit val r = request
     logger.error(s"resolveError", exception)
     Future.successful(Ok(errorTemplate5xx()))
   }
