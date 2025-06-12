@@ -37,10 +37,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class AgentAssuranceConnector @Inject() (http: HttpClientV2, val metrics: Metrics, appConfig: AppConfig)(implicit val ec: ExecutionContext)
     extends HttpAPIMonitor {
 
+  private val baseUrl: String = appConfig.agentAssuranceBaseUrl
+
   def hasAcceptableNumberOfClients(regime: String)(implicit rh: RequestHeader): Future[Boolean] =
     monitor(s"ConsumedAPI-AgentAssurance-hasAcceptableNumberOfClients-GET") {
       http
-        .get(url"${appConfig.agentAssuranceBaseUrl}/agent-assurance/acceptableNumberOfClients/service/$regime")
+        .get(url"$baseUrl/agent-assurance/acceptableNumberOfClients/service/$regime")
         .execute[HttpResponse]
         .map { response =>
           response.status match {
@@ -52,26 +54,11 @@ class AgentAssuranceConnector @Inject() (http: HttpClientV2, val metrics: Metric
         }
     }
 
-  def getActiveCesaRelationship(url: String)(implicit rh: RequestHeader): Future[Boolean] =
-    monitor(s"ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
-      val completeUrl = s"${appConfig.agentAssuranceBaseUrl}$url"
-      http
-        .get(url"$completeUrl")
-        .execute[HttpResponse]
-        .map { response =>
-          response.status match {
-            case s if is2xx(s)         => true
-            case FORBIDDEN | NOT_FOUND => false
-            case s                     => throw UpstreamErrorResponse(response.body, s)
-          }
-        }
-    }
-
   def isR2DWAgent(utr: String)(implicit rh: RequestHeader): Future[Boolean] =
     monitor(s"ConsumedAPI-AgentAssurance-getR2DWAgents-GET") {
       val endpoint = s"/agent-assurance/refusal-to-deal-with/utr/$utr"
       http
-        .get(url"${appConfig.agentAssuranceBaseUrl}/agent-assurance/refusal-to-deal-with/utr/$utr") // correct
+        .get(url"$baseUrl/agent-assurance/refusal-to-deal-with/utr/$utr") // correct
         .execute[HttpResponse]
         .map { response =>
           response.status match {
@@ -79,7 +66,7 @@ class AgentAssuranceConnector @Inject() (http: HttpClientV2, val metrics: Metric
             case FORBIDDEN     => true
             case NOT_FOUND =>
               throw new IllegalStateException(
-                s"unable to reach ${appConfig.agentAssuranceBaseUrl}$endpoint. R2dw list might not have been configured"
+                s"unable to reach $baseUrl$endpoint. R2dw list might not have been configured"
               )
             case s => throw UpstreamErrorResponse(response.body, s)
           }
@@ -90,7 +77,7 @@ class AgentAssuranceConnector @Inject() (http: HttpClientV2, val metrics: Metric
     monitor(s"ConsumedAPI-AgentAssurance-getManuallyAssuredAgents-GET") {
       val endpoint = s"/agent-assurance/manually-assured/utr/$utr"
       http
-        .get(url"${appConfig.agentAssuranceBaseUrl}/agent-assurance/manually-assured/utr/$utr")
+        .get(url"$baseUrl/agent-assurance/manually-assured/utr/$utr")
         .execute[HttpResponse]
         .map { response =>
           response.status match {
@@ -98,7 +85,7 @@ class AgentAssuranceConnector @Inject() (http: HttpClientV2, val metrics: Metric
             case FORBIDDEN     => false
             case NOT_FOUND =>
               throw new IllegalStateException(
-                s"unable to reach ${appConfig.agentAssuranceBaseUrl}/$endpoint. Manually assured agents list might not have been configured"
+                s"unable to reach $baseUrl/$endpoint. Manually assured agents list might not have been configured"
               )
             case s => throw UpstreamErrorResponse(response.body, s)
           }
@@ -118,13 +105,20 @@ class AgentAssuranceConnector @Inject() (http: HttpClientV2, val metrics: Metric
         }
     }
 
-  private def cesaGetUrl(ninoOrUtr: String, valueOfNinoOrUtr: String, saAgentReference: SaAgentReference): String =
-    s"/agent-assurance/activeCesaRelationship/$ninoOrUtr/$valueOfNinoOrUtr/saAgentReference/${saAgentReference.value}"
-
   def hasActiveCesaRelationship(ninoOrUtr: TaxIdentifier, taxIdName: String, saAgentReference: SaAgentReference)(implicit
     rh: RequestHeader
-  ): Future[Boolean] =
-    getActiveCesaRelationship(cesaGetUrl(taxIdName, ninoOrUtr.value, saAgentReference))
+  ): Future[Boolean] = monitor(s"ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
+    http
+      .get(url"$baseUrl/agent-assurance/activeCesaRelationship/$taxIdName/${ninoOrUtr.value}/saAgentReference/${saAgentReference.value}")
+      .execute[HttpResponse]
+      .map { response =>
+        response.status match {
+          case s if is2xx(s)         => true
+          case FORBIDDEN | NOT_FOUND => false
+          case s                     => throw UpstreamErrorResponse(response.body, s)
+        }
+      }
+  }
 
   def hasAcceptableNumberOfPayeClients(implicit rh: RequestHeader): Future[Boolean] =
     hasAcceptableNumberOfClients("IR-PAYE")
