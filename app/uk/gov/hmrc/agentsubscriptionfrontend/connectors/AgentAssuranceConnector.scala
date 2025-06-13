@@ -18,11 +18,11 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import play.api.http.Status._
 import play.api.mvc.RequestHeader
-import uk.gov.hmrc.agentsubscriptionfrontend.util.RequestSupport.hc
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentChecksResponse, AmlsDetails}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpClientConverter.transformOptionResponse
+import uk.gov.hmrc.agentsubscriptionfrontend.util.RequestSupport.hc
 import uk.gov.hmrc.domain.{SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http.HttpErrorFunctions._
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -68,7 +68,7 @@ class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics
         }
     }
 
-  def agentChecks(utr: String)(implicitrh: RequestHeader): Future[AgentChecksResponse] =
+  def agentChecks(utr: String)(implicit rh: RequestHeader): Future[AgentChecksResponse] =
     monitor(s"ConsumedAPI-AgentAssurance-getAgentChecks-GET") {
       val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/restricted-collection-check/utr/$utr?nameRequired=false"
       httpClientV2
