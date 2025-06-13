@@ -26,6 +26,8 @@ import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, MetricTestSup
 import uk.gov.hmrc.domain.{Nino, SaAgentReference}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -98,22 +100,23 @@ class AgentAssuranceConnectorISpecIt extends BaseISpecIt with MetricTestSupport 
   "getR2DWAgents" should {
     val utr = "2000000009"
     "return true is utr found in r2dw list" in {
-      givenRefusalToDealWithUtrIsForbidden(utr)
-      await(connector.isR2DWAgent(utr)) shouldBe true
+      givenAgentIsOnRefusalToDealList(utr)
+      val result = connector.agentChecks(utr).futureValue
+      result.isRefusalToDealWith shouldBe true
     }
     "return false is utr not found in r2dw list" in {
-      givenRefusalToDealWithUtrIsNotForbidden(utr)
-      await(connector.isR2DWAgent(utr)) shouldBe false
+      givenAgentIsNotOnRefusalToDealWithUtrList(utr)
+      connector.agentChecks(utr).futureValue.isRefusalToDealWith shouldBe false
     }
     "return false is r2dw list is empty" in {
-      givenRefusalToDealWithUtrIsNotForbidden(utr)
-      await(connector.isR2DWAgent(utr)) shouldBe false
+      givenAgentIsNotOnRefusalToDealWithUtrList(utr)
+      connector.agentChecks(utr).futureValue.isRefusalToDealWith shouldBe false
     }
     "return illegal state exception when " in {
       val utr1 = "1234567"
       givenRefusalToDealWithReturns404(utr1)
       intercept[IllegalStateException] {
-        await(connector.isR2DWAgent(utr1))
+        await(connector.agentChecks(utr1))
       }
     }
 
@@ -146,39 +149,38 @@ class AgentAssuranceConnectorISpecIt extends BaseISpecIt with MetricTestSupport 
     val utr = "2000000009"
     "return true is utr found in the manually assured agents list" in {
       givenAgentIsManuallyAssured(utr)
-      await(connector.isManuallyAssuredAgent(utr)) shouldBe true
+      connector.agentChecks(utr).futureValue.isManuallyAssured shouldBe true
     }
     "return false if utr not found in the manually assured agents list" in {
       givenAgentIsNotManuallyAssured(utr)
-      await(connector.isManuallyAssuredAgent(utr)) shouldBe false
+      connector.agentChecks(utr).futureValue.isManuallyAssured shouldBe false
     }
     "return false if the manually assured agents list is empty" in {
       givenAgentIsNotManuallyAssured(utr)
-      await(connector.isManuallyAssuredAgent(utr)) shouldBe false
+      connector.agentChecks(utr).futureValue.isManuallyAssured shouldBe false
     }
     "throw illegal state exception when agent-assurance responds with 404" in {
       givenManuallyAssuredAgentsReturns(utr, 404)
       intercept[IllegalStateException] {
-        await(connector.isManuallyAssuredAgent(utr))
+        await(connector.agentChecks(utr))
       }
     }
     "throw Upstream4xxResponse when agent-assurance responds with 401" in {
       givenManuallyAssuredAgentsReturns(utr, 401)
       intercept[UpstreamErrorResponse] {
-        await(connector.isManuallyAssuredAgent(utr))
+        await(connector.agentChecks(utr))
       }
     }
     "throw Upstream5xxResponse when agent-assurance responds with 500" in {
       givenManuallyAssuredAgentsReturns(utr, 500)
       intercept[UpstreamErrorResponse] {
-        await(connector.isManuallyAssuredAgent(utr))
+        await(connector.agentChecks(utr))
       }
     }
     "monitor with metric ConsumedAPI-AgentAssurance-getManuallyAssuredAgents-GET" in {
-      withMetricsTimerUpdate("ConsumedAPI-AgentAssurance-getManuallyAssuredAgents-GET") {
+      withMetricsTimerUpdate("ConsumedAPI-AgentAssurance-getAgentChecks-GET") {
         givenAgentIsManuallyAssured(utr)
-
-        await(connector.isManuallyAssuredAgent(utr))
+        connector.agentChecks(utr).futureValue
       }
     }
   }

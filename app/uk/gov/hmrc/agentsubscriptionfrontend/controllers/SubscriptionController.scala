@@ -70,11 +70,11 @@ class SubscriptionController @Inject() (
     withSubscribingEmailVerifiedAgent { agent =>
       agent.withCleanCredsOrSignIn {
         val sjr = agent.getMandatorySubscriptionRecord
-        agentAssuranceConnector.isManuallyAssuredAgent(sjr.businessDetails.utr).flatMap { isMAAgent =>
+        agentAssuranceConnector.agentChecks(sjr.businessDetails.utr).flatMap { agentChecksResponse =>
           sessionStoreService.cacheIsChangingAnswers(changing = false).flatMap { _ =>
             CYACheckResult.check(sjr) match {
               case PassWithMaybeAmls(taxpayerName, address, maybeAmls, contactEmail, maybeTradingName, tradingAddress, telephone) =>
-                if (maybeAmls.isDefined || isMAAgent) {
+                if (maybeAmls.isDefined || agentChecksResponse.isManuallyAssured) {
                   sessionStoreService
                     .cacheGoBackUrl(routes.SubscriptionController.showCheckAnswers().url)
                     .map { _ =>
@@ -84,7 +84,7 @@ class SubscriptionController @Inject() (
                             registrationName = taxpayerName,
                             address = address,
                             amlsData = maybeAmls,
-                            isManuallyAssured = isMAAgent,
+                            isManuallyAssured = agentChecksResponse.isManuallyAssured,
                             userMappings = sjr.userMappings,
                             continueId = sjr.continueId,
                             contactEmailAddress = contactEmail,

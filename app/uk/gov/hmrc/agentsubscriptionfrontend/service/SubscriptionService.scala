@@ -29,7 +29,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 import uk.gov.hmrc.agentsubscriptionfrontend.support.Monitoring
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import java.time.LocalDate
@@ -195,7 +195,7 @@ class SubscriptionService @Inject() (
 
   def handlePartiallySubscribedAndRedirect(agent: Agent, agentSession: AgentSession)(
     whenNotPartiallySubscribed: => Future[Result]
-  )(implicit request: RequestHeader, ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
+  )(implicit request: RequestHeader, ec: ExecutionContext): Future[Result] = {
     val utr = agentSession.utr.getOrElse("")
     val postcode = agentSession.postcode.getOrElse("")
     for {

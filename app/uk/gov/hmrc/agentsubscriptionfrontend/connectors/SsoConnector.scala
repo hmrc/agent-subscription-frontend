@@ -21,21 +21,23 @@ import play.api.libs.json.JsObject
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SsoConnector @Inject() (http: HttpClient, val metrics: Metrics, appConfig: AppConfig)(implicit val ec: ExecutionContext)
+class SsoConnector @Inject() (http: HttpClientV2, val metrics: Metrics, appConfig: AppConfig)(implicit val ec: ExecutionContext)
     extends HttpAPIMonitor with Logging {
 
   def getAllowlistedDomains()(implicit hc: HeaderCarrier): Future[Set[String]] =
     monitor(s"ConsumedAPI-SSO-getExternalDomains-GET") {
       val url = s"${appConfig.ssoBaseUrl}/sso/domains"
       http
-        .GET[JsObject](url)
+        .get(url"$url")
+        .execute[JsObject]
         .map(jsObj => (jsObj \ "externalDomains").as[Set[String]] ++ (jsObj \ "internalDomains").as[Set[String]])
         .recover { case e =>
           logger.error(s"retrieval of allowlisted domains failed: $e")

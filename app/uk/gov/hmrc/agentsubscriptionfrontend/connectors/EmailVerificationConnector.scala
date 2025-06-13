@@ -35,9 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class EmailVerificationConnector @Inject() (http: HttpClientV2, val metrics: Metrics)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
     extends HttpAPIMonitor with Logging {
 
-  def verifyEmail(request: VerifyEmailRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[VerifyEmailResponse]] = {
-    val url = s"${appConfig.emailVerificationBaseUrl}/email-verification/verify-email"
-
+  def verifyEmail(request: VerifyEmailRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[VerifyEmailResponse]] =
     monitor(s"ConsumedAPI-email-verify-POST") {
       http
         .post(url"${appConfig.emailVerificationBaseUrl}/email-verification/verify-email")
@@ -52,7 +50,6 @@ class EmailVerificationConnector @Inject() (http: HttpClientV2, val metrics: Met
           }
         }
     }
-  }
 
   def checkEmail(credId: String)(implicit rh: RequestHeader, ec: ExecutionContext): Future[Option[VerificationStatusResponse]] =
     monitor(s"ConsumedAPI-email-verification-status-GET") {
