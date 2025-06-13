@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import play.api.mvc.Request
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, AmlsSession}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.MongoDBSessionStoreService
 import uk.gov.hmrc.agentsubscriptionfrontend.util._
@@ -39,14 +40,14 @@ class TestSessionStoreService extends MongoDBSessionStoreService(null) {
 
   private val sessions = collection.mutable.Map[String, Session]()
 
-  private def sessionKey(implicit req: Request[_]): String = HeaderCarrierConverter.fromRequestAndSession(req, req.session).sessionId match {
+  private def sessionKey(implicit req: RequestHeader): String = HeaderCarrierConverter.fromRequestAndSession(req, req.session).sessionId match {
     case None            => "default"
     case Some(sessionId) => sessionId.toString
   }
 
   var currentSessionTest: SessionTest = NormalSession
 
-  def currentSession(implicit req: Request[_]): Session =
+  def currentSession(implicit req: RequestHeader): Session =
     sessions.getOrElseUpdate(sessionKey, new Session())
 
   def clear(): Unit = {

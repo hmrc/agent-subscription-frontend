@@ -31,7 +31,7 @@
     inputText: InputText
 )
 
-@(contactTradingNameForm: Form[BusinessName])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(contactTradingNameForm: Form[BusinessName])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
     title = errorPrefix(contactTradingNameForm) + msgs("contactTradingName.title"),

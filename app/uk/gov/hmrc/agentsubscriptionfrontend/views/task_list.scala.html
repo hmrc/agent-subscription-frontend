@@ -22,7 +22,7 @@
 
 @this(mainTemplate: MainTemplate)
 
-@(tasks: List[Task])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(tasks: List[Task])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @progressTag(isComplete: Boolean, canStart: Boolean, id: String) = {
     @if(isComplete){

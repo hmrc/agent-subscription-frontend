@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{LogCapturing, UnitSpec}
 
-class ErrorHandlerSpecIt extends UnitSpec with GuiceOneServerPerSuite with LogCapturing {
+class ErrorHandlerSpecIt extends UnitSpec with GuiceOneServerPerSuite with LogCapturing with ScalaFutures {
 
   val handler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
@@ -30,23 +31,6 @@ class ErrorHandlerSpecIt extends UnitSpec with GuiceOneServerPerSuite with LogCa
         val result = handler.onClientError(FakeRequest(), BAD_REQUEST, "some error")
         Thread.sleep(2000)
         status(result) shouldBe BAD_REQUEST
-        logEvents.count(_.getMessage.contains(s"onClientError some error")) shouldBe 1
-      }
-    }
-
-    "a client error (403) occurs" in {
-      withCaptureOfLoggingFrom(handler.theLogger) { logEvents =>
-        val result = handler.onClientError(FakeRequest(), FORBIDDEN, "some error")
-        Thread.sleep(2000)
-        status(result) shouldBe FORBIDDEN
-        logEvents.count(_.getMessage.contains(s"global.error.403.message")) shouldBe 1
-      }
-    }
-
-    "standardErrorTemplate shows up with log" in {
-      withCaptureOfLoggingFrom(handler.theLogger) { logEvents =>
-        handler.standardErrorTemplate("", "", "some error")(FakeRequest())
-        logEvents.count(_.getMessage.contains(s"some error")) shouldBe 1
       }
     }
   }

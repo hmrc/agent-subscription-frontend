@@ -21,7 +21,7 @@
 
 @this(mainTemplate: MainTemplate, p: p, a: a, h1: h1, ul: ul)
 
-@()(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@()(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
     title = msgs("amls-not-applied.title"),

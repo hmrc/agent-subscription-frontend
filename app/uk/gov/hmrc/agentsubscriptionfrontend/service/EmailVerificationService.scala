@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import play.api.Logging
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{Email, EmailVerificationStatus, VerifyEmailRequest}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -51,7 +52,7 @@ class EmailVerificationService @Inject() (emailVerificationConnector: EmailVerif
                               )
     } yield mVerifyEmailResponse.map(_.redirectUri)
 
-  def checkStatus(credId: String, email: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[EmailVerificationStatus] = {
+  def checkStatus(credId: String, email: String)(implicit rh: RequestHeader, ec: ExecutionContext): Future[EmailVerificationStatus] = {
     val emailLowerCase = email.toLowerCase
     emailVerificationConnector.checkEmail(credId).map {
       case Some(vsr) if vsr.emails.filter(_.emailAddress == emailLowerCase).exists(_.verified) =>

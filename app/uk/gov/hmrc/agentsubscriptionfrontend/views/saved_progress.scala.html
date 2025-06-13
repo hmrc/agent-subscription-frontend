@@ -22,7 +22,7 @@
 
 @this(mainTemplate: MainTemplate, govukPanel: GovukPanel,p:p, a:a, h1:h1, h2:h2)
 
-@(backLink: Option[String])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(backLink: Option[String])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @savedProgressLink = @{
     a(href = "https://www.gov.uk/guidance/get-an-hmrc-agent-services-account",

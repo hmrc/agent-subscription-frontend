@@ -34,7 +34,7 @@
     submitOrSaveButtonGroup: SubmitOrSaveButtonGroup
 )
 
-@(checkAmlsForm: Form[RadioInputAnswer], isChange: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(checkAmlsForm: Form[RadioInputAnswer], isChange: Boolean)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
     title =  errorPrefix(checkAmlsForm) + msgs("check-amls.title"),

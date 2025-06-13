@@ -32,7 +32,7 @@
     submitButton: SubmitButton
 )
 
-@(radioResponseForm: Form[RadioInvasiveTaxPayerOption])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(radioResponseForm: Form[RadioInvasiveTaxPayerOption])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @textUtr = {
     @inputText(

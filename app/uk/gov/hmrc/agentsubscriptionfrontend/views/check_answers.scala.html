@@ -28,7 +28,7 @@
     checkAnswersRow: CheckAnswersRow
 )
 
-@(checkYourAnswers: CheckYourAnswers)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(checkYourAnswers: CheckYourAnswers)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = msgs("checkAnswers.title")) {
 

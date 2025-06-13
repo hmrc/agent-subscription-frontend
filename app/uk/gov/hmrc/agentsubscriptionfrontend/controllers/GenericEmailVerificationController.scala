@@ -60,7 +60,7 @@ abstract class GenericEmailVerificationController[S](
   /** An effectful call to mark the email as being verified in our session. Should return the new session state. This function is expected to be
     * idempotent (marking the same email as verified twice should not lead to unexpected results)
     */
-  def markEmailAsVerified(session: S, email: String)(implicit hc: HeaderCarrier): Future[S]
+  def markEmailAsVerified(session: S, email: String)(implicit rh: RequestHeader): Future[S]
 
   /*
   Continuation URLs

@@ -17,11 +17,11 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.service
 
 import play.api.Logging
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.models.FormBundleStatus.{Approved, ApprovedWithConditions, FormBundleStatus, Pending}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AMLSForm, AmlsSubscriptionRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.service.AmlsValidationResult._
-import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class AmlsService @Inject() (agentSubscriptionConnector: AgentSubscriptionConnector) extends Logging {
 
-  def validateAmlsSubscription(amlsForm: AMLSForm)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmlsValidationResult] =
+  def validateAmlsSubscription(amlsForm: AMLSForm)(implicit rh: RequestHeader, ec: ExecutionContext): Future[AmlsValidationResult] =
     if (amlsForm.amlsCode != "HMRC") Future successful ResultOK(None)
     else {
       checkAmlsNumber(amlsForm.membershipNumber, Some(amlsForm.expiry))
@@ -43,7 +43,7 @@ class AmlsService @Inject() (agentSubscriptionConnector: AgentSubscriptionConnec
     }
 
   def checkAmlsNumber(membershipNumber: String, maybeExpireDate: Option[LocalDate])(implicit
-    hc: HeaderCarrier,
+    rh: RequestHeader,
     ec: ExecutionContext
   ): Future[AmlsValidationResult] =
     agentSubscriptionConnector.getAmlsSubscriptionRecord(membershipNumber).map {
@@ -66,7 +66,7 @@ class AmlsService @Inject() (agentSubscriptionConnector: AgentSubscriptionConnec
     }
 
   def checkAmlsExpiryDate(membershipNumber: String, expireDate: LocalDate)(implicit
-    hc: HeaderCarrier,
+    rh: RequestHeader,
     ec: ExecutionContext
   ): Future[AmlsValidationResult] =
     agentSubscriptionConnector.getAmlsSubscriptionRecord(membershipNumber).map {

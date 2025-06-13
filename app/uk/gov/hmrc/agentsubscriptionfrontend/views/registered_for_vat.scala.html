@@ -31,7 +31,7 @@
     submitButton: SubmitButton
 )
 
-@(rfvForm: Form[RegisteredForVat], backLink: String)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(rfvForm: Form[RegisteredForVat], backLink: String)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
     title = errorPrefix(rfvForm) + msgs("registered-for-vat.title"),

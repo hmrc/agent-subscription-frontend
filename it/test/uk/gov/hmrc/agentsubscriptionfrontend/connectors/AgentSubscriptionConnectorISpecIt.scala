@@ -19,6 +19,8 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 import org.scalatest.Assertion
 import play.api.http.Status
 import play.api.i18n.Lang
+import play.api.mvc.RequestHeader
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
@@ -31,17 +33,18 @@ import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionJourneyStub
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{phoneNumber, validPostcode, validUtr}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, MetricTestSupport, TestData}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import java.time.{LocalDate, Month}
 import scala.concurrent.ExecutionContext.Implicits.global
 class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSupport {
 
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
+  private implicit val request: RequestHeader = FakeRequest()
 
   private lazy val connector: AgentSubscriptionConnector =
-    new AgentSubscriptionConnector(app.injector.instanceOf[HttpClient], app.injector.instanceOf[Metrics], app.injector.instanceOf[AppConfig])
+    new AgentSubscriptionConnector(app.injector.instanceOf[HttpClientV2], app.injector.instanceOf[Metrics], app.injector.instanceOf[AppConfig])
 
   private val utr = "0123456789"
   private val crn = CompanyRegistrationNumber("SC123456")

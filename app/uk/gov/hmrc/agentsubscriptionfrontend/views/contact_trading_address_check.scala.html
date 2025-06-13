@@ -31,7 +31,7 @@
     submitButton: SubmitButton
 )
 
-@(contactTradingAddressCheckForm: Form[ContactTradingAddressCheck], businessAddress: List[String], isChange: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(contactTradingAddressCheckForm: Form[ContactTradingAddressCheck], businessAddress: List[String], isChange: Boolean)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @backLinkCall = @{if(isChange){routes.SubscriptionController.showCheckAnswers()} else {routes.TaskListController.showTaskList()}}
 

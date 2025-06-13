@@ -35,7 +35,7 @@
     submitButton: SubmitButton
 )
 
-@(businessNameForm: Form[BusinessName], desErrorExists: Boolean = false, isChange: Boolean)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(businessNameForm: Form[BusinessName], desErrorExists: Boolean = false, isChange: Boolean)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @hint = {
     @if(desErrorExists){<p class="govuk-hint" id="business-name-hint">@msgs("businessName.updated.p1")</p>}

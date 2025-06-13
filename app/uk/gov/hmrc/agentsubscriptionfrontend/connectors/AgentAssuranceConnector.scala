@@ -17,6 +17,8 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import play.api.http.Status._
+import play.api.mvc.RequestHeader
+import uk.gov.hmrc.agentsubscriptionfrontend.util.RequestSupport.hc
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentChecksResponse, AmlsDetails}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
@@ -35,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics: Metrics, appConfig: AppConfig)(implicit val ec: ExecutionContext)
     extends HttpAPIMonitor {
 
-  def hasAcceptableNumberOfClients(regime: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def hasAcceptableNumberOfClients(regime: String)(implicit rh: RequestHeader): Future[Boolean] =
     monitor(s"ConsumedAPI-AgentAssurance-hasAcceptableNumberOfClients-GET") {
       val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/acceptableNumberOfClients/service/$regime"
       httpClientV2
@@ -51,7 +53,7 @@ class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics
         }
     }
 
-  def getActiveCesaRelationship(uri: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def getActiveCesaRelationship(uri: String)(implicit rh: RequestHeader): Future[Boolean] =
     monitor(s"ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
       val urlString = s"${appConfig.agentAssuranceBaseUrl}$uri"
       httpClientV2
@@ -66,7 +68,7 @@ class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics
         }
     }
 
-  def agentChecks(utr: String)(implicit hc: HeaderCarrier): Future[AgentChecksResponse] =
+  def agentChecks(utr: String)(implicitrh: RequestHeader): Future[AgentChecksResponse] =
     monitor(s"ConsumedAPI-AgentAssurance-getAgentChecks-GET") {
       val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/restricted-collection-check/utr/$utr?nameRequired=false"
       httpClientV2
@@ -85,7 +87,7 @@ class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics
         }
     }
 
-  def getAmlsData(utr: String)(implicit hc: HeaderCarrier): Future[Option[AmlsDetails]] =
+  def getAmlsData(utr: String)(implicit rh: RequestHeader): Future[Option[AmlsDetails]] =
     monitor(s"ConsumedAPI-AgentAssurance-getAmlsData-GET") {
       val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/amls/utr/$utr"
       transformOptionResponse[AmlsDetails](
@@ -101,19 +103,19 @@ class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics
     s"/agent-assurance/activeCesaRelationship/$ninoOrUtr/$valueOfNinoOrUtr/saAgentReference/${saAgentReference.value}"
 
   def hasActiveCesaRelationship(ninoOrUtr: TaxIdentifier, taxIdName: String, saAgentReference: SaAgentReference)(implicit
-    hc: HeaderCarrier
+    rh: RequestHeader
   ): Future[Boolean] =
     getActiveCesaRelationship(cesaGetUrl(taxIdName, ninoOrUtr.value, saAgentReference))
 
-  def hasAcceptableNumberOfPayeClients(implicit hc: HeaderCarrier): Future[Boolean] =
+  def hasAcceptableNumberOfPayeClients(implicit rh: RequestHeader): Future[Boolean] =
     hasAcceptableNumberOfClients("IR-PAYE")
 
-  def hasAcceptableNumberOfSAClients(implicit hc: HeaderCarrier): Future[Boolean] =
+  def hasAcceptableNumberOfSAClients(implicit rh: RequestHeader): Future[Boolean] =
     hasAcceptableNumberOfClients("IR-SA")
 
-  def hasAcceptableNumberOfVatDecOrgClients(implicit hc: HeaderCarrier): Future[Boolean] =
+  def hasAcceptableNumberOfVatDecOrgClients(implicit rh: RequestHeader): Future[Boolean] =
     hasAcceptableNumberOfClients("HMCE-VATDEC-ORG")
 
-  def hasAcceptableNumberOfIRCTClients(implicit hc: HeaderCarrier): Future[Boolean] =
+  def hasAcceptableNumberOfIRCTClients(implicit rh: RequestHeader): Future[Boolean] =
     hasAcceptableNumberOfClients("IR-CT")
 }

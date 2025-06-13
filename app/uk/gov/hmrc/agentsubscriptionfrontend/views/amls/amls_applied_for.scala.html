@@ -30,7 +30,7 @@
     submitOrSaveButtonGroup: uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.SubmitOrSaveButtonGroup,
     formHelper: uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF)
 
-@(amlsAppliedForForm: Form[RadioInputAnswer])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(amlsAppliedForForm: Form[RadioInputAnswer])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(
 title = errorPrefix(amlsAppliedForForm) + msgs("amlsAppliedFor.title"),

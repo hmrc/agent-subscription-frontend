@@ -32,7 +32,7 @@
     submitButton: SubmitButton
 )
 
-@(addressForm: Form[UpdateBusinessAddressForm])(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(addressForm: Form[UpdateBusinessAddressForm])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = errorPrefix(addressForm) + msgs("updateBusinessAddress.title")) {
 

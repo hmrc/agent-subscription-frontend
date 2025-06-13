@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.auth
 
 import play.api.mvc.Results._
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{Request, RequestHeader, Result}
 import play.api.{Configuration, Logging}
 import uk.gov.hmrc.agentmtdidentifiers.model.Arn
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent.hasNonEmptyEnrolments
@@ -189,7 +189,7 @@ trait AuthActions extends AuthorisedFunctions with Monitoring with Logging {
       identifier <- enrolment.getIdentifier("AgentReferenceNumber")
     } yield Arn(identifier.value)
 
-  private def handleException(implicit request: Request[_]): PartialFunction[Throwable, Result] = {
+  private def handleException(implicit request: RequestHeader): PartialFunction[Throwable, Result] = {
 
     case _: UnsupportedAffinityGroup =>
       mark("Count-Subscription-NonAgent")

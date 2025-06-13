@@ -32,7 +32,7 @@
     inputRadio: InputRadios
 )
 
-@(confirmBusinessRadioForm: Form[ConfirmBusiness], registrationName: String, utr: String, businessAddress: BusinessAddress, backLink: Call)(implicit request: Request[_], msgs: Messages, appConfig: AppConfig)
+@(confirmBusinessRadioForm: Form[ConfirmBusiness], registrationName: String, utr: String, businessAddress: BusinessAddress, backLink: Call)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @mainTemplate(title = errorPrefix(confirmBusinessRadioForm) + msgs("confirmBusiness.title"),
 backLinkHref = Some(backLink.toString)) {

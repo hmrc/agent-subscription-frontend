@@ -20,6 +20,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.mvc.RequestHeader
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AgentAssuranceConnector, AgentSubscriptionConnector}
@@ -34,6 +36,7 @@ import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
+  implicit lazy val rh: RequestHeader = FakeRequest()
   implicit lazy val ec: ExecutionContextExecutor = ExecutionContext.global
 
   private val stubAssuranceConnector = mock[AgentAssuranceConnector]
@@ -133,7 +136,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
 
       "when agent is has amls data already stored show AMLS as complete" in {
         givenAmlsDataIsPresent
-        when(stubAgentSubscriptionConnector.createOrUpdateJourney(any[SubscriptionJourneyRecord])(any[HeaderCarrier]))
+        when(stubAgentSubscriptionConnector.createOrUpdateJourney(any[SubscriptionJourneyRecord])(any[RequestHeader]))
           .thenReturn(Future.successful(1))
         val tasks = await(taskListService.createTasks(minimalUncleanCredsRecord))
         tasks.length shouldBe 5
@@ -326,7 +329,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
 
       "when agent has AMLS data show AMLS as complete" in {
         givenAmlsDataIsPresent
-        when(stubAgentSubscriptionConnector.createOrUpdateJourney(any[SubscriptionJourneyRecord])(any[HeaderCarrier]))
+        when(stubAgentSubscriptionConnector.createOrUpdateJourney(any[SubscriptionJourneyRecord])(any[RequestHeader]))
           .thenReturn(Future.successful(1))
         val tasks = await(taskListService.createTasks(minimalCleanCredsRecord))
         tasks.length shouldBe 3
