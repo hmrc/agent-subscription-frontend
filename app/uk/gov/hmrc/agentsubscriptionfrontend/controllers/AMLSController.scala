@@ -30,7 +30,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.amls._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
@@ -198,7 +197,7 @@ class AMLSController @Inject() (
     amlsCode: String,
     expiry: Option[LocalDate],
     safeId: Option[String]
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext, r: Request[AnyContent]) = {
+  )(implicit ec: ExecutionContext, r: Request[AnyContent]) = {
 
     val supervisoryBodyData =
       amlsBodies.getOrElse(amlsCode, throw new Exception("Invalid AMLS code"))
