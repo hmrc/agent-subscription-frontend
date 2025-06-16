@@ -38,7 +38,6 @@ import uk.gov.hmrc.agentsubscriptionfrontend.validators.BusinessDetailsValidator
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
@@ -176,8 +175,7 @@ class BusinessIdentificationController @Inject() (
   }
 
   private def validatedBusinessDetailsAndRedirect(existingSession: AgentSession, agent: Agent)(implicit
-    request: Request[_],
-    hc: HeaderCarrier
+    request: Request[_]
   ): Future[Result] =
     businessDetailsValidator.validate(existingSession.registration) match {
       case Failure(responses) if responses.contains(InvalidBusinessName) =>
@@ -359,7 +357,7 @@ class BusinessIdentificationController @Inject() (
     }
   }
 
-  private def updateSessionsAndRedirect(updatedSession: AgentSession, agent: Agent)(implicit request: Request[_], hc: HeaderCarrier) = {
+  private def updateSessionsAndRedirect(updatedSession: AgentSession, agent: Agent)(implicit request: Request[_]) = {
 
     val result = for {
       _               <- sessionStoreService.cacheAgentSession(updatedSession)

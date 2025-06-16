@@ -20,7 +20,8 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.SsoStub
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, MetricTestSupport}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,7 +29,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SsoConnectorISpecIt extends BaseISpecIt with MetricTestSupport {
 
   private lazy val connector =
-    new SsoConnector(app.injector.instanceOf[HttpClient], app.injector.instanceOf[Metrics], app.injector.instanceOf[AppConfig])
+    new SsoConnector(app.injector.instanceOf[HttpClientV2], app.injector.instanceOf[Metrics], app.injector.instanceOf[AppConfig])
   private implicit val hc = HeaderCarrier()
 
   "SsoConnector" should {

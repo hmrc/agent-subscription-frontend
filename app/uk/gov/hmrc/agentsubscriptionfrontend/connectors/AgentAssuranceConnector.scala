@@ -18,29 +18,30 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 
 import play.api.http.Status._
 import play.api.mvc.RequestHeader
-import uk.gov.hmrc.agentsubscriptionfrontend.util.RequestSupport.hc
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.models.AmlsDetails
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentChecksResponse, AmlsDetails}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpClientConverter.transformOptionResponse
+import uk.gov.hmrc.agentsubscriptionfrontend.util.RequestSupport.hc
 import uk.gov.hmrc.domain.{SaAgentReference, TaxIdentifier}
 import uk.gov.hmrc.http.HttpErrorFunctions._
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AgentAssuranceConnector @Inject() (http: HttpClientV2, val metrics: Metrics, appConfig: AppConfig)(implicit val ec: ExecutionContext)
+class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics: Metrics, appConfig: AppConfig)(implicit val ec: ExecutionContext)
     extends HttpAPIMonitor {
 
   def hasAcceptableNumberOfClients(regime: String)(implicit rh: RequestHeader): Future[Boolean] =
     monitor(s"ConsumedAPI-AgentAssurance-hasAcceptableNumberOfClients-GET") {
-      http
-        .get(url"${appConfig.agentAssuranceBaseUrl}/agent-assurance/acceptableNumberOfClients/service/$regime")
+      val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/acceptableNumberOfClients/service/$regime"
+      httpClientV2
+        .get(url"$urlString")
         .execute[HttpResponse]
         .map { response =>
           response.status match {
@@ -52,11 +53,11 @@ class AgentAssuranceConnector @Inject() (http: HttpClientV2, val metrics: Metric
         }
     }
 
-  def getActiveCesaRelationship(url: String)(implicit rh: RequestHeader): Future[Boolean] =
+  def getActiveCesaRelationship(uri: String)(implicit rh: RequestHeader): Future[Boolean] =
     monitor(s"ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
-      val completeUrl = s"${appConfig.agentAssuranceBaseUrl}$url"
-      http
-        .get(url"$completeUrl")
+      val urlString = s"${appConfig.agentAssuranceBaseUrl}$uri"
+      httpClientV2
+        .get(url"$urlString")
         .execute[HttpResponse]
         .map { response =>
           response.status match {
@@ -67,50 +68,30 @@ class AgentAssuranceConnector @Inject() (http: HttpClientV2, val metrics: Metric
         }
     }
 
-  def isR2DWAgent(utr: String)(implicit rh: RequestHeader): Future[Boolean] =
-    monitor(s"ConsumedAPI-AgentAssurance-getR2DWAgents-GET") {
-      val endpoint = s"/agent-assurance/refusal-to-deal-with/utr/$utr"
-      http
-        .get(url"${appConfig.agentAssuranceBaseUrl}/agent-assurance/refusal-to-deal-with/utr/$utr") // correct
+  def agentChecks(utr: String)(implicit rh: RequestHeader): Future[AgentChecksResponse] =
+    monitor(s"ConsumedAPI-AgentAssurance-getAgentChecks-GET") {
+      val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/restricted-collection-check/utr/$utr?nameRequired=false"
+      httpClientV2
+        .get(url"$urlString")
         .execute[HttpResponse]
         .map { response =>
           response.status match {
-            case s if is2xx(s) => false
-            case FORBIDDEN     => true
+            case OK => response.json.as[AgentChecksResponse]
             case NOT_FOUND =>
               throw new IllegalStateException(
-                s"unable to reach ${appConfig.agentAssuranceBaseUrl}$endpoint. R2dw list might not have been configured"
+                s"unable to reach $urlString. AgentCheck for Manually assured or R2dw list might not have been configured"
               )
-            case s => throw UpstreamErrorResponse(response.body, s)
-          }
-        }
-    }
-
-  def isManuallyAssuredAgent(utr: String)(implicit rh: RequestHeader): Future[Boolean] =
-    monitor(s"ConsumedAPI-AgentAssurance-getManuallyAssuredAgents-GET") {
-      val endpoint = s"/agent-assurance/manually-assured/utr/$utr"
-      http
-        .get(url"${appConfig.agentAssuranceBaseUrl}/agent-assurance/manually-assured/utr/$utr")
-        .execute[HttpResponse]
-        .map { response =>
-          response.status match {
-            case s if is2xx(s) => true
-            case FORBIDDEN     => false
-            case NOT_FOUND =>
-              throw new IllegalStateException(
-                s"unable to reach ${appConfig.agentAssuranceBaseUrl}/$endpoint. Manually assured agents list might not have been configured"
-              )
-            case s => throw UpstreamErrorResponse(response.body, s)
+            case s =>
+              throw UpstreamErrorResponse(response.body, s)
           }
         }
     }
 
   def getAmlsData(utr: String)(implicit rh: RequestHeader): Future[Option[AmlsDetails]] =
     monitor(s"ConsumedAPI-AgentAssurance-getAmlsData-GET") {
+      val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/amls/utr/$utr"
       transformOptionResponse[AmlsDetails](
-        http
-          .get(url"${appConfig.agentAssuranceBaseUrl}/agent-assurance/amls/utr/$utr")
-          .execute[HttpResponse]
+        httpClientV2.get(url"$urlString").execute[HttpResponse]
       )
         .recover {
           case e: UpstreamErrorResponse if e.statusCode == 404 => None
