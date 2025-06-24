@@ -44,7 +44,7 @@ class AssuranceService @Inject() (
   def assureIsAgent(utr: String)(implicit rh: RequestHeader, ec: ExecutionContext): Future[Option[AssuranceResults]] =
     if (appConfig.agentAssuranceRun) {
       for {
-        agentChecksResponse <- assuranceConnector.agentChecks(utr)
+        agentChecksResponse <- assuranceConnector.getUtrDetails(utr)
         assuranceResults <- if (agentChecksResponse.isRefusalToDealWith || agentChecksResponse.isManuallyAssured) {
                               Future.successful(
                                 Some(

@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 import play.api.http.Status._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentChecksResponse, AmlsDetails}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, UtrDetails}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpClientConverter.transformOptionResponse
 import uk.gov.hmrc.agentsubscriptionfrontend.util.RequestSupport.hc
@@ -30,6 +30,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import java.net.URL
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -53,7 +54,7 @@ class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics
         }
     }
 
-  def getActiveCesaRelationship(uri: String)(implicit rh: RequestHeader): Future[Boolean] =
+  private def getActiveCesaRelationship(uri: String)(implicit rh: RequestHeader): Future[Boolean] =
     monitor(s"ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
       val urlString = s"${appConfig.agentAssuranceBaseUrl}$uri"
       httpClientV2
@@ -68,22 +69,23 @@ class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics
         }
     }
 
-  def agentChecks(utr: String)(implicit rh: RequestHeader): Future[AgentChecksResponse] =
+  def getUtrDetails(utr: String)(implicit rh: RequestHeader): Future[UtrDetails] =
     monitor(s"ConsumedAPI-AgentAssurance-getAgentChecks-GET") {
-      val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/restricted-collection-check/utr/$utr?nameRequired=false"
       httpClientV2
-        .get(url"$urlString")
+        .get(url"${appConfig.agentAssuranceBaseUrl}/agent-assurance/managed-utrs/utr/$utr")
         .execute[HttpResponse]
         .map { response =>
           response.status match {
-            case OK => response.json.as[AgentChecksResponse]
-            case NOT_FOUND =>
-              throw new IllegalStateException(
-                s"unable to reach $urlString. AgentCheck for Manually assured or R2dw list might not have been configured"
-              )
-            case s =>
-              throw UpstreamErrorResponse(response.body, s)
+            case OK => response.json.as[UtrDetails]
+            case s  => throw UpstreamErrorResponse(response.body, s)
           }
+        }
+        .map { utrDetails =>
+          if (utrDetails.isNotManaged)
+            throw new IllegalStateException(
+              s"Given UTR isn't Manually assured or R2dw list might not have been configured"
+            )
+          else utrDetails
         }
     }
 

@@ -112,8 +112,8 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-SA")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("HMCE-VATDEC-ORG")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-CT")
-      if (isMAA) givenCustomAgentChecks(validUtr, isManuallyAssured = true, isRefusalToDealWith = false)
-      else givenCustomAgentChecks(validUtr, isManuallyAssured = false, isRefusalToDealWith = false)
+      if (isMAA) givenUtrDetails(validUtr, isManuallyAssured = true, isRefusalToDealWith = false)
+      else givenUtrDetails(validUtr, isManuallyAssured = false, isRefusalToDealWith = false)
     }
 
     "businessType is SoleTrader or Partnership" should {

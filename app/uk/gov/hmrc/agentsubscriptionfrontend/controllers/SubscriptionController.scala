@@ -70,7 +70,7 @@ class SubscriptionController @Inject() (
     withSubscribingEmailVerifiedAgent { agent =>
       agent.withCleanCredsOrSignIn {
         val sjr = agent.getMandatorySubscriptionRecord
-        agentAssuranceConnector.agentChecks(sjr.businessDetails.utr).flatMap { agentChecksResponse =>
+        agentAssuranceConnector.getUtrDetails(sjr.businessDetails.utr).flatMap { agentChecksResponse =>
           sessionStoreService.cacheIsChangingAnswers(changing = false).flatMap { _ =>
             CYACheckResult.check(sjr) match {
               case PassWithMaybeAmls(taxpayerName, address, maybeAmls, contactEmail, maybeTradingName, tradingAddress, telephone) =>
