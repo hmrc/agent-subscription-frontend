@@ -240,8 +240,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-SA")
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("HMCE-VATDEC-ORG")
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-CT")
-      givenAgentIsNotOnRefusalToDealWithUtrList(validUtr)
-      givenAgentIsNotManuallyAssured(validUtr)
+      givenUtrIsNotManaged(validUtr)
 
       implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = authenticatedAs(subscribingAgentEnrolledForNonMTD, POST)
         .withFormUrlEncodedBody("postcode" -> validPostcode)

@@ -80,13 +80,6 @@ class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics
             case s  => throw UpstreamErrorResponse(response.body, s)
           }
         }
-        .map { utrDetails =>
-          if (utrDetails.isNotManaged)
-            throw new IllegalStateException(
-              s"Given UTR isn't Manually assured or R2dw list might not have been configured"
-            )
-          else utrDetails
-        }
     }
 
   def getAmlsData(utr: String)(implicit rh: RequestHeader): Future[Option[AmlsDetails]] =

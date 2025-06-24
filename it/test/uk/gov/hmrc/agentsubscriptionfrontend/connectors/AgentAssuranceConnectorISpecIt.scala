@@ -110,12 +110,10 @@ class AgentAssuranceConnectorISpecIt extends BaseISpecIt with MetricTestSupport 
       connector.getUtrDetails(utr).futureValue.isRefusalToDealWith shouldBe false
     }
 
-    "return illegal state exception when utr is not managed" in {
+    "return not managed utr not found in any list" in {
       val utr1 = "1234567"
       givenUtrIsNotManaged(utr1)
-      intercept[IllegalStateException] {
-        await(connector.getUtrDetails(utr1))
-      }
+      connector.getUtrDetails(utr1).futureValue shouldBe UtrDetails(isManuallyAssured = false, isRefusalToDealWith = false)
     }
 
   }
