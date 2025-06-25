@@ -26,9 +26,9 @@
 @mainTemplate(title = msgs("cannotVerifyEmail.locked.title")) {
 
     <h1 class="govuk-heading-xl">@msgs("cannotVerifyEmail.locked.title")</h1>
-    <p>@Html(msgs("cannotVerifyEmail.locked.p1"))</p>
-    <p>@Html(msgs("cannotVerifyEmail.locked.p2"))</p>
-    <h2>@Html(msgs("cannotVerifyEmail.locked.h2"))</h2>
-    <p>@Html(msgs("cannotVerifyEmail.locked.p3"))</p>
-    <p>@Html(msgs("cannotVerifyEmail.locked.p4", retryLink))</p>
+    <p class="govuk-body">@Html(msgs("cannotVerifyEmail.locked.p1"))</p>
+    <p class="govuk-body">@Html(msgs("cannotVerifyEmail.locked.p2"))</p>
+    <h2 class="govuk-heading-m">@Html(msgs("cannotVerifyEmail.locked.h2"))</h2>
+    <p class="govuk-body">@Html(msgs("cannotVerifyEmail.locked.p3"))</p>
+    <p class="govuk-body">@Html(msgs("cannotVerifyEmail.locked.p4", retryLink))</p>
 }

@@ -61,8 +61,7 @@ class ViewsSpecIt extends UnitSpec with GuiceOneAppPerSuite {
         backLinkHref = Some("href"),
         mainContent = Html("mainContent"),
         request = FakeRequest(),
-        msgs = messages,
-        appConfig = appConfig
+        msgs = messages
       )
 
       html.toString should {
@@ -77,7 +76,7 @@ class ViewsSpecIt extends UnitSpec with GuiceOneAppPerSuite {
         true,
         true,
         Some("href")
-      )(Html("mainContent"))(FakeRequest(), messages, appConfig)
+      )(Html("mainContent"))(FakeRequest(), messages)
       html2 shouldBe html
     }
 

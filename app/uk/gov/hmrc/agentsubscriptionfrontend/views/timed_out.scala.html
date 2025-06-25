@@ -30,7 +30,7 @@
 @mainTemplate(title = msgs("timed-out.header"), hasTimeout = false) {
 
     <h1 class="govuk-heading-xl govuk-!-margin-bottom-6">@msgs("timed-out.header")</h1>
-    <p>@msgs("timed-out.p1", timeString)</p>
+    <p class="govuk-body">@msgs("timed-out.p1", timeString)</p>
 
-    <p class="govuk-!-margin-bottom-9"><a href='@routes.SignedOutController.signOut()'>@msgs("timed-out.p2.link")</a>&nbsp@msgs("timed-out.p2")</p>
+    <p class="govuk-body govuk-!-margin-bottom-9"><a class="govuk-link" href='@routes.SignedOutController.signOut()'>@msgs("timed-out.p2.link")</a>&nbsp@msgs("timed-out.p2")</p>
 }

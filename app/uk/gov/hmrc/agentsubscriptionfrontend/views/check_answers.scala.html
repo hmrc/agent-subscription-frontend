@@ -63,7 +63,7 @@
             </dl>
         }
 
-    <p>@msgs("checkAnswers.description.p3")</p>
+    <p class="govuk-body">@msgs("checkAnswers.description.p3")</p>
 
     @formHelper(action = routes.SubscriptionController.submitCheckAnswers()) {
         @submitButton(id = "continue", messageKey = "checkAnswers.confirm.button")

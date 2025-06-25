@@ -16,22 +16,32 @@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.Task
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.SubTask
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType
 
-@this(mainTemplate: MainTemplate)
+@this(
+        mainTemplate: MainTemplate,
+        govukTaskList: GovukTaskList
+)
 
 @(tasks: List[Task])(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @progressTag(isComplete: Boolean, canStart: Boolean, id: String) = {
     @if(isComplete){
-    <strong class="govuk-tag app-task-list__tag" id="@id">@msgs("task-list.completed")</strong>
+        <div class="govuk-task-list__status" id="@id">@msgs("task-list.completed")</div>
     } else {
         @if(canStart) {
-        <strong class="govuk-tag govuk-tag--grey app-task-list__tag" id="@id">@msgs("task-list.not-started")</strong>
+            <div class="govuk-task-list__status" id="@id">
+                <strong class="govuk-tag govuk-tag--blue">@msgs("task-list.not-started")</strong>
+            </div>
         } else {
-        <strong class="govuk-tag govuk-tag--grey app-task-list__tag" id="@id">@msgs("task-list.cannot-start-yet")</strong>
+            <div class="govuk-task-list__status" id="@id">
+                <strong class="govuk-tag govuk-tag--grey app-task-list__tag" id="@id">
+                    @msgs("task-list.cannot-start-yet")
+                </strong>
+            </div>
         }
     }
 }
@@ -42,16 +52,16 @@
             <span class="app-task-list__section-number">@msgs(s"task-list.$number.number")</span>@msgs(s"task-list.${task.taskKey}.header")
         </h2>
 
-            <ul class="app-task-list__items">
+            <ul class="govuk-task-list">
             @for(subTask <- task.subTasks) {
-                <li class="app-task-list__item">
-                    <span class="app-task-list__task-name">
+                <li class="govuk-task-list__item govuk-task-list__item--with-link">
+                    <div class="govuk-task-list__name-and-hint govuk-!-width-two-thirds">
                     @if(subTask.showLink) {
-                        <a href="@subTask.link" aria-describedby="@subTask.taskKey">@msgs(s"task-list.${subTask.taskKey}")</a>
+                        <a class="govuk-link govuk-task-list__link" href="@subTask.link" aria-describedby="@subTask.taskKey">@msgs(s"task-list.${subTask.taskKey}")</a>
                     } else {
-                        <span aria-describedby="@subTask.taskKey">@msgs(s"task-list.${subTask.taskKey}")</span>
+                        @msgs(s"task-list.${subTask.taskKey}")
                     }
-                    </span>
+                    </div>
                     @progressTag(subTask.isComplete, subTask.showLink, subTask.taskKey)
                 </li>
             }
@@ -63,7 +73,7 @@
 
     <h1 class="govuk-heading-xl govuk-!-margin-bottom-6">@msgs("task-list.header")</h1>
 
-    <p>@msgs("task-list.subheader")</p>
+    <p class="govuk-body">@msgs("task-list.subheader")</p>
 
     <ol class="govuk-list">
     @for((task, number) <- tasks.zip(Stream from 1)) {

@@ -43,12 +43,12 @@
     @p(html= Some(Html(msgs("saved-progress.p3", savedProgressLink))))
     @p("saved-progress.p4")
 
-    <p>
+    <p class="govuk-body">
         @a(href = backLink.getOrElse(routes.TaskListController.showTaskList.url),
             id = Some("continue-saved-progress"),
             key = "saved-progress.continue")
     </p>
-    <p>
+    <p class="govuk-body">
         @a(href = routes.SignedOutController.startSurvey.url,
             id = Some("finish-signout"),
             key = "link.finishSignOut" )

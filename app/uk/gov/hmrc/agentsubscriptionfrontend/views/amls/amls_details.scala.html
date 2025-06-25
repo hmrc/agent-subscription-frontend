@@ -17,20 +17,21 @@
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.agentsubscriptionfrontend.models.AMLSForm
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{InputDate, InputSelect, InputText, SubmitOrSaveButtonGroup}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorLink, ErrorSummary, ErrorMessage, FormWithCSRF}
-@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{InputDate, InputText, SubmitOrSaveButtonGroup}
+@import uk.gov.hmrc.govukfrontend.views.Implicits.RichSelect
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.accessibleautocomplete.AccessibleAutocomplete
 
 @this(
-    mainTemplate: uk.gov.hmrc.agentsubscriptionfrontend.views.html.MainTemplate,
-    errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
-    errorSummary: GovukErrorSummary,
-    inputText: InputText,
-    inputSelect: InputSelect,
-    inputDate: InputDate,
-    submitOrSaveButtonGroup: SubmitOrSaveButtonGroup,
-    formHelper: FormWithCSRF
+        mainTemplate: uk.gov.hmrc.agentsubscriptionfrontend.views.html.MainTemplate,
+        errorPrefix: uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix,
+        errorSummary: GovukErrorSummary,
+        govukSelect: GovukSelect,
+        inputText: InputText,
+        inputDate: InputDate,
+        submitOrSaveButtonGroup: SubmitOrSaveButtonGroup,
+        formHelper: FormWithCSRF
 )
 
 @(amlsForm: Form[AMLSForm], amlsBodies: Map[String, String], mayBeGoBackUrl: Option[String] = None)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
@@ -77,14 +78,25 @@
 
     @formHelper(action = routes.AMLSController.submitAmlsDetailsForm(), 'id -> "dropForm") {
 
-        @inputSelect(
-            field = amlsForm("amlsCode"),
-            label = msgs("moneyLaunderingCompliance.amls.title"),
-            labelAsHeading = false,
-            hint = Some(msgs("moneyLaunderingCompliance.amls.hint")),
-            options = amlsBodies.toSeq,
-            inputClass = Some("govuk-input--width-20")
-        )
+        @govukSelect(Select(
+            id = "amlsCode",
+            name = "amlsCode",
+            hint = Some(Hint(content = Text(msgs("moneyLaunderingCompliance.amls.hint")))),
+            label = Label(
+                content = Text(msgs("moneyLaunderingCompliance.amls.title")),
+                classes = "govuk-label--s"
+            ),
+            items = Seq(SelectItem(value = Some(""), text = "")) ++ amlsBodies.map(o => SelectItem(
+                value = Some(o._1),
+                text = o._2,
+                selected = amlsForm("amlsCode").value.contains(o._1)
+            )),
+            classes = "govuk-input--width-20"
+        ).asAccessibleAutocomplete(Some(
+            AccessibleAutocomplete(
+                showAllValues = true
+            )
+        )).withFormField(amlsForm("amlsCode")))
 
         @inputText(
             field = amlsForm("membershipNumber"),

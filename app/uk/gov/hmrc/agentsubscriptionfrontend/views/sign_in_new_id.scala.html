@@ -25,9 +25,9 @@
 
     <h1 class="govuk-heading-xl">@msgs("sign-in-new-id.header")</h1>
 
-    <p>@msgs("sign-in-new-id.p1")</p>
-    <p>@msgs("sign-in-new-id.p2")</p>
-    <p>@Html(msgs("sign-in-new-id.p3", routes.SignedOutController.redirectAgentToCreateCleanCreds))</p>
+    <p class="govuk-body">@msgs("sign-in-new-id.p1")</p>
+    <p class="govuk-body">@msgs("sign-in-new-id.p2")</p>
+    <p class="govuk-body">@Html(msgs("sign-in-new-id.p3", routes.SignedOutController.redirectAgentToCreateCleanCreds))</p>
 
     <a class="govuk-button" href="@routes.SignedOutController.redirectToBusinessTypeForm" draggable="false" role="button" id="signInWithNewId">@msgs("sign-in-new-id.button")</a>
 }

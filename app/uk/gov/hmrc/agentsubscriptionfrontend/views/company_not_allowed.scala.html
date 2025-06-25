@@ -25,9 +25,9 @@
 
     <h1 class="govuk-heading-xl">@msgs("companyNotAllowed.title")</h1>
 
-    <p>@msgs("companyNotAllowed.p1")</p>
-    <p>@Html(msgs("companyNotAllowed.p2", appConfig.companiesHouseUrl))</p>
-    <p>@msgs("companyNotAllowed.p3")</p>
+    <p class="govuk-body">@msgs("companyNotAllowed.p1")</p>
+    <p class="govuk-body">@Html(msgs("companyNotAllowed.p2", appConfig.companiesHouseUrl))</p>
+    <p class="govuk-body">@msgs("companyNotAllowed.p3")</p>
 
-    <p><a href="@routes.BusinessTypeController.showBusinessTypeForm" class="govuk-button" role="button">@msgs("button.tryAgain")</a></p>
+    <p class="govuk-body"><a class="govuk-link" href="@routes.BusinessTypeController.showBusinessTypeForm" class="govuk-button" role="button">@msgs("button.tryAgain")</a></p>
 }

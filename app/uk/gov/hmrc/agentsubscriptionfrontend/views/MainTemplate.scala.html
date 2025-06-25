@@ -15,16 +15,18 @@
  *@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.head
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcStandardPage, HmrcReportTechnicalIssueHelper}
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
+@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import views.html.helper.CSPNonce
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcAccessibleAutocompleteCss, HmrcAccessibleAutocompleteJavascript, HmrcReportTechnicalIssueHelper, HmrcStandardPage, HmrcTimeoutDialogHelper}
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 
 @this(
-    head: head,
-    hmrcStandardPage: HmrcStandardPage,
-    hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
+        hmrcStandardPage: HmrcStandardPage,
+        hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
+        autocompleteCss: HmrcAccessibleAutocompleteCss,
+        autocompleteJavascript: HmrcAccessibleAutocompleteJavascript,
+        hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
+        appConfig: AppConfig
 )
 
 @(
@@ -32,21 +34,23 @@
     userIsLoggedIn: Boolean = true,
     hasTimeout: Boolean = true,
     backLinkHref: Option[String] = None
-)(mainContent: Html)(implicit request : RequestHeader, msgs: Messages, appConfig: AppConfig)
+)(mainContent: Html)(implicit request : RequestHeader, msgs: Messages)
+
+@head = {
+    @if(hasTimeout) {
+        @hmrcTimeoutDialogHelper(
+            signOutUrl = routes.SignedOutController.signOut().url,
+            timeoutUrl = Some(routes.SignedOutController.timedOut().url)
+        )
+    }
+    @autocompleteCss()
+}
 
 @mainContentWithTechIssueHelper = {
     @mainContent
     <div class="govuk-!-margin-bottom-9 govuk-!-margin-top-9">
         @hmrcReportTechnicalIssueHelper()
     </div>
-}
-
-@additionalScripts = {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-            crossorigin="anonymous" @{CSPNonce.attr}></script>
-    <script src="@controllers.routes.Assets.versioned("javascripts/accessible-autocomplete.min.js")" @{CSPNonce.attr}></script>
-    <script src="@controllers.routes.Assets.versioned("javascripts/agent-subscription.js")" @{CSPNonce.attr}></script>
 }
 
 @hmrcStandardPage(HmrcStandardPageParams(
@@ -56,8 +60,8 @@
     ),
     banners = Banners(displayHmrcBanner = true),
     templateOverrides = TemplateOverrides(
-        additionalHeadBlock = Some(head(hasTimeout)),
-        additionalScriptsBlock = Some(additionalScripts)
+        additionalHeadBlock = Some(head),
+        additionalScriptsBlock = Some(autocompleteJavascript())
     ),
     serviceName = Some(msgs("service.name")),
     pageTitle = Some(title + " " + msgs("servicename.titleSuffix")),
