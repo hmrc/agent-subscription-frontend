@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 
 object AgentAssuranceStub {
@@ -36,99 +37,58 @@ object AgentAssuranceStub {
 
   def verifyCheckForAcceptableNumberOfClients(service: String, times: Int) =
     verify(times, getRequestedFor(urlEqualTo(checkForAcceptableNumberOfClientsUrl(service))))
-  val agentChecksUrl = (utr: String) => urlEqualTo(s"/agent-assurance/restricted-collection-check/utr/$utr?nameRequired=false")
 
-  def givenCustomAgentChecks(utr: String, isManuallyAssured: Boolean, isRefusalToDealWith: Boolean): StubMapping =
-    stubFor(
-      get(agentChecksUrl(utr)).willReturn(
-        aResponse()
-          .withBody(s"""
-                       |{
-                       | "isManuallyAssured": $isManuallyAssured,
-                       | "isRefusalToDealWith": $isRefusalToDealWith
-                       |}
-                       |""".stripMargin)
-          .withStatus(200)
-      )
-    )
+  def getUtrDetailsUrlPattern(utr: String): UrlPattern = urlEqualTo(s"/agent-assurance/managed-utrs/utr/$utr")
 
-  def givenAgentIsOnRefusalToDealList(utr: String): StubMapping =
+  def givenUtrDetails(utr: String, isManuallyAssured: Boolean = false, isRefusalToDealWith: Boolean = false): StubMapping =
     stubFor(
-      get(agentChecksUrl(utr)).willReturn(
+      get(getUtrDetailsUrlPattern(utr)).willReturn(
         aResponse()
-          .withBody("""
-                      |{
-                      | "isManuallyAssured": true,
-                      | "isRefusalToDealWith": true
-                      |}
-                      |""".stripMargin)
+          .withBody(
+            // language=JSON
+            s"""
+               |{
+               | "isManuallyAssured": $isManuallyAssured,
+               | "isRefusalToDealWith": $isRefusalToDealWith
+               |}
+               |""".stripMargin
+          )
           .withStatus(200)
       )
     )
 
   def givenAgentIsNotOnRefusalToDealWithUtrList(utr: String): StubMapping =
-    stubFor(
-      get(agentChecksUrl(utr)).willReturn(
-        aResponse()
-          .withBody("""
-                      |{
-                      | "isManuallyAssured": false,
-                      | "isRefusalToDealWith": false
-                      |}
-                      |""".stripMargin)
-          .withStatus(200)
-      )
-    )
+    givenUtrDetails(utr, isRefusalToDealWith = false, isManuallyAssured = true)
 
-  def givenRefusalToDealWithReturns404(utr: String): StubMapping =
-    stubFor(get(agentChecksUrl(utr)).willReturn(aResponse().withStatus(404)))
+  def givenUtrIsNotManaged(utr: String): StubMapping = givenUtrDetails(utr)
 
   def verifyCheckRefusalToDealWith(times: Int, utr: String) =
-    verify(times, getRequestedFor(urlEqualTo(s"$agentChecksUrl/$utr")))
+    verify(times, getRequestedFor(getUtrDetailsUrlPattern(utr)))
 
   val retrieveAmlsDataUrl = (utr: String) => urlEqualTo(s"/agent-assurance/amls/utr/$utr")
 
-  def givenAgentIsNotManuallyAssured(utr: String): StubMapping =
-    stubFor(
-      get(agentChecksUrl(utr))
-        .willReturn(
-          aResponse()
-            .withBody("""
-                        |{
-                        | "isManuallyAssured": false,
-                        | "isRefusalToDealWith": false
-                        |}
-                        |""".stripMargin)
-            .withStatus(200)
-        )
-    )
+  def givenAgentIsNotManuallyAssured(utr: String): StubMapping = givenUtrDetails(utr, isRefusalToDealWith = true, isManuallyAssured = false)
 
   def givenAgentIsManuallyAssured(utr: String): StubMapping =
-    stubFor(
-      get(agentChecksUrl(utr))
-        .willReturn(
-          aResponse()
-            .withBody("""
-                        |{
-                        | "isManuallyAssured": true,
-                        | "isRefusalToDealWith": true
-                        |}
-                        |""".stripMargin)
-            .withStatus(200)
-        )
-    )
+    givenUtrDetails(utr, isRefusalToDealWith = false, isManuallyAssured = true)
+
+  def givenAgentIsOnRefusalToDealList(utr: String): StubMapping =
+    givenUtrDetails(utr, isRefusalToDealWith = true, isManuallyAssured = false)
 
   def givenAmlsDataIsFound(utr: String): StubMapping =
     stubFor(
       get(retrieveAmlsDataUrl(utr))
         .willReturn(
           aResponse()
-            .withBody("""
-                        |{
-                        | "supervisoryBody": "HMRC",
-                        | "appliedOn": "2020-10-20"
-                        |}
-                        |""".stripMargin)
+            .withBody(
+              // language=JSON
+              """
+                |{
+                | "supervisoryBody": "HMRC",
+                | "appliedOn": "2020-10-20"
+                |}
+                |""".stripMargin
+            )
             .withStatus(200)
         )
     )
@@ -138,11 +98,14 @@ object AgentAssuranceStub {
       get(retrieveAmlsDataUrl(utr))
         .willReturn(
           aResponse()
-            .withBody("""
-                        |{
-                        | "supervisoryBody": "HM Revenue and Customs (HMRC)"
-                        |}
-                        |""".stripMargin)
+            .withBody(
+              // language=JSON
+              """
+                |{
+                | "supervisoryBody": "HM Revenue and Customs (HMRC)"
+                |}
+                |""".stripMargin
+            )
             .withStatus(200)
         )
     )
@@ -155,7 +118,7 @@ object AgentAssuranceStub {
 
   def givenManuallyAssuredAgentsReturns(utr: String, status: Int): StubMapping =
     stubFor(
-      get(agentChecksUrl(utr))
+      get(getUtrDetailsUrlPattern(utr))
         .willReturn(
           aResponse()
             .withStatus(status)
@@ -163,7 +126,7 @@ object AgentAssuranceStub {
     )
 
   def verifyCheckAgentIsManuallyAssured(times: Int, utr: String) =
-    verify(times, getRequestedFor(agentChecksUrl(utr)))
+    verify(times, getRequestedFor(getUtrDetailsUrlPattern(utr)))
 
   def givenNinoAGoodCombinationAndUserHasRelationshipInCesa(ninoOrUtr: String, valueOfNinoOrUtr: String, saAgentReference: String): StubMapping =
     stubFor(

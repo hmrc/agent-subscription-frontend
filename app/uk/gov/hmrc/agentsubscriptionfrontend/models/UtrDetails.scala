@@ -18,11 +18,15 @@ package uk.gov.hmrc.agentsubscriptionfrontend.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class AgentChecksResponse(
+case class UtrDetails(
   isManuallyAssured: Boolean,
   isRefusalToDealWith: Boolean
-)
+) {
+  val isManaged: Boolean = isManuallyAssured || isRefusalToDealWith
+  val isNotManaged: Boolean = !isManaged
 
-object AgentChecksResponse {
-  implicit val agentChecksResponseFormat: OFormat[AgentChecksResponse] = Json.format
+}
+
+object UtrDetails {
+  implicit val agentChecksResponseFormat: OFormat[UtrDetails] = Json.format
 }
