@@ -8,7 +8,7 @@ startpage.title=Agent services account: sign in or set up
 startpage.p1=As a professional tax agent firm, you need an agent services account to:
 startpage.l1.1=access new HMRC online services
 startpage.l1.2=use software to communicate directly with HMRC
-startpage.p2=If you do not have an agent services account, <a href="{0}" id="guidance">check the guidance</a> to find out:
+startpage.p2=If you do not have an agent services account, <a class="govuk-link" href="{0}" id="guidance">check the guidance</a> to find out:
 startpage.continue=Set up or sign in
 startpage.h2=Before you start
 startpage.l2.1=what an agent services account does
@@ -18,19 +18,19 @@ startpage.l2.4=when to use your agent services account
 
 global.error.403.title=You cannot access this page
 global.error.403.heading=You cannot access this page
-global.error.403.message=Check you have permission to access this page.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">Call the VAT online services helpline</a> for help with VAT.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">Call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.
+global.error.403.message=Check you have permission to access this page.</p><p class="govuk-body"><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">Call the VAT online services helpline</a> for help with VAT.</p><p class="govuk-body"><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">Call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.
 
 global.error.badRequest400.title=Page not found
 global.error.badRequest400.heading=Page not found
-global.error.badRequest400.message=If you typed the web address, check it is correct.</p><p>If you pasted the web address, check you copied the entire address.</p><p>If the web address is correct or you selected a link or button:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with VAT</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p>
+global.error.badRequest400.message=If you typed the web address, check it is correct.</p><p class="govuk-body">If you pasted the web address, check you copied the entire address.</p><p class="govuk-body">If the web address is correct or you selected a link or button:</p><ul class="govuk-list govuk-list--bullet"><li><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with VAT</li><li><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p class="govuk-body">
 
 global.error.pageNotFound404.title=Page not found
 global.error.pageNotFound404.heading=Page not found
-global.error.pageNotFound404.message=If you typed the web address, check it is correct.</p><p>If you pasted the web address, check you copied the entire address.</p><p>If the web address is correct or you selected a link or button:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with VAT</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p>
+global.error.pageNotFound404.message=If you typed the web address, check it is correct.</p><p class="govuk-body">If you pasted the web address, check you copied the entire address.</p><p class="govuk-body">If the web address is correct or you selected a link or button:</p><ul class="govuk-list govuk-list--bullet"><li><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">call the VAT online services helpline</a> for help with VAT</li><li><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.</li></ul><p class="govuk-body">
 
 global.error.InternalServerError500.title=Sorry, there is a problem with the service
 global.error.InternalServerError500.heading=Sorry, there is a problem with the service
-global.error.InternalServerError500.message=Try again later.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">Call the VAT online services helpline</a> for help with VAT.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">Call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.
+global.error.InternalServerError500.message=Try again later.</p><p class="govuk-body"><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-online-services-helpdesk">Call the VAT online services helpline</a> for help with VAT.</p><p class="govuk-body"><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/self-assessment-online-services-helpdesk">Call the HMRC Self Assessment online services helpline</a> for help with Making Tax Digital for Income Tax.
 
 global.error.500.title=Sorry, there is a problem with the service - 500
 global.error.500.heading=Sorry, there is a problem with the service
@@ -193,7 +193,7 @@ noAgencyFound.p2=Check the details and try again.
 #Company Not Allowed
 companyNotAllowed.title=We cannot create an account for this company
 companyNotAllowed.p1=We cannot register this company for an agent services account. This is because of the company''s status on the Companies House register.
-companyNotAllowed.p2=To view your company status you can <a href={0} target='_blank'>search the Companies House register (opens in a new tab)</a>. If you believe the status is incorrect, contact Companies House.
+companyNotAllowed.p2=To view your company status you can <a class="govuk-link" href={0} target='_blank'>search the Companies House register (opens in a new tab)</a>. If you believe the status is incorrect, contact Companies House.
 companyNotAllowed.p3=If you''ve entered the incorrect details, you can try again.
 
 #Already subscribed
@@ -226,9 +226,9 @@ task-list.createIDSubTask=Create your Government Gateway user ID for your agent 
 task-list.5.number=5.
 task-list.checkAnswersTask.header=Check your answers and create your account
 task-list.checkAnswersSubTask=You can check your answers once you have completed the other sections.
-task-list.completed=COMPLETED
-task-list.not-started=NOT STARTED
-task-list.cannot-start-yet=CANNOT START YET
+task-list.completed=Completed
+task-list.not-started=Not started
+task-list.cannot-start-yet=Cannot start yet
 
 #Saved Progress
 saved-progress.title=Your progress has been saved for 30 days
@@ -262,7 +262,7 @@ businessType.error.invalid-choice = Select what type of business you are
 llp-interrupt.title=We need more information to check your identity
 llp-interrupt.p1=You must be a registered member of the limited liability partnership to proceed.
 llp-interrupt.p2=We need to ask you for some additional information to confirm this.
-llp-interrupt.link=<a href={0} target='_blank'>If you’re not sure if you’re a registered member or if your registration is up to date, check the Companies House website (opens in new tab).</a>
+llp-interrupt.link=<a class="govuk-link" href={0} target='_blank'>If you’re not sure if you’re a registered member or if your registration is up to date, check the Companies House website (opens in new tab).</a>
 
 #UTR details page
 utr.title=What is the Unique Taxpayer Reference (UTR) of your company?
@@ -350,7 +350,7 @@ businessDetails.label.utr.partnership=Partnership Unique Taxpayer Reference (UTR
 businessDetails.label.utr.llp=Partnership Unique Taxpayer Reference (UTR)
 
 businessDetails.details.heading.sole_trader=Where to find your Self Assessment UTR
-businessDetails.details.content.sole_trader=You’ll <a href="https://www.gov.uk/find-lost-utr-number" target="_blank" rel="noopener noreferrer">find your UTR (opens in a new tab)</a> on the letter HMRC sent you when you registered for Self Assessment. It’s a 10-digit number, sometimes with a letter ''K'' on the end.
+businessDetails.details.content.sole_trader=You’ll <a class="govuk-link" href="https://www.gov.uk/find-lost-utr-number" target="_blank" rel="noopener noreferrer">find your UTR (opens in a new tab)</a> on the letter HMRC sent you when you registered for Self Assessment. It’s a 10-digit number, sometimes with a letter ''K'' on the end.
 businessDetails.details.heading.limited_company=Where to find your Corporation Tax or company UTR
 businessDetails.details.content.limited_company=You can usually find your Corporation Tax or company UTR in the header of letters from HM Revenue & Customs (HMRC), next to headings such as ‘Tax Reference’, ‘UTR’ or ‘Official Use’.
 businessDetails.details.heading.partnership=Where to find your partnership UTR
@@ -378,8 +378,8 @@ createNewAccount.p1=You will need this user ID to sign in to your new agent serv
 
 #Non agent
 nonAgent.title=You have not signed in with an agent user ID
-nonAgent.p1=To continue, <a href="{0}">sign in with an agent user ID</a>.
-nonAgent.p2=If you do not have one, <a href="{0}">create a new Government Gateway user ID</a>, selecting the ‘Agent’ option.
+nonAgent.p1=To continue, <a class="govuk-link" href="{0}">sign in with an agent user ID</a>.
+nonAgent.p2=If you do not have one, <a class="govuk-link" href="{0}">create a new Government Gateway user ID</a>, selecting the ‘Agent’ option.
 
 #Subscription complete
 subscriptionComplete.title=You’ve created an agent services account
@@ -438,7 +438,7 @@ amls-not-applied.title=You cannot create an agent services account
 amls-not-applied.p1=You can only create an agent account if your business has either:
 amls-not-applied.p1.bullet1=registered with a money laundering supervisory body
 amls-not-applied.p1.bullet2=applied to register for money laundering supervision with HMRC and not yet received the decision
-amls-not-applied.p2=To find details of supervisory bodies, see <a href="https://www.gov.uk/anti-money-laundering-registration" target="_blank" rel="noopener noreferrer">anti-money laundering registration (opens in a new tab).</a>
+amls-not-applied.p2=To find details of supervisory bodies, see <a class="govuk-link" href="https://www.gov.uk/anti-money-laundering-registration" target="_blank" rel="noopener noreferrer">anti-money laundering registration (opens in a new tab).</a>
 
 # AMLS applied for
 
@@ -533,7 +533,7 @@ postcodeNotAllowed.p2=Use a different postcode and try again.
 postcodeNotAllowed.button=Try Again
 
 cannotConfirmIdentity.h1=Get in touch to confirm your details
-cannotConfirmIdentity.p1=We need more details to confirm who you are. Get in touch using the information on <a href="https://www.gov.uk/contact-hmrc" target="_blank" rel="noopener noreferrer">Contact HMRC (opens in new tab)</a>.
+cannotConfirmIdentity.p1=We need more details to confirm who you are. Get in touch using the information on <a class="govuk-link" href="https://www.gov.uk/contact-hmrc" target="_blank" rel="noopener noreferrer">Contact HMRC (opens in new tab)</a>.
 cannotConfirmIdentity.p2=If you’ve entered the incorrect details, you can try again.
 
 #Cannot verify email
@@ -542,7 +542,7 @@ cannotVerifyEmail.locked.p1=We cannot check your identity because you entered an
 cannotVerifyEmail.locked.p2=The verification code was emailed to you.
 cannotVerifyEmail.locked.h2=What to do next
 cannotVerifyEmail.locked.p3=You can try again in 24 hours.
-cannotVerifyEmail.locked.p4=If you want to try again with a different email address <a href="{0}">you can change the email address you entered (opens in new tab)</a>.
+cannotVerifyEmail.locked.p4=If you want to try again with a different email address <a class="govuk-link" href="{0}">you can change the email address you entered (opens in new tab)</a>.
 
 #Cannot verify email
 cannotVerifyEmail.technical.title=We could not confirm your identity
@@ -554,7 +554,7 @@ cannotVerifyEmail.technical.p2=You can try again in 24 hours.
 sign-in-new-id.header=Sign in with your new user ID
 sign-in-new-id.p1=You have not finished creating your agent services account.
 sign-in-new-id.p2=To finish this step, sign in again using the new user ID you created for your agent services account.
-sign-in-new-id.p3=If you do not have one, <a href="{0}">create a new user ID</a>, selecting the ‘Agent’ option.
+sign-in-new-id.p3=If you do not have one, <a class="govuk-link" href="{0}">create a new user ID</a>, selecting the ‘Agent’ option.
 sign-in-new-id.button=Sign in with new user ID
 
 #session time out

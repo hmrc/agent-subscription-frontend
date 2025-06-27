@@ -51,8 +51,8 @@
         <div class="govuk-form-group @if(contactTradingNameCheckForm.hasErrors){govuk-form-group--error}">
             <h1 class="govuk-heading-xl">@msgs("contactTradingNameCheck.title")</h1>
 
-            <p>@msgs("contactTradingNameCheck.p")</p>
-            <p>@msgs(s"$businessName")</p>
+            <p class="govuk-body">@msgs("contactTradingNameCheck.p")</p>
+            <p class="govuk-body">@msgs(s"$businessName")</p>
 
             @inputYesNoRadio(
                 field = contactTradingNameCheckForm("check"),

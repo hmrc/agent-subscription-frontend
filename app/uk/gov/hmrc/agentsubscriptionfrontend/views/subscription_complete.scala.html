@@ -36,9 +36,9 @@ govukPanel: GovukPanel
         content = HtmlContent(s"$panelContent")
     ))
 
-    <p>@Html(msgs("subscriptionComplete.copiedAcross", copiedAcross))</p>
-    <p>@Html(msgs("subscriptionComplete.p1", s"$arn"))</p>
-    <p>@msgs("subscriptionComplete.p2", s"$agencyEmail")</p>
+    <p class="govuk-body">@Html(msgs("subscriptionComplete.copiedAcross", copiedAcross))</p>
+    <p class="govuk-body">@Html(msgs("subscriptionComplete.p1", s"$arn"))</p>
+    <p class="govuk-body">@msgs("subscriptionComplete.p2", s"$agencyEmail")</p>
 
     <a href="@appConfig.agentServicesAccountUrl"
     class="govuk-link govuk-!-margin-bottom-9" id="continue">@msgs("subscriptionComplete.button.continueToASAccount")</a>

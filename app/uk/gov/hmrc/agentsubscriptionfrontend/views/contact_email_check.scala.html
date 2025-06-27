@@ -50,8 +50,8 @@
         <div class="govuk-form-group @if(contactEmailCheckForm.hasErrors){govuk-form-group--error}">
         <h1 class="govuk-heading-xl">@msgs("contactEmailCheck.title")</h1>
 
-        <p>@msgs("contactEmailCheck.p")</p>
-        <p>@msgs(s"$businessEmail")</p>
+        <p class="govuk-body">@msgs("contactEmailCheck.p")</p>
+        <p class="govuk-body">@msgs(s"$businessEmail")</p>
 
         @inputRadio(
             field = contactEmailCheckForm("check"),

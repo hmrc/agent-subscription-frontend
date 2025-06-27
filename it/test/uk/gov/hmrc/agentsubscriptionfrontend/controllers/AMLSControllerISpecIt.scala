@@ -43,6 +43,13 @@ class AMLSControllerISpecIt extends BaseISpecIt {
   lazy val controller: AMLSController = app.injector.instanceOf[AMLSController]
   val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
+  // using this method reduces the output from contentAsString to a maximum of single space separators
+  def singleSpacedString(string: String): String = string
+    .replaceAll("\n", "")
+    .replaceAll("\t", " ")
+    .replaceAll("\\s+", " ")
+    .replaceAll(" >", ">")
+
   val utr = "2000000000"
   val businessAddress: BusinessAddress =
     BusinessAddress("AddressLine1 A", Some("AddressLine2 A"), Some("AddressLine3 A"), Some("AddressLine4 A"), Some("AA11AA"), "GB")
@@ -414,7 +421,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
       val amlsBodies: Map[String, String] = AMLSLoader.load("/amls.csv")
       amlsBodies.foreach { case (expectedCode, expectedName) =>
-        val elChoice = elAmlsSelect.getElementById(s"amlsCode-$expectedCode")
+        val elChoice = elAmlsSelect.expectFirst(s"option[value='$expectedCode']")
         elChoice should not be null
         elChoice.tagName() shouldBe "option"
         elChoice.attr("value") shouldBe expectedCode
@@ -505,11 +512,12 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         sessionStoreService.currentSession.goBackUrl = Some(routes.SubscriptionController.showCheckAnswers().url)
 
         val result: Result = await(controller.showAmlsDetailsForm(authenticatedRequest()))
+        val expectedSelectionString: String = """<option value="IPA" selected>"""
 
-        contentAsString(result) should (include(
+        singleSpacedString(contentAsString(result)) should (include(
           """<a href="/agent-subscription/check-money-laundering-compliance" class="govuk-back-link">Back</a>"""
         )
-          and include("""selected id="amlsCode-IPA">Insolvency Practitioners Association (IPA)</option>""")
+          and include(expectedSelectionString)
           and include("""value="123456789"""")
           and include(s"""value="${LocalDate.now().getYear.toString}""""))
       }

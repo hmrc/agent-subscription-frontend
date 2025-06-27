@@ -49,13 +49,13 @@
     <div class="govuk-form-group @if(contactTradingAddressCheckForm.hasErrors){govuk-form-group--error}">
         <h1 class="govuk-heading-xl">@msgs("contactTradingAddressCheck.title")</h1>
 
-        <p>@msgs("contactTradingAddressCheck.p")</p>
+        <p class="govuk-body">@msgs("contactTradingAddressCheck.p")</p>
 
-        <div class="govuk-!-margin-bottom-6">
+        <p class="govuk-body">
             @for(line <- businessAddress){
-            <p class="govuk-!-margin-top-0 govuk-!-margin-bottom-0">@line</p>
+            @line<br />
             }
-        </div>
+        </p>
 
         @inputRadio(
             field = contactTradingAddressCheckForm("check"),
@@ -76,6 +76,6 @@
 
     </div>
 
-        @submitButton(id = "continue", messageKey = "button.continue", submitClass = Some("govuk-!-margin-top-6"))
+        @submitButton(id = "continue", messageKey = "button.continue")
     }
 }

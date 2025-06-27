@@ -46,11 +46,11 @@ backLinkHref = Some(backLink.toString)) {
         <div class="govuk-form-group @if(confirmBusinessRadioForm.hasErrors){govuk-form-group--error}">
         <h1 class="govuk-heading-xl">@msgs("confirmBusiness.title")</h1>
 
-        <p>@Html(msgs("confirmBusiness.content.utr", utr))</p>
+        <p class="govuk-body">@Html(msgs("confirmBusiness.content.utr", utr))</p>
 
         <div class="govuk-!-margin-bottom-6">
         <h2 class="govuk-heading-m">@registrationName</h2>
-        <p>
+        <p class="govuk-body">
         @businessAddress.addressLine1 <br />
         @businessAddress.addressLine2 @if(businessAddress.addressLine2.nonEmpty) {<br />}
         @businessAddress.addressLine3 @if(businessAddress.addressLine3.nonEmpty) {<br />}

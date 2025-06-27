@@ -8,7 +8,7 @@ startpage.title=Cyfrif gwasanaethau asiant: mewngofnodi neu greu
 startpage.p1=Fel cwmni asiant treth proffesiynol, mae angen cyfrif gwasanaethau asiant arnoch er mwyn:
 startpage.l1.1=defnyddio gwasanaethau ar-lein newydd CThEM
 startpage.l1.2=defnyddio meddalwedd i gyfathrebu’n uniongyrchol â CThEM
-startpage.p2=Os nad oes gennych gyfrif gwasanaethau asiant, <a href="{0}" id="guidance">gwiriwch yr arweiniad</a> i gael gwybod am y canlynol:
+startpage.p2=Os nad oes gennych gyfrif gwasanaethau asiant, <a class="govuk-link" href="{0}" id="guidance">gwiriwch yr arweiniad</a> i gael gwybod am y canlynol:
 startpage.continue=Creu cyfrif neu fewngofnodi
 startpage.h2=Cyn i chi ddechrau
 startpage.l2.1=yr hyn mae cyfrif gwasanaethau asiant yn ei wneud
@@ -18,19 +18,19 @@ startpage.l2.4=pryd i ddefnyddio’ch cyfrif gwasanaethau asiant
 
 global.error.403.title=Ni allwch gael at y dudalen hon
 global.error.403.heading=Ni allwch gael at y dudalen hon
-global.error.403.message=Gwiriwch fod gennych ganiatâd i gael at y dudalen hon. </p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">Ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW.</p><p><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a>i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.
+global.error.403.message=Gwiriwch fod gennych ganiatâd i gael at y dudalen hon. </p><p class="govuk-body"><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">Ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW.</p><p class="govuk-body"><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a>i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.
 
 global.error.badRequest400.title=Heb ddod o hyd i’r dudalen
 global.error.badRequest400.heading=Heb ddod o hyd i’r dudalen
-global.error.badRequest400.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p>Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p>Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class=" govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p>
+global.error.badRequest400.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p class="govuk-body">Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p class="govuk-body">Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class=" govuk-list govuk-list--bullet"><li><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW</li><li><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p class="govuk-body">
 
 global.error.pageNotFound404.title=Heb ddod o hyd i’r dudalen
 global.error.pageNotFound404.heading=Heb ddod o hyd i’r dudalen
-global.error.pageNotFound404.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p>Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p>Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class="govuk-list govuk-list--bullet"><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW</li><li><a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p>
+global.error.pageNotFound404.message=Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.</p><p class="govuk-body">Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.</p><p class="govuk-body">Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm:</p><ul class="govuk-list govuk-list--bullet"><li><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers">ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW</li><li><a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines">ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.</li></ul><p class="govuk-body">
 
 global.error.InternalServerError500.title=Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
 global.error.InternalServerError500.heading=Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
-global.error.InternalServerError500.message=Rhowch gynnig arall arni yn nes ymlaen.</p><p><a href=”https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers”>Ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW.</p><p><a href=”https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines”>Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.
+global.error.InternalServerError500.message=Rhowch gynnig arall arni yn nes ymlaen.</p><p class="govuk-body"><a class="govuk-link" href=”https://www.gov.uk/government/organisations/hm-revenue-customs/contact/vat-customs-and-excise-and-duties-enquiries-for-welsh-speaking-customers”>Ffoniwch linell Ymholiadau TAW, Tollau ac Ecséis CThEM</a> i gael cymorth gyda’r cynllun TAW.</p><p class="govuk-body"><a class="govuk-link" href=”https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines”>Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM</a> i gael cymorth gyda’r cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm.
 
 global.error.500.title=Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth – 500
 global.error.500.heading=Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
@@ -193,7 +193,7 @@ noAgencyFound.p2=Gwiriwch y manylion a rhowch gynnig arall arni.
 #Company Not Allowed
 companyNotAllowed.title=We cannot create an account for this company
 companyNotAllowed.p1=We cannot register this company for an agent services account. This is because of the company''s status on the Companies House register.
-companyNotAllowed.p2=To view your company status you can <a href={0} target='_blank'>search the Companies House register (opens in a new tab)</a>. If you believe the status is incorrect, contact Companies House.
+companyNotAllowed.p2=To view your company status you can <a class="govuk-link" href={0} target='_blank'>search the Companies House register (opens in a new tab)</a>. If you believe the status is incorrect, contact Companies House.
 companyNotAllowed.p3=If you''ve entered the incorrect details, you can try again.
 
 #Already subscribed
@@ -262,7 +262,7 @@ businessType.error.invalid-choice=Dewiswch pa fath o fusnes ydych chi
 llp-interrupt.title=Mae angen rhagor o wybodaeth arnom i allu cadarnhau pwy ydych
 llp-interrupt.p1=Mae’n rhaid i chi fod yn aelod cofrestredig o’r Bartneriaeth Atebolrwydd Cyfyngedig er mwyn mynd yn eich blaen.
 llp-interrupt.p2=Mae angen i ni ofyn i chi am wybodaeth ychwanegol er mwyn cadarnhau hyn.
-llp-interrupt.link=<a href={0} target='_blank'>Os nad ydych yn siŵr a ydych yn aelod cofrestredig neu a yw’ch cofrestriad yn gyfredol, gwiriwch ar wefan Tŷ’r Cwmnïau (yn agor tab newydd).</a>
+llp-interrupt.link=<a class="govuk-link" href={0} target='_blank'>Os nad ydych yn siŵr a ydych yn aelod cofrestredig neu a yw’ch cofrestriad yn gyfredol, gwiriwch ar wefan Tŷ’r Cwmnïau (yn agor tab newydd).</a>
 
 #UTR details page
 utr.title=Beth yw Cyfeirnod Unigryw y Trethdalwr (UTR) eich cwmni?
@@ -350,7 +350,7 @@ businessDetails.label.utr.partnership=Cyfeirnod Unigryw y Trethdalwr (UTR) y Bar
 businessDetails.label.utr.llp=Cyfeirnod Unigryw y Trethdalwr (UTR) y Bartneriaeth
 
 businessDetails.details.heading.sole_trader=Ble i ddod o hyd i’ch UTR Hunanasesiad
-businessDetails.details.content.sole_trader=Gallwch <a href="https://www.gov.uk/dod-o-hyd-i-utr-sydd-ar-goll" target="_blank" rel="noopener noreferrer">ddod o hyd i’ch UTR (yn agor ffenestr neu dab newydd)</a> ar y llythyr a anfonodd CThEM atoch pan wnaethoch gofrestru ar gyfer Hunanasesiad. Mae’n rhif 10 digid o hyd, ac sydd â’r llythyren “K” ar y diwedd weithiau.
+businessDetails.details.content.sole_trader=Gallwch <a class="govuk-link" href="https://www.gov.uk/dod-o-hyd-i-utr-sydd-ar-goll" target="_blank" rel="noopener noreferrer">ddod o hyd i’ch UTR (yn agor ffenestr neu dab newydd)</a> ar y llythyr a anfonodd CThEM atoch pan wnaethoch gofrestru ar gyfer Hunanasesiad. Mae’n rhif 10 digid o hyd, ac sydd â’r llythyren “K” ar y diwedd weithiau.
 businessDetails.details.heading.limited_company=Ble i ddod o hyd i’ch UTR Treth Gorfforaeth neu UTR eich cwmni
 businessDetails.details.content.limited_company=Fel rheol, gallwch ddod o hyd i’ch UTR Treth Gorfforaeth neu UTR eich cwmni ym mhennawd llythyrau gan Gyllid a Thollau EM (CThEM), wrth ymyl penawdau megis ‘Cyfeirnod Treth’, ‘UTR’ neu ‘Defnydd Swyddogol’.
 businessDetails.details.heading.partnership=Ble i ddod o hyd i UTR eich partneriaeth
@@ -378,8 +378,8 @@ createNewAccount.p1=Bydd angen y Dynodydd Defnyddiwr (ID) hwn i fewngofnodi i’
 
 #Non agent
 nonAgent.title=Nid ydych wedi mewngofnodi gyda Dynodydd Defnyddiwr (ID) asiant
-nonAgent.p1=I fynd yn eich blaen, <a href="{0}">mewngofnodwch gyda Dynodydd Defnyddiwr (ID) asiant</a>.
-nonAgent.p2=Os nad oes un gennych, <a href="{0}">crëwch Ddynodydd Defnyddiwr (ID) Porth y Llywodraeth newydd</a>, gan ddewis yr opsiwn ‘Asiant’.
+nonAgent.p1=I fynd yn eich blaen, <a class="govuk-link" href="{0}">mewngofnodwch gyda Dynodydd Defnyddiwr (ID) asiant</a>.
+nonAgent.p2=Os nad oes un gennych, <a class="govuk-link" href="{0}">crëwch Ddynodydd Defnyddiwr (ID) Porth y Llywodraeth newydd</a>, gan ddewis yr opsiwn ‘Asiant’.
 
 #Subscription complete
 subscriptionComplete.title=Rydych wedi creu cyfrif gwasanaethau asiant
@@ -438,7 +438,7 @@ amls-not-applied.title=Ni allwch greu cyfrif gwasanaethau asiant
 amls-not-applied.p1=Gallwch ond creu cyfrif asiant os yw’ch busnes naill ai:
 amls-not-applied.p1.bullet1=wedi cofrestru gyda chorff goruchwylio gwyngalchu arian
 amls-not-applied.p1.bullet2=wedi gwneud cais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian, a heb gael y penderfyniad eto
-amls-not-applied.p2=I ddod o hyd i fanylion cyrff goruchwylio, gweler y dudalen sy’n trafod <a href="https://www.gov.uk/anti-money-laundering-registration" target="_blank" rel="noopener noreferrer">cofrestriadau gwrth-wyngalchu arian (yn agor ffenestr neu dab newydd).</a>
+amls-not-applied.p2=I ddod o hyd i fanylion cyrff goruchwylio, gweler y dudalen sy’n trafod <a class="govuk-link" href="https://www.gov.uk/anti-money-laundering-registration" target="_blank" rel="noopener noreferrer">cofrestriadau gwrth-wyngalchu arian (yn agor ffenestr neu dab newydd).</a>
 
 # AMLS applied for
 
@@ -533,7 +533,7 @@ postcodeNotAllowed.p2=Defnyddiwch god post gwahanol a rhowch gynnig arall arni.
 postcodeNotAllowed.button=Rhoi cynnig arall arni
 
 cannotConfirmIdentity.h1=Cysylltwch â ni er mwyn cadarnhau eich manylion
-cannotConfirmIdentity.p1=Mae angen rhagor o fanylion arnom er mwyn cadarnhau pwy ydych. Cysylltwch â ni drwy ddefnyddio’r wybodaeth ar <a href="https://www.gov.uk/contact-hmrc" target="_blank" rel="noopener noreferrer">Cysylltwch â CThEM (yn agor tab newydd)</a>.
+cannotConfirmIdentity.p1=Mae angen rhagor o fanylion arnom er mwyn cadarnhau pwy ydych. Cysylltwch â ni drwy ddefnyddio’r wybodaeth ar <a class="govuk-link" href="https://www.gov.uk/contact-hmrc" target="_blank" rel="noopener noreferrer">Cysylltwch â CThEM (yn agor tab newydd)</a>.
 cannotConfirmIdentity.p2=Os ydych wedi nodi’r manylion anghywir, gallwch roi cynnig arall arni.
 
 #Cannot verify email
@@ -542,7 +542,7 @@ cannotVerifyEmail.locked.p1=Ni allwn wirio pwy ydych oherwydd rydych wedi nodi c
 cannotVerifyEmail.locked.p2=Cafodd y cod dilysu ei e-bostio atoch.
 cannotVerifyEmail.locked.h2=Beth i’w wneud nesaf
 cannotVerifyEmail.locked.p3=Gallwch roi cynnig arall arni ymhen 24 awr.
-cannotVerifyEmail.locked.p4=Os hoffech drio eto gyda chyfeiriad e-bost gwahanol, <a href="{0}">gallwch newid y cyfeiriad e-bost a nodwyd gennych (yn agor tab newydd)</a>.
+cannotVerifyEmail.locked.p4=Os hoffech drio eto gyda chyfeiriad e-bost gwahanol, <a class="govuk-link" href="{0}">gallwch newid y cyfeiriad e-bost a nodwyd gennych (yn agor tab newydd)</a>.
 
 #Cannot verify email
 cannotVerifyEmail.technical.title=Nid oedd modd i ni gadarnhau pwy ydych
@@ -554,7 +554,7 @@ cannotVerifyEmail.technical.p2=Gallwch roi cynnig arall arni ymhen 24 awr.
 sign-in-new-id.header=Mewngofnodi gyda’ch Dynodydd Defnyddiwr (ID) newydd
 sign-in-new-id.p1=Nid ydych wedi gorffen creu eich cyfrif gwasanaethau asiant.
 sign-in-new-id.p2=I orffen y cam hwn, mewngofnodwch eto gyda’r Dynodydd Defnyddiwr (ID) newydd a grëwyd gennych ar gyfer eich cyfrif gwasanaethau asiant.
-sign-in-new-id.p3=Os nad oes gennych un, <a href="{0}">ewch ati i greu Dynodydd Defnyddiwr (ID) newydd</a>, gan ddewis yr opsiwn ‘Asiant’.
+sign-in-new-id.p3=Os nad oes gennych un, <a class="govuk-link" href="{0}">ewch ati i greu Dynodydd Defnyddiwr (ID) newydd</a>, gan ddewis yr opsiwn ‘Asiant’.
 sign-in-new-id.button=Mewngofnodi gyda Dynodydd Defnyddiwr (ID) newydd
 
 #session time out

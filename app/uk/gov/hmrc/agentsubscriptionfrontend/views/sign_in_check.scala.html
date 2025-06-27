@@ -25,6 +25,6 @@
 
     <h1 class="govuk-heading-xl">@msgs("sign-in-check.header")</h1>
 
-    <p>@msgs("sign-in-check.p1.start")&nbsp;<a href='@routes.SignedOutController.signOut()'>@msgs("sign-in-check.sign-out.link")</a> @msgs("sign-in-check.p1.end")</p>
-    <p>@msgs("sign-in-check.p2")&nbsp;<a href='@routes.BusinessTypeController.showBusinessTypeForm()'>@msgs("sign-in-check.create.link")</a></p>
+    <p class="govuk-body">@msgs("sign-in-check.p1.start")&nbsp;<a class="govuk-link" href='@routes.SignedOutController.signOut()'>@msgs("sign-in-check.sign-out.link")</a> @msgs("sign-in-check.p1.end")</p>
+    <p class="govuk-body">@msgs("sign-in-check.p2")&nbsp;<a class="govuk-link" href='@routes.BusinessTypeController.showBusinessTypeForm()'>@msgs("sign-in-check.create.link")</a></p>
 }
