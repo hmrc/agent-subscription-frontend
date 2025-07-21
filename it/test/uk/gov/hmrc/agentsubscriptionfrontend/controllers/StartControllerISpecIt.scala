@@ -142,7 +142,7 @@ class StartControllerISpecIt extends BaseISpecIt {
         contentType(result) shouldBe Some("text/html")
         charset(result) shouldBe Some("utf-8")
         bodyOf(result) should include(htmlEscapedMessage("sign-in-check.header"))
-        result should containLink("sign-in-check.sign-out.link", routes.SignedOutController.signOut().url)
+        result should containLink("sign-in-check.sign-out.link", routes.SignOutController.signOut().url)
         result should containLink("sign-in-check.create.link", routes.BusinessTypeController.showBusinessTypeForm().url)
         sessionStoreService.currentSession.continueUrl shouldBe Some("/go/somewhere")
       }

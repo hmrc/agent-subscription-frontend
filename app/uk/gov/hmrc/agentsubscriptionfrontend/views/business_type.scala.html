@@ -39,7 +39,7 @@
 
 @detailsContent = {
     @p("businessType.progressive.content.p1")
-    @a(href=routes.SignedOutController.signOutWithContinueUrl.url, id=Some("sign-out"), key="link.finishSignOut")
+    @a(href=routes.SignOutController.signOutWithContinueUrl.url, id=Some("sign-out"), key="link.finishSignOut")
 }
 
 @mainTemplate(title = errorPrefixTemplate(businessTypeRadioForm) + msgs("businessType.title")) {

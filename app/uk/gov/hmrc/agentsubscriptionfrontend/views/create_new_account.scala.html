@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SignedOutController
+@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SignOutController
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 
 @this(mainTemplate: MainTemplate)
@@ -29,7 +29,7 @@
     <p class="govuk-body">@msgs("createNewAccount.p1")</p>
 
     <div class="govuk-button-group">
-     <a class="govuk-button" href="@SignedOutController.redirectAgentToCreateCleanCreds" draggable="false" role="button" id="buttonGoToGg">@msgs("button.register")</a>
+     <a class="govuk-button" href="@SignOutController.redirectAgentToCreateCleanCreds" draggable="false" role="button" id="buttonGoToGg">@msgs("button.register")</a>
      <a class="govuk-button govuk-button--secondary" href="@routes.TaskListController.savedProgress(Some(routes.BusinessIdentificationController.showCreateNewAccount().url))" draggable="false" role="button">@msgs("button.saveComeBackLater")</a>
     </div>
 }

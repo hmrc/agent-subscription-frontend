@@ -23,6 +23,6 @@
 @mainTemplate(title = msgs("nonAgent.title")) {
 
     <h1 class="govuk-heading-xl">@msgs("nonAgent.title")</h1>
-    <p class="govuk-body">@Html(msgs("nonAgent.p1", routes.SignedOutController.redirectToBusinessTypeForm))</p>
-    <p class="govuk-body">@Html(msgs("nonAgent.p2", routes.SignedOutController.redirectToCreateCleanCreds))</p>
+    <p class="govuk-body">@Html(msgs("nonAgent.p1", routes.SignOutController.redirectToBusinessTypeForm))</p>
+    <p class="govuk-body">@Html(msgs("nonAgent.p2", routes.SignOutController.redirectToCreateCleanCreds))</p>
 }

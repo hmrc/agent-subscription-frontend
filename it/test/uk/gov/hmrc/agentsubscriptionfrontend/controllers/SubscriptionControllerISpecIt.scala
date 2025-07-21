@@ -731,7 +731,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         "If you do not have one"
       )
 
-      result should containLinkText("create a new user ID", routes.SignedOutController.redirectAgentToCreateCleanCreds().url)
+      result should containLinkText("create a new user ID", routes.SignOutController.redirectAgentToCreateCleanCreds().url)
     }
   }
 

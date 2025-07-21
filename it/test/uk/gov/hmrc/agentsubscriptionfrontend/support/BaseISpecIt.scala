@@ -70,7 +70,6 @@ abstract class BaseISpecIt
         "microservice.services.auth.port"                                     -> wireMockPort,
         "microservice.services.agent-subscription.port"                       -> wireMockPort,
         "microservice.services.agent-subscription-frontend.external-url"      -> "",
-        "companyAuthSignInUrl"                                                -> "/gg/sign-in",
         "microservice.services.address-lookup-frontend.port"                  -> wireMockPort,
         "microservice.services.sso.port"                                      -> wireMockPort,
         "microservice.services.agent-assurance.port"                          -> wireMockPort,

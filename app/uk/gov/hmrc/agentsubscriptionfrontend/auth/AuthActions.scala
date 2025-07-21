@@ -120,7 +120,7 @@ trait AuthActions extends AuthorisedFunctions with Monitoring with Logging {
             }
           case None =>
             logger.warn("User does not have the correct credentials")
-            Redirect(routes.SignedOutController.signOut())
+            Redirect(routes.SignOutController.signOut())
         }
       }
       .recover {
@@ -204,9 +204,9 @@ trait AuthActions extends AuthorisedFunctions with Monitoring with Logging {
 
     case _: UnsupportedAuthProvider =>
       logger.warn("User is not logged in via  GovernmentGateway, signing out and redirecting")
-      Redirect(routes.SignedOutController.signOut())
+      Redirect(routes.SignOutController.signOut())
   }
 
-  private val signInUrl = appConfig.signinUrl
+  private val signInUrl = appConfig.signInUrl
   private val continueUrl = appConfig.loginContinueUrl
 }

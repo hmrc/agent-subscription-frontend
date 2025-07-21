@@ -32,16 +32,15 @@ trait AppConfig {
   val agentAssuranceBaseUrl: String
   val agentAssuranceRun: Boolean
   val surveyRedirectUrl: String
-  val companyAuthSignInUrl: String
   val chainedSessionDetailsTtl: Int
   val agentMappingBaseUrl: String
   val addressLookupFrontendBaseUrl: String
   def agentMappingFrontendStartUrl(continueId: String): String
   val ggRegistrationFrontendExternalUrl: String
   val ssoBaseUrl: String
-  val rootContinueUrl: String
+  val returnAfterGGCredsCreatedUrl: String
   val agentSubscriptionBaseUrl: String
-  val agentSubscriptionFrontendExternalUrl: String
+  val selfExternalUrl: String
   val timeout: Int
   val timeoutCountdown: Int
   val appName: String
@@ -50,12 +49,13 @@ trait AppConfig {
   def routeToSwitchLanguage: String => Call
   val companiesHouseUrl: String
   val mongoDbExpireAfterSeconds: Int
-  val signinUrl: String
   val loginContinueUrl: String
   val amlsGuidanceLink: String
   val emailVerificationBaseUrl: String
   val emailVerificationFrontendBaseUrl: String
   val disableEmailVerification: Boolean
+  val signOutUrl: String
+  val signInUrl: String
 }
 
 @Singleton
@@ -63,7 +63,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
 
   override val appName = "agent-subscription-frontend"
 
-  def getConf(key: String): String = servicesConfig.getString(key)
+  private def getConf(key: String): String = servicesConfig.getString(key)
 
   private val servicesAccountUrl = getConf("microservice.services.agent-services-account-frontend.external-url")
   private val servicesAccountPath =
@@ -76,9 +76,8 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
   override lazy val agentAssuranceBaseUrl: String = servicesConfig.baseUrl("agent-assurance")
   override val agentAssuranceRun: Boolean = servicesConfig.getBoolean("features.agent-assurance-run")
   override val surveyRedirectUrl: String = getConf("surveyRedirectUrl")
-  override val agentSubscriptionFrontendExternalUrl: String = getConf("microservice.services.agent-subscription-frontend.external-url")
+  override val selfExternalUrl: String = getConf("microservice.services.agent-subscription-frontend.external-url")
 
-  override val companyAuthSignInUrl: String = getConf("microservice.services.companyAuthSignInUrl")
   override val chainedSessionDetailsTtl: Int = servicesConfig.getInt("mongodb.chainedsessiondetails.ttl")
   override val agentMappingBaseUrl: String = servicesConfig.baseUrl("agent-mapping")
   override def agentMappingFrontendStartUrl(continueId: String): String =
@@ -86,7 +85,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
 
   override val addressLookupFrontendBaseUrl: String = servicesConfig.baseUrl("address-lookup-frontend")
 
-  val ssoRedirectUrl: String = "/government-gateway-registration-frontend?accountType=agent&origin=unknown"
+  val ssoRedirectUrl: String = "/government-gateway-registration-frontend"
 
   override val agentSubscriptionBaseUrl: String = servicesConfig.baseUrl("agent-subscription")
 
@@ -96,7 +95,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
     s"${getConf("microservice.services.government-gateway-registration-frontend.externalUrl")}$ssoRedirectUrl"
 
   private val returnAfterGGCredsCreatedPath: String = "/agent-subscription/return-after-gg-creds-created"
-  override val rootContinueUrl: String = s"$agentSubscriptionFrontendExternalUrl$returnAfterGGCredsCreatedPath"
+  override val returnAfterGGCredsCreatedUrl: String = s"$selfExternalUrl$returnAfterGGCredsCreatedPath"
 
   override val timeout: Int = servicesConfig.getInt("timeoutDialog.timeout-seconds")
   override val timeoutCountdown: Int = servicesConfig.getInt("timeoutDialog.timeout-countdown-seconds")
@@ -113,7 +112,6 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
 
   override val companiesHouseUrl: String = getConf("companies-house.url")
   override val mongoDbExpireAfterSeconds: Int = servicesConfig.getInt("mongodb.session.expireAfterSeconds")
-  override val signinUrl: String = servicesConfig.getString("bas-gateway.url")
   override val loginContinueUrl: String = servicesConfig.getString("login.continue")
 
   override val amlsGuidanceLink: String = "https://www.gov.uk/guidance/money-laundering-regulations-appeals-and-penalties"
@@ -121,4 +119,10 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
   override val emailVerificationFrontendBaseUrl: String =
     servicesConfig.getString("microservice.services.email-verification-frontend.external-url")
   override val disableEmailVerification: Boolean = servicesConfig.getBoolean("disable-email-verification")
+
+  private val basGatewayFrontendExternalUrl: String = servicesConfig.getString("bas-gateway-frontend.external-url")
+  private val signOutPath: String = servicesConfig.getString("bas-gateway-frontend.sign-out.path")
+  private val signInPath: String = servicesConfig.getString("bas-gateway-frontend.sign-in.path")
+  override lazy val signOutUrl: String = s"$basGatewayFrontendExternalUrl$signOutPath"
+  override lazy val signInUrl: String = s"$basGatewayFrontendExternalUrl$signInPath"
 }

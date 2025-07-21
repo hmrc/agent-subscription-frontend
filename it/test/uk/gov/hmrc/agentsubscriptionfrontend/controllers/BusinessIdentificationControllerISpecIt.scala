@@ -101,7 +101,7 @@ class BusinessIdentificationControllerISpecIt extends BaseISpecIt {
         val result: Result = await(controller.showAlreadySubscribed(authenticatedAs(subscribingCleanAgentWithoutEnrolments)))
 
         result should containMessages("alreadySubscribed.title")
-        result should containLink("link.finishSignOut", routes.SignedOutController.redirectToBusinessTypeForm().url)
+        result should containLink("link.finishSignOut", routes.SignOutController.redirectToBusinessTypeForm().url)
 
       }
   }
