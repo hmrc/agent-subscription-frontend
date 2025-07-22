@@ -62,7 +62,7 @@ class SignOutControllerISpecIt extends BaseISpecIt {
       val continueFromGG = uri"${controller.appConfig.returnAfterGGCredsCreatedUrl}?${Map("id" -> "foo")}"
       val expectedLocation = uri"${controller.appConfig.ggRegistrationFrontendExternalUrl}?${Map(
           "accountType" -> "agent",
-          "origin"      -> "unknown",
+          "origin"      -> controller.appConfig.appName,
           "continue"    -> continueFromGG.toString
         )}"
       private val result = controller.redirectAgentToCreateCleanCreds(request).futureValue
@@ -84,7 +84,7 @@ class SignOutControllerISpecIt extends BaseISpecIt {
       val continueFromGG = uri"${controller.appConfig.returnAfterGGCredsCreatedUrl}?${Map("continue" -> ourContinueUrl)}"
       val expectedLocation = uri"${controller.appConfig.ggRegistrationFrontendExternalUrl}?${Map(
           "accountType" -> "agent",
-          "origin"      -> "unknown",
+          "origin"      -> controller.appConfig.appName,
           "continue"    -> continueFromGG.toString
         )}"
       val result = controller.redirectAgentToCreateCleanCreds(request).futureValue
@@ -102,7 +102,7 @@ class SignOutControllerISpecIt extends BaseISpecIt {
         )}"
       val expectedLocation = uri"${controller.appConfig.ggRegistrationFrontendExternalUrl}?${Map(
           "accountType" -> "agent",
-          "origin"      -> "unknown",
+          "origin"      -> controller.appConfig.appName,
           "continue"    -> continue.toString
         )}"
       redirectLocation(result).head shouldBe signOutWithContinue(expectedLocation.toString)

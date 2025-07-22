@@ -64,7 +64,7 @@ class SignOutController @Inject() (
           )}"
         val continueFromSignOut = uri"${appConfig.ggRegistrationFrontendExternalUrl}?${Map(
             "accountType" -> "agent",
-            "origin"      -> "unknown",
+            "origin"      -> appConfig.appName,
             "continue"    -> continueFromGG.toString
           )}"
 
@@ -84,7 +84,7 @@ class SignOutController @Inject() (
         )}"
       val continueFromSignOut = uri"${appConfig.ggRegistrationFrontendExternalUrl}?${Map(
           "accountType" -> "agent",
-          "origin"      -> "unknown",
+          "origin"      -> appConfig.appName,
           "continue"    -> continueFromGG.toString
         )}"
 
