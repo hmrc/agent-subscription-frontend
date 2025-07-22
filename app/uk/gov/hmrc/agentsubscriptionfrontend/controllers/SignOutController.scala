@@ -18,10 +18,10 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.{Configuration, Environment}
+import sttp.model.Uri.UriContext
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{MongoDBSessionStoreService, SubscriptionJourneyService}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps.addParamsToUrl
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.timed_out
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
@@ -32,7 +32,7 @@ import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SignedOutController @Inject() (
+class SignOutController @Inject() (
   timedOutTemplate: timed_out,
   val sessionStoreService: MongoDBSessionStoreService,
   val redirectUrlActions: RedirectUrlActions,
@@ -45,6 +45,11 @@ class SignedOutController @Inject() (
 )(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
+  private def signOutWithContinue(continue: String) = {
+    val signOutAndRedirectUrl: String = uri"""${appConfig.signOutUrl}?${Map("continue" -> continue)}""".toString
+    Redirect(signOutAndRedirectUrl)
+  }
+
   def redirectAgentToCreateCleanCreds: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       for {
@@ -53,14 +58,18 @@ class SignedOutController @Inject() (
         continueId =
           agent.subscriptionJourneyRecord.flatMap(_.continueId)
       } yield {
-        val continueUrl =
-          addParamsToUrl(
-            appConfig.rootContinueUrl,
+        val continueFromGG = uri"${appConfig.returnAfterGGCredsCreatedUrl}?${Map(
             "id"       -> continueId,
             "continue" -> redirectUrl
-          )
+          )}"
+        val continueFromSignOut = uri"${appConfig.ggRegistrationFrontendExternalUrl}?${Map(
+            "accountType" -> "agent",
+            "origin"      -> appConfig.appName,
+            "continue"    -> continueFromGG.toString
+          )}"
 
-        SeeOther(addParamsToUrl(appConfig.ggRegistrationFrontendExternalUrl, "continue" -> Some(continueUrl))).withNewSession
+        signOutWithContinue(continueFromSignOut.toString)
+
       }
     }
   }
@@ -70,13 +79,16 @@ class SignedOutController @Inject() (
       agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
       redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
     } yield {
-      val continueUrl =
-        addParamsToUrl(
-          appConfig.rootContinueUrl,
+      val continueFromGG = uri"${appConfig.returnAfterGGCredsCreatedUrl}?${Map(
           "continue" -> redirectUrl
-        )
+        )}"
+      val continueFromSignOut = uri"${appConfig.ggRegistrationFrontendExternalUrl}?${Map(
+          "accountType" -> "agent",
+          "origin"      -> appConfig.appName,
+          "continue"    -> continueFromGG.toString
+        )}"
 
-      SeeOther(addParamsToUrl(appConfig.ggRegistrationFrontendExternalUrl, "continue" -> Some(continueUrl))).withNewSession
+      signOutWithContinue(continueFromSignOut.toString)
     }
   }
 
@@ -84,11 +96,7 @@ class SignedOutController @Inject() (
     val result: Future[Result] = for {
       agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
       redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
-    } yield {
-      val signOutUrlWithContinueUrl =
-        addParamsToUrl(appConfig.companyAuthSignInUrl, "continue" -> redirectUrl)
-      SeeOther(signOutUrlWithContinueUrl).withNewSession
-    }
+    } yield signOutWithContinue(redirectUrl.getOrElse(appConfig.returnAfterGGCredsCreatedUrl))
 
     result.recover { case _: RuntimeException =>
       startNewSession
@@ -96,29 +104,33 @@ class SignedOutController @Inject() (
   }
 
   def startSurvey: Action[AnyContent] = Action {
-    SeeOther(appConfig.surveyRedirectUrl).withNewSession
+    signOutWithContinue(appConfig.surveyRedirectUrl)
   }
 
   def redirectToASAccountPage: Action[AnyContent] = Action {
-    SeeOther(appConfig.agentServicesAccountUrl).withNewSession
+    signOutWithContinue(appConfig.agentServicesAccountUrl)
   }
 
   def signOut: Action[AnyContent] = Action {
     startNewSession
   }
 
-  def keepAlive: Action[AnyContent] = Action.async {
-    Future successful Ok("OK")
+  def timeOut: Action[AnyContent] = Action {
+    val continue = uri"${appConfig.selfExternalUrl + routes.SignOutController.timedOut().url}"
+    signOutWithContinue(continue.toString)
   }
 
   def timedOut: Action[AnyContent] = Action.async { implicit request =>
-    Future successful Forbidden(timedOutTemplate())
+    Future successful Ok(timedOutTemplate())
   }
 
-  private def startNewSession: Result =
-    Redirect(routes.TaskListController.showTaskList()).withNewSession
+  private def startNewSession: Result = {
+    val continue = uri"${appConfig.selfExternalUrl + routes.TaskListController.showTaskList().url}"
+    signOutWithContinue(continue.toString)
+  }
 
   def redirectToBusinessTypeForm: Action[AnyContent] = Action {
-    Redirect(routes.BusinessTypeController.showBusinessTypeForm()).withNewSession
+    val continue = uri"${appConfig.selfExternalUrl + routes.BusinessTypeController.showBusinessTypeForm().url}"
+    signOutWithContinue(continue.toString)
   }
 }

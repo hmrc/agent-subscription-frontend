@@ -21,7 +21,9 @@ import org.scalatest.Assertion
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import sttp.model.Uri.UriContext
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub._
+import uk.gov.hmrc.agentsubscriptionfrontend.support.CallOps.addParamsToUrl
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, SessionLost, TestData}
@@ -31,8 +33,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SignOutControllerISpecIt extends BaseISpecIt {
 
-  protected lazy val sosRedirectUrl = "/government-gateway-registration-frontend?accountType=agent"
-  protected lazy val controller: SignedOutController = app.injector.instanceOf[SignedOutController]
+  protected lazy val sosRedirectUrl = "/government-gateway-registration-frontend"
+  protected lazy val controller: SignOutController = app.injector.instanceOf[SignOutController]
+  private val signOutUrl: String = uri"http://localhost:9099/bas-gateway/sign-out-without-state".toString
 
   private val fakeRequest = FakeRequest()
 
@@ -40,10 +43,15 @@ class SignOutControllerISpecIt extends BaseISpecIt {
     givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(continueId = Some("foo")))
   }
 
-  "redirectToSos" should {
+  def signOutWithContinue(continue: String): String =
+    uri"""$signOutUrl?${Map("continue" -> continue)}""".toString
+
+  "redirectAgentToCreateCleanCreds" should {
 
     "redirect user to create clean creds" in new TestSetup {
-      private val result = await(controller.redirectAgentToCreateCleanCreds(authenticatedAs(subscribingAgentEnrolledForNonMTD)))
+      private val result = controller
+        .redirectAgentToCreateCleanCreds(authenticatedAs(subscribingAgentEnrolledForNonMTD))
+        .futureValue
 
       status(result) shouldBe 303
       redirectLocation(result).head should include(sosRedirectUrl)
@@ -51,17 +59,19 @@ class SignOutControllerISpecIt extends BaseISpecIt {
 
     "the SOS redirect URL should include an ID of the saved continue id" in new TestSetup {
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-
-      private val result = await(controller.redirectAgentToCreateCleanCreds(request))
-      redirectLocation(result).head should include(s"continue=%2Fagent-subscription%2Freturn-after-gg-creds-created%3Fid%3Dfoo")
+      val continueFromGG = uri"${controller.appConfig.returnAfterGGCredsCreatedUrl}?${Map("id" -> "foo")}"
+      val expectedLocation = uri"${controller.appConfig.ggRegistrationFrontendExternalUrl}?${Map(
+          "accountType" -> "agent",
+          "origin"      -> controller.appConfig.appName,
+          "continue"    -> continueFromGG.toString
+        )}"
+      private val result = controller.redirectAgentToCreateCleanCreds(request).futureValue
+      redirectLocation(result).head shouldBe signOutWithContinue(expectedLocation.toString)
     }
 
     def assertContinueUrl(result: Result, continueUrl: String): Assertion = {
-      val sosContinueValueUnencoded =
-        s"/agent-subscription/return-after-gg-creds-created?continue=${URLEncoder.encode(continueUrl, "UTF-8")}"
-      val sosContinueValueEncoded = URLEncoder.encode(sosContinueValueUnencoded, "UTF-8")
-      val expectedSosContinueParam = s"continue=$sosContinueValueEncoded"
-      redirectLocation(result).head should include(expectedSosContinueParam)
+      val continue = uri"${controller.appConfig.returnAfterGGCredsCreatedUrl}?${Map("continue" -> continueUrl)}"
+      redirectLocation(result).head shouldBe signOutWithContinue(continue.toString)
     }
 
     "include a continue URL in the SOS redirect URL if a continue URL exists in the session store" in {
@@ -71,25 +81,31 @@ class SignOutControllerISpecIt extends BaseISpecIt {
       val ourContinueUrl = "/test-continue-url"
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.continueUrl = Some(ourContinueUrl)
-
-      assertContinueUrl(
-        await(controller.redirectAgentToCreateCleanCreds(authenticatedAs(subscribingAgentEnrolledForNonMTD))),
-        ourContinueUrl
-      )
+      val continueFromGG = uri"${controller.appConfig.returnAfterGGCredsCreatedUrl}?${Map("continue" -> ourContinueUrl)}"
+      val expectedLocation = uri"${controller.appConfig.ggRegistrationFrontendExternalUrl}?${Map(
+          "accountType" -> "agent",
+          "origin"      -> controller.appConfig.appName,
+          "continue"    -> continueFromGG.toString
+        )}"
+      val result = controller.redirectAgentToCreateCleanCreds(request).futureValue
+      redirectLocation(result).head shouldBe signOutWithContinue(expectedLocation.toString)
     }
 
     "include both an ID and a continue URL in the SOS redirect URL if both a continue URL and KnownFacts exist in the session store" in new TestSetup {
       val ourContinueUrl = "/test-continue-url"
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
       sessionStoreService.currentSession.continueUrl = Some(ourContinueUrl)
-
-      private val result = await(controller.redirectAgentToCreateCleanCreds(request))
-
-      val sosContinueValueUnencoded =
-        s"/agent-subscription/return-after-gg-creds-created?id=foo&continue=${URLEncoder.encode(ourContinueUrl, "UTF-8")}"
-      val sosContinueValueEncoded: String = URLEncoder.encode(sosContinueValueUnencoded, "UTF-8")
-      val expectedSosContinueParam = s"continue=$sosContinueValueEncoded"
-      redirectLocation(result).head should include(expectedSosContinueParam)
+      private val result = controller.redirectAgentToCreateCleanCreds(request).futureValue
+      val continue = uri"${controller.appConfig.returnAfterGGCredsCreatedUrl}?${Map(
+          "id"       -> "foo",
+          "continue" -> ourContinueUrl
+        )}"
+      val expectedLocation = uri"${controller.appConfig.ggRegistrationFrontendExternalUrl}?${Map(
+          "accountType" -> "agent",
+          "origin"      -> controller.appConfig.appName,
+          "continue"    -> continue.toString
+        )}"
+      redirectLocation(result).head shouldBe signOutWithContinue(expectedLocation.toString)
     }
   }
 
@@ -105,99 +121,75 @@ class SignOutControllerISpecIt extends BaseISpecIt {
   "redirectToASAccountPage" should {
     "logout and redirect to agent services account" in {
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession("sessionId" -> "SomeSession")
-
       request.session.get("sessionId") should not be empty
-
       val result = await(controller.redirectToASAccountPage(request))
-
       status(result) shouldBe 303
       redirectLocation(result).head should include("agent-services-account")
-
-      result.session.get("sessionId") shouldBe empty
     }
   }
 
   "signOutWithContinueUrl" should {
 
-    "logout and redirect to /gg/sign-in when no continue URL is present in the session" in {
-      testLogoutAndRedirect(expectedRedirectUrl = "http://localhost:9099/gg/sign-in")
-    }
-
-    "logout and redirect to /gg/sign-in?continue=... when continue URL is present in the session" in {
-      testLogoutAndRedirect(
-        expectedRedirectUrl = "http://localhost:9099/gg/sign-in?continue=%2Ftest-continue-url",
-        maybeContinueUrl = Some("/test-continue-url")
-      )
-    }
-
-    "sign out to continueUrl with expired session should just sign out; not give an exception" in {
+    "sign out via bas-gateway-frontend to continueUrl with expired session should just sign out; not give an exception" in {
 
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession("sessionId" -> "SomeSession")
-
+      val expectedLocation = uri"$signOutUrl?${Map("continue" -> routes.TaskListController.showTaskList().url)}"
       sessionStoreService.cacheContinueUrl(RedirectUrl("/someContinueUrl"))
 
       request.session.get("sessionId") should not be empty
 
       sessionStoreService.currentSessionTest = SessionLost // simulate SessionCache expiry
 
-      val result = await(controller.signOutWithContinueUrl(fakeRequest))
+      val result = controller.signOutWithContinueUrl(fakeRequest).futureValue
 
       status(result) shouldBe 303
-      redirectLocation(result).head shouldBe "/agent-subscription/task-list"
+      redirectLocation(result).head shouldBe expectedLocation.toString
 
     }
 
-    def testLogoutAndRedirect(expectedRedirectUrl: String, maybeContinueUrl: Option[String] = None): Assertion = {
-
-      implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession("sessionId" -> "SomeSession")
-
-      maybeContinueUrl.map { continueUrl =>
-        sessionStoreService.cacheContinueUrl(RedirectUrl(continueUrl))
-      }
-
-      request.session.get("sessionId") should not be empty
-
-      val result = await(controller.signOutWithContinueUrl(request))
-
-      status(result) shouldBe 303
-      redirectLocation(result).head shouldBe expectedRedirectUrl
-
-      result.session.get("sessionId") shouldBe empty
-    }
   }
 
   "signOut" should {
-    "logout and redirect to task list page" in {
+    "redirect via bas-gateway-frontend to task list page" in {
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession("sessionId" -> "SomeSession")
-      val result = await(controller.signOut(request))
+      val expectedLocation = uri"$signOutUrl?${Map("continue" -> routes.TaskListController.showTaskList().url)}"
+      val result = controller.signOut(request).futureValue
 
       status(result) shouldBe 303
+      redirectLocation(result).head shouldBe expectedLocation.toString
+    }
+  }
 
-      redirectLocation(result).head shouldBe routes.TaskListController.showTaskList().url
-      result.session.get("sessionId") shouldBe empty
+  "timeOut" should {
+    "redirect via bas-gateway-frontend to the timed out page" in {
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession("sessionId" -> "SomeSession")
+      val continueUrl = uri"${controller.appConfig.selfExternalUrl + routes.SignOutController.timedOut().url}"
+      val expectedLocation = uri"""$signOutUrl?${Map("continue" -> continueUrl.toString)}"""
+      val result = controller.timeOut(request).futureValue
+
+      status(result) shouldBe 303
+      redirectLocation(result).head shouldBe expectedLocation.toString
     }
   }
 
   "timedOut" should {
-    "show the timed out page with forbidden status" in {
+    "show the timed out page" in {
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-      val result = await(controller.timedOut(request))
-
-      status(result) shouldBe 403
+      val result = controller.timedOut(request).futureValue
+      status(result) shouldBe 200
       checkHtmlResultWithBodyText(result, "You have been signed out", "Sign in again")
-
     }
   }
 
   "redirectToBusinessTypeForm" should {
-    "redirect to the business type page and remove the session" in {
+    "redirect via bas-gateway-frontend to the business type page" in {
+      val expectedLocation = uri"""$signOutUrl?${Map("continue" -> routes.BusinessTypeController.showBusinessTypeForm().url)}"""
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession("sessionId" -> "SomeSession")
-      val result = await(controller.redirectToBusinessTypeForm(request))
+      val result = controller.redirectToBusinessTypeForm(request).futureValue
 
       status(result) shouldBe 303
 
-      redirectLocation(result).head shouldBe routes.BusinessTypeController.showBusinessTypeForm().url
-      result.session.get("sessionId") shouldBe empty
+      redirectLocation(result).head shouldBe expectedLocation.toString
     }
   }
 }

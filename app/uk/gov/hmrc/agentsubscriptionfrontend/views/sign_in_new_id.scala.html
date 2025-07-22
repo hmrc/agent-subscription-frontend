@@ -27,7 +27,7 @@
 
     <p class="govuk-body">@msgs("sign-in-new-id.p1")</p>
     <p class="govuk-body">@msgs("sign-in-new-id.p2")</p>
-    <p class="govuk-body">@Html(msgs("sign-in-new-id.p3", routes.SignedOutController.redirectAgentToCreateCleanCreds))</p>
+    <p class="govuk-body">@Html(msgs("sign-in-new-id.p3", routes.SignOutController.redirectAgentToCreateCleanCreds))</p>
 
-    <a class="govuk-button" href="@routes.SignedOutController.redirectToBusinessTypeForm" draggable="false" role="button" id="signInWithNewId">@msgs("sign-in-new-id.button")</a>
+    <a class="govuk-button" href="@routes.SignOutController.redirectToBusinessTypeForm" draggable="false" role="button" id="signInWithNewId">@msgs("sign-in-new-id.button")</a>
 }

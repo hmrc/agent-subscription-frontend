@@ -427,7 +427,7 @@ class BusinessIdentificationController @Inject() (
         agentSubContinueUrlOpt <- sessionStoreService.fetchContinueUrl
         redirectUrl            <- redirectUrlActions.getUrl(agentSubContinueUrlOpt)
       } yield {
-        val continueUrl = redirectUrl.getOrElse(routes.SignedOutController.redirectToBusinessTypeForm().url)
+        val continueUrl = redirectUrl.getOrElse(routes.SignOutController.redirectToBusinessTypeForm().url)
         Ok(alreadySubscribedTemplate(continueUrl))
       }
     }

@@ -36,11 +36,19 @@
     backLinkHref: Option[String] = None
 )(mainContent: Html)(implicit request : RequestHeader, msgs: Messages)
 
+@isSignedIn = @{
+    try {
+        request.session.get("authToken").isDefined
+    } catch {
+        case _: Throwable => false
+    }
+}
+
 @head = {
-    @if(hasTimeout) {
+    @if(isSignedIn) {
         @hmrcTimeoutDialogHelper(
-            signOutUrl = routes.SignedOutController.signOut().url,
-            timeoutUrl = Some(routes.SignedOutController.timedOut().url)
+            signOutUrl = routes.SignOutController.signOut().url,
+            timeoutUrl = Some(routes.SignOutController.timeOut().url)
         )
     }
     @autocompleteCss()
@@ -56,7 +64,7 @@
 @hmrcStandardPage(HmrcStandardPageParams(
     serviceURLs = ServiceURLs(
         serviceUrl = None,
-        signOutUrl = None
+        signOutUrl = if(isSignedIn) Some(routes.SignOutController.signOut().url) else None
     ),
     banners = Banners(displayHmrcBanner = true),
     templateOverrides = TemplateOverrides(

@@ -30,9 +30,9 @@ class AddressLookupConfig @Inject() (appConfig: AppConfig, messagesApi: Messages
     val v2Config = s"""{
   "version": 2,
   "options": {
-    "continueUrl": "${appConfig.agentSubscriptionFrontendExternalUrl}$continueUrl",
+    "continueUrl": "${appConfig.selfExternalUrl}$continueUrl",
     "includeHMRCBranding": true,
-     "signOutHref": "${appConfig.agentSubscriptionFrontendExternalUrl}${routes.SignedOutController.signOut().url}",
+     "signOutHref": "${appConfig.selfExternalUrl}${routes.SignOutController.signOut().url}",
     "selectPageConfig": {
       "proposedListLimit": 30,
       "showSearchLinkAgain": true
@@ -48,7 +48,7 @@ class AddressLookupConfig @Inject() (appConfig: AppConfig, messagesApi: Messages
     },
      "timeoutConfig": {
       "timeoutAmount": ${appConfig.timeout},
-      "timeoutUrl": "${appConfig.agentSubscriptionFrontendExternalUrl}${routes.SignedOutController.timedOut().url}"
+      "timeoutUrl": "${appConfig.selfExternalUrl}${routes.SignOutController.timeOut().url}"
     }
   },
   "labels": {

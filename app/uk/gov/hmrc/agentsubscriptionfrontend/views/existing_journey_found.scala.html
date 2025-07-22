@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SignedOutController
+@import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes.SignOutController
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 
 
@@ -30,6 +30,6 @@
     <p class="govuk-body">@msgs("existingJourneyFound.p2")</p>
     <p class="govuk-body">@msgs("existingJourneyFound.p3")</p>
 
-    <p class="govuk-body"><a class="govuk-button" href="@SignedOutController.redirectToBusinessTypeForm" role="button" draggable="false" id="finishSignOut">@msgs("button.signIn")</a></p>
+    <p class="govuk-body"><a class="govuk-button" href="@SignOutController.redirectToBusinessTypeForm" role="button" draggable="false" id="finishSignOut">@msgs("button.signIn")</a></p>
 
 }

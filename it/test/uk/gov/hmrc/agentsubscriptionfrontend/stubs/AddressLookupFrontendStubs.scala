@@ -47,7 +47,7 @@ object AddressLookupFrontendStubs {
                                         |    },
                                         |     "timeoutConfig": {
                                         |      "timeoutAmount": 900,
-                                        |      "timeoutUrl": "/agent-subscription/timed-out"
+                                        |      "timeoutUrl": "/agent-subscription/time-out"
                                         |    }
                                         |  },
                                         |  "labels": {

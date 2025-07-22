@@ -304,7 +304,7 @@ class TaskListControllerISpecIt extends BaseISpecIt with EmailVerificationBehavi
         .text() shouldBe "You will need to sign in with the same Government Gateway user ID you used when you started filling out this form."
 
       html.select("a#finish-signout").text() shouldBe "Finish and sign out"
-      html.select("a#finish-signout").attr("href") shouldBe routes.SignedOutController.startSurvey().url
+      html.select("a#finish-signout").attr("href") shouldBe routes.SignOutController.startSurvey().url
       html.select("a#continue-saved-progress").text() shouldBe "Continue where you left off"
       html.select("a#continue-saved-progress").attr("href") shouldBe routes.TaskListController.showTaskList().url
 
