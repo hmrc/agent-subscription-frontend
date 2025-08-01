@@ -36,7 +36,12 @@ After submission the agent should be assigned the HMRC-AS-AGENT enrolment if suc
     
 ### Running the tests with coverage
 
-    sbt clean coverageOn test it/test coverageReport    
+    sbt clean coverageOn test it/test coverageReport
+
+### Automated testing
+This service is tested by the following automated test repositories:
+- [agent-onboarding-ui-tests](https://github.com/hmrc/agent-onboarding-ui-tests)
+- [agent-subscription-performance-tests](https://github.com/hmrc/agent-subscription-performance-tests)
 
 ### Running the app locally
 
