@@ -22,7 +22,6 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Call, RequestHeader}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.{AddressLookupConfig, AppConfig}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AddressLookupFrontendAddress
-import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
 import uk.gov.hmrc.agentsubscriptionfrontend.util.RequestSupport.hc
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -39,32 +38,27 @@ class AddressLookupFrontendConnector @Inject() (
   val metrics: Metrics,
   addressLookupConfig: AddressLookupConfig,
   appConfig: AppConfig
-)(implicit val ec: ExecutionContext)
-    extends HttpAPIMonitor {
+)(implicit val ec: ExecutionContext) {
 
-  def initJourney(call: Call)(implicit rh: RequestHeader, ec: ExecutionContext, lang: Lang): Future[String] =
-    monitor(s"ConsumedAPI-Address-Lookup-Frontend-initJourney-POST") {
-
-      val addressConfig = Json.toJson(addressLookupConfig.config(s"${call.url}"))
-      http
-        .post(url"$initJourneyUrl")
-        .withBody(Json.toJson(addressConfig))
-        .execute[HttpResponse] map { resp =>
-        resp.header(LOCATION).getOrElse {
-          throw new ALFLocationHeaderNotSetException
-        }
+  def initJourney(call: Call)(implicit rh: RequestHeader, ec: ExecutionContext, lang: Lang): Future[String] = {
+    val addressConfig = Json.toJson(addressLookupConfig.config(s"${call.url}"))
+    http
+      .post(url"$initJourneyUrl")
+      .withBody(Json.toJson(addressConfig))
+      .execute[HttpResponse] map { resp =>
+      resp.header(LOCATION).getOrElse {
+        throw new ALFLocationHeaderNotSetException
       }
     }
+  }
 
   def getAddressDetails(id: String)(implicit rh: RequestHeader, ec: ExecutionContext): Future[AddressLookupFrontendAddress] = {
     import AddressLookupFrontendAddress._
+    http
+      .get(url"${confirmJourneyUrl(id)}")
+      .execute[JsObject]
+      .map(json => (json \ "address").as[AddressLookupFrontendAddress])
 
-    monitor(s"ConsumedAPI-Address-Lookup-Frontend-getAddressDetails-GET") {
-      http
-        .get(url"${confirmJourneyUrl(id)}")
-        .execute[JsObject]
-        .map(json => (json \ "address").as[AddressLookupFrontendAddress])
-    }
   }
 
   private def confirmJourneyUrl(id: String) =

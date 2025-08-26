@@ -19,22 +19,20 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.models.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.UtrDetails
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, MetricTestSupport}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpecIt
 import uk.gov.hmrc.domain.{Nino, SaAgentReference}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AgentAssuranceConnectorISpecIt extends BaseISpecIt with MetricTestSupport {
+class AgentAssuranceConnectorISpecIt extends BaseISpecIt {
 
   private implicit val request: RequestHeader = FakeRequest()
 
@@ -63,39 +61,32 @@ class AgentAssuranceConnectorISpecIt extends BaseISpecIt with MetricTestSupport 
 
   "hasActiveCesaRelationship" should {
     "receive 200 if valid combination passed and relationship exists in Cesa Nino" in {
-      withMetricsTimerUpdate("ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
-        givenNinoAGoodCombinationAndUserHasRelationshipInCesa("nino", "AA123456A", "SA6012")
-        await(connector.hasActiveCesaRelationship(Nino("AA123456A"), "nino", SaAgentReference("SA6012"))) shouldBe true
-      }
+      givenNinoAGoodCombinationAndUserHasRelationshipInCesa("nino", "AA123456A", "SA6012")
+      await(connector.hasActiveCesaRelationship(Nino("AA123456A"), "nino", SaAgentReference("SA6012"))) shouldBe true
+
     }
 
     "receive 200 if valid combination passed and relationship exists in Cesa Utr" in {
-      withMetricsTimerUpdate("ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
-        givenUtrAGoodCombinationAndUserHasRelationshipInCesa("utr", "4000000009", "SA6012")
-        await(connector.hasActiveCesaRelationship(Utr("4000000009"), "utr", SaAgentReference("SA6012"))) shouldBe true
-      }
+      givenUtrAGoodCombinationAndUserHasRelationshipInCesa("utr", "4000000009", "SA6012")
+      await(connector.hasActiveCesaRelationship(Utr("4000000009"), "utr", SaAgentReference("SA6012"))) shouldBe true
+
     }
 
     "receive 403 if valid combination passed and relationship does not exist in Cesa" in {
-      withMetricsTimerUpdate("ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
-        givenAUserDoesNotHaveRelationshipInCesa("nino", "AA123456A", "SA6012")
-        await(connector.hasActiveCesaRelationship(Nino("AA123456A"), "nino", SaAgentReference("SA6012"))) shouldBe false
-      }
+      givenAUserDoesNotHaveRelationshipInCesa("nino", "AA123456A", "SA6012")
+      await(connector.hasActiveCesaRelationship(Nino("AA123456A"), "nino", SaAgentReference("SA6012"))) shouldBe false
     }
 
     "receive 403 if invalid combination passed" in {
-      withMetricsTimerUpdate("ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
-        givenABadCombinationAndUserHasRelationshipInCesa("nino", "AB123456A", "SA126013")
-        await(connector.hasActiveCesaRelationship(Nino("AB123456A"), "nino", SaAgentReference("SA126013"))) shouldBe false
-      }
+      givenABadCombinationAndUserHasRelationshipInCesa("nino", "AB123456A", "SA126013")
+      await(connector.hasActiveCesaRelationship(Nino("AB123456A"), "nino", SaAgentReference("SA126013"))) shouldBe false
     }
 
     "receive 404 when valid Nino but is not found in DB" in {
-      withMetricsTimerUpdate("ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
-        givenAGoodCombinationAndNinoNotFoundInCesa("nino", "AB123456B", "SA126012")
-        await(connector.hasActiveCesaRelationship(Nino("AB123456A"), "nino", SaAgentReference("SA126013"))) shouldBe false
-      }
+      givenAGoodCombinationAndNinoNotFoundInCesa("nino", "AB123456B", "SA126012")
+      await(connector.hasActiveCesaRelationship(Nino("AB123456A"), "nino", SaAgentReference("SA126013"))) shouldBe false
     }
+
   }
 
   "getR2DWAgents" should {
@@ -171,11 +162,10 @@ class AgentAssuranceConnectorISpecIt extends BaseISpecIt with MetricTestSupport 
       }
     }
     "monitor with metric ConsumedAPI-AgentAssurance-getManuallyAssuredAgents-GET" in {
-      withMetricsTimerUpdate("ConsumedAPI-AgentAssurance-getAgentChecks-GET") {
-        givenAgentIsManuallyAssured(utr)
-        connector.getUtrDetails(utr).futureValue
-      }
+      givenAgentIsManuallyAssured(utr)
+      connector.getUtrDetails(utr).futureValue
     }
+
   }
 
   def testAcceptableNumberOfClientsEndpoint(service: String)(method: => Future[Boolean]): Unit = {

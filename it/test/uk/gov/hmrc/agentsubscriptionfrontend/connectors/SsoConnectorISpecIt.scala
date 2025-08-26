@@ -19,14 +19,14 @@ package uk.gov.hmrc.agentsubscriptionfrontend.connectors
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.SsoStub
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, MetricTestSupport}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpecIt
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SsoConnectorISpecIt extends BaseISpecIt with MetricTestSupport {
+class SsoConnectorISpecIt extends BaseISpecIt {
 
   private lazy val connector =
     new SsoConnector(app.injector.instanceOf[HttpClientV2], app.injector.instanceOf[Metrics], app.injector.instanceOf[AppConfig])
@@ -34,19 +34,17 @@ class SsoConnectorISpecIt extends BaseISpecIt with MetricTestSupport {
 
   "SsoConnector" should {
     "return valid domains" in {
-      withMetricsTimerUpdate("ConsumedAPI-SSO-getExternalDomains-GET") {
-        SsoStub.givenAllowlistedDomainsExist
-        val result = await(connector.getAllowlistedDomains())
-        result shouldBe Set("online-qa.ibt.hmrc.gov.uk", "localhost", "ibt.hmrc.gov.uk", "127.0.0.1", "www.tax.service.gov.uk")
-      }
+      SsoStub.givenAllowlistedDomainsExist
+      val result = await(connector.getAllowlistedDomains())
+      result shouldBe Set("online-qa.ibt.hmrc.gov.uk", "localhost", "ibt.hmrc.gov.uk", "127.0.0.1", "www.tax.service.gov.uk")
+
     }
 
     "return an empty set when the service throws an error" in {
-      withMetricsTimerUpdate("ConsumedAPI-SSO-getExternalDomains-GET") {
-        SsoStub.givenAllowlistedDomainsError
-        val result = await(connector.getAllowlistedDomains())
-        result shouldBe Set.empty
-      }
+      SsoStub.givenAllowlistedDomainsError
+      val result = await(connector.getAllowlistedDomains())
+      result shouldBe Set.empty
     }
+
   }
 }

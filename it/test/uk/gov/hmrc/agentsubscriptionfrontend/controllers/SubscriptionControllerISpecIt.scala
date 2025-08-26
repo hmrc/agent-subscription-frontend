@@ -99,7 +99,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       val result: Result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
       result.header.headers("Location") should include("/agent-subscription/sign-in-with-new-user-id")
-      noMetricExpectedAtThisPoint()
     }
 
     "redirect to /business-type if no registration data found" in new TestSetupWithMinimalSubscriptionJourneyRecord {
@@ -109,7 +108,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       status(result) shouldBe 303
 
       redirectLocation(result) shouldBe Some(routes.BusinessTypeController.showBusinessTypeForm().url)
-      noMetricExpectedAtThisPoint()
     }
 
     "redirect to /check-money-laundering-compliance if not manually assured and no amls data found" in
@@ -120,7 +118,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         status(result) shouldBe 303
 
         redirectLocation(result) shouldBe Some(routes.AMLSController.showAmlsRegisteredPage().url)
-        noMetricExpectedAtThisPoint()
       }
 
     "redirect to /contact-email-check if no contact email address found" in {
@@ -133,7 +130,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       status(result) shouldBe 303
 
       redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck().url)
-      noMetricExpectedAtThisPoint()
     }
 
     "redirect to /trading-name if no contact trading name data found" in {
@@ -146,7 +142,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       status(result) shouldBe 303
 
       redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showTradingNameCheck().url)
-      noMetricExpectedAtThisPoint()
     }
 
     "redirect to /check-main-trading-address if no contact trading address data found" in {
@@ -159,7 +154,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       status(result) shouldBe 303
 
       redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showCheckMainTradingAddress().url)
-      noMetricExpectedAtThisPoint()
     }
 
     "show subscription answers page if user has not already subscribed and has clean creds and also cache the goBack url" in
@@ -261,7 +255,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       val result: Result = await(controller.submitCheckAnswers(request))
       status(result) shouldBe 303
       result.header.headers("Location") should include("/agent-subscription/sign-in-with-new-user-id")
-      noMetricExpectedAtThisPoint()
     }
 
     "redirect to already subscribed" when {
@@ -275,9 +268,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
         status(result) shouldBe 303
         redirectLocation(result).head shouldBe routes.BusinessIdentificationController.showAlreadySubscribed().url
-        metricShouldExistAndBeUpdated(
-          "Count-Subscription-AlreadySubscribed-APIResponse"
-        )
       }
     }
   }
@@ -382,7 +372,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         status(result2) shouldBe 303
         redirectLocation(result2).head shouldBe routes.SubscriptionController.showCheckAnswers().url
 
-        metricShouldExistAndBeUpdated("Count-Subscription-AddressLookup-Start", "Count-Subscription-AddressLookup-Success")
       }
 
       "all fields are supplied but address contains more than 4 lines" in new TestSetupWithCompleteJourneyRecord {
@@ -422,7 +411,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
         status(result2) shouldBe 303
         redirectLocation(result2).head shouldBe routes.SubscriptionController.showCheckAnswers().url
-        metricShouldExistAndBeUpdated("Count-Subscription-AddressLookup-Start", "Count-Subscription-AddressLookup-Success")
       }
 
       "town is omitted" in new TestSetupWithCompleteJourneyRecord {
@@ -616,7 +604,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       val result: Result = await(controller.submitModifiedAddress()(request))
 
       resultShouldBeSessionDataMissing(result)
-      noMetricExpectedAtThisPoint()
     }
 
     "redisplay address_form_with_errors and show errors" when {
@@ -646,7 +633,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
 
         verifySubscriptionRequestSent(subscriptionRequestWithNoEdit())
-        metricShouldExistAndBeUpdated("Count-Subscription-Complete")
       }
 
       "some fields are supplied" in new TestSetupWithCompleteJourneyRecordAndCreate {
@@ -661,7 +647,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
 
         verifySubscriptionRequestSent(subscriptionRequestWithNoEdit())
-        metricShouldExistAndBeUpdated("Count-Subscription-Complete")
       }
 
       "amlsDetails are passed in" in new TestSetupWithCompleteJourneyRecordAndCreate {
@@ -675,7 +660,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         redirectLocation(result).head shouldBe routes.SubscriptionController.showSubscriptionComplete().url
 
         verifySubscriptionRequestSent(subscriptionRequestWithNoEdit())
-        metricShouldExistAndBeUpdated("Count-Subscription-Complete")
       }
     }
 
@@ -691,7 +675,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         redirectLocation(result).head shouldBe routes.StartController.showCannotCreateAccount().url
 
         verifySubscriptionRequestSent(subscriptionRequestWithNoEdit())
-        metricShouldExistAndBeUpdated("Count-Subscription-Failed-Agent_Terminated")
       }
     }
 

@@ -21,7 +21,7 @@ import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.models.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, BusinessType}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.SampleUser.subscribingCleanAgentWithoutEnrolments
@@ -82,7 +82,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
 
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.AssuranceChecksController.showClientDetailsForm().url)
-        noMetricExpectedAtThisPoint()
       }
     }
 
@@ -97,7 +96,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
 
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.StartController.showCannotCreateAccount().url)
-      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Declined")
     }
 
     "return 200 and display page with error when failing the validation of SaAgentCode" when {
@@ -113,7 +111,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
 
         result should containMessages("error.saAgentCode.invalid")
         result should repeatMessage("error.saAgentCode.invalid", 2)
-        noMetricExpectedAtThisPoint()
       }
 
       "it contains wrong max length" in new TestSetupNoJourneyRecord {
@@ -127,7 +124,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
 
         result should containMessages("error.saAgentCode.length")
         result should repeatMessage("error.saAgentCode.length", 2)
-        noMetricExpectedAtThisPoint()
       }
 
       "it contains wrong min length" in new TestSetupNoJourneyRecord {
@@ -141,7 +137,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
 
         result should containMessages("error.saAgentCode.length")
         result should repeatMessage("error.saAgentCode.length", 2)
-        noMetricExpectedAtThisPoint()
       }
 
       "contains empty SaAgentCode" in new TestSetupNoJourneyRecord {
@@ -155,7 +150,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
 
         result should containMessages("error.saAgentCode.blank")
         result should repeatMessage("error.saAgentCode.blank", 2)
-        noMetricExpectedAtThisPoint()
       }
     }
   }
@@ -226,8 +220,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
           "SA6012",
           aAssurancePayeCheck = true
         )
-
-        metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Success")
       }
     }
 
@@ -275,8 +267,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
         "SA6012",
         aAssurancePayeCheck = true
       )
-
-      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Failed")
     }
 
     "clientDetails no variant selected" in new TestSetupNoJourneyRecord {
@@ -341,8 +331,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
         "SA6012",
         aAssurancePayeCheck = true
       )
-
-      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Success")
     }
 
     "redirect to confirm business when successfully submitting UTR with random spaces" in new TestSetupNoJourneyRecord {
@@ -368,8 +356,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
         "SA6012",
         aAssurancePayeCheck = true
       )
-
-      metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Success")
     }
 
     "redirect to /cannot-create account page" when {
@@ -406,8 +392,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
           "SA6012",
           aAssurancePayeCheck = true
         )
-
-        metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Failed")
       }
 
       "successfully selecting ICannotProvideEitherOfTheseDetails" in new TestSetupNoJourneyRecord {
@@ -424,8 +408,6 @@ class AssuranceChecksControllerISpecIt extends BaseISpecIt {
 
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.StartController.showCannotCreateAccount().url)
-
-        metricShouldExistAndBeUpdated("Count-Subscription-InvasiveCheck-Could-Not-Provide-Tax-Payer-Identifier")
       }
     }
 

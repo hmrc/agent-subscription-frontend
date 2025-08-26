@@ -21,7 +21,6 @@ import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{VerificationStatusResponse, VerifyEmailRequest, VerifyEmailResponse}
-import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
 import uk.gov.hmrc.agentsubscriptionfrontend.util.RequestSupport.hc
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -33,37 +32,33 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class EmailVerificationConnector @Inject() (http: HttpClientV2, val metrics: Metrics)(implicit val appConfig: AppConfig, val ec: ExecutionContext)
-    extends HttpAPIMonitor with Logging {
+    extends Logging {
 
   def verifyEmail(request: VerifyEmailRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[VerifyEmailResponse]] =
-    monitor(s"ConsumedAPI-email-verify-POST") {
-      http
-        .post(url"${appConfig.emailVerificationBaseUrl}/email-verification/verify-email")
-        .withBody(Json.toJson(request))
-        .execute[HttpResponse]
-        .map { response =>
-          response.status match {
-            case 201 => Some(response.json.as[VerifyEmailResponse])
-            case status =>
-              logger.error(s"verifyEmail error; HTTP status: $status, message: $response")
-              None
-          }
+    http
+      .post(url"${appConfig.emailVerificationBaseUrl}/email-verification/verify-email")
+      .withBody(Json.toJson(request))
+      .execute[HttpResponse]
+      .map { response =>
+        response.status match {
+          case 201 => Some(response.json.as[VerifyEmailResponse])
+          case status =>
+            logger.error(s"verifyEmail error; HTTP status: $status, message: $response")
+            None
         }
-    }
+      }
 
   def checkEmail(credId: String)(implicit rh: RequestHeader, ec: ExecutionContext): Future[Option[VerificationStatusResponse]] =
-    monitor(s"ConsumedAPI-email-verification-status-GET") {
-      http
-        .get(url"${appConfig.emailVerificationBaseUrl}/email-verification/verification-status/$credId")
-        .execute[HttpResponse]
-        .map { response =>
-          response.status match {
-            case 200 => Some(response.json.as[VerificationStatusResponse])
-            case 404 => Some(VerificationStatusResponse(List.empty))
-            case status =>
-              logger.error(s"email verification status error for $credId; HTTP status: $status, message: $response")
-              None
-          }
+    http
+      .get(url"${appConfig.emailVerificationBaseUrl}/email-verification/verification-status/$credId")
+      .execute[HttpResponse]
+      .map { response =>
+        response.status match {
+          case 200 => Some(response.json.as[VerificationStatusResponse])
+          case 404 => Some(VerificationStatusResponse(List.empty))
+          case status =>
+            logger.error(s"email verification status error for $credId; HTTP status: $status, message: $response")
+            None
         }
-    }
+      }
 }

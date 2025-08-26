@@ -21,7 +21,7 @@ import play.api.http.Status
 import play.api.i18n.Lang
 import play.api.mvc.Results.{Conflict, Redirect}
 import play.api.mvc.{RequestHeader, Result}
-import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Vrn}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{Arn, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.Agent
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.AgentSubscriptionConnector
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes

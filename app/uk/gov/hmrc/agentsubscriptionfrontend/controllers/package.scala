@@ -21,7 +21,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.mvc.{AnyContent, Call, Request}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.models.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.models.RadioInputAnswer.{No, Yes}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TaxIdentifierFormatters.normalizedText

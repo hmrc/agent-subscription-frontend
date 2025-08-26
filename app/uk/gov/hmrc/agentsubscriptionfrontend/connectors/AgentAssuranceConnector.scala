@@ -20,7 +20,6 @@ import play.api.http.Status._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AmlsDetails, UtrDetails}
-import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpAPIMonitor
 import uk.gov.hmrc.agentsubscriptionfrontend.util.HttpClientConverter.transformOptionResponse
 import uk.gov.hmrc.agentsubscriptionfrontend.util.RequestSupport.hc
 import uk.gov.hmrc.domain.{SaAgentReference, TaxIdentifier}
@@ -34,64 +33,58 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics: Metrics, appConfig: AppConfig)(implicit val ec: ExecutionContext)
-    extends HttpAPIMonitor {
+class AgentAssuranceConnector @Inject() (httpClientV2: HttpClientV2, val metrics: Metrics, appConfig: AppConfig)(implicit val ec: ExecutionContext) {
 
-  def hasAcceptableNumberOfClients(regime: String)(implicit rh: RequestHeader): Future[Boolean] =
-    monitor(s"ConsumedAPI-AgentAssurance-hasAcceptableNumberOfClients-GET") {
-      val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/acceptableNumberOfClients/service/$regime"
-      httpClientV2
-        .get(url"$urlString")
-        .execute[HttpResponse]
-        .map { response =>
-          response.status match {
-            case NO_CONTENT               => true
-            case s if is2xx(s)            => false
-            case UNAUTHORIZED | FORBIDDEN => false
-            case s                        => throw UpstreamErrorResponse(response.body, s)
-          }
+  private def hasAcceptableNumberOfClients(regime: String)(implicit rh: RequestHeader): Future[Boolean] = {
+    val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/acceptableNumberOfClients/service/$regime"
+    httpClientV2
+      .get(url"$urlString")
+      .execute[HttpResponse]
+      .map { response =>
+        response.status match {
+          case NO_CONTENT               => true
+          case s if is2xx(s)            => false
+          case UNAUTHORIZED | FORBIDDEN => false
+          case s                        => throw UpstreamErrorResponse(response.body, s)
         }
-    }
+      }
+  }
 
-  private def getActiveCesaRelationship(uri: String)(implicit rh: RequestHeader): Future[Boolean] =
-    monitor(s"ConsumedAPI-AgentAssurance-getActiveCesaRelationship-GET") {
-      val urlString = s"${appConfig.agentAssuranceBaseUrl}$uri"
-      httpClientV2
-        .get(url"$urlString")
-        .execute[HttpResponse]
-        .map { response =>
-          response.status match {
-            case s if is2xx(s)         => true
-            case FORBIDDEN | NOT_FOUND => false
-            case s                     => throw UpstreamErrorResponse(response.body, s)
-          }
+  private def getActiveCesaRelationship(uri: String)(implicit rh: RequestHeader): Future[Boolean] = {
+    val urlString = s"${appConfig.agentAssuranceBaseUrl}$uri"
+    httpClientV2
+      .get(url"$urlString")
+      .execute[HttpResponse]
+      .map { response =>
+        response.status match {
+          case s if is2xx(s)         => true
+          case FORBIDDEN | NOT_FOUND => false
+          case s                     => throw UpstreamErrorResponse(response.body, s)
         }
-    }
+      }
+  }
 
   def getUtrDetails(utr: String)(implicit rh: RequestHeader): Future[UtrDetails] =
-    monitor(s"ConsumedAPI-AgentAssurance-getAgentChecks-GET") {
-      httpClientV2
-        .get(url"${appConfig.agentAssuranceBaseUrl}/agent-assurance/managed-utrs/utr/$utr")
-        .execute[HttpResponse]
-        .map { response =>
-          response.status match {
-            case OK => response.json.as[UtrDetails]
-            case s  => throw UpstreamErrorResponse(response.body, s)
-          }
+    httpClientV2
+      .get(url"${appConfig.agentAssuranceBaseUrl}/agent-assurance/managed-utrs/utr/$utr")
+      .execute[HttpResponse]
+      .map { response =>
+        response.status match {
+          case OK => response.json.as[UtrDetails]
+          case s  => throw UpstreamErrorResponse(response.body, s)
         }
-    }
+      }
 
-  def getAmlsData(utr: String)(implicit rh: RequestHeader): Future[Option[AmlsDetails]] =
-    monitor(s"ConsumedAPI-AgentAssurance-getAmlsData-GET") {
-      val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/amls/utr/$utr"
-      transformOptionResponse[AmlsDetails](
-        httpClientV2.get(url"$urlString").execute[HttpResponse]
-      )
-        .recover {
-          case e: UpstreamErrorResponse if e.statusCode == 404 => None
-          case e                                               => throw e
-        }
-    }
+  def getAmlsData(utr: String)(implicit rh: RequestHeader): Future[Option[AmlsDetails]] = {
+    val urlString = s"${appConfig.agentAssuranceBaseUrl}/agent-assurance/amls/utr/$utr"
+    transformOptionResponse[AmlsDetails](
+      httpClientV2.get(url"$urlString").execute[HttpResponse]
+    )
+      .recover {
+        case e: UpstreamErrorResponse if e.statusCode == 404 => None
+        case e                                               => throw e
+      }
+  }
 
   private def cesaGetUrl(ninoOrUtr: String, valueOfNinoOrUtr: String, saAgentReference: SaAgentReference): String =
     s"/agent-assurance/activeCesaRelationship/$ninoOrUtr/$valueOfNinoOrUtr/saAgentReference/${saAgentReference.value}"
