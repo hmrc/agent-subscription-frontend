@@ -22,7 +22,7 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.agentmtdidentifiers.model.Vrn
+import uk.gov.hmrc.agentsubscriptionfrontend.models.Vrn
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.VatDetailsController.{formWithRefinedErrors, registeredForVatForm, vatDetailsForm}

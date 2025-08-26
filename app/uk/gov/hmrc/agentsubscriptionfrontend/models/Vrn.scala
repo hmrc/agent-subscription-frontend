@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,21 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.domain.{SimpleObjectReads, SimpleObjectWrites, TaxIdentifier}
 
-case class MainBusinessIdentity(utr: Utr, postcode: String)
+case class Vrn(value: String) extends TaxIdentifier
 
-object MainBusinessIdentity {
-  implicit val format: Format[MainBusinessIdentity] = Json.format[MainBusinessIdentity]
+object Vrn {
+
+  private val vrnPattern = "[0-9]{9}".r
+
+  def isValid(vrn: String): Boolean =
+    vrn match {
+      case vrnPattern(_*) => true
+      case _              => false
+    }
+
+  implicit val vrnReads: SimpleObjectReads[Vrn] = new SimpleObjectReads[Vrn]("value", Vrn.apply)
+  implicit val vrnWrites: SimpleObjectWrites[Vrn] = new SimpleObjectWrites[Vrn](_.value)
+
 }

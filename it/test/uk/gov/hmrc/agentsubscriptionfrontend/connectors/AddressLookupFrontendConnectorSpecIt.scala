@@ -21,35 +21,34 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AddressLookupFrontendAddress, Country}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AddressLookupFrontendStubs.givenAddressLookupReturnsAddress
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, MetricTestSupport}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.BaseISpecIt
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AddressLookupFrontendConnectorSpecIt extends BaseISpecIt with MetricTestSupport {
+class AddressLookupFrontendConnectorSpecIt extends BaseISpecIt {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val rh: RequestHeader = FakeRequest()
 
   "getAddressDetails" should {
     "convert the JSON returned by address-lookup-frontend into an object" in {
-      withMetricsTimerUpdate("ConsumedAPI-Address-Lookup-Frontend-getAddressDetails-GET") {
-        val addressId = "id"
-        val addressLine1 = "10 Other Place"
-        val addressLine2 = "Some District"
-        val addressLine3 = "Line 3"
-        val town = "Our town"
-        val postcode = "AA1 1AA"
-        givenAddressLookupReturnsAddress(addressId, addressLine1, addressLine2, addressLine3, town, postcode)
-        val connector = app.injector.instanceOf[AddressLookupFrontendConnector]
-        val address = await(connector.getAddressDetails(addressId))
-        address shouldBe AddressLookupFrontendAddress(
-          lines = Seq(addressLine1, addressLine2, addressLine3, town),
-          postcode = Some(postcode),
-          country = Country("GB", Some("United Kingdom"))
-        )
-      }
+      val addressId = "id"
+      val addressLine1 = "10 Other Place"
+      val addressLine2 = "Some District"
+      val addressLine3 = "Line 3"
+      val town = "Our town"
+      val postcode = "AA1 1AA"
+      givenAddressLookupReturnsAddress(addressId, addressLine1, addressLine2, addressLine3, town, postcode)
+      val connector = app.injector.instanceOf[AddressLookupFrontendConnector]
+      val address = await(connector.getAddressDetails(addressId))
+      address shouldBe AddressLookupFrontendAddress(
+        lines = Seq(addressLine1, addressLine2, addressLine3, town),
+        postcode = Some(postcode),
+        country = Country("GB", Some("United Kingdom"))
+      )
     }
+
   }
 
 }

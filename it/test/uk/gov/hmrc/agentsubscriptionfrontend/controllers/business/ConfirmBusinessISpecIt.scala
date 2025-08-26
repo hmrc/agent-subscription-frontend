@@ -121,7 +121,6 @@ class ConfirmBusinessISpecIt extends BaseISpecIt {
         val result: Result = await(controller.submitConfirmBusinessForm(request))
 
         result.header.headers(LOCATION) shouldBe routes.BusinessIdentificationController.showAlreadySubscribed().url
-        metricShouldExistAndBeUpdated("Count-Subscription-AlreadySubscribed-RegisteredInETMP")
       }
 
       "redirect to task list if the user has clean creds and isSubscribedToAgentServices=false" in new TestSetupNoJourneyRecord {

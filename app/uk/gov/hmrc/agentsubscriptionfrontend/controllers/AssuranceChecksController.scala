@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import play.api.mvc._
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.models.Utr
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.{Agent, AuthActions}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationForms.{clientDetailsForm, invasiveCheckStartSaAgentCodeForm}

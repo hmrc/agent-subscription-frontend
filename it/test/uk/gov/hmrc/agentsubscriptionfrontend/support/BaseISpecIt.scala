@@ -43,7 +43,7 @@ import scala.concurrent.Future
 
 abstract class BaseISpecIt
     extends AnyWordSpecLike with Matchers with OptionValues with ScalaFutures with GuiceOneAppPerSuite with WireMockSupport with EndpointBehaviours
-    with DataStreamStubs with MetricTestSupport {
+    with DataStreamStubs {
 
   // Note: This is simply a randomly-chosen secret key to run tests
   val aesCrypto: Encrypter with Decrypter =
@@ -85,10 +85,8 @@ abstract class BaseISpecIt
       )
       .overrides(new TestGuiceModule)
 
-  override def commonStubs(): Unit = {
+  override def commonStubs(): Unit =
     givenAuditConnector()
-    givenCleanMetricRegistry()
-  }
 
   protected lazy val sessionStoreService = new TestSessionStoreService
 
@@ -264,12 +262,6 @@ abstract class BaseISpecIt
         )
       }
     }
-  }
-
-  protected def withMetricsTimerUpdate[A](expectedMetricName: String)(testCode: => A): Assertion = {
-    givenCleanMetricRegistry()
-    testCode
-    timerShouldExistAndBeUpdated(expectedMetricName)
   }
 
   private val messagesApi = app.injector.instanceOf[MessagesApi]

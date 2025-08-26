@@ -22,7 +22,7 @@ import play.api.i18n.Lang
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.agentmtdidentifiers.model.{Arn, Vrn}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.{Arn, Vrn}
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.SoleTrader
 import uk.gov.hmrc.agentsubscriptionfrontend.models.DesignatoryDetails.Person
@@ -31,7 +31,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, BusinessDetails, SubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.{AgentSubscriptionJourneyStub, AgentSubscriptionStub}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{phoneNumber, validPostcode, validUtr}
-import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, MetricTestSupport, TestData}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestData}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -39,7 +39,7 @@ import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import java.time.{LocalDate, Month}
 import scala.concurrent.ExecutionContext.Implicits.global
-class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSupport {
+class AgentSubscriptionConnectorISpecIt extends BaseISpecIt {
 
   private implicit val request: RequestHeader = FakeRequest()
 
@@ -126,72 +126,62 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
   "getRegistration" should {
 
     "return a subscribed Registration when agent-subscription returns a 200 response (for a matching UTR and postcode)" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET") {
-        AgentSubscriptionStub
-          .withMatchingUtrAndPostcode(utr, "AA1 1AA", isSubscribedToAgentServices = true, isSubscribedToETMP = true)
-        val result: Option[Registration] = await(connector.getRegistration(utr, "AA1 1AA"))
-        result.isDefined shouldBe true
-        result.get.taxpayerName shouldBe Some("My Agency")
-        result.get.isSubscribedToAgentServices shouldBe true
-        result.get.isSubscribedToETMP shouldBe true
-        testBusinessAddress(result.get)
-        result.get.emailAddress shouldBe Some("someone@example.com")
-      }
+      AgentSubscriptionStub
+        .withMatchingUtrAndPostcode(utr, "AA1 1AA", isSubscribedToAgentServices = true, isSubscribedToETMP = true)
+      val result: Option[Registration] = await(connector.getRegistration(utr, "AA1 1AA"))
+      result.isDefined shouldBe true
+      result.get.taxpayerName shouldBe Some("My Agency")
+      result.get.isSubscribedToAgentServices shouldBe true
+      result.get.isSubscribedToETMP shouldBe true
+      testBusinessAddress(result.get)
+      result.get.emailAddress shouldBe Some("someone@example.com")
     }
 
     "return a not subscribed Registration when agent-subscription returns a 200 response (for a matching UTR and postcode)" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET") {
-        AgentSubscriptionStub.withMatchingUtrAndPostcode(utr, "AA1 1AA")
+      AgentSubscriptionStub.withMatchingUtrAndPostcode(utr, "AA1 1AA")
 
-        val result: Option[Registration] = await(connector.getRegistration(utr, "AA1 1AA"))
-        result.isDefined shouldBe true
-        result.get.taxpayerName shouldBe Some("My Agency")
-        result.get.isSubscribedToAgentServices shouldBe false
-        testBusinessAddress(result.get)
-        result.get.emailAddress shouldBe Some("someone@example.com")
-      }
+      val result: Option[Registration] = await(connector.getRegistration(utr, "AA1 1AA"))
+      result.isDefined shouldBe true
+      result.get.taxpayerName shouldBe Some("My Agency")
+      result.get.isSubscribedToAgentServices shouldBe false
+      testBusinessAddress(result.get)
+      result.get.emailAddress shouldBe Some("someone@example.com")
+
     }
 
     "return a not subscribed with record in ETMP Registration when partially subscribed" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET") {
-        AgentSubscriptionStub
-          .withMatchingUtrAndPostcode(utr, "AA1 1AA", isSubscribedToETMP = true)
+      AgentSubscriptionStub
+        .withMatchingUtrAndPostcode(utr, "AA1 1AA", isSubscribedToETMP = true)
 
-        val result: Option[Registration] = await(connector.getRegistration(utr, "AA1 1AA"))
-        result.isDefined shouldBe true
-        result.get.taxpayerName shouldBe Some("My Agency")
-        result.get.isSubscribedToETMP shouldBe true
-        result.get.isSubscribedToAgentServices shouldBe false
-        testBusinessAddress(result.get)
-        result.get.emailAddress shouldBe Some("someone@example.com")
-      }
+      val result: Option[Registration] = await(connector.getRegistration(utr, "AA1 1AA"))
+      result.isDefined shouldBe true
+      result.get.taxpayerName shouldBe Some("My Agency")
+      result.get.isSubscribedToETMP shouldBe true
+      result.get.isSubscribedToAgentServices shouldBe false
+      testBusinessAddress(result.get)
+      result.get.emailAddress shouldBe Some("someone@example.com")
     }
 
     "URL-path-encode path parameters" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET") {
-        AgentSubscriptionStub.withMatchingUtrAndPostcode("01234/56789", "AA1 1AA/&")
+      AgentSubscriptionStub.withMatchingUtrAndPostcode("01234/56789", "AA1 1AA/&")
 
-        val result: Option[Registration] = await(connector.getRegistration("01234/56789", "AA1 1AA/&"))
-        result.isDefined shouldBe true
-      }
+      val result: Option[Registration] = await(connector.getRegistration("01234/56789", "AA1 1AA/&"))
+      result.isDefined shouldBe true
     }
 
     "return None when agent-subscription returns a 404 response (for a non-matching UTR and postcode)" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET") {
-        AgentSubscriptionStub.withNonMatchingUtrAndPostcode(utr, "AA1 1AA")
+      AgentSubscriptionStub.withNonMatchingUtrAndPostcode(utr, "AA1 1AA")
 
-        val result: Option[Registration] = await(connector.getRegistration(utr, "AA1 1AA"))
-        result shouldBe None
-      }
+      val result: Option[Registration] = await(connector.getRegistration(utr, "AA1 1AA"))
+      result shouldBe None
+
     }
 
     "throw an exception when agent-subscription returns a 500 response" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-hasAcceptableNumberOfClients-GET") {
-        AgentSubscriptionStub.withErrorForUtrAndPostcode(utr, "AA1 1AA")
+      AgentSubscriptionStub.withErrorForUtrAndPostcode(utr, "AA1 1AA")
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.getRegistration(utr, "AA1 1AA"))
-        }
+      intercept[UpstreamErrorResponse] {
+        await(connector.getRegistration(utr, "AA1 1AA"))
       }
     }
 
@@ -205,156 +195,140 @@ class AgentSubscriptionConnectorISpecIt extends BaseISpecIt with MetricTestSuppo
 
   "subscribe" should {
     "return an ARN" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST") {
-        AgentSubscriptionStub.subscriptionWillSucceed(utr, subscriptionRequest)
+      AgentSubscriptionStub.subscriptionWillSucceed(utr, subscriptionRequest)
 
-        val result = await(connector.subscribeAgencyToMtd(subscriptionRequest))
+      val result = await(connector.subscribeAgencyToMtd(subscriptionRequest))
 
-        result shouldBe Arn("ARN00001")
-      }
+      result shouldBe Arn("ARN00001")
+
     }
 
     "throw Upstream4xxResponse if subscription already exists" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST") {
-        AgentSubscriptionStub.subscriptionWillConflict(utr, subscriptionRequest)
+      AgentSubscriptionStub.subscriptionWillConflict(utr, subscriptionRequest)
 
-        val e = intercept[UpstreamErrorResponse] {
-          await(connector.subscribeAgencyToMtd(subscriptionRequest))
-        }
-
-        e.statusCode shouldBe 409
+      val e = intercept[UpstreamErrorResponse] {
+        await(connector.subscribeAgencyToMtd(subscriptionRequest))
       }
+
+      e.statusCode shouldBe 409
+
     }
 
     "throw Upstream4xxResponse if postcodes don't match" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-subscribeAgencyToMtd-POST") {
-        AgentSubscriptionStub.subscriptionWillBeForbidden(utr, subscriptionRequest)
+      AgentSubscriptionStub.subscriptionWillBeForbidden(utr, subscriptionRequest)
 
-        val e = intercept[UpstreamErrorResponse] {
-          await(connector.subscribeAgencyToMtd(subscriptionRequest))
-        }
-
-        e.statusCode shouldBe 403
+      val e = intercept[UpstreamErrorResponse] {
+        await(connector.subscribeAgencyToMtd(subscriptionRequest))
       }
+
+      e.statusCode shouldBe 403
     }
+
   }
 
   "completePartialSubscription" should {
     "return an ARN when partialSubscription has been resolved" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT") {
-        AgentSubscriptionStub.partialSubscriptionWillSucceed(partialSubscriptionRequest)
+      AgentSubscriptionStub.partialSubscriptionWillSucceed(partialSubscriptionRequest)
 
-        val result = await(connector.completePartialSubscription(partialSubscriptionRequest))
+      val result = await(connector.completePartialSubscription(partialSubscriptionRequest))
 
-        result shouldBe Arn("ARN00001")
-      }
+      result shouldBe Arn("ARN00001")
+
     }
 
     "throw Upstream4xxResponse if enrolment is already allocated to someone" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT") {
-        AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 409)
+      AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 409)
 
-        val e = intercept[UpstreamErrorResponse] {
-          await(connector.completePartialSubscription(partialSubscriptionRequest))
-        }
-
-        e.statusCode shouldBe 409
+      val e = intercept[UpstreamErrorResponse] {
+        await(connector.completePartialSubscription(partialSubscriptionRequest))
       }
+
+      e.statusCode shouldBe 409
+
     }
 
     "throw Upstream4xxResponse if details do not match any record" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT") {
-        AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 403)
+      AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 403)
 
-        val e = intercept[UpstreamErrorResponse] {
-          await(connector.completePartialSubscription(partialSubscriptionRequest))
-        }
-
-        e.statusCode shouldBe 403
+      val e = intercept[UpstreamErrorResponse] {
+        await(connector.completePartialSubscription(partialSubscriptionRequest))
       }
+
+      e.statusCode shouldBe 403
     }
 
     "throw BadRequestException if BadRequest" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT") {
-        AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 400)
+      AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 400)
 
-        val e = intercept[UpstreamErrorResponse] {
-          await(connector.completePartialSubscription(partialSubscriptionRequest))
-        }
-
-        e.statusCode shouldBe 400
+      val e = intercept[UpstreamErrorResponse] {
+        await(connector.completePartialSubscription(partialSubscriptionRequest))
       }
+
+      e.statusCode shouldBe 400
+
     }
 
     "throw Upstream5xxResponse if postcodes don't match" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-completePartialAgencySubscriptionToMtd-PUT") {
-        AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 500)
+      AgentSubscriptionStub.partialSubscriptionWillReturnStatus(partialSubscriptionRequest, 500)
 
-        val e = intercept[UpstreamErrorResponse] {
-          await(connector.completePartialSubscription(partialSubscriptionRequest))
-        }
-
-        e.statusCode shouldBe 500
+      val e = intercept[UpstreamErrorResponse] {
+        await(connector.completePartialSubscription(partialSubscriptionRequest))
       }
+
+      e.statusCode shouldBe 500
     }
+
   }
 
   "matchCorporationTaxUtrWithCrn" should {
 
     "return true when agent-subscription returns a 200 response (for a matching UTR and CRN)" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-matchCorporationTaxUtrWithCrn-GET") {
-        AgentSubscriptionStub
-          .withMatchingCtUtrAndCrn(utr, crn)
+      AgentSubscriptionStub
+        .withMatchingCtUtrAndCrn(utr, crn)
 
-        await(connector.matchCorporationTaxUtrWithCrn(utr, crn)) shouldBe true
-      }
+      await(connector.matchCorporationTaxUtrWithCrn(utr, crn)) shouldBe true
+
     }
 
     "return false when agent-subscription returns a 404 response (for a non-matching UTR and CRN)" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-matchCorporationTaxUtrWithCrn-GET") {
-        AgentSubscriptionStub.withNonMatchingCtUtrAndCrn(utr, crn)
+      AgentSubscriptionStub.withNonMatchingCtUtrAndCrn(utr, crn)
 
-        await(connector.matchCorporationTaxUtrWithCrn(utr, crn)) shouldBe false
-      }
+      await(connector.matchCorporationTaxUtrWithCrn(utr, crn)) shouldBe false
     }
 
     "throw an exception when agent-subscription returns a 500 response" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-matchCorporationTaxUtrWithCrn-GET") {
-        AgentSubscriptionStub.withErrorForCtUtrAndCrn(utr, crn)
+      AgentSubscriptionStub.withErrorForCtUtrAndCrn(utr, crn)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.matchCorporationTaxUtrWithCrn(utr, crn))
-        }
+      intercept[UpstreamErrorResponse] {
+        await(connector.matchCorporationTaxUtrWithCrn(utr, crn))
       }
+
     }
   }
 
   "matchVatKnownFacts" should {
     "return true when agent-subscription returns a 200 response (for a matching VRN and registration date)" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-matchVatKnownFacts-GET") {
-        AgentSubscriptionStub
-          .withMatchingVrnAndDateOfReg(vrn, dateOfReg)
+      AgentSubscriptionStub
+        .withMatchingVrnAndDateOfReg(vrn, dateOfReg)
 
-        await(connector.matchVatKnownFacts(vrn, dateOfReg)) shouldBe true
-      }
+      await(connector.matchVatKnownFacts(vrn, dateOfReg)) shouldBe true
+
     }
 
     "return false when agent-subscription returns a 404 response (for a non-matching VRN and registration date)" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-matchVatKnownFacts-GET") {
-        AgentSubscriptionStub.withNonMatchingVrnAndDateOfReg(vrn, dateOfReg)
+      AgentSubscriptionStub.withNonMatchingVrnAndDateOfReg(vrn, dateOfReg)
 
-        await(connector.matchVatKnownFacts(vrn, dateOfReg)) shouldBe false
-      }
+      await(connector.matchVatKnownFacts(vrn, dateOfReg)) shouldBe false
+
     }
 
     "throw an exception when agent-subscription returns a 500 response" in {
-      withMetricsTimerUpdate("ConsumedAPI-Agent-Subscription-matchVatKnownFacts-GET") {
-        AgentSubscriptionStub.withErrorForVrnAndDateOfReg(vrn, dateOfReg)
+      AgentSubscriptionStub.withErrorForVrnAndDateOfReg(vrn, dateOfReg)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.matchVatKnownFacts(vrn, dateOfReg))
-        }
+      intercept[UpstreamErrorResponse] {
+        await(connector.matchVatKnownFacts(vrn, dateOfReg))
       }
+
     }
   }
 

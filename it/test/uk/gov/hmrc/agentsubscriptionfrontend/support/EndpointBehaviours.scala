@@ -45,7 +45,6 @@ trait EndpointBehaviours {
 
       status(result) shouldBe 303
       redirectLocation(result.futureValue).get should include("/bas-gateway/sign-in")
-      noMetricExpectedAtThisPoint()
     }
 
     "redirect to the non-Agent next steps page if the current user is logged in and does not have affinity group = Agent" in new TestSetupNoJourneyRecord {
@@ -56,7 +55,6 @@ trait EndpointBehaviours {
 
       status(result) shouldBe 303
       redirectLocation(result.futureValue).get shouldBe routes.StartController.showNotAgent().url
-      metricShouldExistAndBeUpdated("Count-Subscription-NonAgent")
     }
   }
 

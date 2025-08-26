@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.support
 import play.api.data.Forms.of
 import play.api.data.Mapping
 import play.api.data.format.Formats._
-import uk.gov.hmrc.agentmtdidentifiers.model.Utr
+import uk.gov.hmrc.agentsubscriptionfrontend.models.Utr
 import uk.gov.hmrc.domain.Nino
 
 object TaxIdentifierFormatters {
