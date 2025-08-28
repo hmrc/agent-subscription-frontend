@@ -1570,4 +1570,18 @@ class ContactDetailsControllerISpecIt extends BaseISpecIt {
     }
   }
 
+  "GET /change-contact-email-address" should {
+
+    "303 SEE_OTHER to /contact-email-check and cache isChangingAnswers=true" in {
+      // this endpoint only needs auth; it doesn't read the journey record
+      val request = authenticatedAs(subscribingAgentEnrolledForNonMTD, GET)
+
+      val result = await(controller.changeContactEmailAddress(request))
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.ContactDetailsController.showContactEmailCheck().url)
+
+    }
+  }
+
 }

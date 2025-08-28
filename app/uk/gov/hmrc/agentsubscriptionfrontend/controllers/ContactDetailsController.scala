@@ -153,9 +153,11 @@ class ContactDetailsController @Inject() (
   }
 
   def changeContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>
-    sessionStoreService
-      .cacheIsChangingAnswers(changing = true)
-      .map(_ => Redirect(routes.ContactDetailsController.showContactEmailCheck()))
+    authorised() {
+      sessionStoreService
+        .cacheIsChangingAnswers(changing = true)
+        .map(_ => Redirect(routes.ContactDetailsController.showContactEmailCheck()))
+    }
   }
 
   def submitContactEmailAddress: Action[AnyContent] = Action.async { implicit request =>

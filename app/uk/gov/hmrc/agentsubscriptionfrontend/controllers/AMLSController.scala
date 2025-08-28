@@ -67,9 +67,11 @@ class AMLSController @Inject() (
   private val hmrcAmlsCode = "HMRC"
 
   def changeAmlsDetails: Action[AnyContent] = Action.async { implicit request =>
-    sessionStoreService
-      .cacheIsChangingAnswers(changing = true)
-      .map(_ => Redirect(routes.AMLSController.showAmlsRegisteredPage()))
+    authorised() {
+      sessionStoreService
+        .cacheIsChangingAnswers(changing = true)
+        .map(_ => Redirect(routes.AMLSController.showAmlsRegisteredPage()))
+    }
   }
 
   def showAmlsRegisteredPage: Action[AnyContent] = Action.async { implicit request =>
