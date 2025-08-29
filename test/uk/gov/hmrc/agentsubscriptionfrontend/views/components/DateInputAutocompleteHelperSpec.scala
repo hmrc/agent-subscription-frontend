@@ -40,22 +40,22 @@ class DateInputAutocompleteHelperSpec extends UnitSpec {
     )
   )
 
-  ".withDateAutocomplete" when {
+  ".withDateOfBirthAutocomplete" when {
 
-    "autocomplete is true" should {
+    "autocompleteEnabled is true" should {
 
       "copy the DateInput object and add the relevant 'bday' autocomplete attributes" in {
-        val resultDateInput = testDateInput.withDateAutocomplete(true)
+        val resultDateInput = testDateInput.withDateOfBirthAutocomplete(true)
         resultDateInput.items(0).autocomplete shouldBe Some("bday-day")
         resultDateInput.items(1).autocomplete shouldBe Some("bday-month")
         resultDateInput.items(2).autocomplete shouldBe Some("bday-year")
       }
     }
 
-    "autocomplete is false" should {
+    "autocompleteEnabled is false" should {
 
       "return the DateInput object without changes" in {
-        val resultDateInput = testDateInput.withDateAutocomplete(false)
+        val resultDateInput = testDateInput.withDateOfBirthAutocomplete(false)
         resultDateInput shouldBe testDateInput
       }
     }

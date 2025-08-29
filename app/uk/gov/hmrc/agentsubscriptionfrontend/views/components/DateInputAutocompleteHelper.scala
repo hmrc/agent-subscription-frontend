@@ -22,20 +22,17 @@ object DateInputAutocompleteHelper {
 
   implicit class DateInputAutocomplete(dateInput: DateInput) extends DateInput {
 
-    def withDateAutocomplete(autocomplete: Boolean): DateInput = {
-      if (autocomplete) {
+    def withDateOfBirthAutocomplete(autocompleteEnabled: Boolean): DateInput =
+      if (autocompleteEnabled) {
         val itemsWithAutocomplete = Seq(
           dateInput.items(0).copy(autocomplete = Some("bday-day")),
           dateInput.items(1).copy(autocomplete = Some("bday-month")),
           dateInput.items(2).copy(autocomplete = Some("bday-year"))
         )
-        dateInput.copy(
-          items = itemsWithAutocomplete
-        )
-      }
-      else {
+
+        dateInput.copy(items = itemsWithAutocomplete)
+      } else {
         dateInput
       }
-    }
   }
 }
