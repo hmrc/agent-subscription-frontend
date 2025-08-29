@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.api.Environment
+import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.service.EmailVerificationService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,7 +31,7 @@ abstract class GenericEmailVerificationController[S](
   val env: Environment,
   emailVerificationService: EmailVerificationService
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController with I18nSupport {
+    extends FrontendBaseController with I18nSupport with AuthActions {
 
   def emailVerificationEnabled: Boolean
 
@@ -92,52 +93,54 @@ abstract class GenericEmailVerificationController[S](
   def enterEmailUrl(session: S): Call
 
   def verifyEmail: Action[AnyContent] = Action.async { implicit request =>
-    getState.flatMap { case (session, credId) =>
-      val emailToVerify = getEmailToVerify(session)
-      if (isAlreadyVerified(session, emailToVerify) || !emailVerificationEnabled) {
-        markEmailAsVerified(session, emailToVerify).map { updatedSession =>
-          Redirect(redirectUrlIfVerified(updatedSession))
-        }
-      } else {
-        // Check the status of the email with the email verification service
-        emailVerificationService.checkStatus(credId, emailToVerify).flatMap {
-          case EmailVerificationStatus.Verified =>
-            markEmailAsVerified(session, emailToVerify).map { updatedSession =>
-              Redirect(redirectUrlIfVerified(updatedSession))
-            }
-          // The email is not yet verified. Start the verification journey
-          case EmailVerificationStatus.Unverified =>
-            emailVerificationService
-              .verifyEmail(
-                credId,
-                Some(
-                  Email(
-                    address = emailToVerify,
-                    enterUrl = urlFor(enterEmailUrl(session))
-                  )
-                ),
-                continueUrl = urlFor(
-                  selfRoute
-                ), // when the verification journey is done, this same method will be called again to verify that the email is indeed verified
-                mBackUrl = backLinkUrl(session).map(urlFor(_)),
-                accessibilityStatementUrl = accessibilityStatementUrl,
-                lang = messagesApi.preferred(request).lang.code
-              )
-              .map {
-                case Some(redirectUri) =>
-                  val url = if (useAbsoluteUrls) emailVerificationFrontendBaseUrl + redirectUri else redirectUri
-                  Redirect(url)
-                case None => throw new RuntimeException("Could not start email verification journey")
+    authorised() {
+      getState.flatMap { case (session, credId) =>
+        val emailToVerify = getEmailToVerify(session)
+        if (isAlreadyVerified(session, emailToVerify) || !emailVerificationEnabled) {
+          markEmailAsVerified(session, emailToVerify).map { updatedSession =>
+            Redirect(redirectUrlIfVerified(updatedSession))
+          }
+        } else {
+          // Check the status of the email with the email verification service
+          emailVerificationService.checkStatus(credId, emailToVerify).flatMap {
+            case EmailVerificationStatus.Verified =>
+              markEmailAsVerified(session, emailToVerify).map { updatedSession =>
+                Redirect(redirectUrlIfVerified(updatedSession))
               }
-          // The email provided was locked out due to too many failed verification attempts
-          case EmailVerificationStatus.Locked =>
-            Future.successful(Redirect(redirectUrlIfLocked(session)))
-          // Any other error
-          case EmailVerificationStatus.Error =>
-            Future.successful(Redirect(redirectUrlIfError(session)))
+            // The email is not yet verified. Start the verification journey
+            case EmailVerificationStatus.Unverified =>
+              emailVerificationService
+                .verifyEmail(
+                  credId,
+                  Some(
+                    Email(
+                      address = emailToVerify,
+                      enterUrl = urlFor(enterEmailUrl(session))
+                    )
+                  ),
+                  continueUrl = urlFor(
+                    selfRoute
+                  ), // when the verification journey is done, this same method will be called again to verify that the email is indeed verified
+                  mBackUrl = backLinkUrl(session).map(urlFor(_)),
+                  accessibilityStatementUrl = accessibilityStatementUrl,
+                  lang = messagesApi.preferred(request).lang.code
+                )
+                .map {
+                  case Some(redirectUri) =>
+                    val url = if (useAbsoluteUrls) emailVerificationFrontendBaseUrl + redirectUri else redirectUri
+                    Redirect(url)
+                  case None => throw new RuntimeException("Could not start email verification journey")
+                }
+            // The email provided was locked out due to too many failed verification attempts
+            case EmailVerificationStatus.Locked =>
+              Future.successful(Redirect(redirectUrlIfLocked(session)))
+            // Any other error
+            case EmailVerificationStatus.Error =>
+              Future.successful(Redirect(redirectUrlIfError(session)))
+          }
         }
-      }
 
+      }
     }
   }
 
