@@ -191,10 +191,10 @@ noAgencyFound.p1=Nid oeddem yn gallu dod o hyd i fusnes yn ein cofnodion drwy dd
 noAgencyFound.p2=Gwiriwch y manylion a rhowch gynnig arall arni.
 
 #Company Not Allowed
-companyNotAllowed.title=We cannot create an account for this company
-companyNotAllowed.p1=We cannot register this company for an agent services account. This is because of the company''s status on the Companies House register.
-companyNotAllowed.p2=To view your company status you can <a class="govuk-link" href={0} target='_blank'>search the Companies House register (opens in a new tab)</a>. If you believe the status is incorrect, contact Companies House.
-companyNotAllowed.p3=If you''ve entered the incorrect details, you can try again.
+companyNotAllowed.title=Ni allwn greu cyfrif ar gyfer y cwmni hwn
+companyNotAllowed.p1=Ni allwn gofrestru’r cwmni hwn ar gyfer cyfrif gwasanaethau asiant. Mae hyn oherwydd statws y cwmni ar gofrestr Tŷ’r Cwmnïau.
+companyNotAllowed.p2=I fwrw golwg dros statws eich cwmni <a class="govuk-link" href={0} target="_blank" rel="noreferrer noopener">gallwch bori drwy gofrestr Tŷ’r Cwmnïau (yn agor tab newydd)</a>. Os ydych chi’n credu bod y statws yn anghywir, cysylltwch â Thŷ’r Cwmnïau.
+companyNotAllowed.p3=Os ydych wedi rhoi’r manylion anghywir, gallwch roi cynnig arall arni.
 
 #Already subscribed
 alreadySubscribed.title=Mae gan eich busnes gyfrif gwasanaethau asiant eisoes
@@ -216,7 +216,7 @@ task-list.contactDetailsTask.header=Nodwch fanylion eich cyfrif gwasanaethau asi
 task-list.contactDetailsEmailSubTask=Cadarnhewch eich cyfeiriad e-bost
 task-list.contactDetailsTradingNameSubTask=Cadarnhewch eich enw
 task-list.contactDetailsTradingAddressSubTask=Cadarnhewch eich cyfeiriad
-task-list.contactDetailsTelephoneNumberSubTask=Confirm your telephone number
+task-list.contactDetailsTelephoneNumberSubTask=Cadarnhau’ch rhif ffôn
 task-list.3.number=3.
 task-list.mappingTask.header=Ychwanegwch eich awdurdodiadau presennol gan gleientiaid Hunanasesiad
 task-list.mappingSubTask=Ychwanegwch awdurdodiadau gan gleientiaid Hunanasesiad at eich cyfrif gwasanaethau asiant
@@ -457,7 +457,7 @@ moneyLaunderingCompliance.expiry.month.title=Mis
 moneyLaunderingCompliance.expiry.year.title=Blwyddyn
 
 # Money laundering enter number page
-    moneyLaunderingCompliance.enter-number.title=Beth yw manylion eich cofrestriad disgwyliedig ar gyfer goruchwyliaeth gwyngalchu arian?
+moneyLaunderingCompliance.enter-number.title=Beth yw manylion eich cofrestriad disgwyliedig ar gyfer goruchwyliaeth gwyngalchu arian?
 moneyLaunderingCompliance.enter-number.membershipNumber=Eich rhif cofrestru
 moneyLaunderingCompliance.enter-number.membershipNumber.hint=Gallwch ddod o hyd i hyn ar ddangosfwrdd eich cyfrif Goruchwyliaeth Gwrth-wyngalchu Arian (AMLS).
 
@@ -469,12 +469,12 @@ amls-details-not-found.button=Rhowch gynnig arall arni
 # Amls Number Not Found
 amls-number-not-found.title=Ni allwn ddod o hyd i’ch rhif cofrestru ar gyfer goruchwyliaeth gwyngalchu arian
 amls-number-not-found.p=Gwiriwch eich rhif cofrestru a rhowch gynnig arall arni.
-amls-number-not-found.button=Try again
+amls-number-not-found.button=Rhoi cynnig arall arni
 
 # Amls Date Not Matched
 amls-date-not-matched.title=Nid yw’r dyddiad a nodoch yn cyd-fynd â’n cofnodion
 amls-date-not-matched.p=Gwiriwch ddyddiad adnewyddu’ch cofrestriad, a rhowch gynnig arall arni.
-amls-date-not-matched.button=Try again
+amls-date-not-matched.button=Rhoi cynnig arall arni
 
 # Amls Ineligible status
 amls-ineligible-status.title=Ni allwch greu cyfrif gwasanaethau asiant ar hyn o bryd
@@ -580,12 +580,12 @@ form-input.day=Diwrnod
 form-input.month=Mis
 form-input.year=Blwyddyn
 
-contactPhoneCheck.title=Is this the telephone number you want to use for your agent services account?
-contactPhoneCheck.yes=Yes
-contactPhoneCheck.no=No - I want to use a different telephone number
-error.contact-phone-check.invalid=Select yes if this is the telephone number you want to use for your agent services account
-contactTelephone.title=What is the telephone number you want to use for your agent services account?
-contactTelephone.p=Enter a UK telephone number, like 01632 960 001, 07700 900 982 or +44 808 157 0192
-error.contact.phone.invalid=Enter a UK telephone number in the correct format
-error.contact.phone.empty=Enter a UK telephone number
-checkAnswers.telephoneNumber.label=Contact telephone number
+contactPhoneCheck.title=Ai dyma’r rhif ffôn yr hoffech ei ddefnyddio ar gyfer eich cyfrif gwasanaethau asiant?
+contactPhoneCheck.yes=Iawn
+contactPhoneCheck.no=Na – hoffwn ddefnyddio rhif ffôn gwahanol
+error.contact-phone-check.invalid=Dewiswch ‘Iawn’ os yw’r rhif ffôn yr hoffech ei ddefnyddio ar gyfer eich cyfrif gwasanaethau asiant
+contactTelephone.title=Beth yw’r rhif ffôn yr hoffech ei ddefnyddio ar gyfer eich cyfrif gwasanaethau asiant?
+contactTelephone.p=Nodwch rif ffôn yn y DU, fel 01632 960 001, 07700 900 982 neu +44 808 157 0192
+error.contact.phone.invalid=Nodwch rif ffôn yn y DU yn y fformat cywir
+error.contact.phone.empty=Nodwch rif ffôn yn y DU
+checkAnswers.telephoneNumber.label=Rhif ffôn cyswllt
