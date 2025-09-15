@@ -55,7 +55,7 @@ object CheckYourAnswers {
     CheckYourAnswers(
       businessNameRow = makeBusinessNameRow(registrationName),
       businessAddressRow = makeBusinessAddressRow(address),
-      maybeAmlsDataRow = makeAmlsDataRow(amlsData),
+      maybeAmlsDataRow = if (!isManuallyAssured) makeAmlsDataRow(amlsData) else None,
       contactEmailRow = makeContactEmailRow(contactEmailAddress),
       contactTradingNameRow = makeContactTradingNameRow(contactTradingName, registrationName),
       contactTradingAddressRow = makeContactTradingAddressRow(contactTradingAddress),
