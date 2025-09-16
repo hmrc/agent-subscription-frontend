@@ -21,10 +21,10 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsDat
 
 sealed trait CYACheckResult
 
-case class PassWithMaybeAmls(
+case class PassCYAChecks(
   taxpayerName: String,
   address: BusinessAddress,
-  amlsData: Option[AmlsData],
+  amlsData: AmlsData,
   contactEmailAddress: String,
   contactTradingName: Option[String],
   contactTradingAddress: BusinessAddress,
@@ -41,6 +41,8 @@ case object FailedContactTradingAddress extends CYACheckResult
 
 case object FailedContactTelephone extends CYACheckResult
 
+case object FailedAlms extends CYACheckResult
+
 object CYACheckResult {
 
   def check(sjr: SubscriptionJourneyRecord): CYACheckResult =
@@ -53,10 +55,11 @@ object CYACheckResult {
       sjr.contactTelephoneData
     ) match {
 
-      case (Some(reg), _, Some(email), Some(tradingName), Some(tradingAddress), Some(telephone)) =>
-        checkContactDetails(email, tradingName, tradingAddress, telephone)(reg, sjr.amlsData)
+      case (Some(reg), Some(amls), Some(email), Some(tradingName), Some(tradingAddress), Some(telephone)) =>
+        checkContactDetails(email, tradingName, tradingAddress, telephone)(reg, amls)
 
       case (None, _, _, _, _, _) => FailedRegistration
+      case (_, None, _, _, _, _) => FailedAlms
       case (_, _, None, _, _, _) => FailedContactEmail
       case (_, _, _, None, _, _) => FailedContactTradingName
       case (_, _, _, _, None, _) => FailedContactTradingAddress
@@ -68,17 +71,17 @@ object CYACheckResult {
     tradingNameData: ContactTradingNameData,
     tradingAddressData: ContactTradingAddressData,
     telephoneData: ContactTelephoneData
-  )(reg: Registration, maybeAmls: Option[AmlsData]): CYACheckResult =
+  )(reg: Registration, amls: AmlsData): CYACheckResult =
     if (emailData.contactEmail.isEmpty) FailedContactEmail
     else if (!tradingNameData.hasTradingName && tradingNameData.contactTradingName.isEmpty)
       FailedContactTradingName
     else if (tradingAddressData.contactTradingAddress.isEmpty) FailedContactTradingAddress
     else if (telephoneData.telephoneNumber.isEmpty) FailedContactTelephone
     else
-      PassWithMaybeAmls(
+      PassCYAChecks(
         reg.taxpayerName.getOrElse(""),
         reg.address,
-        maybeAmls,
+        amls,
         emailData.contactEmail.getOrElse(""),
         tradingNameData.contactTradingName,
         tradingAddressData.contactTradingAddress.get,

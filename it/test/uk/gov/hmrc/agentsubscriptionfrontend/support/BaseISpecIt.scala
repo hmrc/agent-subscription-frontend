@@ -168,6 +168,23 @@ abstract class BaseISpecIt
       }
     }
 
+  protected def containNoMessages(forbiddenKeys: String*): Matcher[Result] =
+    new Matcher[Result] {
+      override def apply(result: Result): MatchResult = {
+        forbiddenKeys.foreach(checkMessageIsDefined)
+        checkIsHtml200(result)
+
+        val resultBody = bodyOf(result)
+        val present = forbiddenKeys.filter(k => resultBody.contains(htmlEscapedMessage(k)))
+
+        MatchResult(
+          present.isEmpty,
+          s"Content unexpectedly contained message keys: ${present.mkString(", ")}",
+          s"Content contains none of the forbidden message keys."
+        )
+      }
+    }
+
   protected def containInputElement(expectedElementId: String, expectedInputType: String, expectedValue: Option[String] = None): Matcher[Result] =
     new Matcher[Result] {
       override def apply(result: Result): MatchResult = {

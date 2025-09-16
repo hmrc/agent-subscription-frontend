@@ -59,10 +59,10 @@ class CYACheckResultSpecIt extends UnitSpec {
         contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
       )
 
-      CYACheckResult.check(sjr) shouldBe PassWithMaybeAmls(
+      CYACheckResult.check(sjr) shouldBe PassCYAChecks(
         registrationName,
         businessAddress,
-        Some(amlsData),
+        amlsData,
         "email@email.com",
         Some("My Trading Name"),
         businessAddress,
@@ -70,35 +70,35 @@ class CYACheckResultSpecIt extends UnitSpec {
       )
     }
 
-    "PassWithMaybeAmls when SubscriptionJourneyRecord is complete without Amls" in {
-
-      val sjr = SubscriptionJourneyRecord(
-        authProviderId = id,
-        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
-        amlsData = None,
-        contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
-        contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
-        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
-        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
-      )
-
-      CYACheckResult.check(sjr) shouldBe PassWithMaybeAmls(
-        registrationName,
-        businessAddress,
-        None,
-        "email@email.com",
-        Some("My Trading Name"),
-        businessAddress,
-        telephoneNumber
-      )
-    }
+//    "PassWithMaybeAmls when SubscriptionJourneyRecord is complete without Amls" in {
+//
+//      val sjr = SubscriptionJourneyRecord(
+//        authProviderId = id,
+//        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
+//        amlsData = None,
+//        contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
+//        contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
+//        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+//        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
+//      )
+//
+//      CYACheckResult.check(sjr) shouldBe PassCYAChecks(
+//        registrationName,
+//        businessAddress,
+//        None,
+//        "email@email.com",
+//        Some("My Trading Name"),
+//        businessAddress,
+//        telephoneNumber
+//      )
+//    }
 
     "FailedRegistration when SubscriptionJourneyRecord is missing Registration" in {
 
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
         businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = None),
-        amlsData = None,
+        amlsData = Some(amlsData),
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
         contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
@@ -113,7 +113,7 @@ class CYACheckResultSpecIt extends UnitSpec {
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
         businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
-        amlsData = None,
+        amlsData = Some(amlsData),
         contactEmailData = None,
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
         contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
@@ -128,7 +128,7 @@ class CYACheckResultSpecIt extends UnitSpec {
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
         businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
-        amlsData = None,
+        amlsData = Some(amlsData),
         contactEmailData = Some(ContactEmailData(true, None)),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
         contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
@@ -143,7 +143,7 @@ class CYACheckResultSpecIt extends UnitSpec {
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
         businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
-        amlsData = None,
+        amlsData = Some(amlsData),
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = None,
         contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
@@ -158,7 +158,7 @@ class CYACheckResultSpecIt extends UnitSpec {
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
         businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
-        amlsData = None,
+        amlsData = Some(amlsData),
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(false, None)),
         contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
@@ -173,7 +173,7 @@ class CYACheckResultSpecIt extends UnitSpec {
       val sjr = SubscriptionJourneyRecord(
         authProviderId = id,
         businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
-        amlsData = None,
+        amlsData = Some(amlsData),
         contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
         contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
         contactTradingAddressData = None,
@@ -204,7 +204,7 @@ class CYACheckResultSpecIt extends UnitSpec {
     val sjr = SubscriptionJourneyRecord(
       authProviderId = id,
       businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
-      amlsData = None,
+      amlsData = Some(amlsData),
       contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
       contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
       contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
@@ -228,4 +228,20 @@ class CYACheckResultSpecIt extends UnitSpec {
 
     CYACheckResult.check(sjr) shouldBe FailedContactTelephone
   }
+
+  "FailedAlms when SubscriptionJourneyRecord is complete except amls" in {
+
+    val sjr = SubscriptionJourneyRecord(
+      authProviderId = id,
+      businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
+      amlsData = None,
+      contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
+      contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
+      contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
+      contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
+    )
+
+    CYACheckResult.check(sjr) shouldBe FailedAlms
+  }
+
 }
