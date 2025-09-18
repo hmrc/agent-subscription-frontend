@@ -70,29 +70,6 @@ class CYACheckResultSpecIt extends UnitSpec {
       )
     }
 
-//    "PassWithMaybeAmls when SubscriptionJourneyRecord is complete without Amls" in {
-//
-//      val sjr = SubscriptionJourneyRecord(
-//        authProviderId = id,
-//        businessDetails = BusinessDetails(SoleTrader, validUtr, validPostcode, registration = Some(testRegistration)),
-//        amlsData = None,
-//        contactEmailData = Some(ContactEmailData(true, Some("email@email.com"))),
-//        contactTradingNameData = Some(ContactTradingNameData(true, Some("My Trading Name"))),
-//        contactTradingAddressData = Some(ContactTradingAddressData(true, Some(businessAddress))),
-//        contactTelephoneData = Some(ContactTelephoneData(true, Some(telephoneNumber)))
-//      )
-//
-//      CYACheckResult.check(sjr) shouldBe PassCYAChecks(
-//        registrationName,
-//        businessAddress,
-//        None,
-//        "email@email.com",
-//        Some("My Trading Name"),
-//        businessAddress,
-//        telephoneNumber
-//      )
-//    }
-
     "FailedRegistration when SubscriptionJourneyRecord is missing Registration" in {
 
       val sjr = SubscriptionJourneyRecord(
