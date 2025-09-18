@@ -42,6 +42,11 @@ trait TestSetupWithCompleteJourneyRecord {
   givenAgentIsNotManuallyAssured(utr)
 }
 
+trait TestManuallyAssuredASetupWithCompleteJourneyRecord {
+  givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordNoMappings)
+  givenAgentIsManuallyAssured(utr)
+}
+
 trait TestSetupWithCouldBePartiallySubscribedRecord {
   givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), couldBePartiallySubscribedJourneyRecord)
   givenAgentIsNotManuallyAssured(utr)
@@ -173,31 +178,34 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           "checkAnswers.contactDetails.h2"
         )
 
-        result shouldNot containMessages("checkAnswers.userMapping.label", "checkAnswers.mapping.h2")
+        result should containNoMessages("checkAnswers.userMapping.label", "checkAnswers.mapping.h2")
 
         result should containSubstrings(testRegistration.address.addressLine1, testRegistration.address.postalCode.get)
 
         sessionStoreService.fetchGoBackUrl.futureValue shouldBe Some(routes.SubscriptionController.showCheckAnswers().url)
       }
 
-    "show subscription answers page without AMLS section if the agent is on the manually assured list" in new TestSetupWithCompleteJourneyRecord {
-      givenAgentIsManuallyAssured(validUtr)
-      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
+    "show subscription answers page with AMLS section if the agent is on the manually assured list" in
+      new TestManuallyAssuredASetupWithCompleteJourneyRecord {
+        implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
-      val result: Result = await(controller.showCheckAnswers(request))
-      result should containMessages(
-        "checkAnswers.title",
-        "checkAnswers.change.button",
-        "checkAnswers.confirm.button",
-        "checkAnswers.contactEmailAddress.label",
-        "checkAnswers.contactTradingName.label",
-        "checkAnswers.contactTradingAddress.label",
-        "checkAnswers.contactDetails.h2"
-      )
-      result should not(containMessages("checkAnswers.userMapping.label", "checkAnswers.mapping.h2"))
-      result should not(containMessages("checkAnswers.ggId.label"))
-      result should not(containMessages("checkAnswers.amlsDetails.pending.label", "checkAnswers.amls.h2"))
-    }
+        val result: Result = await(controller.showCheckAnswers(request))
+        result should containMessages(
+          "checkAnswers.title",
+          "checkAnswers.change.button",
+          "checkAnswers.confirm.button",
+          "checkAnswers.contactEmailAddress.label",
+          "checkAnswers.contactTradingName.label",
+          "checkAnswers.contactTradingAddress.label",
+          "checkAnswers.amls.h2",
+          "checkAnswers.contactDetails.h2"
+        )
+        result should containNoMessages(
+          "checkAnswers.userMapping.label",
+          "checkAnswers.mapping.h2",
+          "checkAnswers.ggId.label"
+        )
+      }
 
     "show subscription answers page with mapping " in {
       givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings.copy(continueId = Some("continue-id")))
@@ -215,10 +223,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         "checkAnswers.contactTradingName.label",
         "checkAnswers.contactTradingAddress.label",
         "checkAnswers.mapping.h2",
+        "checkAnswers.amls.h2",
         "checkAnswers.contactDetails.h2"
       )
 
-      result should not(containMessages("checkAnswers.amlsDetails.pending.label", "checkAnswers.amls.h2"))
       checkHtmlResultWithBodyText(result, "XXXX-XXXX-1234", "XXXX-XXXX-5678")
     }
 

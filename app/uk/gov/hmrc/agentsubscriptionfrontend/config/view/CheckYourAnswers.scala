@@ -28,7 +28,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessAddress
 case class CheckYourAnswers(
   businessNameRow: AnswerRow,
   businessAddressRow: AnswerRow,
-  maybeAmlsDataRow: Option[AnswerRow],
+  amlsDataRow: AnswerRow,
   contactEmailRow: AnswerRow,
   contactTradingNameRow: AnswerRow,
   contactTradingAddressRow: AnswerRow,
@@ -42,8 +42,7 @@ object CheckYourAnswers {
   def apply(
     registrationName: String,
     address: BusinessAddress,
-    amlsData: Option[AmlsData],
-    isManuallyAssured: Boolean,
+    amlsData: AmlsData,
     userMappings: List[UserMapping],
     continueId: Option[String],
     contactEmailAddress: String,
@@ -55,7 +54,7 @@ object CheckYourAnswers {
     CheckYourAnswers(
       businessNameRow = makeBusinessNameRow(registrationName),
       businessAddressRow = makeBusinessAddressRow(address),
-      maybeAmlsDataRow = makeAmlsDataRow(amlsData),
+      amlsDataRow = makeAmlsDataRow(amlsData),
       contactEmailRow = makeContactEmailRow(contactEmailAddress),
       contactTradingNameRow = makeContactTradingNameRow(contactTradingName, registrationName),
       contactTradingAddressRow = makeContactTradingAddressRow(contactTradingAddress),
@@ -91,15 +90,13 @@ object CheckYourAnswers {
           )
     )
 
-  private def makeAmlsDataRow(amlsData: Option[AmlsData])(implicit messages: Messages) =
-    amlsData.map { data =>
-      AnswerRow(
-        question = amlsQuestion(data),
-        answerLines = amlsAnswer(data),
-        changeLink = Some(routes.AMLSController.changeAmlsDetails()),
-        buttonText = Some(defaultButtonText)
-      )
-    }
+  private def makeAmlsDataRow(amlsData: AmlsData)(implicit messages: Messages) =
+    AnswerRow(
+      question = amlsQuestion(amlsData),
+      answerLines = amlsAnswer(amlsData),
+      changeLink = Some(routes.AMLSController.changeAmlsDetails()),
+      buttonText = Some(defaultButtonText)
+    )
 
   private def defaultButtonText(implicit messages: Messages) = Messages("checkAnswers.change.button")
 

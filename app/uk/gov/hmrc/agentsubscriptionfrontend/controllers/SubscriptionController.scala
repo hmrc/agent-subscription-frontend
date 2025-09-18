@@ -73,30 +73,28 @@ class SubscriptionController @Inject() (
         agentAssuranceConnector.getUtrDetails(sjr.businessDetails.utr).flatMap { agentChecksResponse =>
           sessionStoreService.cacheIsChangingAnswers(changing = false).flatMap { _ =>
             CYACheckResult.check(sjr) match {
-              case PassWithMaybeAmls(taxpayerName, address, maybeAmls, contactEmail, maybeTradingName, tradingAddress, telephone) =>
-                if (maybeAmls.isDefined || agentChecksResponse.isManuallyAssured) {
-                  sessionStoreService
-                    .cacheGoBackUrl(routes.SubscriptionController.showCheckAnswers().url)
-                    .map { _ =>
-                      Ok(
-                        checkAnswersTemplate(
-                          CheckYourAnswers(
-                            registrationName = taxpayerName,
-                            address = address,
-                            amlsData = maybeAmls,
-                            isManuallyAssured = agentChecksResponse.isManuallyAssured,
-                            userMappings = sjr.userMappings,
-                            continueId = sjr.continueId,
-                            contactEmailAddress = contactEmail,
-                            contactTradingName = maybeTradingName,
-                            contactTradingAddress = tradingAddress,
-                            contactTelephone = telephone,
-                            appConfig
-                          )
+              case PassCYAChecks(taxpayerName, address, amls, contactEmail, maybeTradingName, tradingAddress, telephone) =>
+                sessionStoreService
+                  .cacheGoBackUrl(routes.SubscriptionController.showCheckAnswers().url)
+                  .map { _ =>
+                    Ok(
+                      checkAnswersTemplate(
+                        CheckYourAnswers(
+                          registrationName = taxpayerName,
+                          address = address,
+                          amlsData = amls,
+                          userMappings = sjr.userMappings,
+                          continueId = sjr.continueId,
+                          contactEmailAddress = contactEmail,
+                          contactTradingName = maybeTradingName,
+                          contactTradingAddress = tradingAddress,
+                          contactTelephone = telephone,
+                          appConfig
                         )
                       )
-                    }
-                } else Redirect(routes.AMLSController.showAmlsRegisteredPage())
+                    )
+                  }
+              case FailedAlms                  => Redirect(routes.AMLSController.showAmlsRegisteredPage())
               case FailedRegistration          => Redirect(routes.BusinessTypeController.showBusinessTypeForm())
               case FailedContactEmail          => Redirect(routes.ContactDetailsController.showContactEmailCheck())
               case FailedContactTradingName    => Redirect(routes.ContactDetailsController.showTradingNameCheck())
