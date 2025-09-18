@@ -185,7 +185,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         sessionStoreService.fetchGoBackUrl.futureValue shouldBe Some(routes.SubscriptionController.showCheckAnswers().url)
       }
 
-    // TODO WG - why that is not failing
     "show subscription answers page with AMLS section if the agent is on the manually assured list" in
       new TestManuallyAssuredASetupWithCompleteJourneyRecord {
         implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
@@ -201,8 +200,11 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           "checkAnswers.amls.h2",
           "checkAnswers.contactDetails.h2"
         )
-        result should containNoMessages("checkAnswers.userMapping.label", "checkAnswers.mapping.h2")
-        result should containNoMessages("checkAnswers.ggId.label")
+        result should containNoMessages(
+          "checkAnswers.userMapping.label",
+          "checkAnswers.mapping.h2",
+          "checkAnswers.ggId.label"
+        )
       }
 
     "show subscription answers page with mapping " in {

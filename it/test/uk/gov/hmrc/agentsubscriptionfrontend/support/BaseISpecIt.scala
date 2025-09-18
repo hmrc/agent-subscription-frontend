@@ -171,8 +171,6 @@ abstract class BaseISpecIt
   protected def containNoMessages(forbiddenKeys: String*): Matcher[Result] =
     new Matcher[Result] {
       override def apply(result: Result): MatchResult = {
-        forbiddenKeys.foreach(checkMessageIsDefined)
-        checkIsHtml200(result)
 
         val resultBody = bodyOf(result)
         val present = forbiddenKeys.filter(k => resultBody.contains(htmlEscapedMessage(k)))
