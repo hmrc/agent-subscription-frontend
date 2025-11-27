@@ -55,8 +55,10 @@ class TaskListService @Inject() (
 
         val amlsAndContactDetailsTaskList: List[Task] = amlsAndContactDetailsTasks(journeyRecord)
 
+//        TODO: Remove MappingTask
         val mappingTask: Task = MappingTask(
           List(
+//            TODO: Remove MappingSubtask
             MappingSubTask(
               journeyRecord.cleanCredsAuthProviderId,
               journeyRecord.mappingComplete,
@@ -66,6 +68,7 @@ class TaskListService @Inject() (
             )
           )
         )
+//        TODO: Replace mappingTask.isComplete
         val createIDTask: Task = CreateIDTask(List(CreateIDSubTask(journeyRecord.cleanCredsAuthProviderId, mappingTask.isComplete)))
         val checkAnswersTask: Task = CheckAnswersTask(List(CheckAnswersSubTask(createIDTask.isComplete)))
         amlsAndContactDetailsTaskList ::: List(mappingTask, createIDTask, checkAnswersTask)
