@@ -101,6 +101,7 @@ class StartController @Inject() (
     }
   }
 
+//  TODO: Remove this function
   def returnAfterMapping: Action[AnyContent] = Action.async { implicit request =>
     withSubscribingAgent { agent =>
       val sjr = agent.getMandatorySubscriptionRecord
