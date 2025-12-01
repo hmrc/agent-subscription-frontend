@@ -206,32 +206,6 @@ class StartControllerISpecIt extends BaseISpecIt {
     }
   }
 
-  "returnAfterMapping" should {
-
-    "given a valid subscription journey record" when {
-
-      "redirect to the /task-list page and update journey record with mappingComplete as true" in {
-        implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingAgentEnrolledForNonMTD)
-        givenSubscriptionJourneyRecordExists(id, record)
-        givenSubscriptionRecordCreated(record.authProviderId, record.copy(continueId = None, mappingComplete = true))
-
-        val result = await(controller.returnAfterMapping()(request))
-
-        status(result) shouldBe 303
-        redirectLocation(result).head should include(routes.TaskListController.showTaskList().url)
-      }
-
-      "throw a runtime exception when there is no record" in {
-        implicit val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] =
-          authenticatedAs(subscribingAgentEnrolledForNonMTD)
-        givenNoSubscriptionJourneyRecordExists(id)
-        intercept[RuntimeException] {
-          await(controller.returnAfterMapping()(authenticatedRequest))
-        }.getMessage shouldBe "Expected Journey Record missing"
-      }
-    }
-  }
-
   "GET /cannot-create-account" should {
     "display the cannot create account page" in {
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()

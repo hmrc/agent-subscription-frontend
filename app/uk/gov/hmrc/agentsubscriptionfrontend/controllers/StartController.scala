@@ -101,18 +101,6 @@ class StartController @Inject() (
     }
   }
 
-//  TODO: Remove this function
-  def returnAfterMapping: Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
-      val sjr = agent.getMandatorySubscriptionRecord
-      redirectUrlActions.withMaybeRedirectUrlCached {
-        subscriptionJourneyService
-          .saveJourneyRecord(sjr.copy(mappingComplete = true))
-          .map(_ => Redirect(routes.TaskListController.showTaskList()))
-      }
-    }
-  }
-
   def showCannotCreateAccount: Action[AnyContent] = Action { implicit request =>
     Ok(cannotCreateAccountTemplate())
   }
