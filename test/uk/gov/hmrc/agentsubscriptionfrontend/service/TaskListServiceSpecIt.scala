@@ -204,44 +204,45 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
 
     "CreateIDTask" should {
       "when the previous task is complete show the create id link" in {
-        givenAmlsDataNotPresent
+        givenAmlsDataIsPresent
         val record = minimalUncleanCredsRecord.copy(
-          amlsData = Some(AmlsData(amlsRegistered = true, None, Some(pendingAmlsDetails))),
+          amlsData = Some(AmlsData(amlsRegistered = true, None, Some(registeredAmlsDetails))),
           contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("email@email.com"))),
           contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(tradingName))),
-          contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress)))
+          contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress))),
+          contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = true, Some("01273111111")))
         )
         val tasks = await(taskListService.createTasks(record))
 
         tasks.length shouldBe 4
         tasks(2).taskKey shouldBe "createIDTask"
         tasks(2).subTasks.length shouldBe 1
-        //  TODO: FIX THESE TESTS
         tasks(2).subTasks.head.showLink shouldBe true
       }
 
       "when an agent has an auth provider id and the previous task is complete show the create id task as complete" in {
-        givenAmlsDataNotPresent
+        givenAmlsDataIsPresent
         val record = minimalUncleanCredsRecord
           .copy(
+            amlsData = Some(AmlsData(amlsRegistered = true, None, Some(registeredAmlsDetails))),
             cleanCredsAuthProviderId = Some(AuthProviderId("cred-123")),
             contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("email@email.com"))),
             contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(tradingName))),
-            contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress)))
+            contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress))),
+            contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = true, Some("01273111111")))
           )
         val tasks = await(taskListService.createTasks(record))
 
         tasks.length shouldBe 4
         tasks(2).taskKey shouldBe "createIDTask"
         tasks(2).subTasks.length shouldBe 1
-        //  TODO: FIX THESE TESTS
         tasks(2).subTasks.head.isComplete shouldBe true
       }
     }
 
     "CheckAnswersTask" should {
       "when an agent has completed the previous task show the check answers link" in {
-        givenAmlsDataNotPresent
+        givenAmlsDataIsPresent
         val record = minimalUncleanCredsRecord
           .copy(
             cleanCredsAuthProviderId = Some(AuthProviderId("cred-123")),
@@ -255,7 +256,6 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
         tasks.length shouldBe 4
         tasks(3).taskKey shouldBe "checkAnswersTask"
         tasks(3).subTasks.length shouldBe 1
-        //  TODO: FIX THESE TESTS
         tasks(3).subTasks.head.showLink shouldBe true
       }
     }
