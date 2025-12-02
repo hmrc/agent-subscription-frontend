@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 

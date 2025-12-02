@@ -47,14 +47,6 @@
             @checkAnswersRow("telephoneNumber", checkYourAnswers.contactTelephoneNumberRow)
         </dl>
 
-
-        @for(mappingClientNumberRow <- checkYourAnswers.maybeMappingClientNumberRow) {
-        <h2 class="govuk-heading-m govuk-!-margin-top-6">@msgs("checkAnswers.mapping.h2")</h2>
-            <dl class="govuk-summary-list">
-            @checkAnswersRow("mappings", mappingClientNumberRow)
-            </dl>
-        }
-
         @for(mappingGGIdRow <- checkYourAnswers.maybeMappingGGIdsRow) {
             <dl class="govuk-summary-list">
                 @checkAnswersRow("ggIds", mappingGGIdRow)

@@ -59,23 +59,7 @@ object CheckYourAnswers {
       contactTradingNameRow = makeContactTradingNameRow(contactTradingName, registrationName),
       contactTradingAddressRow = makeContactTradingAddressRow(contactTradingAddress),
       contactTelephoneNumberRow = makeContactTelephoneNumberRow(contactTelephone),
-      maybeMappingClientNumberRow =
-        if (userMappings.isEmpty)
-          None
-        else
-          Some(
-            AnswerRow(
-              question = Messages("checkAnswers.userMapping.label"),
-              answerLines = List(userMappings.map(_.count).sum.toString),
-              changeLink = Some(
-                Call(
-                  "GET",
-                  url = appConfig.agentMappingFrontendStartUrl(continueId.getOrElse(throw new RuntimeException("no continueId found in record")))
-                )
-              ),
-              buttonText = Some(Messages("checkAnswers.addMore.button"))
-            )
-          ),
+      maybeMappingClientNumberRow = None,
       maybeMappingGGIdsRow =
         if (userMappings.isEmpty)
           None
