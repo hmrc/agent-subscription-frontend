@@ -33,9 +33,7 @@ trait AppConfig {
   val agentAssuranceRun: Boolean
   val surveyRedirectUrl: String
   val chainedSessionDetailsTtl: Int
-  val agentMappingBaseUrl: String
   val addressLookupFrontendBaseUrl: String
-  def agentMappingFrontendStartUrl(continueId: String): String
   val ggRegistrationFrontendExternalUrl: String
   val ssoBaseUrl: String
   val returnAfterGGCredsCreatedUrl: String
@@ -79,9 +77,6 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
   override val selfExternalUrl: String = getConf("microservice.services.agent-subscription-frontend.external-url")
 
   override val chainedSessionDetailsTtl: Int = servicesConfig.getInt("mongodb.chainedsessiondetails.ttl")
-  override val agentMappingBaseUrl: String = servicesConfig.baseUrl("agent-mapping")
-  override def agentMappingFrontendStartUrl(continueId: String): String =
-    s"${getConf("microservice.services.agent-mapping-frontend.external-url")}${getConf("microservice.services.agent-mapping-frontend.start.path")}?continueId=$continueId"
 
   override val addressLookupFrontendBaseUrl: String = servicesConfig.baseUrl("address-lookup-frontend")
 
