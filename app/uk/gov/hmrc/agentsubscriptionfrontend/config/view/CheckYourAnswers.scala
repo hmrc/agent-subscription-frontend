@@ -20,7 +20,6 @@ import java.time.format.DateTimeFormatter
 
 import play.api.i18n.Messages
 import play.api.mvc.Call
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, UserMapping}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessAddress
@@ -44,12 +43,10 @@ object CheckYourAnswers {
     address: BusinessAddress,
     amlsData: AmlsData,
     userMappings: List[UserMapping],
-    continueId: Option[String],
     contactEmailAddress: String,
     contactTradingName: Option[String],
     contactTradingAddress: BusinessAddress,
-    contactTelephone: String,
-    appConfig: AppConfig
+    contactTelephone: String
   )(implicit messages: Messages): CheckYourAnswers =
     CheckYourAnswers(
       businessNameRow = makeBusinessNameRow(registrationName),
