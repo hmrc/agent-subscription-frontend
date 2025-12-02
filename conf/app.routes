@@ -61,13 +61,13 @@ POST        /money-laundering-compliance                   uk.gov.hmrc.agentsubs
 GET         /money-laundering-application-details          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsApplicationEnterNumberPage()
 POST        /money-laundering-application-details          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsApplicationEnterNumberPage()
 
-GET         /money-laundering-application-approved        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsApplicationEnterDatePage()
-POST        /money-laundering-application-approved        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsApplicationDatePage()
+GET         /money-laundering-application-approved         uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsApplicationEnterDatePage()
+POST        /money-laundering-application-approved         uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.submitAmlsApplicationDatePage()
 
 
-GET         /money-laundering-number-not-found           uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsNumberNotFound()
+GET         /money-laundering-number-not-found             uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsNumberNotFound()
 
-GET        /money-laundering-renewal-date-not-matched          uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsDateNotMatched()
+GET         /money-laundering-renewal-date-not-matched     uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsDateNotMatched()
 
 GET         /money-laundering-compliance-incomplete        uk.gov.hmrc.agentsubscriptionfrontend.controllers.AMLSController.showAmlsNotAppliedPage()
 
@@ -105,32 +105,32 @@ POST        /change-business-name                          uk.gov.hmrc.agentsubs
 
 GET         /contact-email-check                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showContactEmailCheck()
 POST        /contact-email-check                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitContactEmailCheck()
-GET         /change-contact-email-address                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeContactEmailAddress()
+GET         /change-contact-email-address                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeContactEmailAddress()
 
-GET         /contact-email-address                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showContactEmailAddress()
-POST        /contact-email-address                          uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitContactEmailAddress()
+GET         /contact-email-address                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showContactEmailAddress()
+POST        /contact-email-address                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitContactEmailAddress()
 
-GET         /contact-phone-check                            uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.contactPhoneCheck
-GET         /check-telephone-number                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showCheckTelephoneNumber
-POST        /check-telephone-number                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitCheckTelephoneNumber
-GET         /telephone-number                               uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTelephoneNumber
-POST        /telephone-number                               uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTelephoneNumber
-GET         /change-contact-telephone-number                uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeTelephoneNumber
+GET         /contact-phone-check                           uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.contactPhoneCheck
+GET         /check-telephone-number                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showCheckTelephoneNumber
+POST        /check-telephone-number                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitCheckTelephoneNumber
+GET         /telephone-number                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTelephoneNumber
+POST        /telephone-number                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTelephoneNumber
+GET         /change-contact-telephone-number               uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeTelephoneNumber
 
 
-GET         /trading-name                                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTradingNameCheck()
-POST        /trading-name                                   uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTradingNameCheck()
-GET         /change-main-trading-name                       uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeTradingName()
+GET         /trading-name                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTradingNameCheck()
+POST        /trading-name                                  uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTradingNameCheck()
+GET         /change-main-trading-name                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeTradingName()
 
-GET         /main-trading-name                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTradingName()
-POST        /main-trading-name                              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTradingName()
+GET         /main-trading-name                             uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showTradingName()
+POST        /main-trading-name                             uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitTradingName()
 
-GET         /check-main-trading-address                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showCheckMainTradingAddress()
-POST        /check-main-trading-address                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitCheckMainTradingAddress()
-GET         /change-check-main-trading-address              uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeCheckMainTradingAddress()
+GET         /check-main-trading-address                    uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showCheckMainTradingAddress()
+POST        /check-main-trading-address                    uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.submitCheckMainTradingAddress()
+GET         /change-check-main-trading-address             uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.changeCheckMainTradingAddress()
 
-GET         /find-main-trading-address                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showMainTradingAddress()
-GET         /lookup-trading-address                         uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.returnFromAddressLookup(id: String ?= "")
+GET         /find-main-trading-address                     uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.showMainTradingAddress()
+GET         /lookup-trading-address                        uk.gov.hmrc.agentsubscriptionfrontend.controllers.ContactDetailsController.returnFromAddressLookup(id: String ?= "")
 
 GET         /business-email                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.showBusinessEmailForm()
 POST        /business-email                                uk.gov.hmrc.agentsubscriptionfrontend.controllers.BusinessIdentificationController.submitBusinessEmailForm()

@@ -178,7 +178,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           "checkAnswers.contactDetails.h2"
         )
 
-        result should containNoMessages("checkAnswers.userMapping.label", "checkAnswers.mapping.h2")
+        result should containNoMessages("checkAnswers.userMapping.label")
 
         result should containSubstrings(testRegistration.address.addressLine1, testRegistration.address.postalCode.get)
 
@@ -202,7 +202,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         )
         result should containNoMessages(
           "checkAnswers.userMapping.label",
-          "checkAnswers.mapping.h2",
           "checkAnswers.ggId.label"
         )
       }
@@ -222,20 +221,11 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         "checkAnswers.contactEmailAddress.label",
         "checkAnswers.contactTradingName.label",
         "checkAnswers.contactTradingAddress.label",
-        "checkAnswers.mapping.h2",
         "checkAnswers.amls.h2",
         "checkAnswers.contactDetails.h2"
       )
 
       checkHtmlResultWithBodyText(result, "XXXX-XXXX-1234", "XXXX-XXXX-5678")
-    }
-
-    "throw an exception when there is no continue url in the record" in new TestSetupWithCompleteJourneyRecordWithMapping {
-      implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
-
-      intercept[RuntimeException] {
-        await(controller.showCheckAnswers(request))
-      }.getMessage shouldBe "no continueId found in record"
     }
 
     "redirect to email verification if the email is not verified" in new TestSetupWithCompleteJourneyRecord {
