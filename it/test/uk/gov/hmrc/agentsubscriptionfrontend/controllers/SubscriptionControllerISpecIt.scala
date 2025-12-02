@@ -178,8 +178,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           "checkAnswers.contactDetails.h2"
         )
 
-        result should containNoMessages("checkAnswers.userMapping.label")
-
         result should containSubstrings(testRegistration.address.addressLine1, testRegistration.address.postalCode.get)
 
         sessionStoreService.fetchGoBackUrl.futureValue shouldBe Some(routes.SubscriptionController.showCheckAnswers().url)
@@ -200,10 +198,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           "checkAnswers.amls.h2",
           "checkAnswers.contactDetails.h2"
         )
-        result should containNoMessages(
-          "checkAnswers.userMapping.label",
-          "checkAnswers.ggId.label"
-        )
+        result should containNoMessages("checkAnswers.ggId.label")
       }
 
     "show subscription answers page with mapping " in {
@@ -216,7 +211,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         "checkAnswers.title",
         "checkAnswers.change.button",
         "checkAnswers.confirm.button",
-        "checkAnswers.userMapping.label",
         "checkAnswers.ggId.label",
         "checkAnswers.contactEmailAddress.label",
         "checkAnswers.contactTradingName.label",
