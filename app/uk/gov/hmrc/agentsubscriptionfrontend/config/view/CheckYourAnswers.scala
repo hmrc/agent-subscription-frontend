@@ -20,7 +20,6 @@ import java.time.format.DateTimeFormatter
 
 import play.api.i18n.Messages
 import play.api.mvc.Call
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, UserMapping}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessAddress
@@ -44,12 +43,10 @@ object CheckYourAnswers {
     address: BusinessAddress,
     amlsData: AmlsData,
     userMappings: List[UserMapping],
-    continueId: Option[String],
     contactEmailAddress: String,
     contactTradingName: Option[String],
     contactTradingAddress: BusinessAddress,
-    contactTelephone: String,
-    appConfig: AppConfig
+    contactTelephone: String
   )(implicit messages: Messages): CheckYourAnswers =
     CheckYourAnswers(
       businessNameRow = makeBusinessNameRow(registrationName),
@@ -59,23 +56,7 @@ object CheckYourAnswers {
       contactTradingNameRow = makeContactTradingNameRow(contactTradingName, registrationName),
       contactTradingAddressRow = makeContactTradingAddressRow(contactTradingAddress),
       contactTelephoneNumberRow = makeContactTelephoneNumberRow(contactTelephone),
-      maybeMappingClientNumberRow =
-        if (userMappings.isEmpty)
-          None
-        else
-          Some(
-            AnswerRow(
-              question = Messages("checkAnswers.userMapping.label"),
-              answerLines = List(userMappings.map(_.count).sum.toString),
-              changeLink = Some(
-                Call(
-                  "GET",
-                  url = appConfig.agentMappingFrontendStartUrl(continueId.getOrElse(throw new RuntimeException("no continueId found in record")))
-                )
-              ),
-              buttonText = Some(Messages("checkAnswers.addMore.button"))
-            )
-          ),
+      maybeMappingClientNumberRow = None,
       maybeMappingGGIdsRow =
         if (userMappings.isEmpty)
           None

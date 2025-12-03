@@ -55,20 +55,11 @@ class TaskListService @Inject() (
 
         val amlsAndContactDetailsTaskList: List[Task] = amlsAndContactDetailsTasks(journeyRecord)
 
-        val mappingTask: Task = MappingTask(
-          List(
-            MappingSubTask(
-              journeyRecord.cleanCredsAuthProviderId,
-              journeyRecord.mappingComplete,
-              journeyRecord.continueId.getOrElse(" "),
-              amlsAndContactDetailsTaskList.forall(_.isComplete),
-              appConfig
-            )
-          )
+        val createIDTask: Task = CreateIDTask(
+          List(CreateIDSubTask(journeyRecord.cleanCredsAuthProviderId, amlsAndContactDetailsTaskList.forall(_.isComplete)))
         )
-        val createIDTask: Task = CreateIDTask(List(CreateIDSubTask(journeyRecord.cleanCredsAuthProviderId, mappingTask.isComplete)))
         val checkAnswersTask: Task = CheckAnswersTask(List(CheckAnswersSubTask(createIDTask.isComplete)))
-        amlsAndContactDetailsTaskList ::: List(mappingTask, createIDTask, checkAnswersTask)
+        amlsAndContactDetailsTaskList ::: List(createIDTask, checkAnswersTask)
       }
     }
 

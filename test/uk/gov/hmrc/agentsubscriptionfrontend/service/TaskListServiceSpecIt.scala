@@ -97,7 +97,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
         givenAmlsDataNotPresent
         val tasks = await(taskListService.createTasks(minimalUncleanCredsRecord))
 
-        tasks.length shouldBe 5
+        tasks.length shouldBe 4
         tasks.head.taskKey shouldBe "amlsTask"
         tasks.head.subTasks.head.showLink shouldBe true
       }
@@ -109,7 +109,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
         )
         val tasks = await(taskListService.createTasks(amlsRecord))
 
-        tasks.length shouldBe 5
+        tasks.length shouldBe 4
         tasks.head.taskKey shouldBe "amlsTask"
         tasks.head.isComplete shouldBe false
       }
@@ -119,7 +119,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
         val amlsRecord = minimalUncleanCredsRecord.copy(amlsData = Some(AmlsData(amlsRegistered = true, None, Some(registeredAmlsDetails))))
         val tasks = await(taskListService.createTasks(amlsRecord))
 
-        tasks.length shouldBe 5
+        tasks.length shouldBe 4
         tasks.head.taskKey shouldBe "amlsTask"
         tasks.head.isComplete shouldBe true
       }
@@ -129,7 +129,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
         val amlsRecord = minimalUncleanCredsRecord.copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true), Some(pendingAmlsDetails))))
         val tasks = await(taskListService.createTasks(amlsRecord))
 
-        tasks.length shouldBe 5
+        tasks.length shouldBe 4
         tasks.head.taskKey shouldBe "amlsTask"
         tasks.head.isComplete shouldBe true
       }
@@ -139,7 +139,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
         when(stubAgentSubscriptionConnector.createOrUpdateJourney(any[SubscriptionJourneyRecord])(any[RequestHeader]))
           .thenReturn(Future.successful(1))
         val tasks = await(taskListService.createTasks(minimalUncleanCredsRecord))
-        tasks.length shouldBe 5
+        tasks.length shouldBe 4
         tasks.head.isComplete shouldBe true
       }
 
@@ -149,7 +149,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
           minimalUncleanCredsRecord.copy(amlsData = Some(AmlsData(amlsRegistered = true, None, None)))
         val tasks = await(taskListService.createTasks(partialAmlsRecord))
 
-        tasks.length shouldBe 5
+        tasks.length shouldBe 4
         tasks.head.taskKey shouldBe "amlsTask"
         tasks.head.isComplete shouldBe false
       }
@@ -161,7 +161,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
         val record = minimalUncleanCredsRecord.copy(amlsData = Some(AmlsData(amlsRegistered = false, Some(true), Some(pendingAmlsDetails))))
         val tasks = await(taskListService.createTasks(record))
 
-        tasks.length shouldBe 5
+        tasks.length shouldBe 4
         tasks(1).taskKey shouldBe "contactDetailsTask"
         tasks(1).subTasks.length shouldBe 4
         tasks(1).subTasks.head.showLink shouldBe true
@@ -176,7 +176,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
         )
         val tasks = await(taskListService.createTasks(record))
 
-        tasks.length shouldBe 5
+        tasks.length shouldBe 4
         tasks(1).taskKey shouldBe "contactDetailsTask"
         tasks(1).subTasks.length shouldBe 4
         tasks(1).subTasks.head.showLink shouldBe true
@@ -193,7 +193,7 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
         )
         val tasks = await(taskListService.createTasks(record))
 
-        tasks.length shouldBe 5
+        tasks.length shouldBe 4
         tasks(1).taskKey shouldBe "contactDetailsTask"
         tasks(1).subTasks.length shouldBe 4
         tasks(1).subTasks.head.showLink shouldBe true
@@ -202,84 +202,30 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
       }
     }
 
-    "MappingTask" should {
-      "when agent has no clean creds auth provider id and the previous task is complete show the mapping task link" in {
-        givenAmlsDataNotPresent
+    "CreateIDTask" should {
+      "when the previous task is complete show the create id link" in {
+        givenAmlsDataIsPresent
         val record = minimalUncleanCredsRecord.copy(
-          amlsData = Some(AmlsData(amlsRegistered = false, Some(true), Some(pendingAmlsDetails))),
+          amlsData = Some(AmlsData(amlsRegistered = true, None, Some(registeredAmlsDetails))),
           contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("email@email.com"))),
-          contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress))),
           contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(tradingName))),
+          contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress))),
           contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = true, Some("01273111111")))
         )
         val tasks = await(taskListService.createTasks(record))
 
-        tasks.length shouldBe 5
-        tasks(2).taskKey shouldBe "mappingTask"
+        tasks.length shouldBe 4
+        tasks(2).taskKey shouldBe "createIDTask"
         tasks(2).subTasks.length shouldBe 1
         tasks(2).subTasks.head.showLink shouldBe true
       }
 
-      "when an agent has completed mapping and the previous task is complete show the mapping task as complete" in {
-        givenAmlsDataNotPresent
-        val record = minimalUncleanCredsRecord.copy(
-          mappingComplete = true,
-          contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("email@email.com"))),
-          contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(tradingName))),
-          contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress)))
-        )
-        val tasks = await(taskListService.createTasks(record))
-
-        tasks.length shouldBe 5
-        tasks(2).taskKey shouldBe "mappingTask"
-        tasks(2).isComplete shouldBe true
-      }
-    }
-
-    "CreateIDTask" should {
-      "when the previous task is complete show the create id link" in {
-        givenAmlsDataNotPresent
-        val record = minimalUncleanCredsRecord.copy(
-          mappingComplete = true,
-          amlsData = Some(AmlsData(amlsRegistered = true, None, Some(pendingAmlsDetails))),
-          contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("email@email.com"))),
-          contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(tradingName))),
-          contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress)))
-        )
-        val tasks = await(taskListService.createTasks(record))
-
-        tasks.length shouldBe 5
-        tasks(3).taskKey shouldBe "createIDTask"
-        tasks(3).subTasks.length shouldBe 1
-        tasks(3).subTasks.head.showLink shouldBe true
-      }
-
       "when an agent has an auth provider id and the previous task is complete show the create id task as complete" in {
-        givenAmlsDataNotPresent
+        givenAmlsDataIsPresent
         val record = minimalUncleanCredsRecord
           .copy(
+            amlsData = Some(AmlsData(amlsRegistered = true, None, Some(registeredAmlsDetails))),
             cleanCredsAuthProviderId = Some(AuthProviderId("cred-123")),
-            mappingComplete = true,
-            contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("email@email.com"))),
-            contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(tradingName))),
-            contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress)))
-          )
-        val tasks = await(taskListService.createTasks(record))
-
-        tasks.length shouldBe 5
-        tasks(3).taskKey shouldBe "createIDTask"
-        tasks(3).subTasks.length shouldBe 1
-        tasks(3).subTasks.head.isComplete shouldBe true
-      }
-    }
-
-    "CheckAnswersTask" should {
-      "when an agent has completed the previous task show the check answers link" in {
-        givenAmlsDataNotPresent
-        val record = minimalUncleanCredsRecord
-          .copy(
-            cleanCredsAuthProviderId = Some(AuthProviderId("cred-123")),
-            mappingComplete = true,
             contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("email@email.com"))),
             contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(tradingName))),
             contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress))),
@@ -287,10 +233,30 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
           )
         val tasks = await(taskListService.createTasks(record))
 
-        tasks.length shouldBe 5
-        tasks(4).taskKey shouldBe "checkAnswersTask"
-        tasks(4).subTasks.length shouldBe 1
-        tasks(4).subTasks.head.showLink shouldBe true
+        tasks.length shouldBe 4
+        tasks(2).taskKey shouldBe "createIDTask"
+        tasks(2).subTasks.length shouldBe 1
+        tasks(2).subTasks.head.isComplete shouldBe true
+      }
+    }
+
+    "CheckAnswersTask" should {
+      "when an agent has completed the previous task show the check answers link" in {
+        givenAmlsDataIsPresent
+        val record = minimalUncleanCredsRecord
+          .copy(
+            cleanCredsAuthProviderId = Some(AuthProviderId("cred-123")),
+            contactEmailData = Some(ContactEmailData(useBusinessEmail = true, Some("email@email.com"))),
+            contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, Some(tradingName))),
+            contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(tradingAddress))),
+            contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = true, Some("01273111111")))
+          )
+        val tasks = await(taskListService.createTasks(record))
+
+        tasks.length shouldBe 4
+        tasks(3).taskKey shouldBe "checkAnswersTask"
+        tasks(3).subTasks.length shouldBe 1
+        tasks(3).subTasks.head.showLink shouldBe true
       }
     }
   }

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.models
 
-import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
 
@@ -32,10 +31,6 @@ final case class AmlsTask(subTasks: List[SubTask]) extends Task {
 
 final case class ContactDetailsTask(subTasks: List[SubTask]) extends Task {
   override val taskKey: String = "contactDetailsTask"
-}
-
-final case class MappingTask(subTasks: List[SubTask]) extends Task {
-  override val taskKey: String = "mappingTask"
 }
 
 final case class CreateIDTask(subTasks: List[SubTask]) extends Task {
@@ -93,18 +88,6 @@ final case class ContactTelephoneNumberSubTask(contactTelephoneData: Option[Cont
   override val taskKey: String = "contactDetailsTelephoneNumberSubTask"
   override val isComplete: Boolean = contactTelephoneData.flatMap(_.telephoneNumber).isDefined
   override val link: String = routes.ContactDetailsController.contactPhoneCheck.url
-}
-
-final case class MappingSubTask(
-  cleanCredsAuthProviderId: Option[AuthProviderId],
-  mappingComplete: Boolean,
-  continueId: String,
-  showLink: Boolean,
-  appConfig: AppConfig
-) extends SubTask {
-  override val taskKey: String = "mappingSubTask"
-  override val isComplete: Boolean = mappingComplete
-  override val link: String = appConfig.agentMappingFrontendStartUrl(continueId)
 }
 
 final case class CreateIDSubTask(cleanCredsAuthProviderId: Option[AuthProviderId], showLink: Boolean) extends SubTask {

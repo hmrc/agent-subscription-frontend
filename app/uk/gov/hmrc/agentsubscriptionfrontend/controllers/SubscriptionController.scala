@@ -84,12 +84,10 @@ class SubscriptionController @Inject() (
                           address = address,
                           amlsData = amls,
                           userMappings = sjr.userMappings,
-                          continueId = sjr.continueId,
                           contactEmailAddress = contactEmail,
                           contactTradingName = maybeTradingName,
                           contactTradingAddress = tradingAddress,
-                          contactTelephone = telephone,
-                          appConfig
+                          contactTelephone = telephone
                         )
                       )
                     )
