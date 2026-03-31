@@ -383,7 +383,6 @@ nonAgent.p2=Os nad oes un gennych, <a class="govuk-link" href="{0}">crëwch Ddyn
 subscriptionComplete.title=Rydych wedi creu cyfrif gwasanaethau asiant
 subscriptionComplete.h1=Rydych wedi creu cyfrif gwasanaethau asiant
 subscriptionComplete.accountName=Cyfeirnod yr asiant:
-subscriptionComplete.copiedAcross=Rydych wedi ychwanegu <strong class="govuk-!-font-weight-bold">{0}</strong> o awdurdodiadau ar gyfer Hunanasesiad at eich cyfrif gwasanaethau asiant newydd.
 subscriptionComplete.p1=Gwnewch nodyn o’ch cyfeirnod yr asiant – byddwn yn gofyn amdano os byddwch yn cysylltu â ni ynghylch eich cyfrif gwasanaethau asiant.
 subscriptionComplete.p2=Rydym wedi anfon e-bost i {0} i gadarnhau’r manylion hyn.
 subscriptionComplete.button.continueToASAccount=Ewch i’ch cyfrif gwasanaethau asiant
@@ -495,17 +494,12 @@ checkAnswers.confirm.button=Cadarnhau manylion a chreu cyfrif
 checkAnswers.change.button=Newid
 checkAnswers.amlsDetails.label=Manylion cydymffurfiad gwyngalchu arian a’r dyddiad dod i ben
 checkAnswers.amlsDetails.pending.label=Y dyddiad y gwnaethoch gais i CThEM i gofrestru ar gyfer goruchwyliaeth gwyngalchu arian
-checkAnswers.userMapping.label=Nifer yr awdurdodiadau gan gleientiaid sydd wedi’u hychwanegu
-checkAnswers.addMore.button=Ychwanegu rhagor
-checkAnswers.ggId.label=Dynodyddion Defnyddiwr (ID) ar gyfer Porth y Llywodraeth a nodwyd
-checkAnswers.ggId.xs=XXXX-XXXX-{0}
 checkAnswers.contactEmailAddress.label=Cyfeiriad e-bost
 checkAnswers.contactTradingName.label=Enw
 checkAnswers.contactTradingAddress.label=Cyfeiriad
 checkAnswers.amls.h2=Manylion cydymffurfiad gwyngalchu arian
 checkAnswers.businessDetails.h2=Manylion y busnes
 checkAnswers.contactDetails.h2=Manylion y cyfrif gwasanaethau asiant
-checkAnswers.mapping.h2=Awdurdodiadau presennol gan gleientiaid
 checkAnswers.tradingName.none=Dim
 
 businessName.title=Beth yw enw eich busnes?

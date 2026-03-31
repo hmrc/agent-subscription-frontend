@@ -28,7 +28,7 @@ import uk.gov.hmrc.agentsubscriptionfrontend.models.{AuthProviderId, ContactEmai
 import uk.gov.hmrc.agentsubscriptionfrontend.service.SubscriptionJourneyService
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionJourneyStub.givenSubscriptionJourneyRecordExists
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AuthStub._
-import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{completeJourneyRecordNoMappings, completeJourneyRecordWithMappingsNoVerifiedEmails, minimalSubscriptionJourneyRecord}
+import uk.gov.hmrc.agentsubscriptionfrontend.support.TestData.{completeJourneyRecord, completeJourneyRecordNoVerifiedEmails, minimalSubscriptionJourneyRecord}
 import uk.gov.hmrc.agentsubscriptionfrontend.support.{BaseISpecIt, TestSetupNoJourneyRecord}
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, EnrolmentIdentifier}
@@ -111,7 +111,7 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
     val providerId = AuthProviderId("12345-credId")
 
     " check if the email needs verification and let it pass if it does not" in new TestSetupNoJourneyRecord {
-      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordNoMappings)
+      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecord)
       authenticatedAgentEmailCheck("fooArn", "12345-credId")
 
       val result = TestController.withSubscribedAgentCheckEmail
@@ -121,7 +121,7 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
     }
     " check if the email needs verification and and redirect if it does " in new TestSetupNoJourneyRecord {
 
-      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordWithMappingsNoVerifiedEmails)
+      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordNoVerifiedEmails)
       authenticatedAgentEmailCheck("fooArn", "12345-credId")
 
       val result = TestController.withSubscribedAgentCheckEmail
@@ -131,7 +131,7 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
     }
     " check if the email is the same as one supplied in auth and dont redirect if it does " in new TestSetupNoJourneyRecord {
 
-      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordWithMappingsNoVerifiedEmails)
+      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordNoVerifiedEmails)
       authenticatedAgentEmailCheck("fooArn", "12345-credId", Some("email@email.com"))
 
       val result = TestController.withSubscribedAgentCheckEmail
@@ -143,7 +143,7 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
 
       givenSubscriptionJourneyRecordExists(
         providerId,
-        completeJourneyRecordWithMappingsNoVerifiedEmails.copy(contactEmailData = Some(ContactEmailData(false, Some("eMaiL@email.Com"))))
+        completeJourneyRecordNoVerifiedEmails.copy(contactEmailData = Some(ContactEmailData(false, Some("eMaiL@email.Com"))))
       )
       authenticatedAgentEmailCheck("fooArn", "12345-credId", Some("EmAil@email.com"))
 
@@ -153,7 +153,7 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
       bodyOf(result) shouldBe "subscribing agent with email verification"
     }
     " check if the email is the same as one supplied in auth and  redirect if it doesnt" in new TestSetupNoJourneyRecord {
-      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordWithMappingsNoVerifiedEmails)
+      givenSubscriptionJourneyRecordExists(providerId, completeJourneyRecordNoVerifiedEmails)
       authenticatedAgentEmailCheck("fooArn", "12345-credId", Some("emailNotmatching@email.com"))
 
       val result = TestController.withSubscribedAgentCheckEmail

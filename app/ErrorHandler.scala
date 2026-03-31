@@ -21,7 +21,6 @@ import play.api.mvc.Results._
 import play.api.mvc.{RequestHeader, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-import uk.gov.hmrc.agentsubscriptionfrontend.util.AuthRedirects
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html.{ErrorTemplate, ErrorTemplate5xx}
 import uk.gov.hmrc.http.{JsValidationException, NotFoundException}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -41,7 +40,7 @@ class ErrorHandler @Inject() (
   errorTemplate5xx: ErrorTemplate5xx,
   @Named("appName") val appName: String
 )(implicit val config: Configuration, val ec: ExecutionContext, appConfig: AppConfig)
-    extends FrontendErrorHandler with AuthRedirects with ErrorAuditing with Logging {
+    extends FrontendErrorHandler with ErrorAuditing with Logging {
 
   def theLogger: Logger = this.logger // for testing
 

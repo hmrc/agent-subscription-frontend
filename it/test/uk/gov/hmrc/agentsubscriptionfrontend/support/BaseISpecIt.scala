@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentsubscriptionfrontend.support
 
 import com.google.inject.AbstractModule
+import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -100,7 +101,7 @@ abstract class BaseISpecIt
     sessionStoreService.clear()
   }
 
-  protected implicit val materializer = app.materializer
+  protected implicit val materializer: Materializer = app.materializer
 
   protected def authenticatedAs(user: SampleUser, method: String = GET): FakeRequest[AnyContentAsEmpty.type] = {
     val sessionKeys = userIsAuthenticated(user)

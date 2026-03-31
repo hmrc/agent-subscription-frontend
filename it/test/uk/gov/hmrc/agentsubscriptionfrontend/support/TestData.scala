@@ -19,7 +19,6 @@ import org.apache.commons.lang3.RandomStringUtils
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
 import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney._
-import uk.gov.hmrc.domain.AgentCode
 
 import java.time.LocalDate
 
@@ -96,7 +95,6 @@ object TestData {
       ),
       continueId = Some("/continue"),
       amlsData = None,
-      userMappings = List.empty[UserMapping],
       cleanCredsAuthProviderId = Some(id),
       contactEmailData = None,
       contactTradingAddressData = None,
@@ -111,7 +109,7 @@ object TestData {
       amlsData = Some(AmlsData.registeredUserNoDataEntered)
     )
 
-  val completeJourneyRecordNoMappings: SubscriptionJourneyRecord = SubscriptionJourneyRecord(
+  val completeJourneyRecord: SubscriptionJourneyRecord = SubscriptionJourneyRecord(
     authProviderId = AuthProviderId("12345-credId"),
     continueId = None,
     businessDetails = BusinessDetails(
@@ -146,32 +144,13 @@ object TestData {
     contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = true, Some(phoneNumber))),
     verifiedEmails = VerifiedEmails(Set("email@email.com"))
   )
-  val completeJourneyRecordWithMappingsNoVerifiedEmails: SubscriptionJourneyRecord = completeJourneyRecordNoMappings
+  val completeJourneyRecordNoVerifiedEmails: SubscriptionJourneyRecord = completeJourneyRecord
     .copy(
       verifiedEmails = VerifiedEmails()
     )
 
-  val completeJourneyRecordWithMappings: SubscriptionJourneyRecord = completeJourneyRecordNoMappings
-    .copy(
-      userMappings = List(
-        UserMapping(AuthProviderId("map-1"), Some(AgentCode("ACODE")), List.empty, 20, "1234"),
-        UserMapping(AuthProviderId("map-2"), Some(AgentCode("BCODE")), List.empty, 20, "5678")
-      )
-    )
-
-  def completeJourneyRecordWithMappingsAndNewTradingDetails(
-    tradingName: Option[String],
-    tradingAddress: Option[BusinessAddress]
-  ): SubscriptionJourneyRecord =
-    completeJourneyRecordWithMappings
-      .copy(
-        contactTradingNameData = Some(ContactTradingNameData(hasTradingName = true, tradingName)),
-        contactTradingAddressData = Some(ContactTradingAddressData(useBusinessAddress = true, Some(businessAddress))),
-        contactTelephoneData = Some(ContactTelephoneData(useBusinessTelephone = true, Some(phoneNumber)))
-      )
-
   def completeJourneyRecordWithUpdatedBusinessName(newBusinessName: String): SubscriptionJourneyRecord =
-    completeJourneyRecordNoMappings.copy(businessDetails =
+    completeJourneyRecord.copy(businessDetails =
       BusinessDetails(
         SoleTrader,
         validUtr,
@@ -191,7 +170,7 @@ object TestData {
     )
 
   def completeJourneyRecordWithUpdatedBusinessEmail(newBusinessEmail: String): SubscriptionJourneyRecord =
-    completeJourneyRecordNoMappings.copy(businessDetails =
+    completeJourneyRecord.copy(businessDetails =
       BusinessDetails(
         SoleTrader,
         validUtr,

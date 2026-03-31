@@ -122,7 +122,7 @@ trait EndpointBehaviours {
     }
 
     "not include a continue URL if it's not provided" in new TestSetupNoJourneyRecord {
-      implicit val request = FakeRequest("GET", "/").withSession(sessionKeys: _*)
+      implicit val request: Request[AnyContent] = FakeRequest("GET", "/").withSession(sessionKeys: _*)
       await(sessionStoreService.cacheAgentSession(AgentSession(businessType = Some(BusinessType.SoleTrader)))(request, global, aesCrypto))
       val result = action(request)
       assertContinueUrlNotKept(request, result.futureValue, None)

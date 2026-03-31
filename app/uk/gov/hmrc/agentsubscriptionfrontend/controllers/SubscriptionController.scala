@@ -19,14 +19,13 @@ package uk.gov.hmrc.agentsubscriptionfrontend.controllers
 import play.api.i18n.Lang
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logging}
-import uk.gov.hmrc.agentsubscriptionfrontend.models.Arn
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.config.view._
 import uk.gov.hmrc.agentsubscriptionfrontend.connectors.{AddressLookupFrontendConnector, AgentAssuranceConnector}
 import uk.gov.hmrc.agentsubscriptionfrontend.form.DesAddressForm
 import uk.gov.hmrc.agentsubscriptionfrontend.models._
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{SubscriptionJourneyRecord, UserMapping}
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.SubscriptionJourneyRecord
 import uk.gov.hmrc.agentsubscriptionfrontend.service.{HttpError, MongoDBSessionStoreService, SubscriptionJourneyService, SubscriptionService}
 import uk.gov.hmrc.agentsubscriptionfrontend.util.{toFuture, valueOps}
 import uk.gov.hmrc.agentsubscriptionfrontend.views.html._
@@ -83,7 +82,6 @@ class SubscriptionController @Inject() (
                           registrationName = taxpayerName,
                           address = address,
                           amlsData = amls,
-                          userMappings = sjr.userMappings,
                           contactEmailAddress = contactEmail,
                           contactTradingName = maybeTradingName,
                           contactTradingAddress = tradingAddress,
@@ -110,13 +108,11 @@ class SubscriptionController @Inject() (
     emailData: ContactEmailData,
     nameData: ContactTradingNameData,
     addressData: ContactTradingAddressData,
-    telephoneData: ContactTelephoneData,
-    userMappings: List[UserMapping]
+    telephoneData: ContactTelephoneData
   )(implicit request: Request[_]): Future[Agency] = {
     val agencyName = nameData.contactTradingName.orElse(registration.taxpayerName)
     val agencyEmail = emailData.contactEmail
     val agencyAddress: BusinessAddress = addressData.contactTradingAddress.getOrElse(throw new Exception("contact trading address should be defined"))
-    val clientCount = userMappings.map(_.count).sum
     val agencyTelephone = telephoneData.telephoneNumber
 
     sessionStoreService
@@ -132,8 +128,7 @@ class SubscriptionController @Inject() (
               agencyTelephone,
               registration.safeId
             )
-          ),
-          clientCount = Some(clientCount)
+          )
         )
       )
       .map(_ =>
@@ -158,13 +153,12 @@ class SubscriptionController @Inject() (
           sjr.contactEmailData,
           sjr.contactTradingNameData,
           sjr.contactTradingAddressData,
-          sjr.contactTelephoneData,
-          sjr.userMappings
+          sjr.contactTelephoneData
         ) match {
-          case (utr, postcode, Some(registration), amlsData, Some(email), Some(name), Some(address), Some(telephone), userMappings) =>
+          case (utr, postcode, Some(registration), amlsData, Some(email), Some(name), Some(address), Some(telephone)) =>
             {
               for {
-                agencyDetails <- updateSessionAndReturnAgencyBeforeSubscribing(registration)(email, name, address, telephone, userMappings)
+                agencyDetails <- updateSessionAndReturnAgencyBeforeSubscribing(registration)(email, name, address, telephone)
                 langForEmail = extractLangPreferenceFromCookie
                 _      <- subscriptionService.subscribe(utr, postcode, agencyDetails, langForEmail, amlsData)
                 result <- redirectSubscriptionResponse
@@ -265,10 +259,10 @@ class SubscriptionController @Inject() (
   def showSubscriptionComplete: Action[AnyContent] = Action.async { implicit request =>
     withSubscribedAgent { (arn: Arn, sjrOpt: Option[SubscriptionJourneyRecord]) =>
       for {
-        maybeContinueUrl           <- getMaybeContinueUrl
-        (name, email, clientCount) <- agencyNameAndEmailClientCount(sjrOpt)
+        maybeContinueUrl <- getMaybeContinueUrl
+        (name, email)    <- agencyNameAndEmailClientCount(sjrOpt)
 
-      } yield Ok(subscriptionCompleteTemplate(arn.value, name, email, clientCount))
+      } yield Ok(subscriptionCompleteTemplate(arn.value, name, email))
     }
   }
 
@@ -282,7 +276,7 @@ class SubscriptionController @Inject() (
 
   private def agencyNameAndEmailClientCount(
     maybeSjr: Option[SubscriptionJourneyRecord]
-  )(implicit request: Request[Any]): Future[(String, String, Int)] =
+  )(implicit request: Request[Any]): Future[(String, String)] =
     maybeSjr match {
       case Some(sjr) =>
         {
@@ -299,9 +293,7 @@ class SubscriptionController @Inject() (
               sjr.businessDetails.registration.flatMap(_.emailAddress).getOrElse(throw new Exception("business email address should be defined"))
             )
 
-          val clientCount = sjr.userMappings.map(_.count).sum
-
-          (agencyName, agencyEmail, clientCount)
+          (agencyName, agencyEmail)
         }.toFuture
       case None =>
         sessionStoreService.fetchAgentSession.map {
@@ -309,8 +301,7 @@ class SubscriptionController @Inject() (
             val reg = agentSession.registration.getOrElse(throw new Exception("agent session should have a registration "))
             val agencyName = reg.taxpayerName.getOrElse(throw new Exception("taxpayer name should be defined"))
             val agencyEmail = reg.emailAddress.getOrElse(throw new Exception("agency email should be defined"))
-            val clientCount = agentSession.clientCount.getOrElse(0)
-            (agencyName, agencyEmail, clientCount)
+            (agencyName, agencyEmail)
           case None => throw new RuntimeException("no agent session found")
         }
     }
