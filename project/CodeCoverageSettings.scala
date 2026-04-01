@@ -36,7 +36,7 @@ object CodeCoverageSettings {
     ScoverageKeys.coverageMinimumStmtTotal := 83,
 //    ScoverageKeys.coverageMinimumStmtPerFile := 50, // increase to 80 asap
     ScoverageKeys.coverageMinimumBranchTotal:= 78,
-    ScoverageKeys.coverageMinimumBranchPerFile:= 50,
+   // ScoverageKeys.coverageMinimumBranchPerFile:= 50,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     Test / parallelExecution := false

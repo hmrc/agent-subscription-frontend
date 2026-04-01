@@ -39,7 +39,6 @@ class StartControllerISpecIt extends BaseISpecIt {
   private val id = AuthProviderId("12345-credId")
   private val continueId = ContinueId("foobar")
   private val record = TestData.minimalSubscriptionJourneyRecord(id)
-  private lazy val rh: RequestHeader = FakeRequest()
 
   override protected def appBuilder: GuiceApplicationBuilder =
     super.appBuilder

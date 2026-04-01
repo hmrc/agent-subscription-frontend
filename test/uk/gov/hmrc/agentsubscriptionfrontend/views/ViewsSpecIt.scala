@@ -52,7 +52,6 @@ class ViewsSpecIt extends UnitSpec with GuiceOneAppPerSuite {
 
     "render title, header, sidebar and main content" in new App {
       val view = app.injector.instanceOf[MainTemplate]
-      val appConfig = app.injector.instanceOf[AppConfig]
       val messages = app.injector.instanceOf[Messages]
       val html = view.render(
         title = "My custom page title",

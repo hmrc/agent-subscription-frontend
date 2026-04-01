@@ -67,11 +67,6 @@ class SignOutControllerISpecIt extends BaseISpecIt {
       redirectLocation(result).head shouldBe signOutWithContinue(expectedLocation.toString)
     }
 
-    def assertContinueUrl(result: Result, continueUrl: String): Assertion = {
-      val continue = uri"${controller.appConfig.returnAfterGGCredsCreatedUrl}?${Map("continue" -> continueUrl)}"
-      redirectLocation(result).head shouldBe signOutWithContinue(continue.toString)
-    }
-
     "include a continue URL in the SOS redirect URL if a continue URL exists in the session store" in {
 
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id).copy(continueId = None))

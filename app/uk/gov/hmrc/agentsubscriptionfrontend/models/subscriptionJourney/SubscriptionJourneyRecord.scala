@@ -31,8 +31,6 @@ final case class SubscriptionJourneyRecord(
   continueId: Option[String] = None, // once allocated, should not be changed?
   businessDetails: BusinessDetails,
   amlsData: Option[AmlsData] = None,
-  userMappings: List[UserMapping] = List.empty,
-  mappingComplete: Boolean = false,
   cleanCredsAuthProviderId: Option[AuthProviderId] = None,
   lastModifiedDate: Option[LocalDateTime] = None,
   contactEmailData: Option[ContactEmailData] = None,
@@ -60,8 +58,6 @@ object SubscriptionJourneyRecord {
       (JsPath \ "continueId").formatNullable[String] and
       (JsPath \ "businessDetails").format[BusinessDetails] and
       (JsPath \ "amlsData").formatNullable[AmlsData] and
-      (JsPath \ "userMappings").format[List[UserMapping]] and
-      (JsPath \ "mappingComplete").format[Boolean] and
       (JsPath \ "cleanCredsAuthProviderId").formatNullable[AuthProviderId] and
       (JsPath \ "lastModifiedDate").formatNullable[LocalDateTime] and
       (JsPath \ "contactEmailData").formatNullable[ContactEmailData] and

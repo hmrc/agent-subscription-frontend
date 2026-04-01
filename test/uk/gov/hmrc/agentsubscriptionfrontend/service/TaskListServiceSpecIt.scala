@@ -61,8 +61,6 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
     None,
     BusinessDetails(BusinessType.LimitedCompany, "12345", "BN25GJ", None, None, None, None, None, None),
     None,
-    List.empty,
-    mappingComplete = false,
     None,
     None
   )
@@ -72,8 +70,6 @@ class TaskListServiceSpecIt extends UnitSpec with MockitoSugar {
     None,
     BusinessDetails(BusinessType.LimitedCompany, "12345", "BN25GJ", None, None, None, None, None, None),
     None,
-    List.empty,
-    mappingComplete = false,
     Some(AuthProviderId("cred-1234")),
     None
   )

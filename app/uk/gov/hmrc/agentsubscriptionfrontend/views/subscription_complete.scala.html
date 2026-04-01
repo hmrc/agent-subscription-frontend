@@ -23,7 +23,7 @@
 govukPanel: GovukPanel
 )
 
-@(arn: String, agencyName: String, agencyEmail: String, copiedAcross: Int)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
+@(arn: String, agencyName: String, agencyEmail: String)(implicit request: RequestHeader, msgs: Messages, appConfig: AppConfig)
 
 @panelContent = {
 @msgs("subscriptionComplete.accountName")
@@ -36,7 +36,6 @@ govukPanel: GovukPanel
         content = HtmlContent(s"$panelContent")
     ))
 
-    <p class="govuk-body">@Html(msgs("subscriptionComplete.copiedAcross", copiedAcross))</p>
     <p class="govuk-body">@Html(msgs("subscriptionComplete.p1", s"$arn"))</p>
     <p class="govuk-body">@msgs("subscriptionComplete.p2", s"$agencyEmail")</p>
 

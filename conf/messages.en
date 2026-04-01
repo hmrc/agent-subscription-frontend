@@ -383,7 +383,6 @@ nonAgent.p2=If you do not have one, <a class="govuk-link" href="{0}">create a ne
 subscriptionComplete.title=You’ve created an agent services account
 subscriptionComplete.h1=You’ve created an agent services account
 subscriptionComplete.accountName=Agent reference number:
-subscriptionComplete.copiedAcross=You have added <strong class="govuk-!-font-weight-bold">{0}</strong> Self Assessment authorisations to your new agent services account.
 subscriptionComplete.p1=Quote your agent reference number if you need to contact us about your agent services account.
 subscriptionComplete.p2=We have sent an email to {0} confirming these details.
 subscriptionComplete.button.continueToASAccount=Go to your agent services account
@@ -495,17 +494,12 @@ checkAnswers.confirm.button=Confirm details and create account
 checkAnswers.change.button=Change
 checkAnswers.amlsDetails.label=Money laundering compliance details and expiry date
 checkAnswers.amlsDetails.pending.label=Date you applied to register for money laundering supervision with HMRC
-checkAnswers.userMapping.label=Number of client authorisations added
-checkAnswers.addMore.button=Add more
-checkAnswers.ggId.label=Government Gateway user IDs entered
-checkAnswers.ggId.xs=XXXX-XXXX-{0}
 checkAnswers.contactEmailAddress.label=Email address
 checkAnswers.contactTradingName.label=Name
 checkAnswers.contactTradingAddress.label=Address
 checkAnswers.amls.h2=Money laundering compliance details
 checkAnswers.businessDetails.h2=Business details
 checkAnswers.contactDetails.h2=Agent services account details
-checkAnswers.mapping.h2=Existing client authorisations
 checkAnswers.tradingName.none=None
 
 businessName.title=What is your business name?

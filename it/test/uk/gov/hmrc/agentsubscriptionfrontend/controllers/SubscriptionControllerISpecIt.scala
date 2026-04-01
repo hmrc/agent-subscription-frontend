@@ -38,12 +38,12 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait TestSetupWithCompleteJourneyRecord {
-  givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordNoMappings)
+  givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecord)
   givenAgentIsNotManuallyAssured(utr)
 }
 
 trait TestManuallyAssuredASetupWithCompleteJourneyRecord {
-  givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordNoMappings)
+  givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecord)
   givenAgentIsManuallyAssured(utr)
 }
 
@@ -58,19 +58,14 @@ trait TestSetupWithMinimalSubscriptionJourneyRecord {
 }
 
 trait TestSetupWithMinimalSubscriptionJourneyRecordAndRegistration {
-  givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordNoMappings.copy(amlsData = None))
-  givenAgentIsNotManuallyAssured(utr)
-}
-
-trait TestSetupWithCompleteJourneyRecordWithMapping {
-  givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings)
+  givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecord.copy(amlsData = None))
   givenAgentIsNotManuallyAssured(utr)
 }
 
 trait TestSetupWithCompleteJourneyRecordAndCreate {
-  givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordNoMappings)
+  givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecord)
   givenAgentIsNotManuallyAssured(utr)
-  givenSubscriptionRecordCreated(id, completeJourneyRecordNoMappings)
+  givenSubscriptionRecordCreated(id, completeJourneyRecord)
 }
 
 class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingSpec with ScalaFutures {
@@ -127,7 +122,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
     "redirect to /contact-email-check if no contact email address found" in {
 
-      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings.copy(contactEmailData = None))
+      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecord.copy(contactEmailData = None))
       givenAgentIsNotManuallyAssured(utr)
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
@@ -139,7 +134,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
     "redirect to /trading-name if no contact trading name data found" in {
 
-      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings.copy(contactTradingNameData = None))
+      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecord.copy(contactTradingNameData = None))
       givenAgentIsNotManuallyAssured(utr)
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
@@ -151,7 +146,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
     "redirect to /check-main-trading-address if no contact trading address data found" in {
 
-      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings.copy(contactTradingAddressData = None))
+      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecord.copy(contactTradingAddressData = None))
       givenAgentIsNotManuallyAssured(utr)
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
@@ -201,8 +196,8 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         result should containNoMessages("checkAnswers.ggId.label")
       }
 
-    "show subscription answers page with mapping " in {
-      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecordWithMappings.copy(continueId = Some("continue-id")))
+    "show subscription answers page" in {
+      givenSubscriptionJourneyRecordExists(AuthProviderId("12345-credId"), completeJourneyRecord.copy(continueId = Some("continue-id")))
       givenAgentIsManuallyAssured(validUtr)
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = authenticatedAs(subscribingCleanAgentWithoutEnrolments)
 
@@ -211,21 +206,18 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
         "checkAnswers.title",
         "checkAnswers.change.button",
         "checkAnswers.confirm.button",
-        "checkAnswers.ggId.label",
         "checkAnswers.contactEmailAddress.label",
         "checkAnswers.contactTradingName.label",
         "checkAnswers.contactTradingAddress.label",
         "checkAnswers.amls.h2",
         "checkAnswers.contactDetails.h2"
       )
-
-      checkHtmlResultWithBodyText(result, "XXXX-XXXX-1234", "XXXX-XXXX-5678")
     }
 
     "redirect to email verification if the email is not verified" in new TestSetupWithCompleteJourneyRecord {
       givenSubscriptionJourneyRecordExists(
         AuthProviderId("12345-credId"),
-        completeJourneyRecordNoMappings.copy(
+        completeJourneyRecord.copy(
           contactEmailData = Some(ContactEmailData(useBusinessEmail = false, contactEmail = Some("email@email.com"))),
           verifiedEmails = VerifiedEmails()
         )
@@ -281,7 +273,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       resultOf(request).futureValue should containSubstrings(expectedArn)
     }
 
-    "display the static page content" in new AuthRequest with TestSetupWithCompleteJourneyRecordWithMapping {
+    "display the static page content" in new AuthRequest with TestSetupWithCompleteJourneyRecord {
 
       val result: Result = await(resultOf(request))
 
@@ -293,7 +285,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       )
       bodyOf(result) should include(hasMessage("subscriptionComplete.p1", "AARN0000001"))
       bodyOf(result) should include(hasMessage("subscriptionComplete.p2", "email@email.com"))
-      bodyOf(result) should include(hasMessage("subscriptionComplete.copiedAcross", 40))
 
     }
 
@@ -309,7 +300,6 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       )
       bodyOf(result) should include(hasMessage("subscriptionComplete.p1", "AARN0000001"))
       bodyOf(result) should include(hasMessage("subscriptionComplete.p2", "test@gmail.com"))
-      bodyOf(result) should include(hasMessage("subscriptionComplete.copiedAcross", 0))
 
     }
 
@@ -329,10 +319,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       "all fields are supplied" in new TestSetupWithCompleteJourneyRecord {
         givenSubscriptionRecordCreated(
           id,
-          completeJourneyRecordNoMappings.copy(
-            businessDetails = completeJourneyRecordNoMappings.businessDetails.copy(
+          completeJourneyRecord.copy(
+            businessDetails = completeJourneyRecord.businessDetails.copy(
               registration = Some(
-                completeJourneyRecordNoMappings.businessDetails.registration.get.copy(
+                completeJourneyRecord.businessDetails.registration.get.copy(
                   address = BusinessAddress(
                     addressLine1 = "1 Some Street",
                     addressLine2 = Some("Sometown"),
@@ -369,10 +359,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       "all fields are supplied but address contains more than 4 lines" in new TestSetupWithCompleteJourneyRecord {
         givenSubscriptionRecordCreated(
           id,
-          completeJourneyRecordNoMappings.copy(
-            businessDetails = completeJourneyRecordNoMappings.businessDetails.copy(
+          completeJourneyRecord.copy(
+            businessDetails = completeJourneyRecord.businessDetails.copy(
               registration = Some(
-                completeJourneyRecordNoMappings.businessDetails.registration.get.copy(
+                completeJourneyRecord.businessDetails.registration.get.copy(
                   address = BusinessAddress(
                     addressLine1 = "1 Some Street",
                     addressLine2 = Some("Sometown"),
@@ -408,10 +398,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
       "town is omitted" in new TestSetupWithCompleteJourneyRecord {
         givenSubscriptionRecordCreated(
           id,
-          completeJourneyRecordNoMappings.copy(
-            businessDetails = completeJourneyRecordNoMappings.businessDetails.copy(
+          completeJourneyRecord.copy(
+            businessDetails = completeJourneyRecord.businessDetails.copy(
               registration = Some(
-                completeJourneyRecordNoMappings.businessDetails.registration.get.copy(
+                completeJourneyRecord.businessDetails.registration.get.copy(
                   address = BusinessAddress(
                     addressLine1 = "1 Some Street",
                     addressLine2 = None,
@@ -446,10 +436,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     "always send countryCode=GB to the back end as we do not currently allow non-UK addresses" in new TestSetupWithCompleteJourneyRecord {
       givenSubscriptionRecordCreated(
         id,
-        completeJourneyRecordNoMappings.copy(
-          businessDetails = completeJourneyRecordNoMappings.businessDetails.copy(
+        completeJourneyRecord.copy(
+          businessDetails = completeJourneyRecord.businessDetails.copy(
             registration = Some(
-              completeJourneyRecordNoMappings.businessDetails.registration.get.copy(
+              completeJourneyRecord.businessDetails.registration.get.copy(
                 address = BusinessAddress(
                   addressLine1 = "1 Some Street",
                   addressLine2 = Some("Sometown"),
@@ -486,10 +476,10 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
     "not mix up data from concurrent users" in new TestSetupWithCompleteJourneyRecord {
       givenSubscriptionRecordCreated(
         id,
-        completeJourneyRecordNoMappings.copy(
-          businessDetails = completeJourneyRecordNoMappings.businessDetails.copy(
+        completeJourneyRecord.copy(
+          businessDetails = completeJourneyRecord.businessDetails.copy(
             registration = Some(
-              completeJourneyRecordNoMappings.businessDetails.registration.get.copy(
+              completeJourneyRecord.businessDetails.registration.get.copy(
                 address = BusinessAddress(
                   addressLine1 = "1 Some Street",
                   addressLine2 = Some("Sometown"),
@@ -503,7 +493,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
           )
         )
       )
-      givenSubscriptionJourneyRecordExists(AuthProviderId("54321-credId"), completeJourneyRecordNoMappings)
+      givenSubscriptionJourneyRecordExists(AuthProviderId("54321-credId"), completeJourneyRecord)
 
       val request: SubscriptionRequest = subscriptionRequest()
       AgentSubscriptionStub.subscriptionWillSucceed(utr, request)
@@ -679,7 +669,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
       givenSubscriptionJourneyRecordExists(
         AuthProviderId("12345-credId"),
-        completeJourneyRecordNoMappings.copy(
+        completeJourneyRecord.copy(
           contactEmailData = Some(ContactEmailData(useBusinessEmail = false, contactEmail = Some("email@email.com"))),
           verifiedEmails = VerifiedEmails()
         )

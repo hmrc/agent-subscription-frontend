@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.agentsubscriptionfrontend.config.view
 
-import java.time.format.DateTimeFormatter
-
 import play.api.i18n.Messages
 import play.api.mvc.Call
 import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.{AmlsData, UserMapping}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessAddress
+import uk.gov.hmrc.agentsubscriptionfrontend.models.subscriptionJourney.AmlsData
+
+import java.time.format.DateTimeFormatter
 
 case class CheckYourAnswers(
   businessNameRow: AnswerRow,
@@ -31,9 +31,7 @@ case class CheckYourAnswers(
   contactEmailRow: AnswerRow,
   contactTradingNameRow: AnswerRow,
   contactTradingAddressRow: AnswerRow,
-  contactTelephoneNumberRow: AnswerRow,
-  maybeMappingClientNumberRow: Option[AnswerRow],
-  maybeMappingGGIdsRow: Option[AnswerRow]
+  contactTelephoneNumberRow: AnswerRow
 )
 
 object CheckYourAnswers {
@@ -42,7 +40,6 @@ object CheckYourAnswers {
     registrationName: String,
     address: BusinessAddress,
     amlsData: AmlsData,
-    userMappings: List[UserMapping],
     contactEmailAddress: String,
     contactTradingName: Option[String],
     contactTradingAddress: BusinessAddress,
@@ -55,20 +52,7 @@ object CheckYourAnswers {
       contactEmailRow = makeContactEmailRow(contactEmailAddress),
       contactTradingNameRow = makeContactTradingNameRow(contactTradingName, registrationName),
       contactTradingAddressRow = makeContactTradingAddressRow(contactTradingAddress),
-      contactTelephoneNumberRow = makeContactTelephoneNumberRow(contactTelephone),
-      maybeMappingClientNumberRow = None,
-      maybeMappingGGIdsRow =
-        if (userMappings.isEmpty)
-          None
-        else
-          Some(
-            AnswerRow(
-              question = Messages("checkAnswers.ggId.label"),
-              answerLines = userMappings.map(u => Messages("checkAnswers.ggId.xs", u.ggTag)),
-              changeLink = None,
-              buttonText = None
-            )
-          )
+      contactTelephoneNumberRow = makeContactTelephoneNumberRow(contactTelephone)
     )
 
   private def makeAmlsDataRow(amlsData: AmlsData)(implicit messages: Messages) =

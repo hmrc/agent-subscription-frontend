@@ -30,7 +30,7 @@ class SsoConnectorISpecIt extends BaseISpecIt {
 
   private lazy val connector =
     new SsoConnector(app.injector.instanceOf[HttpClientV2], app.injector.instanceOf[Metrics], app.injector.instanceOf[AppConfig])
-  private implicit val hc = HeaderCarrier()
+  private implicit val hc: HeaderCarrier = HeaderCarrier()
 
   "SsoConnector" should {
     "return valid domains" in {
