@@ -146,32 +146,34 @@ trait AuthActions extends AuthorisedFunctions with Monitoring with Logging {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
-      .retrieve(allEnrolments and credentials and nino and email) { case enrolments ~ creds ~ mayBeNino ~ maybeAuthEmail =>
-        if (isEnrolledForHmrcAsAgent(enrolments)) {
-          redirectUrlActions.withMaybeRedirectUrl {
-            case Some(redirectUrl) =>
-              mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
-              Redirect(redirectUrl) // end of journey; back to calling service
-            case None =>
-              mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
-              Redirect(appConfig.agentServicesAccountUrl) // dashboard
-          }
-        } else {
-          val authProviderId = AuthProviderId(creds.fold("unknown")(_.providerId))
-          subscriptionJourneyService
-            .getJourneyRecord(authProviderId)
-            .flatMap { maybeSjr =>
-              if (requireEmailVerification && maybeSjr.exists(_.emailNeedsVerifying(maybeAuthEmail)))
-                Redirect(routes.EmailVerificationController.verifyEmail())
-              else body(new Agent(enrolments.enrolments, creds, maybeSjr, mayBeNino))
+    if (appConfig.enableRedirectToAgentRegistration) Future.successful(Redirect(appConfig.agentRegistrationFrontendStartUrl))
+    else
+      authorised(AuthProviders(GovernmentGateway) and AffinityGroup.Agent)
+        .retrieve(allEnrolments and credentials and nino and email) { case enrolments ~ creds ~ mayBeNino ~ maybeAuthEmail =>
+          if (isEnrolledForHmrcAsAgent(enrolments)) {
+            redirectUrlActions.withMaybeRedirectUrl {
+              case Some(redirectUrl) =>
+                mark("Count-Subscription-AlreadySubscribed-HasEnrolment-ContinueUrl")
+                Redirect(redirectUrl) // end of journey; back to calling service
+              case None =>
+                mark("Count-Subscription-AlreadySubscribed-HasEnrolment-AgentServicesAccount")
+                Redirect(appConfig.agentServicesAccountUrl) // dashboard
             }
-          // check what we should do when AuthProviderId not available!
+          } else {
+            val authProviderId = AuthProviderId(creds.fold("unknown")(_.providerId))
+            subscriptionJourneyService
+              .getJourneyRecord(authProviderId)
+              .flatMap { maybeSjr =>
+                if (requireEmailVerification && maybeSjr.exists(_.emailNeedsVerifying(maybeAuthEmail)))
+                  Redirect(routes.EmailVerificationController.verifyEmail())
+                else body(new Agent(enrolments.enrolments, creds, maybeSjr, mayBeNino))
+              }
+            // check what we should do when AuthProviderId not available!
+          }
         }
-      }
-      .recover {
-        handleException
-      }
+        .recover {
+          handleException
+        }
   }
 
   def withAuthenticatedUser[A](body: => Future[Result])(implicit request: Request[A], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
