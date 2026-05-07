@@ -82,7 +82,8 @@ abstract class BaseISpecIt
         "auditing.consumer.baseUri.port"                                      -> wireMockPort,
         "features.enable-welsh-toggle"                                        -> true,
         "login.continue"                                                      -> "",
-        "bas-gateway.url"                                                     -> "/bas-gateway/sign-in"
+        "bas-gateway.url"                                                     -> "/bas-gateway/sign-in",
+        "features.enable-redirect-to-agent-registration"                      -> false
       )
       .overrides(new TestGuiceModule)
 

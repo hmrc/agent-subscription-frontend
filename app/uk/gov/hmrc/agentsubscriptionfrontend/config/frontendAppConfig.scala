@@ -54,6 +54,8 @@ trait AppConfig {
   val disableEmailVerification: Boolean
   val signOutUrl: String
   val signInUrl: String
+  val enableRedirectToAgentRegistration: Boolean
+  val agentRegistrationFrontendStartUrl: String
 }
 
 @Singleton
@@ -120,4 +122,6 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
   private val signInPath: String = servicesConfig.getString("bas-gateway-frontend.sign-in.path")
   override lazy val signOutUrl: String = s"$basGatewayFrontendExternalUrl$signOutPath"
   override lazy val signInUrl: String = s"$basGatewayFrontendExternalUrl$signInPath"
+  override val enableRedirectToAgentRegistration: Boolean = servicesConfig.getBoolean("features.enable-redirect-to-agent-registration")
+  override val agentRegistrationFrontendStartUrl: String = s"${servicesConfig.getString("agent-registration-frontend.host")}/agent-registration/apply"
 }
