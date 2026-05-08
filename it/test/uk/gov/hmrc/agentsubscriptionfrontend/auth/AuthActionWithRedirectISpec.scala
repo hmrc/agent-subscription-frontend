@@ -36,11 +36,10 @@ import scala.concurrent.Future
 
 class AuthActionWithRedirectISpec extends AnyWordSpecLike with Matchers with ScalaFutures with GuiceOneAppPerSuite {
 
-
   protected def appBuilder: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
-        "features.enable-redirect-to-agent-registration"                      -> true
+        "features.enable-redirect-to-agent-registration" -> true
       )
 
   override implicit lazy val app: Application = appBuilder.build()
@@ -56,7 +55,6 @@ class AuthActionWithRedirectISpec extends AnyWordSpecLike with Matchers with Sca
     override def metrics: Metrics = app.injector.instanceOf[Metrics]
     override def subscriptionJourneyService: SubscriptionJourneyService = app.injector.instanceOf[SubscriptionJourneyService]
   }
-
 
   "with redirect feature flag enabled subscribingAgent authAction" should {
     "redirect the request to /agent-registration/apply" in {
