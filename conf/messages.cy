@@ -229,9 +229,9 @@ task-list.not-started=HEB DDECHRAU
 task-list.cannot-start-yet=METHU DECHRAU ETO
 
 #Saved Progress
-saved-progress.title=Cedwir eich cynnydd am 30 diwrnod
+saved-progress.title=Mae eich cynnydd wedi’i gadw tan 17 Mai 2026.
 saved-progress.p1=Yr hyn y mae angen i chi ei wneud nesaf
-saved-progress.p2=Mae’n rhaid i chi ddod yn ôl a chwblhau’r ffurflen hon cyn pen 30 diwrnod.
+saved-progress.p2=Mae’n rhaid i chi ddychwelyd a chwblhau’r ffurflen hon erbyn 17 Mai 2026.
 saved-progress.p3=I gwblhau’r ffurflen hon yn nes ymlaen, ewch i’r {0} ar GOV.UK a mewngofnodi i’r gwasanaeth hwn eto.
 saved-progress.link=tudalen arweiniad ynglŷn â chreu cyfrif gwasanaethau asiant (yn agor ffenestr neu dab newydd)
 saved-progress.p4=Bydd angen i chi fewngofnodi gyda’r un Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth a ddefnyddioch wrth ddechrau llenwi’r ffurflen hon.
