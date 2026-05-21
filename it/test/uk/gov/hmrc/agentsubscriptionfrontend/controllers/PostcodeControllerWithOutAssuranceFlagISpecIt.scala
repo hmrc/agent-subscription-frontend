@@ -21,6 +21,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.models.{AgentSession, CompletePartialSubscriptionBody, SubscriptionRequestKnownFacts}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentSubscriptionStub._
@@ -41,6 +42,7 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
       )
 
   lazy val controller: PostcodeController = app.injector.instanceOf[PostcodeController]
+  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
   "POST /postcode" when {
 
@@ -59,11 +61,7 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
 
           status(result) shouldBe 303
 
-          redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
-
-          sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
-            testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)
-          )
+          redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
         }
       }
 
@@ -79,11 +77,7 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
 
           status(result) shouldBe 303
 
-          redirectLocation(result) shouldBe Some(routes.VatDetailsController.showRegisteredForVatForm().url)
-
-          sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
-            testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)
-          )
+          redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
         }
       }
     }
@@ -101,11 +95,7 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
 
           status(result) shouldBe 303
 
-          redirectLocation(result) shouldBe Some(routes.CompanyRegistrationController.showCompanyRegNumberForm().url)
-
-          sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
-            testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)
-          )
+          redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
         }
       }
 
@@ -137,7 +127,7 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
       val result: Result = await(controller.submitPostcodeForm()(request))
-      redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
+      redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
     }
 
     "redirect to no match found when the subscription status is strange" in new TestSetupNoJourneyRecord {

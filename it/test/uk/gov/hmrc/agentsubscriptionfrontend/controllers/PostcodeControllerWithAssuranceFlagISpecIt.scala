@@ -22,6 +22,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
+import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
 import uk.gov.hmrc.agentsubscriptionfrontend.models.AgentSession
 import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessType.{LimitedCompany, Llp, Partnership, SoleTrader}
 import uk.gov.hmrc.agentsubscriptionfrontend.stubs.AgentAssuranceStub._
@@ -45,6 +46,8 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       )
 
   lazy val controller: PostcodeController = app.injector.instanceOf[PostcodeController]
+
+  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
   "GET /postcode" should {
     "display the postcode page with content tailored to the business type - Sole Trader" in new TestSetupNoJourneyRecord {
@@ -106,14 +109,13 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
 
   "POST /postcode" when {
 
-    def stubs(isMAA: Boolean = false) = {
+    def stubs(isMAA: Boolean = true) = {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-PAYE")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-SA")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("HMCE-VATDEC-ORG")
       givenUserIsAnAgentWithAnAcceptableNumberOfClients("IR-CT")
-      if (isMAA) givenUtrDetails(validUtr, isManuallyAssured = true, isRefusalToDealWith = false)
-      else givenUtrDetails(validUtr, isManuallyAssured = false, isRefusalToDealWith = false)
+      givenUtrDetails(validUtr, isManuallyAssured = isMAA, isRefusalToDealWith = false)
     }
 
     "businessType is SoleTrader or Partnership" should {
@@ -140,7 +142,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
                 postcode = Some(validPostcode),
                 nino = None,
                 registration = Some(testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)),
-                isMAA = Some(false)
+                isMAA = Some(true)
               )
             )
         }
@@ -167,7 +169,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
                 postcode = Some(validPostcode),
                 nino = None,
                 registration = Some(testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)),
-                isMAA = Some(false)
+                isMAA = Some(true)
               )
             )
         }
@@ -198,7 +200,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
 
     "business type is Llp" should {
       "redirect to /confirm-business when the agent is on the manually assured list" in new TestSetupNoJourneyRecord {
-        stubs(true)
+        stubs()
         implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
           authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Llp), postcode = None, nino = None))
@@ -212,11 +214,11 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
         sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
           testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)
         )
-
+        sessionStoreService.currentSession.agentSession.get.isMAA shouldBe Some(true)
       }
 
       "redirect to /company-registration-number when the agent is not on the manually assured list" in new TestSetupNoJourneyRecord {
-        stubs(false)
+        stubs(isMAA = false)
         implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] =
           authenticatedAs(subscribingAgentEnrolledForNonMTD, POST).withFormUrlEncodedBody("postcode" -> validPostcode)
         sessionStoreService.currentSession.agentSession = Some(agentSession.copy(businessType = Some(Llp), postcode = None, nino = None))
@@ -225,16 +227,12 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
 
         status(result) shouldBe 303
 
-        redirectLocation(result) shouldBe Some(routes.CompanyRegistrationController.showCompanyRegNumberForm().url)
-
-        sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
-          testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)
-        )
-
+        redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
+        sessionStoreService.currentSession.agentSession.get.isMAA shouldBe None
       }
     }
 
-    "fail when a matching registration is found for the UTR and postcode for an agent when failing the SaAgent check" in new TestSetupNoJourneyRecord {
+    "redirect to agent registration frontend when the agent fails eligibility checks" in new TestSetupNoJourneyRecord {
       withMatchingUtrAndPostcode(validUtr, validPostcode)
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-PAYE")
       givenUserIsNotAnAgentWithAnAcceptableNumberOfClients("IR-SA")
@@ -249,15 +247,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
       val result: Result = await(controller.submitPostcodeForm()(request))
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.AssuranceChecksController.invasiveCheckStart().url)
-      verifyAgentAssuranceAuditRequestSent(
-        passPayeAgentAssuranceCheck = None,
-        passSaAgentAssuranceCheck = Some(false),
-        passVatDecOrgAgentAssuranceCheck = Some(false),
-        passIRCTAgentAssuranceCheck = Some(false)
-      )
-
-      await(sessionStoreService.fetchAgentSession(request, global, aesCrypto)).get.registration.get.taxpayerName shouldBe Some(registrationName)
+      redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
     }
 
     "redirect to /business-type if businessType is not found in session" in new TestSetupNoJourneyRecord {
@@ -295,7 +285,7 @@ class PostcodeControllerWithAssuranceFlagISpecIt extends BaseISpecIt with Sessio
 
       status(result) shouldBe 303
 
-      redirectLocation(result) shouldBe Some(routes.StartController.showCannotCreateAccount().url)
+      redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
     }
 
     "handle for with invalid postcodes" in new TestSetupNoJourneyRecord {

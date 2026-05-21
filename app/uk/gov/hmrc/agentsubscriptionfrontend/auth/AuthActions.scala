@@ -35,6 +35,7 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
 class Agent(
@@ -137,6 +138,12 @@ trait AuthActions extends AuthorisedFunctions with Monitoring with Logging {
   def withSubscribingEmailVerifiedAgent[A](body: Agent => Future[Result])(implicit request: Request[A], ec: ExecutionContext): Future[Result] =
     withSubscribingAgent(requireEmailVerification = true)(body)
 
+  val goLiveDate: LocalDateTime =
+    LocalDate.of(2026, 5, 18).atStartOfDay()
+
+  private def isOldJourney(record: SubscriptionJourneyRecord): Boolean =
+    record.lastModifiedDate.exists(_.isBefore(goLiveDate))
+
   /** User is half way through a setup/onboarding journey. Optionally, check that the email (if any) is verified and redirect to email verification if
     * not.
     */
@@ -164,9 +171,17 @@ trait AuthActions extends AuthorisedFunctions with Monitoring with Logging {
             subscriptionJourneyService
               .getJourneyRecord(authProviderId)
               .flatMap { maybeSjr =>
-                if (requireEmailVerification && maybeSjr.exists(_.emailNeedsVerifying(maybeAuthEmail)))
-                  Redirect(routes.EmailVerificationController.verifyEmail())
-                else body(new Agent(enrolments.enrolments, creds, maybeSjr, mayBeNino))
+                if (maybeSjr.exists(isOldJourney)) {
+                  logger.warn("Old journey detected - forcing restart of UTR flow")
+
+                  Future.successful(
+                    Redirect(routes.UtrController.showUtrForm())
+                  )
+                } else {
+                  if (requireEmailVerification && maybeSjr.exists(_.emailNeedsVerifying(maybeAuthEmail)))
+                    Redirect(routes.EmailVerificationController.verifyEmail())
+                  else body(new Agent(enrolments.enrolments, creds, maybeSjr, mayBeNino))
+                }
               }
             // check what we should do when AuthProviderId not available!
           }
