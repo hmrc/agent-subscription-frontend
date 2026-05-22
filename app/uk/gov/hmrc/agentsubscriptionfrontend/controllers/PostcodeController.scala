@@ -108,24 +108,22 @@ class PostcodeController @Inject() (
     agent: Agent
   ): Future[Result] =
     assuranceService.assureIsAgent(utr).flatMap {
-
-      case ManuallyAssured(assuranceResults) =>
-        auditService.sendAgentAssuranceAuditEvent(utr, postcode, assuranceResults).flatMap { _ =>
-          mark("Count-Subscription-ManuallyAssured-Allowed")
-
-          updateSessionAndRedirect(
-            agentSession.copy(
-              postcode = Some(postcode),
-              registration = Some(registration),
-              isMAA = Some(true)
+      case maybeAssured @ (None | ManuallyAssured(_)) =>
+        maybeAssured match {
+          case Some(assuranceResults) =>
+            auditService
+              .sendAgentAssuranceAuditEvent(utr, postcode, assuranceResults)
+              .flatMap { _ =>
+                updateSessionAndRedirect(
+                  agentSession.copy(postcode = Some(postcode), registration = Some(registration), isMAA = Some(true))
+                )(getNextPage(agentSession.businessType, maybeAssured))
+              }
+          case None =>
+            updateSessionAndRedirect(agentSession.copy(postcode = Some(postcode), registration = Some(registration)))(
+              getNextPage(agentSession.businessType, maybeAssured)
             )
-          )(
-            getNextPage(agentSession.businessType, Some(assuranceResults))
-          )
         }
-
-      case _ =>
-        Redirect(appConfig.agentRegistrationFrontendStartUrl)
+      case _ => Redirect(appConfig.agentRegistrationFrontendStartUrl)
     }
 
   private def getNextPage(businessType: Option[BusinessType], assuranceResults: Option[AssuranceResults])(implicit agent: Agent) =
