@@ -31,7 +31,7 @@ object AddressLookupFrontendStubs {
                                         |  "options": {
                                         |    "continueUrl": "$callbackUrl",
                                         |    "includeHMRCBranding": true,
-                                        |     "signOutHref": "/agent-subscription/finish-sign-out",
+                                        |     "signOutHref": "/agent-subscription-manually-assured/finish-sign-out",
                                         |    "selectPageConfig": {
                                         |      "proposedListLimit": 30,
                                         |      "showSearchLinkAgain": true
@@ -47,7 +47,7 @@ object AddressLookupFrontendStubs {
                                         |    },
                                         |     "timeoutConfig": {
                                         |      "timeoutAmount": 900,
-                                        |      "timeoutUrl": "/agent-subscription/time-out"
+                                        |      "timeoutUrl": "/agent-subscription-manually-assured/time-out"
                                         |    }
                                         |  },
                                         |  "labels": {

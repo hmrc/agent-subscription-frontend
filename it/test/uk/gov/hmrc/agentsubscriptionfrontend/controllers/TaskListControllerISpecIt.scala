@@ -265,10 +265,10 @@ class TaskListControllerISpecIt extends BaseISpecIt with EmailVerificationBehavi
       status(result) shouldBe 200
 
       val html = Jsoup.parse(Helpers.contentAsString(Future.successful(result)))
-      html.title() shouldBe "Your details will be saved until 17 May 2026 - Create an agent services account - GOV.UK"
+      html.title() shouldBe "Your progress has been saved - Create an agent services account - GOV.UK"
       html.select(Css.H2).text() shouldBe "What you need to do next"
       val paragraphs = html.select(Css.paragraphs)
-      paragraphs.get(0).text() shouldBe "You must come back and complete this form by 17 May 2026."
+      paragraphs.get(0).text() shouldBe "You must come back and complete this form."
       paragraphs.get(1).text() shouldBe "To complete this form later, go to the guidance page about " +
         "creating an agent services account (opens in a new tab) on GOV.UK and sign in to this service again."
       paragraphs

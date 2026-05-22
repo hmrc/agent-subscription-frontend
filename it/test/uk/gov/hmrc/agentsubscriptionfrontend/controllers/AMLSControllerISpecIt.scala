@@ -479,7 +479,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
 
       val elForm: Elements = doc.select("form")
       elForm should not be null
-      elForm.attr("action") shouldBe "/agent-subscription/money-laundering-compliance"
+      elForm.attr("action") shouldBe "/agent-subscription-manually-assured/money-laundering-compliance"
       elForm.attr("method") shouldBe "POST"
     }
 
@@ -515,7 +515,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
         val expectedSelectionString: String = """<option value="IPA" selected>"""
 
         singleSpacedString(contentAsString(result)) should (include(
-          """<a href="/agent-subscription/check-money-laundering-compliance" class="govuk-back-link">Back</a>"""
+          """<a href="/agent-subscription-manually-assured/check-money-laundering-compliance" class="govuk-back-link">Back</a>"""
         )
           and include(expectedSelectionString)
           and include("""value="123456789"""")
@@ -1008,7 +1008,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
       status(result) shouldBe 303
       redirectLocation(result).get shouldBe routes.AMLSController.showAmlsApplicationEnterDatePage().url
     }
-    " Show /agent-subscription/money-laundering-number-not-found if the amls record is not found in" in new Setup {
+    " Show /agent-subscription-manually-assured/money-laundering-number-not-found if the amls record is not found in" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))
       givenAmlsRecordNotFound(validAmlsRegistrationNumber)
       givenSubscriptionRecordCreated(
@@ -1041,7 +1041,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     }
   }
 
-  "GET /agent-subscription/money-laundering-application-approved" should {
+  "GET /agent-subscription-manually-assured/money-laundering-application-approved" should {
 
     "display page with correct content" when {
 
@@ -1106,7 +1106,7 @@ class AMLSControllerISpecIt extends BaseISpecIt {
     }
   }
 
-  "POST /agent-subscription/money-laundering-application-approved" should {
+  "POST /agent-subscription-manually-assured/money-laundering-application-approved" should {
 
     "store AMLS pending details in temporary store after successful submission, redirect to task list when change flag is false" in new Setup {
       givenSubscriptionJourneyRecordExists(id, TestData.minimalSubscriptionJourneyRecordWithAmls(id))

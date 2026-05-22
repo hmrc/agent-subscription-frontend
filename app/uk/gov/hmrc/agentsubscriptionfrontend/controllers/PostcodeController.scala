@@ -108,25 +108,14 @@ class PostcodeController @Inject() (
     agent: Agent
   ): Future[Result] =
     assuranceService.assureIsAgent(utr).flatMap {
-      case RefuseToDealWith(_) =>
-        Redirect(routes.StartController.showCannotCreateAccount())
-      case CheckedInvisibleAssuranceAndFailed(assuranceResults) =>
-        auditService
-          .sendAgentAssuranceAuditEvent(utr, postcode, assuranceResults)
-          .flatMap { _ =>
-            mark("Count-Subscription-InvasiveCheck-Start")
-            updateSessionAndRedirect(agentSession.copy(postcode = Some(postcode), registration = Some(registration)))(
-              routes.AssuranceChecksController.invasiveCheckStart()
-            )
-          }
-      case maybeAssured @ (None | ManuallyAssured(_) | CheckedInvisibleAssuranceAndPassed(_)) =>
+      case maybeAssured @ (None | ManuallyAssured(_)) =>
         maybeAssured match {
           case Some(assuranceResults) =>
             auditService
               .sendAgentAssuranceAuditEvent(utr, postcode, assuranceResults)
               .flatMap { _ =>
                 updateSessionAndRedirect(
-                  agentSession.copy(postcode = Some(postcode), registration = Some(registration), isMAA = Some(assuranceResults.isManuallyAssured))
+                  agentSession.copy(postcode = Some(postcode), registration = Some(registration), isMAA = Some(true))
                 )(getNextPage(agentSession.businessType, maybeAssured))
               }
           case None =>
@@ -134,7 +123,7 @@ class PostcodeController @Inject() (
               getNextPage(agentSession.businessType, maybeAssured)
             )
         }
-      case _ => throw new RuntimeException("match error in checkAssuranceAndUpdateSession")
+      case _ => Redirect(appConfig.agentRegistrationFrontendStartUrl)
     }
 
   private def getNextPage(businessType: Option[BusinessType], assuranceResults: Option[AssuranceResults])(implicit agent: Agent) =

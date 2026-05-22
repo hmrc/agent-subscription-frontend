@@ -104,7 +104,7 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
       val result = TestController.withSubscribedAgent
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some("/agent-subscription/finish-sign-out")
+      redirectLocation(result) shouldBe Some("/agent-subscription-manually-assured/finish-sign-out")
     }
   }
   "withSubscribedAgent Email check" should {
@@ -127,7 +127,7 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
       val result = TestController.withSubscribedAgentCheckEmail
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some("/agent-subscription/verify-email")
+      redirectLocation(result) shouldBe Some("/agent-subscription-manually-assured/verify-email")
     }
     " check if the email is the same as one supplied in auth and dont redirect if it does " in new TestSetupNoJourneyRecord {
 
@@ -159,7 +159,7 @@ class AuthActionsSpecIt extends BaseISpecIt with MockitoSugar {
       val result = TestController.withSubscribedAgentCheckEmail
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some("/agent-subscription/verify-email")
+      redirectLocation(result) shouldBe Some("/agent-subscription-manually-assured/verify-email")
     }
 
   }
