@@ -2,16 +2,16 @@ import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapVer = "10.4.0"
-  private val mongoVer = "2.10.0"
+  private val bootstrapVer = "10.7.0"
+  private val mongoVer = "2.12.0"
   private val playVer = "play-30"
 
   val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"       %% s"bootstrap-frontend-$playVer"             % bootstrapVer,
     "uk.gov.hmrc.mongo" %% s"hmrc-mongo-$playVer"                     % mongoVer,
-    "uk.gov.hmrc"       %% s"play-frontend-hmrc-$playVer"             % "12.21.0",
+    "uk.gov.hmrc"       %% s"play-frontend-hmrc-$playVer"             % "12.32.1",
     "uk.gov.hmrc"       %% s"play-partials-$playVer"                  % "10.2.0",
-    "uk.gov.hmrc"       %% s"play-conditional-form-mapping-$playVer"  % "3.3.0",
+    "uk.gov.hmrc"       %% s"play-conditional-form-mapping-$playVer"  % "3.5.0",
     "org.typelevel"     %% "cats-core"                                % "2.13.0",
     "uk.gov.hmrc"       %% "domain-play-30"                           % "11.0.0",
     "uk.gov.hmrc"       %% s"crypto-json-$playVer"                    % "8.4.0"
