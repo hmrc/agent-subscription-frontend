@@ -76,8 +76,8 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
   protected val utr = "2000000000"
   protected val knownFactsPostcode = "AA1 2AA"
 
-  protected val returnFromAddressLookupUrl: String = "/agent-subscription/return-from-address-lookup"
-  protected val showBusinessAddressFormUrl: String = "/agent-subscription/business-address"
+  protected val returnFromAddressLookupUrl: String = "/agent-subscription-manually-assured/return-from-address-lookup"
+  protected val showBusinessAddressFormUrl: String = "/agent-subscription-manually-assured/business-address"
 
   protected lazy val controller: SubscriptionController = app.injector.instanceOf[SubscriptionController]
 
@@ -98,7 +98,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
       val result: Result = await(controller.showCheckAnswers(request))
       status(result) shouldBe 303
-      result.header.headers("Location") should include("/agent-subscription/sign-in-with-new-user-id")
+      result.header.headers("Location") should include("/agent-subscription-manually-assured/sign-in-with-new-user-id")
     }
 
     "redirect to /business-type if no registration data found" in new TestSetupWithMinimalSubscriptionJourneyRecord {
@@ -238,7 +238,7 @@ class SubscriptionControllerISpecIt extends BaseISpecIt with SessionDataMissingS
 
       val result: Result = await(controller.submitCheckAnswers(request))
       status(result) shouldBe 303
-      result.header.headers("Location") should include("/agent-subscription/sign-in-with-new-user-id")
+      result.header.headers("Location") should include("/agent-subscription-manually-assured/sign-in-with-new-user-id")
     }
 
     "redirect to already subscribed" when {

@@ -61,7 +61,11 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
 
           status(result) shouldBe 303
 
-          redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
+          redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
+
+          sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
+            testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)
+          )
         }
       }
 
@@ -77,7 +81,11 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
 
           status(result) shouldBe 303
 
-          redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
+          redirectLocation(result) shouldBe Some(routes.VatDetailsController.showRegisteredForVatForm().url)
+
+          sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
+            testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)
+          )
         }
       }
     }
@@ -95,7 +103,11 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
 
           status(result) shouldBe 303
 
-          redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
+          redirectLocation(result) shouldBe Some(routes.CompanyRegistrationController.showCompanyRegNumberForm().url)
+
+          sessionStoreService.currentSession.agentSession.get.registration shouldBe Some(
+            testRegistration.copy(emailAddress = Some("someone@example.com"), safeId = None)
+          )
         }
       }
 
@@ -127,7 +139,7 @@ class PostcodeControllerWithOutAssuranceFlagISpecIt extends BaseISpecIt with Ses
       sessionStoreService.currentSession.agentSession = Some(agentSession)
 
       val result: Result = await(controller.submitPostcodeForm()(request))
-      redirectLocation(result) shouldBe Some(appConfig.agentRegistrationFrontendStartUrl)
+      redirectLocation(result) shouldBe Some(routes.NationalInsuranceController.showNationalInsuranceNumberForm().url)
     }
 
     "redirect to no match found when the subscription status is strange" in new TestSetupNoJourneyRecord {
