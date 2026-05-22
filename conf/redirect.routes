@@ -1,0 +1,2 @@
+GET         /agent-subscription             uk.gov.hmrc.agentsubscriptionfrontend.controllers.redirect.RedirectAgentSubscriptionController.redirectToAgentRegistration(path = "")
+GET         /agent-subscription/*path       uk.gov.hmrc.agentsubscriptionfrontend.controllers.redirect.RedirectAgentSubscriptionController.redirectToAgentRegistration(path: String)

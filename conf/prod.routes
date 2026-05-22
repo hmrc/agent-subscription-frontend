@@ -1,5 +1,4 @@
 # Add all the application routes to the app.routes file
 ->         /agent-subscription-manually-assured     app.Routes
 ->         /                                        health.Routes
-GET        /agent-subscription                      uk.gov.hmrc.agentsubscriptionfrontend.controllers.AgentRegistrationController.redirectToAgentRegistration(path = "")
-GET        /agent-subscription/*path                uk.gov.hmrc.agentsubscriptionfrontend.controllers.AgentRegistrationController.redirectToAgentRegistration(path: String)
+->         /                                        redirect.Routes

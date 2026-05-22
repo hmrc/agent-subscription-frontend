@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentsubscriptionfrontend.controllers
+package uk.gov.hmrc.agentsubscriptionfrontend.controllers.redirect
 
 import play.api.Configuration
 import play.api.mvc._
 import uk.gov.hmrc.agentsubscriptionfrontend.auth.AuthActions
 import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
+import uk.gov.hmrc.agentsubscriptionfrontend.controllers.{RedirectUrlActions, SessionBehaviour}
 import uk.gov.hmrc.agentsubscriptionfrontend.service._
-import uk.gov.hmrc.agentsubscriptionfrontend.util.toFuture
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -31,7 +31,7 @@ import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class AgentRegistrationController @Inject() (
+class RedirectAgentSubscriptionController @Inject() (
   val redirectUrlActions: RedirectUrlActions,
   val authConnector: AuthConnector,
   val sessionStoreService: MongoDBSessionStoreService,
@@ -42,10 +42,9 @@ class AgentRegistrationController @Inject() (
 )(implicit val appConfig: AppConfig, val ec: ExecutionContext, @Named("aes") val crypto: Encrypter with Decrypter)
     extends FrontendController(mcc) with SessionBehaviour with AuthActions {
 
-  def redirectToAgentRegistration(path: String): Action[AnyContent] = Action.async { implicit request =>
-    withSubscribingAgent { agent =>
+  def redirectToAgentRegistration(path: String): Action[AnyContent] =
+    Action {
       Redirect(appConfig.agentRegistrationFrontendStartUrl)
     }
-  }
 
 }
