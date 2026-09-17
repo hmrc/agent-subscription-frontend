@@ -91,7 +91,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) extends AppCo
   override val ggRegistrationFrontendExternalUrl: String =
     s"${getConf("microservice.services.government-gateway-registration-frontend.externalUrl")}$ssoRedirectUrl"
 
-  private val returnAfterGGCredsCreatedPath: String = "/agent-subscription/return-after-gg-creds-created"
+  private val returnAfterGGCredsCreatedPath: String = "/agent-registration/return-after-gg-creds-created"
   override val returnAfterGGCredsCreatedUrl: String = s"$selfExternalUrl$returnAfterGGCredsCreatedPath"
 
   override val timeout: Int = servicesConfig.getInt("timeoutDialog.timeout-seconds")

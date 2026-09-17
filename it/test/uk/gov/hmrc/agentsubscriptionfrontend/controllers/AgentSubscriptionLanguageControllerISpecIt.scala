@@ -44,11 +44,11 @@ class AgentSubscriptionLanguageControllerISpecIt extends BaseISpecIt {
 
     val request = FakeRequest("GET", "/language/english")
 
-    "redirect to https://www.tax.service.co.uk/agent-subscription/start when the request header contains no referer" in {
+    "redirect to https://www.tax.service.co.uk/agent-registration/start when the request header contains no referer" in {
 
       val result = controller.switchToLanguage("english")(request)
       status(result) shouldBe 303
-      Helpers.redirectLocation(result)(timeout) shouldBe Some("https://www.tax.service.gov.uk/agent-subscription/start")
+      Helpers.redirectLocation(result)(timeout) shouldBe Some("https://www.tax.service.gov.uk/agent-registration/start")
 
       cookies(result)(timeout).get("PLAY_LANG").get.value shouldBe "en"
     }
