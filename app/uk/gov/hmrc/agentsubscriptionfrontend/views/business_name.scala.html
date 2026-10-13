@@ -15,13 +15,12 @@
  *@
 
 @import uk.gov.hmrc.agentsubscriptionfrontend.config.AppConfig
-@import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessName
 @import uk.gov.hmrc.agentsubscriptionfrontend.controllers.routes
-@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.{error_prefix}
+@import uk.gov.hmrc.agentsubscriptionfrontend.models.BusinessName
 @import uk.gov.hmrc.agentsubscriptionfrontend.views.html.components.{SubmitButton, SubmitOrSaveButtonGroup}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukErrorSummary, ErrorSummary, ErrorMessage, FormWithCSRF, GovukInsetText, GovukInput}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{Text, Hint, Label, HtmlContent, Input, InsetText}
+@import uk.gov.hmrc.agentsubscriptionfrontend.views.html.helpers.error_prefix
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.govukfrontend.views.html.components.{ErrorSummary, FormWithCSRF, GovukErrorSummary, GovukInput, GovukInsetText, Hint, HtmlContent, Input, InsetText, Label, Text}
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.implicits._
 
 @this(
@@ -48,7 +47,7 @@
 @title = @{ if(desErrorExists) msgs("businessName.updated.title") else msgs("businessName.title") }
 
 @mainTemplate(
-    title = errorPrefix(businessNameForm) + title,
+    title = errorPrefix(businessNameForm).toString + title,
     backLinkHref = if(!desErrorExists) Some(routes.SubscriptionController.showCheckAnswers().url) else None
 ) {
 
@@ -56,7 +55,7 @@
         @errorSummary(ErrorSummary().withFormErrorsAsText(businessNameForm))
     }
 
-    @formHelper(action = if(isChange) routes.BusinessIdentificationController.submitChangeBusinessName else routes.BusinessIdentificationController.submitBusinessNameForm()) {
+    @formHelper(action = if(isChange) routes.BusinessIdentificationController.submitChangeBusinessName else routes.BusinessIdentificationController.submitBusinessNameForm) {
 
         @govukInputText(
             Input(
@@ -76,7 +75,7 @@
                 saveId = "business-name-change-save"
             )
         } else {
-            @submitButton(id = "submit-businessName", messageKey = "button.continue")
+            @submitButton(id = "submit-businessName")
         }
 
     }

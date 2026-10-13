@@ -15,7 +15,8 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
-@import uk.gov.hmrc.govukfrontend.views.html.components.{Text, Button}
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 
 @this(
 button: GovukButton,
@@ -25,8 +26,8 @@ button: GovukButton,
 
 
 @button(Button(
-    attributes = Map("id" -> s"${id}"),
-    classes = s"${submitClass.getOrElse("")}",
     inputType = Some("submit"),
+    classes = s"${submitClass.getOrElse("")}",
+    attributes = Map("id" -> s"$id"),
     content = Text(msgs(messageKey))
 ))
